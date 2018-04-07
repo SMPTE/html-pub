@@ -1,0 +1,67 @@
+p.doc-num {
+    text-align: right;
+    font-weight: bold;
+    margin: 0 0 .1em;
+    font-size: 150%;
+}
+
+p.doc-revision {
+    text-align: right;
+    font-weight: bold;
+    margin: 0 0 .1em;
+    font-size: 75%;
+}
+
+p.doc-type {
+    font-weight: bold;
+    margin: 0 0 .1em;
+    font-size: 125%;
+    color: #005A9C;
+    text-transform: uppercase;
+}
+
+h1.title {
+  margin-top : 1em;
+  margin-left : 3em;
+  
+}
+
+a.logo {
+    float: right;
+    margin: 0.4rem 0 0.2rem .4rem;
+    border: none;
+    text-decoration: none;
+}
+
+a.logo:hover, a.logo:visited {
+  background: transparent;
+}
+
+#watermark {
+  position: fixed;
+  top: 50%;
+  text-align: center;
+  margin: auto;
+  font-size: 5em;
+  transform: rotate(45deg);
+  color: #f2f2f2;
+  z-index: -99;
+}
+  
+.note {
+  font-size:small
+}
+
+.example {
+  font-size:small
+}
+
+div > span.secno, p > span.secno {
+  font-weight: bold;
+}
+
+@page {
+  @bottom-right {
+    content: counter(page) " of " counter(pages);
+  }
+}
