@@ -1,3 +1,0 @@
-[submodule "respec"]
-	path = contrib/respec
-	url = https://github.com/SMPTE/smpte-respec.git
