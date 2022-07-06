@@ -1,0 +1,15 @@
+#event-list {
+    position: fixed;
+    top: 0;
+    right: 0;
+    font-size: 0.9rem;
+    border: 5px solid red;
+    border-radius: 14px;
+    padding: 1rem;
+    margin: 1rem;
+}
+
+#event-list li {
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
