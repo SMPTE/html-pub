@@ -347,13 +347,61 @@ function numberSections(element, curHeadingNumber) {
 }
 
 function resolveLinks(docMetadata) {
+  /* collect definitions */
+
+  const dfns = document.getElementsByTagName("dfn");
+
+  const definitions = new Map();
+
+  for (const dfn of dfns) {
+
+    const dfnText = dfn.textContent;
+
+    if (definitions.has(dfnText)) {
+      logEvent(`Duplicate definition ${dfnText}`)
+      continue;
+    }
+
+    if (dfn.id === "") {
+      const id = dfnText.replace(/\s/g,"-");
+
+      if (id.match(/[a-zA-Z]\w*/) === null) {
+        logEvent(`Cannot auto-generate id: ${dfnText}`);
+        continue;
+      }
+
+      dfn.id = "dfn-" + id;
+    }
+
+    definitions[dfnText] = dfn;
+    definitions[dfnText + "s"] = dfn;
+  }
+
   const anchors = document.getElementsByTagName("a");
 
   for (const anchor of anchors) {
+    /* process definitions */
+
+    if (anchor.href === "") {
+      const definition = definitions[anchor.textContent];
+
+      if (definition !== null) {
+        anchor.href = "#" + definition.id;
+      } else {
+        logEvent(`Unresolved definition: ${anchor.textContent}`);
+      }
+
+      continue;
+    }
+
+    /* process other links */
+
     const fragmentIndex = anchor.href.indexOf("#");
 
-    if (fragmentIndex < 0)
+    if (fragmentIndex < 0) {
       continue;
+    }
+      
 
     const target_id = anchor.href.substring(fragmentIndex + 1);
 
