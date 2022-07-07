@@ -346,6 +346,10 @@ function numberSections(element, curHeadingNumber) {
 
 }
 
+function _normalizeTerm(term) {
+  return term.trim().toLowerCase().replace(/\s+/g," ");
+}
+
 function resolveLinks(docMetadata) {
   /* collect definitions */
 
@@ -355,26 +359,48 @@ function resolveLinks(docMetadata) {
 
   for (const dfn of dfns) {
 
-    const dfnText = dfn.textContent;
+    const baseTerm = _normalizeTerm(dfn.textContent);
 
-    if (definitions.has(dfnText)) {
-      logEvent(`Duplicate definition ${dfnText}`)
+    if (baseTerm.length == 0) {
+      logEvent(`Missing term in definition`);
+      continue;
+    }
+
+    const terms = new Set();
+
+    terms.add(baseTerm);    
+
+    if (dfn.hasAttribute("data-lt")) {
+      dfn.getAttribute("data-lt").split("|").forEach(t => terms.add(_normalizeTerm(t)));
+    }
+
+    const termExists = function() {
+      for(const term of terms.values())
+        if (definitions.has(term))
+          return true;
+      return false;
+    }();
+
+    if (termExists) {
+      logEvent(`Duplicate definition ${baseTerm}`);
       continue;
     }
 
     if (dfn.id === "") {
-      const id = dfnText.replace(/\s/g,"-");
+      const id = baseTerm.replace(/\s/g,"-");
 
       if (id.match(/[a-zA-Z]\w*/) === null) {
-        logEvent(`Cannot auto-generate id: ${dfnText}`);
+        logEvent(`Cannot auto-generate id: ${baseTerm}`);
         continue;
       }
 
       dfn.id = "dfn-" + id;
     }
 
-    definitions.set(dfnText, dfn);
-    definitions.set(dfnText + "s", dfn);
+    for(let term of terms) {
+      definitions.set(term, dfn);
+    }
+
   }
 
   const anchors = document.getElementsByTagName("a");
@@ -384,10 +410,12 @@ function resolveLinks(docMetadata) {
 
     if (anchor.href === "") {
 
-      if (! definitions.has(anchor.textContent)) {
-        logEvent(`Unresolved definition: ${anchor.textContent}`);
+      const term = _normalizeTerm(anchor.textContent);
+
+      if (! definitions.has(term)) {
+        logEvent(`Unresolved definition: ${term}`);
       } else {
-        anchor.href = "#" + definitions.get(anchor.textContent).id;
+        anchor.href = "#" + definitions.get(term).id;
       }
 
       continue;
