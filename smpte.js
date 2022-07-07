@@ -373,8 +373,8 @@ function resolveLinks(docMetadata) {
       dfn.id = "dfn-" + id;
     }
 
-    definitions[dfnText] = dfn;
-    definitions[dfnText + "s"] = dfn;
+    definitions.set(dfnText, dfn);
+    definitions.set(dfnText + "s", dfn);
   }
 
   const anchors = document.getElementsByTagName("a");
@@ -383,12 +383,11 @@ function resolveLinks(docMetadata) {
     /* process definitions */
 
     if (anchor.href === "") {
-      const definition = definitions[anchor.textContent];
 
-      if (definition !== null) {
-        anchor.href = "#" + definition.id;
-      } else {
+      if (! definitions.has(anchor.textContent)) {
         logEvent(`Unresolved definition: ${anchor.textContent}`);
+      } else {
+        anchor.href = "#" + definitions.get(anchor.textContent).id;
       }
 
       continue;
