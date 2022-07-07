@@ -346,14 +346,89 @@ function numberSections(element, curHeadingNumber) {
 
 }
 
+function _normalizeTerm(term) {
+  return term.trim().toLowerCase().replace(/\s+/g," ");
+}
+
 function resolveLinks(docMetadata) {
+  /* collect definitions */
+
+  const dfns = document.getElementsByTagName("dfn");
+
+  const definitions = new Map();
+
+  for (const dfn of dfns) {
+
+    const baseTerm = _normalizeTerm(dfn.textContent);
+
+    if (baseTerm.length == 0) {
+      logEvent(`Missing term in definition`);
+      continue;
+    }
+
+    const terms = new Set();
+
+    terms.add(baseTerm);    
+
+    if (dfn.hasAttribute("data-lt")) {
+      dfn.getAttribute("data-lt").split("|").forEach(t => terms.add(_normalizeTerm(t)));
+    }
+
+    const termExists = function() {
+      for(const term of terms.values())
+        if (definitions.has(term))
+          return true;
+      return false;
+    }();
+
+    if (termExists) {
+      logEvent(`Duplicate definition ${baseTerm}`);
+      continue;
+    }
+
+    if (dfn.id === "") {
+      const id = baseTerm.replace(/\s/g,"-");
+
+      if (id.match(/[a-zA-Z]\w*/) === null) {
+        logEvent(`Cannot auto-generate id: ${baseTerm}`);
+        continue;
+      }
+
+      dfn.id = "dfn-" + id;
+    }
+
+    for(let term of terms) {
+      definitions.set(term, dfn);
+    }
+
+  }
+
   const anchors = document.getElementsByTagName("a");
 
   for (const anchor of anchors) {
+    /* process definitions */
+
+    if (anchor.href === "") {
+
+      const term = _normalizeTerm(anchor.textContent);
+
+      if (! definitions.has(term)) {
+        logEvent(`Unresolved definition: ${term}`);
+      } else {
+        anchor.href = "#" + definitions.get(term).id;
+      }
+
+      continue;
+    }
+
+    /* process other links */
+
     const fragmentIndex = anchor.href.indexOf("#");
 
-    if (fragmentIndex < 0)
+    if (fragmentIndex < 0) {
       continue;
+    }
+      
 
     const target_id = anchor.href.substring(fragmentIndex + 1);
 
