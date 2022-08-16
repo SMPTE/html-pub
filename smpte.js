@@ -420,6 +420,47 @@ function numberTables() {
   }
 }
 
+function numberFigures() {
+  let counter = 1;
+
+  for (let section of document.querySelectorAll("body > section")) {
+
+    let numPrefix = "";
+
+    if (section.classList.contains("annex")) {
+      counter = 1;
+      numPrefix = section.querySelector(".heading-number").innerText + ".";
+    }
+
+    for (let figure of section.querySelectorAll("figure")) {
+
+      const figcaption = figure.querySelector("figcaption");
+  
+      if (figcaption === null) {
+        logEvent(`Figure is missing a caption`);
+        continue;
+      }
+
+      const headingLabel = document.createElement("span");
+      headingLabel.className = "heading-label";
+  
+      const headingNumberElement = document.createElement("span");
+      headingNumberElement.className = "heading-number";
+      headingNumberElement.innerText = numPrefix + counter;
+      
+      headingLabel.appendChild(document.createTextNode("Figure "));
+      headingLabel.appendChild(headingNumberElement);
+      headingLabel.appendChild(document.createTextNode(" –⁠ "));
+
+
+      figcaption.insertBefore(headingLabel, figcaption.firstChild);
+      
+      counter++;
+    }
+
+  }
+}
+
 function _normalizeTerm(term) {
   return term.trim().toLowerCase().replace(/\s+/g," ");
 }
@@ -532,7 +573,10 @@ function resolveLinks(docMetadata) {
 
     } else if (target.localName === "table") {
       anchor.innerText = "Table " + target.querySelector(".heading-number").innerText;
-      
+    
+    } else if (target.localName === "figure") {
+      anchor.innerText = "Figure " + target.querySelector(".heading-number").innerText
+
     } else if (target.localName === "section") {
       anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
 
@@ -553,6 +597,7 @@ function render() {
   insertBibliography(docMetadata);
   numberSections(document.body, "");
   numberTables();
+  numberFigures();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
 }
