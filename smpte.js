@@ -27,6 +27,32 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+_SCRIPT_PATH = document.currentScript.src;
+
+function resolveScriptRelativePath(path) {
+  return new URL(path, _SCRIPT_PATH);
+}
+
+function asyncFetchLocal(url) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest
+    xhr.onload = () => resolve(xhr.responseText);
+    xhr.onerror = () =>  reject(new TypeError('Local request failed'));
+    xhr.open('GET', url);
+    xhr.send(null);
+  });
+}
+
+async function asyncAddStylesheet(url) {
+  return asyncFetchLocal(url)
+    .then(function (data) {
+      let s = document.createElement("style");
+      s.textContent = data;
+      document.head.appendChild(s);
+      })
+    .catch(err => logError("Cannot fetch: " + err));
+}
+
 function getHeadMetadata(paramName) {
   let e = document.querySelector("head meta[itemprop='" + paramName + "']");
 
@@ -74,6 +100,7 @@ function insertFrontMatter(docMetadata) {
   })();
 
   sec = document.createElement("section");
+  sec.className = "unnumbered";
   sec.id = FRONT_MATTER_ID;
   sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
@@ -144,21 +171,16 @@ function insertTOC(docMetadata) {
     return;
   }
 
-  const scope = document.getElementById("sec-scope");
+  const toc = document.getElementById("sec-toc");
 
-  if (scope === null) {
-    throw "Missing scope element"
-  }
+  if (toc === null)
+    return;
 
   const h2 = document.createElement("h2");
   h2.innerText = "Table of contents";
   h2.className = "unnumbered";
 
-  const toc = document.createElement("section");
-  toc.id = "sec-toc";
   toc.appendChild(h2);
-
-  scope.parentElement.insertBefore(toc, scope);
 
   _processSubSections(toc, document.body, 1);
 }
@@ -225,7 +247,8 @@ function insertConformance(docMetadata) {
   const sec = document.getElementById("sec-conformance");
 
   if (sec === null) {
-    throw "Missing required `conformance` section."
+    logEvent("Missing required `conformance` section.");
+    return;
   }
 
   if (sec.innerText.trim().length !== 0)
@@ -269,7 +292,8 @@ function insertForeword(docMetadata) {
   let sec = document.getElementById("sec-foreword");
 
   if (sec === null) {
-    throw "Missing required `foreword` section."
+    logEvent("Missing required `foreword` section.");
+    return;
   }
 
   custom_text = sec.innerHTML;
@@ -305,8 +329,6 @@ function insertForeword(docMetadata) {
 }
 
 function numberSections(element, curHeadingNumber) {
-  const unnumberedSectionIds = new Set(["sec-foreword", "sec-front-matter"])
-
   let headingCounter = 1;
   let annexCounter = "A".charCodeAt();
 
@@ -315,10 +337,10 @@ function numberSections(element, curHeadingNumber) {
     if (child.localName !== "section")
       continue;
 
-    if (unnumberedSectionIds.has(child.id))
+    if (child.classList.contains("unnumbered"))
       continue;
 
-    if (child.classList.contains("unnumbered"))
+    if (child.firstElementChild === null)
       continue;
 
     let numText = curHeadingNumber;
@@ -497,11 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (listEvents().length > 0) {
 
-    const styleLink = document.createElement("link");
-    styleLink.type = "text/css";
-    styleLink.rel = "stylesheet";
-    styleLink.href = "tooling/smpte-errors.css";
-    document.head.appendChild(styleLink);
+    asyncAddStylesheet(resolveScriptRelativePath("../smpte-errors.css"));
 
     const eventList = document.createElement('ol');
     eventList.id = "event-list";
