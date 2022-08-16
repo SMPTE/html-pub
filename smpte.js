@@ -134,9 +134,9 @@ function insertTOC(docMetadata) {
       if (!heading)
         continue;
 
-      const headingNumber = heading.firstElementChild;
+      const headingNumber = subSection.querySelector(".heading-number");
 
-      if (!headingNumber || !headingNumber.classList.contains("heading-number"))
+      if (! headingNumber)
         continue;
 
       subSections.push(subSection);
@@ -149,7 +149,7 @@ function insertTOC(docMetadata) {
       for (const subSection of subSections) {
         let sectionRef = document.createElement("a");
         sectionRef.href = "#" + subSection.id;
-        sectionRef.innerHTML = subSection.firstElementChild.innerHTML;
+        sectionRef.innerHTML = subSection.firstElementChild.innerText;
 
         let sectionItem = document.createElement("li");
         sectionItem.appendChild(sectionRef);
@@ -343,29 +343,81 @@ function numberSections(element, curHeadingNumber) {
     if (child.firstElementChild === null)
       continue;
 
+    const heading = child.firstElementChild;
+
     let numText = curHeadingNumber;
 
     if (curHeadingNumber.length !== 0) {
       numText += ".";
     }
 
-    const headingNumberElement = document.createElement("span");
-    headingNumberElement.className = "heading-number";
+    const headingNum = document.createElement("span");
+    headingNum.className = "heading-number";
+
+    const headingLabel = document.createElement("span");
+    headingLabel.className = "heading-label";
     
     if (child.classList.contains("annex")) {
-      numText = "Annex " + String.fromCharCode(annexCounter);
-      headingNumberElement.innerText = numText + "\n";
-      annexCounter++;
+      numText = String.fromCharCode(annexCounter++);
+      headingNum.innerText = numText;
+
+      headingLabel.appendChild(document.createTextNode("Annex "));
+      headingLabel.appendChild(headingNum);
+      headingLabel.appendChild(document.createElement("br"));
     } else {
       numText += headingCounter.toString();
-      headingNumberElement.innerText = numText + " ";
       headingCounter++;
+      headingNum.innerText = numText;
+
+      headingLabel.appendChild(headingNum);
+      headingLabel.appendChild(document.createTextNode(" "));
     }
     
-    child.firstElementChild.insertBefore(headingNumberElement, child.firstElementChild.firstChild);
+    heading.insertBefore(headingLabel, heading.firstChild);
     numberSections(child, numText);
   }
 
+}
+
+function numberTables() {
+  let counter = 1;
+
+  for (let section of document.querySelectorAll("body > section")) {
+
+    let numPrefix = "";
+
+    if (section.classList.contains("annex")) {
+      counter = 1;
+      numPrefix = section.querySelector(".heading-number").innerText + ".";
+    }
+
+    for (let table of section.querySelectorAll("table")) {
+
+      const caption = table.querySelector("caption");
+  
+      if (caption === null) {
+        logEvent(`Table is missing a caption`);
+        continue;
+      }
+
+      const headingLabel = document.createElement("span");
+      headingLabel.className = "heading-label";
+  
+      const headingNumberElement = document.createElement("span");
+      headingNumberElement.className = "heading-number";
+      headingNumberElement.innerText = numPrefix + counter;
+      
+      headingLabel.appendChild(document.createTextNode("Table "));
+      headingLabel.appendChild(headingNumberElement);
+      headingLabel.appendChild(document.createTextNode(" –⁠ "));
+
+
+      caption.insertBefore(headingLabel, caption.firstChild);
+      
+      counter++;
+    }
+
+  }
 }
 
 function _normalizeTerm(term) {
@@ -465,7 +517,6 @@ function resolveLinks(docMetadata) {
       continue;
     }
       
-
     const target_id = anchor.href.substring(fragmentIndex + 1);
 
     let target = document.getElementById(target_id);
@@ -478,8 +529,13 @@ function resolveLinks(docMetadata) {
 
     if (target.localName === "cite") {
       anchor.innerText = target.innerText;
+
+    } else if (target.localName === "table") {
+      anchor.innerText = "Table " + target.querySelector(".heading-number").innerText;
+      
     } else if (target.localName === "section") {
       anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
+
     } else {
       logEvent(`Anchor points to ambiguous #${target_id}`)
       anchor.innerText = "????";
@@ -496,6 +552,7 @@ function render() {
   insertNormativeReferences(docMetadata);
   insertBibliography(docMetadata);
   numberSections(document.body, "");
+  numberTables();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
 }
