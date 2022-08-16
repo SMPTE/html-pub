@@ -27,6 +27,32 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+_SCRIPT_PATH = document.currentScript.src;
+
+function resolveScriptRelativePath(path) {
+  return new URL(path, _SCRIPT_PATH);
+}
+
+function asyncFetchLocal(url) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest
+    xhr.onload = () => resolve(xhr.responseText);
+    xhr.onerror = () =>  reject(new TypeError('Local request failed'));
+    xhr.open('GET', url);
+    xhr.send(null);
+  });
+}
+
+async function asyncAddStylesheet(url) {
+  return asyncFetchLocal(url)
+    .then(function (data) {
+      let s = document.createElement("style");
+      s.textContent = data;
+      document.head.appendChild(s);
+      })
+    .catch(err => logError("Cannot fetch: " + err));
+}
+
 function getHeadMetadata(paramName) {
   let e = document.querySelector("head meta[itemprop='" + paramName + "']");
 
@@ -221,7 +247,8 @@ function insertConformance(docMetadata) {
   const sec = document.getElementById("sec-conformance");
 
   if (sec === null) {
-    throw "Missing required `conformance` section."
+    logEvent("Missing required `conformance` section.");
+    return;
   }
 
   if (sec.innerText.trim().length !== 0)
@@ -265,7 +292,8 @@ function insertForeword(docMetadata) {
   let sec = document.getElementById("sec-foreword");
 
   if (sec === null) {
-    throw "Missing required `foreword` section."
+    logEvent("Missing required `foreword` section.");
+    return;
   }
 
   custom_text = sec.innerHTML;
@@ -477,11 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (listEvents().length > 0) {
 
-    const styleLink = document.createElement("link");
-    styleLink.type = "text/css";
-    styleLink.rel = "stylesheet";
-    styleLink.href = "tooling/smpte-errors.css";
-    document.head.appendChild(styleLink);
+    asyncAddStylesheet(resolveScriptRelativePath("../smpte-errors.css"));
 
     const eventList = document.createElement('ol');
     eventList.id = "event-list";
