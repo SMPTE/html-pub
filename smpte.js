@@ -122,7 +122,7 @@ function insertTOC(docMetadata) {
       for (const subSection of subSections) {
         let sectionRef = document.createElement("a");
         sectionRef.href = "#" + subSection.id;
-        sectionRef.innerHTML = subSection.firstElementChild.innerHTML;
+        sectionRef.innerHTML = subSection.firstElementChild.innerText;
 
         let sectionItem = document.createElement("li");
         sectionItem.appendChild(sectionRef);
@@ -331,17 +331,45 @@ function numberSections(element, curHeadingNumber) {
     headingNumberElement.className = "heading-number";
     
     if (child.classList.contains("annex")) {
-      numText = "Annex " + String.fromCharCode(annexCounter);
-      headingNumberElement.innerText = numText + "\n";
+      child.firstElementChild.insertBefore(document.createElement("br"), child.firstElementChild.firstChild);
+      headingNumberElement.innerText = "Annex " + String.fromCharCode(annexCounter);
+      child.firstElementChild.insertBefore(headingNumberElement, child.firstElementChild.firstChild);
       annexCounter++;
     } else {
       numText += headingCounter.toString();
-      headingNumberElement.innerText = numText + " ";
+      child.firstElementChild.insertBefore(document.createTextNode(" "), child.firstElementChild.firstChild);
+      headingNumberElement.innerText = numText;
+      child.firstElementChild.insertBefore(headingNumberElement, child.firstElementChild.firstChild);
       headingCounter++;
     }
     
-    child.firstElementChild.insertBefore(headingNumberElement, child.firstElementChild.firstChild);
     numberSections(child, numText);
+  }
+
+}
+
+function numberTables() {
+  const tables = document.getElementsByTagName("table");
+
+  let counter = 1;
+
+  for (let table of tables) {
+
+    const caption = table.querySelector("caption");
+
+    if (caption === null) {
+      logEvent(`Table is missing a caption`);
+      continue;
+    }
+
+    const headingNumberElement = document.createElement("span");
+    headingNumberElement.className = "heading-number";
+    headingNumberElement.innerText = "Table " + counter;
+    
+    caption.insertBefore(document.createTextNode(" –⁠ "), caption.firstChild);
+    caption.insertBefore(headingNumberElement, caption.firstChild);
+    
+    counter++;
   }
 
 }
@@ -429,7 +457,6 @@ function resolveLinks(docMetadata) {
       continue;
     }
       
-
     const target_id = anchor.href.substring(fragmentIndex + 1);
 
     let target = document.getElementById(target_id);
@@ -442,8 +469,13 @@ function resolveLinks(docMetadata) {
 
     if (target.localName === "cite") {
       anchor.innerText = target.innerText;
+
+    } else if (target.localName === "table") {
+      anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
+      
     } else if (target.localName === "section") {
       anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
+
     } else {
       logEvent(`Anchor points to ambiguous #${target_id}`)
       anchor.innerText = "????";
@@ -460,6 +492,7 @@ function render() {
   insertNormativeReferences(docMetadata);
   insertBibliography(docMetadata);
   numberSections(document.body, "");
+  numberTables();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
 }

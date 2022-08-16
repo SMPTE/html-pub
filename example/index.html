@@ -71,27 +71,6 @@
       </p>
     </section>
     
-    <section>
-      <h3>Encoding</h3>
-      
-      <p>A SMPTE JSON structure is encoded using UTF-8 and does not include a
-      byte order mark (BOM), as specified in <a
-      href="#bib-ietf-rfc-8259"></a>.</p>
-    </section>
-    
-    <section>
-      <h3>Example Instances</h3>
-      
-      <p>All example instance JSON structures shall be informative.</p>
-      
-      <p>All example instance SMPTE JSON structures shall be valid with respect to
-      the corresponding SMPTE JSON Schema resource, where one is provided.</p>
-      
-      <p>If a SMPTE JSON Schema resource is provided, it should be used to
-      validate each corresponding example instance SMPTE JSON structure, as a test
-      of both the instance and the resource.</p>
-    </section>
-    
   </section>
 
 <section>
@@ -110,10 +89,7 @@
     <p>A JSON Schema resource is identified by its canonical URI. Canonical URIs
     provide an unambiguous and human-readable link to the specifications define
     these schemas.</p>
-    
-    <p>Where a JSON Schema resource relies on another JSON Schema resource to
-    specify constraints on substructures, the other JSON Schema is identified by its
-    canonical URI.  </p>
+
   </section>
   
   <section>
@@ -146,20 +122,6 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       Engineering Document, without leading zeroes and including a part number, if
       any, separated by a hyphen, e.g., 456-1.</p>
       
-      <p><code>SHORTNAME</code> is used when the Engineering Document defines more
-      than one JSON Schema. It may provide a human meaningful designation of the
-      schema, but shall not include any version information.</p>
-      
-      <p>A stable SMPTE JSON Schema canonical URI is a SMPTE JSON Schema
-      canonical URI whose name is such that <code>REVISION</code>:</p>
-      <ul>
-        <li>conforms to <code>STABLEREV</code>, which consists of a year encoded as 4 decimal
-        digits, optionally followed by a month encoded as 2 decimal digits in the
-        range 01-12; and</li>
-        <li>represents the date that the JSON Schema canonical URI first appeared in
-        the Engineering Document, which might be as a Public Committee Draft.</li>
-      </ul>
-      
       <p class="note">The <code>REVISION</code> component of a stable SMPTE JSON
       Schema canonical URI does not necessarily correspond to the publication
       date of its defining Engineering Document. For instance, the defining
@@ -179,32 +141,23 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       
       <pre>https://www.smpte-ra.org/json-schema/456/2021/foo</pre>
       
-      <p>One can immediately see that the schema "foo" is defined in a SMPTE
-      Engineering Document numbered "456" and initially appeared in the year "2021".
-      One would assume that a "foo" was a well-known artifact to SMPTE members, at
-      least for those that have read Engineering Document number "456". </p>
-      
-      <p>The following is an example SMPTE JSON Schema resource canonical URI, defined
-      in a document with a part designation and that originally appeared in September
-      of 2022:</p>
-      
-      <pre>https://www.smpte-ra.org/json-schema/456-1/202209/foo</pre>
-      
-      <p>The following is a SMPTE JSON Schema resource canonical URI defined in a
-      draft version of the same specification:</p>
-      
-      <pre>https://www.smpte-ra.org/json-schema/456-1/experimental-20211001/foo</pre>
-      
-      <p>The following is not equivalent to the previous name since it is missing the
-      string "www" (though the two URIs can nevertheless resolve to the same resource
-      when used in an HTTP GET query):</p>
-      
-      <pre>https://smpte-ra.org/json-schema/456-1/experimental-20141001/</pre>
-      
-      <p>The following is not a valid SMPTE JSON Schema resource canonical URI,
-      since a fragment is used:</p>
-      
-      <pre>https://www.smpte-ra.org/json-schema/456-1/experimental-20141001/foo#hello</pre>
+      <p><a href="#table-1"></a> lists examples.</p>
+
+      <table id="table-1">
+        <caption>Examples</caption>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>URI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Hello</td>
+            <td>https://www.smpte-ra.org/json-schema/456/2021/foo</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
     
     <section>
@@ -218,15 +171,6 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   </section>
   
   <section>
-    <h3>Change Policy</h3>
-    
-    An Engineering Document that defines a SMPTE JSON Schema resource should specify
-    whether the schema is mutable, i.e., whether the schema is allowed to change
-    substantially over time without also changing the canonical URI of the SMPTE
-    JSON Schema resource.
-  </section>
-  
-  <section>
     <h3>Using a SMPTE JSON Schema Resource</h3>
     
     <p>A SMPTE JSON Schema resource can be used informatively by an Engineering
@@ -237,47 +181,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
     10 Normative References) and AG-03. Thus, provision of SMPTE JSON Schema
     resources, at this time, is strictly informative.</p>
   </section>
-  
-  <section>
-    <h3>Precedence</h3>
     
-    <p>
-      Engineering Documents normatively describe the constraints on a SMPTE JSON
-      structure, including names and values, by their prose. Any Engineering Document
-      providing a SMPTE JSON Schema resource to help validate a structure against
-      those constraints should point out that, in case of a conflict between prose and
-      the JSON Schema resource, the prose takes precedence.
-    </p>
-  </section>
-  
-  <section>
-    <h3>Avoiding Discrepancies</h3>
-    
-    <p>
-      To help avoid discrepancies between the English prose and a SMPTE JSON Schema
-      resource, prose sections should be bound to the related portion of the resource,
-      so that one cannot be modified without the other.
-    </p>
-    
-    <p class="note">
-      One method to bind prose to a SMPTE JSON Schema resource is to include the
-      resource definitions inline within the prose. Another method is for the prose to
-      refer to SMPTE JSON Schema resources specified in appendices or Additional
-      Elements.
-    </p>
-    
-    <p>
-      Any Additional Element that duplicates a SMPTE JSON Schema resource specified in
-      the Prose Element, shall be informative.
-    </p>
-    
-    <p class="note">
-      Informative JSON Schema resource definitions can be provided as examples, e.g.,
-      to demonstrate how to define an extension to another JSON Schema resource
-      through the “additionalProperties” or “additionalItems” keywords.
-    </p>
-  </section>
-  
   <section id="sec-version">
     <h3>Version</h3>
     
@@ -308,36 +212,6 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       represents the constraints for a JSON structure representing a rational value.
     </p>
     
-  </section>
-  <section>
-    <h3>External Definitions</h3>
-    
-    <p>
-      The defining document of any externally-defined JSON Schema resource shall be
-      included as an informative reference.
-    </p>
-  </section>
-  
-  <section>
-    <h3>Valid Definitions</h3>
-    
-    <p>
-      All SMPTE JSON Schema resources specified in an Engineering Document shall be
-      valid with respect to the JSON Schema resource(s) identified by the value of the
-      <code>$schema</code> keyword(s) therein.
-    </p>
-    
-    <p>
-      All SMPTE JSON Schema resources should be validated against the meta-schema
-      specified by their <code>$schema</code> keyword(s).
-    </p>
-  </section>
-  
-  <section>
-    <h3>Publication</h3>
-    
-    All Additional Elements of Engineering Documents conforming to JSON Schema shall
-    be publicly retrievable at an HTTP URI chosen by the Director of Engineering.
   </section>
   
   <section id="sec-keyword-order">
