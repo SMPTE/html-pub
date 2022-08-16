@@ -134,9 +134,9 @@ function insertTOC(docMetadata) {
       if (!heading)
         continue;
 
-      const headingNumber = heading.firstElementChild;
+      const headingNumber = subSection.querySelector(".heading-number");
 
-      if (!headingNumber || !headingNumber.classList.contains("heading-number"))
+      if (! headingNumber)
         continue;
 
       subSections.push(subSection);
@@ -343,28 +343,37 @@ function numberSections(element, curHeadingNumber) {
     if (child.firstElementChild === null)
       continue;
 
+    const heading = child.firstElementChild;
+
     let numText = curHeadingNumber;
 
     if (curHeadingNumber.length !== 0) {
       numText += ".";
     }
 
-    const headingNumberElement = document.createElement("span");
-    headingNumberElement.className = "heading-number";
+    const headingNum = document.createElement("span");
+    headingNum.className = "heading-number";
+
+    const headingLabel = document.createElement("span");
+    headingLabel.className = "heading-label";
     
     if (child.classList.contains("annex")) {
-      child.firstElementChild.insertBefore(document.createElement("br"), child.firstElementChild.firstChild);
-      headingNumberElement.innerText = "Annex " + String.fromCharCode(annexCounter);
-      child.firstElementChild.insertBefore(headingNumberElement, child.firstElementChild.firstChild);
-      annexCounter++;
+      numText = String.fromCharCode(annexCounter++);
+      headingNum.innerText = numText;
+
+      headingLabel.appendChild(document.createTextNode("Annex "));
+      headingLabel.appendChild(headingNum);
+      headingLabel.appendChild(document.createElement("br"));
     } else {
       numText += headingCounter.toString();
-      child.firstElementChild.insertBefore(document.createTextNode(" "), child.firstElementChild.firstChild);
-      headingNumberElement.innerText = numText;
-      child.firstElementChild.insertBefore(headingNumberElement, child.firstElementChild.firstChild);
       headingCounter++;
+      headingNum.innerText = numText;
+
+      headingLabel.appendChild(headingNum);
+      headingLabel.appendChild(document.createTextNode(" "));
     }
     
+    heading.insertBefore(headingLabel, heading.firstChild);
     numberSections(child, numText);
   }
 

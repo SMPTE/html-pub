@@ -256,51 +256,23 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
 
 <section class="annex" id="sec-json-doc-license">
   <h2>JSON Document License</h2>
+
+  <section id="sec-cc-element">
+    <h3>CopyrightElement</h3>
 <pre>
 Copyright (c), Society of Motion Pictures and Television Engineers. 
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met: 
-
-1. Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer. 
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution. 
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software without
-specific prior written permission. 
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </pre>
-</section>
+  </section>
 
-<section class="annex" id="sec-cc-license-element">
-  <h2>Copyright and License Element</h2>
+  <section id="sec-cc-license-element">
+    <h3>License Element</h3>
 
-<p>
-  The following JSON elements present the SMPTE copyright notice and the JSON
-  Schema identifier, a URI, which is useable as a URL to access the JSON Schema
-  Definition Document which presents, among other things, the JSON Document
-  License shown in <a href="#sec-json-doc-license"></a>.
-</p>
-
-<pre>"$comment": "Copyright (c), Society of Motion Pictures and Television Engineers. Licensed under BSD-3-Clause (https://spdx.org/licenses/BSD-3-Clause.html)."</pre>
-
-<p>The following example JSON Schema incorporates the above element in
-accordance with <a href="#sec-cc-license-schema-resources"></a>, with the initial
-keyword order recommended in <a href="#sec-keyword-order"></a>.</p>
+  <p>The following example JSON Schema incorporates the above element in
+  accordance with <a href="#sec-cc-license-schema-resources"></a>, with the initial
+  keyword order recommended in <a href="#sec-keyword-order"></a>.</p>
 
 <pre>
 {
@@ -314,21 +286,10 @@ keyword order recommended in <a href="#sec-keyword-order"></a>.</p>
     {
       "bar": "zyzx"
     }
-  ],
-  "properties": {
-    "bar": {
-      "$id": "#bar",
-      "title": "bar",
-      "type": "string",
-      "description": "A fictitious short string element.",
-      "minLength":1,
-      "maxLength":4
-    }
-  },
-  "required": [ "bar" ]
 }  
 </pre>
 
+  </section>
 </section>
 
 <section id="sec-bibliographic-references">
