@@ -406,16 +406,30 @@ function resolveLinks(docMetadata) {
   const anchors = document.getElementsByTagName("a");
 
   for (const anchor of anchors) {
-    /* process definitions */
 
     if (anchor.href === "") {
 
-      const term = _normalizeTerm(anchor.textContent);
+      const contents = anchor.textContent;
 
-      if (! definitions.has(term)) {
-        logEvent(`Unresolved definition: ${term}`);
+      if (contents.match(/^[a-z]+:/)) {
+
+        /* process URLs */
+
+        anchor.href = anchor.textContent;
+        anchor.classList.add("ext-ref");
+
       } else {
-        anchor.href = "#" + definitions.get(term).id;
+
+        /* process definitions */
+
+        const term = _normalizeTerm(anchor.textContent);
+
+        if (! definitions.has(term)) {
+          logEvent(`Unresolved link: ${term}`);
+        } else {
+          anchor.href = "#" + definitions.get(term).id;
+        }
+
       }
 
       continue;
