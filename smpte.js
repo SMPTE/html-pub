@@ -380,29 +380,44 @@ function numberSections(element, curHeadingNumber) {
 }
 
 function numberTables() {
-  const tables = document.getElementsByTagName("table");
-
   let counter = 1;
 
-  for (let table of tables) {
+  for (let section of document.querySelectorAll("body > section")) {
 
-    const caption = table.querySelector("caption");
+    let numPrefix = "";
 
-    if (caption === null) {
-      logEvent(`Table is missing a caption`);
-      continue;
+    if (section.classList.contains("annex")) {
+      counter = 1;
+      numPrefix = section.querySelector(".heading-number").innerText + ".";
     }
 
-    const headingNumberElement = document.createElement("span");
-    headingNumberElement.className = "heading-number";
-    headingNumberElement.innerText = "Table " + counter;
-    
-    caption.insertBefore(document.createTextNode(" –⁠ "), caption.firstChild);
-    caption.insertBefore(headingNumberElement, caption.firstChild);
-    
-    counter++;
-  }
+    for (let table of section.querySelectorAll("table")) {
 
+      const caption = table.querySelector("caption");
+  
+      if (caption === null) {
+        logEvent(`Table is missing a caption`);
+        continue;
+      }
+
+      const headingLabel = document.createElement("span");
+      headingLabel.className = "heading-label";
+  
+      const headingNumberElement = document.createElement("span");
+      headingNumberElement.className = "heading-number";
+      headingNumberElement.innerText = numPrefix + counter;
+      
+      headingLabel.appendChild(document.createTextNode("Table "));
+      headingLabel.appendChild(headingNumberElement);
+      headingLabel.appendChild(document.createTextNode(" –⁠ "));
+
+
+      caption.insertBefore(headingLabel, caption.firstChild);
+      
+      counter++;
+    }
+
+  }
 }
 
 function _normalizeTerm(term) {
@@ -516,7 +531,7 @@ function resolveLinks(docMetadata) {
       anchor.innerText = target.innerText;
 
     } else if (target.localName === "table") {
-      anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
+      anchor.innerText = "Table " + target.querySelector(".heading-number").innerText;
       
     } else if (target.localName === "section") {
       anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
