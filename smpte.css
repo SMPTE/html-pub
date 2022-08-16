@@ -242,6 +242,13 @@ figure {
   margin-top: 1rem;
 }
 
+/* links */
+
+.ext-ref {
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
 /* code */
 
 pre {
