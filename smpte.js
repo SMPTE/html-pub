@@ -74,6 +74,7 @@ function insertFrontMatter(docMetadata) {
   })();
 
   sec = document.createElement("section");
+  sec.className = "unnumbered";
   sec.id = FRONT_MATTER_ID;
   sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
@@ -144,21 +145,16 @@ function insertTOC(docMetadata) {
     return;
   }
 
-  const scope = document.getElementById("sec-scope");
+  const toc = document.getElementById("sec-toc");
 
-  if (scope === null) {
-    throw "Missing scope element"
-  }
+  if (toc === null)
+    return;
 
   const h2 = document.createElement("h2");
   h2.innerText = "Table of contents";
   h2.className = "unnumbered";
 
-  const toc = document.createElement("section");
-  toc.id = "sec-toc";
   toc.appendChild(h2);
-
-  scope.parentElement.insertBefore(toc, scope);
 
   _processSubSections(toc, document.body, 1);
 }
@@ -305,8 +301,6 @@ function insertForeword(docMetadata) {
 }
 
 function numberSections(element, curHeadingNumber) {
-  const unnumberedSectionIds = new Set(["sec-foreword", "sec-front-matter"])
-
   let headingCounter = 1;
   let annexCounter = "A".charCodeAt();
 
@@ -315,10 +309,10 @@ function numberSections(element, curHeadingNumber) {
     if (child.localName !== "section")
       continue;
 
-    if (unnumberedSectionIds.has(child.id))
+    if (child.classList.contains("unnumbered"))
       continue;
 
-    if (child.classList.contains("unnumbered"))
+    if (child.firstElementChild === null)
       continue;
 
     let numText = curHeadingNumber;
