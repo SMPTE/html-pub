@@ -628,7 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (listEvents().length > 0) {
 
-    asyncAddStylesheet(resolveScriptRelativePath("../smpte-errors.css"));
+    asyncAddStylesheet(resolveScriptRelativePath("smpte-errors.css"));
 
     const eventList = document.createElement('ol');
     eventList.id = "event-list";
