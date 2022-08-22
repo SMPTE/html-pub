@@ -251,8 +251,26 @@ function insertConformance(docMetadata) {
     return;
   }
 
-  if (sec.innerText.trim().length !== 0)
-    return;
+  let implConformance = "";
+
+  if (docMetadata.pubType !== "AG") {
+
+    if (sec.innerText.trim().length === 0) {
+
+      implConformance = `<p>A conformant implementation according to this document is one that
+      includes all mandatory provisions ("shall") and, if implemented, all recommended provisions
+      ("should") as described. A conformant implementation need not implement
+      optional provisions ("may") and need not implement them as described.</p>`;
+
+    } else {
+
+      implConformance = sec.innerText.innerHTML;
+
+    }
+
+  } else if (sec.innerText.trim().length !== 0) {
+    logEvent("Conformance section not used in AGs.");
+  }
 
   sec.innerHTML = `
   <h2>Conformance</h2>
@@ -278,9 +296,7 @@ document and from which no deviation is permitted.</p>
   and may be defined in the future. The keyword "forbidden" indicates "reserved" and in addition
    indicates that the provision will never be defined in the future.</p>
 
-<p>A conformant implementation according to this document is one that includes all mandatory provisions ("shall") and,
-  if implemented, all recommended provisions ("should") as described. A conformant implementation need not implement
-  optional provisions ("may") and need not implement them as described.</p>
+${implConformance}
 
 <p>Unless otherwise specified, the order of precedence of the types of normative information in
   this document shall be as follows: Normative prose shall be the authoritative definition;
