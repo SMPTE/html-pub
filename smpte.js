@@ -539,8 +539,9 @@ function resolveLinks(docMetadata) {
   for (const anchor of anchors) {
 
     const contents = anchor.textContent;
+    const specifiedHref = anchor.getAttribute('href') || "";
 
-    if (anchor.href === "") {
+    if (specifiedHref === "") {
 
       if (contents.match(/^[a-z]+:/)) {
 
@@ -563,15 +564,15 @@ function resolveLinks(docMetadata) {
 
       }
 
-    } else if (anchor.href.match(/^[a-z]+:/)) {
+    } else if (specifiedHref.match(/^[a-z]+:/)) {
 
       /* absolute URLs */
 
-    } else if (anchor.href[0] === "#") {
+    } else if (specifiedHref[0] == "#") {
 
       /* process fragments */
 
-      const target_id = anchor.href.substring(1);
+      const target_id = specifiedHref.substring(1);
 
       let target = document.getElementById(target_id);
 
@@ -604,7 +605,7 @@ function resolveLinks(docMetadata) {
       
     } else {
 
-      logEvent(`Empty anchor`)
+      logEvent(`Empty anchor`);
 
     }
   }
