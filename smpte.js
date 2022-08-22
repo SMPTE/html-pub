@@ -104,7 +104,7 @@ function insertFrontMatter(docMetadata) {
   sec.id = FRONT_MATTER_ID;
   sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
-    <img id="smpte-logo" src="tooling/smpte-logo.png" />
+    <img id="smpte-logo" src="${resolveScriptRelativePath("../smpte-logo.png")}" />
     <div id="long-doc-type">${longDoctype}</div>
     <h1>${docMetadata.pubTitle}</h1>
     <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>
@@ -522,9 +522,9 @@ function resolveLinks(docMetadata) {
 
   for (const anchor of anchors) {
 
-    if (anchor.href === "") {
+    const contents = anchor.textContent;
 
-      const contents = anchor.textContent;
+    if (anchor.href === "") {
 
       if (contents.match(/^[a-z]+:/)) {
 
@@ -547,42 +547,49 @@ function resolveLinks(docMetadata) {
 
       }
 
-      continue;
-    }
+    } else if (anchor.href.match(/^[a-z]+:/)) {
 
-    /* process other links */
+      /* absolute URLs */
 
-    const fragmentIndex = anchor.href.indexOf("#");
+    } else if (anchor.href[0] === "#") {
 
-    if (fragmentIndex < 0) {
-      continue;
-    }
+      /* process fragments */
+
+      const target_id = anchor.href.substring(1);
+
+      let target = document.getElementById(target_id);
+
+      if (! target) {
+        logEvent(`anchor points to non-existent #${target_id}`)
+        anchor.innerText = "????";
+        continue
+      }
+
+      if (target.localName === "cite") {
+        anchor.innerText = target.innerText;
+
+      } else if (target.localName === "table") {
+        anchor.innerText = "Table " + target.querySelector(".heading-number").innerText;
+
+      } else if (target.localName === "figure") {
+        anchor.innerText = "Figure " + target.querySelector(".heading-number").innerText
+        
+      } else if (target.localName === "section") {
+        anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
+
+      } else {
+        logEvent(`Anchor points to ambiguous #${target_id}`)
+        anchor.innerText = "????";
+      }
+
+    } else if (contents !== "") {
+
+      /* nothing to do */
       
-    const target_id = anchor.href.substring(fragmentIndex + 1);
-
-    let target = document.getElementById(target_id);
-
-    if (! target) {
-      logEvent(`anchor points to non-existent #${target_id}`)
-      anchor.innerText = "????";
-      continue
-    }
-
-    if (target.localName === "cite") {
-      anchor.innerText = target.innerText;
-
-    } else if (target.localName === "table") {
-      anchor.innerText = "Table " + target.querySelector(".heading-number").innerText;
-    
-    } else if (target.localName === "figure") {
-      anchor.innerText = "Figure " + target.querySelector(".heading-number").innerText
-
-    } else if (target.localName === "section") {
-      anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
-
     } else {
-      logEvent(`Anchor points to ambiguous #${target_id}`)
-      anchor.innerText = "????";
+
+      logEvent(`Empty anchor`)
+
     }
   }
 }
