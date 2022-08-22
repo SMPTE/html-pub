@@ -43,13 +43,13 @@
 
   <section id="sec-smpte-json-structures">
     <h2>SMPTE JSON structures</h2>
-    <section>
+    <section id="sec-overview">
       <h3>Overview (informative)</h3> 
       The JSON Schema resource applicable to a JSON structure can specify constraints to which the structure is expected to conform.
     </section>
     
-    <section>
-      <h3>SMPTE JSON Structures</h3>
+    <section id="sec-json-structures">
+      <h3>JSON Structures</h3>
       
       <p>
         A <dfn>SMPTE JSON structure</dfn> is any data structure that (a) is specified by an
@@ -71,10 +71,10 @@
     
   </section>
 
-<section>
+<section id="sec-smpte-json-schema-resources">
   <h2>SMPTE JSON Schema resources</h2>
   
-  <section>
+  <section id="sec-introduction">
     <h3>Introduction (informative)</h3>
     
     <p>Using the formal language of JSON Schema, descriptions of conformance
@@ -90,7 +90,7 @@
 
   </section>
   
-  <section>
+  <section id="sec-canonical-uri">
     <h3>Canonical URI</h3>
     
     <section id="sec-id-keyword">
@@ -100,7 +100,7 @@
       object, thereby providing the canonical URI for the JSON root schema.</p>
     </section>
     
-    <section>
+    <section id="sec-canonical-uri-syntax">
       <h4>Canonical URI Syntax</h4>
       
       The canonical URI shall conform to the <code>SCHEMAID</code> syntax below,
@@ -133,7 +133,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       </p>
     </section>
     
-    <section>
+    <section id="sec-examples">
       <h4>Examples (informative)</h4>
       The following is an example SMPTE JSON Schema resource canonical URI:
       
@@ -158,7 +158,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       </table>
     </section>
     
-    <section>
+    <section id="sec-registration">
       <h4>Registration (informative)</h4>
       
       <p>
@@ -176,7 +176,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
     </section>
   </section>
   
-  <section>
+  <section id="sec-using-a-smpte-json-schema-resource">
     <h3>Using a SMPTE JSON Schema Resource</h3>
     
     <p>A SMPTE JSON Schema resource can be used informatively by an Engineering
@@ -236,10 +236,10 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   </section>
 </section>
 
-<section>
+<section id="sec-copyright-and-license">
   <h2>Copyright and License</h2>
   
-  <section>
+  <section id="sec-license">
     <h3>License</h3>
     
     <p>
@@ -263,10 +263,10 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   </section>
 </section>
 
-<section class="annex" id="sec-json-doc-license">
+<section class="annex" id="sec-json-document-license">
   <h2>JSON Document License</h2>
 
-  <section id="sec-cc-element">
+  <section id="sec-copyright-element">
     <h3>Copyright Element</h3>
 <pre>
 Copyright (c), Society of Motion Pictures and Television Engineers. 
@@ -276,7 +276,7 @@ are permitted provided that the following conditions are met:
 </pre>
 <p><a href="#table-copyright-forms"></a> lists copyright forms.</p>
 <table id="table-copyright-forms">
-  <caption>Copyright forms</caption>
+  <caption>Copyright Forms</caption>
   <thead>
     <tr>
       <th>Name</th>
@@ -293,7 +293,7 @@ are permitted provided that the following conditions are met:
 </table>
   </section>
 
-  <section id="sec-cc-license-element">
+  <section id="sec-license-element">
     <h3>License Element</h3>
 
   <p>The following example JSON Schema incorporates the above element in
