@@ -104,7 +104,7 @@ function insertFrontMatter(docMetadata) {
   sec.id = FRONT_MATTER_ID;
   sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
-    <img id="smpte-logo" src="${resolveScriptRelativePath("../smpte-logo.png")}" />
+    <img id="smpte-logo" src="${resolveScriptRelativePath("smpte-logo.png")}" />
     <div id="long-doc-type">${longDoctype}</div>
     <h1>${docMetadata.pubTitle}</h1>
     <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>
