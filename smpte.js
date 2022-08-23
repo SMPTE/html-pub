@@ -182,7 +182,7 @@ function insertTOC(docMetadata) {
 
   toc.appendChild(h2);
 
-  _processSubSections(toc, document.body, 1);
+  _processSubSections(toc, document.body, 3);
 }
 
 function insertNormativeReferences(docMetadata) {
