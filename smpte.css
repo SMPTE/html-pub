@@ -249,6 +249,11 @@ figure {
   white-space: nowrap;
 }
 
+.dfn-ref {
+    text-decoration: underline blue dotted;
+    color: black;
+}
+
 /* code */
 
 pre {

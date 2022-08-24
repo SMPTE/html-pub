@@ -620,6 +620,7 @@ function resolveLinks(docMetadata) {
           logEvent(`Unresolved link: ${term}`);
         } else {
           anchor.href = "#" + definitions.get(term).id;
+          anchor.classList.add("dfn-ref");
         }
 
       }
