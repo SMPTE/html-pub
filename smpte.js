@@ -215,12 +215,12 @@ function insertTOC(docMetadata) {
     return;
 
   const h2 = document.createElement("h2");
-  h2.innerText = "Table of contents";
+  h2.innerText = "Table of Contents";
   h2.className = "unnumbered";
 
   toc.appendChild(h2);
 
-  _processSubSections(toc, document.body, 1);
+  _processSubSections(toc, document.body, 3);
 }
 
 function insertNormativeReferences(docMetadata) {
