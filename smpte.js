@@ -72,6 +72,8 @@ function loadDocMetadata() {
   metadata.pubState = params.get("pubState") || getHeadMetadata("pubState");
   metadata.pubNumber = params.get("pubNumber") || getHeadMetadata("pubNumber");
   metadata.pubDateTime = params.get("pubDateTime") || getHeadMetadata("pubDateTime");
+  metadata.pubApproveDateTime = params.get("pubApproveDateTime") || getHeadMetadata("pubApproveDateTime");
+  metadata.pubVersion = params.get("pubVersion") || getHeadMetadata("pubVersion");
 
   return metadata;
 }
@@ -90,13 +92,36 @@ function insertFrontMatter(docMetadata) {
     throw "Front matter section already exists."
   }
 
-  const longDoctype = { "AG": "Administrative Guideline" }[docMetadata.pubType];
+  const longDoctype = { "AG": "Administrative Guideline",
+                        "OM": "Operations Manual"         }[docMetadata.pubType];
 
   const actualPubDateTime = (() => {
     if (docMetadata.pubDateTime === null)
       return new Date();
 
     return docMetadata.pubDateTime;
+  })();
+
+  const pubApproveHTML = (() => {
+    if (docMetadata.pubApproveDateTime === null)
+    {
+      return "";
+    }
+    else
+    {
+      return `<div id="doc-approve">Approved by Board of Governors ${docMetadata.pubApproveDateTime}</div>`;
+    }
+  })();
+
+  const pubVersionHTML = (() => {
+    if (docMetadata.pubVersion === null)
+    {
+      return "";
+    }
+    else
+    {
+      return `<div id="doc-version">${docMetadata.pubVersion}</div>`;
+    }
   })();
 
   sec = document.createElement("section");
@@ -107,6 +132,8 @@ function insertFrontMatter(docMetadata) {
     <img id="smpte-logo" src="${resolveScriptRelativePath("smpte-logo.png")}" />
     <div id="long-doc-type">${longDoctype}</div>
     <h1>${docMetadata.pubTitle}</h1>
+    ${pubVersionHTML}
+    ${pubApproveHTML}
     <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>
   <hr />
   </section>`;
@@ -245,6 +272,12 @@ function insertBibliography(docMetadata) {
 
 function insertConformance(docMetadata) {
   const sec = document.getElementById("sec-conformance");
+
+  /* No conformance section in an OM.  The standards OM
+     defines conformance.  Other OMs?? */
+  if (docMetadata.pubType == "OM") {
+    return;
+  }
 
   if (sec === null) {
     logEvent("Missing required `conformance` section.");
