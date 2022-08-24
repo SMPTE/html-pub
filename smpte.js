@@ -72,7 +72,7 @@ function loadDocMetadata() {
   metadata.pubState = params.get("pubState") || getHeadMetadata("pubState");
   metadata.pubNumber = params.get("pubNumber") || getHeadMetadata("pubNumber");
   metadata.pubDateTime = params.get("pubDateTime") || getHeadMetadata("pubDateTime");
-  metadata.pubApproveDateTime = params.get("pubApproveDateTime") || getHeadMetadata("pubApproveDateTime");
+  metadata.pubEffectiveDateTime = params.get("pubEffectiveDateTime") || getHeadMetadata("pubEffectiveDateTime");
   metadata.pubVersion = params.get("pubVersion") || getHeadMetadata("pubVersion");
 
   return metadata;
@@ -99,43 +99,54 @@ function insertFrontMatter(docMetadata) {
     if (docMetadata.pubDateTime === null)
       return new Date();
 
+    if (docMetadata.pubType === "OM")
+    {
+      if (docMetadata.pubEffectiveDateTime !== null)
+      {
+          return docMetadata.pubEffectiveDateTime;
+      }
+    }
+
     return docMetadata.pubDateTime;
   })();
 
-  const pubApproveHTML = (() => {
-    if (docMetadata.pubApproveDateTime === null)
+
+  const pubHeaderHTML = (() => {
+    if (docMetadata.pubType === "OM")
     {
-      return "";
+      const pubApproveHTML = (() => {
+        if (docMetadata.pubDateTime === null)
+          {
+            return `Not Approved by Board of Governors`;
+          }
+          else
+          {
+            return `Approved by Board of Governors ${docMetadata.pubDateTime}`;
+          }
+      })();
+
+      return `<h2><center>Society of Motion Picture and Television Engineers<br>
+              ${docMetadata.pubTitle} ${docMetadata.pubVersion}<br>
+              ${pubApproveHTML}<br>
+              ${docMetadata.pubState} ${actualPubDateTime}</center></h2>`
     }
     else
     {
-      return `<div id="doc-approve">Approved by Board of Governors ${docMetadata.pubApproveDateTime}</div>`;
+      return `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
+             <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
+             <img id="smpte-logo" src="${resolveScriptRelativePath("smpte-logo.png")}" />
+             <div id="long-doc-type">${longDoctype}</div>
+             <h1>${docMetadata.pubTitle}</h1>
+             <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>
+             <hr />`
     }
   })();
 
-  const pubVersionHTML = (() => {
-    if (docMetadata.pubVersion === null)
-    {
-      return "";
-    }
-    else
-    {
-      return `<div id="doc-version">${docMetadata.pubVersion}</div>`;
-    }
-  })();
 
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = FRONT_MATTER_ID;
-  sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
-    <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
-    <img id="smpte-logo" src="${resolveScriptRelativePath("smpte-logo.png")}" />
-    <div id="long-doc-type">${longDoctype}</div>
-    <h1>${docMetadata.pubTitle}</h1>
-    ${pubVersionHTML}
-    ${pubApproveHTML}
-    <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>
-  <hr />
+  sec.innerHTML = `${pubHeaderHTML}
   </section>`;
 
   body.insertBefore(sec, body.firstChild);
@@ -273,10 +284,15 @@ function insertBibliography(docMetadata) {
 function insertConformance(docMetadata) {
   const sec = document.getElementById("sec-conformance");
 
-  /* No conformance section in an OM.  The standards OM
-     defines conformance.  Other OMs?? */
+  /* No conformance section in an OM. */
   if (docMetadata.pubType == "OM") {
-    return;
+    if (sec === null) {
+      return;
+    }
+    else
+    {
+      throw "'Conformance' section not allowed in OM."
+    }
   }
 
   if (sec === null) {
@@ -339,6 +355,17 @@ ${implConformance}
 
 function insertForeword(docMetadata) {
   let sec = document.getElementById("sec-foreword");
+
+  /* No foreword in an OM. */
+  if (docMetadata.pubType == "OM") {
+    if (sec === null) {
+      return;
+    }
+    else
+    {
+      throw "'Foreword' section not allowed in OM."
+    }
+  }
 
   if (sec === null) {
     logEvent("Missing required `foreword` section.");
