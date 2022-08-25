@@ -148,6 +148,16 @@ dd.abbr {
   counter-increment: notes-counter;
 }
 
+/* example */
+
+.example {
+  font-size: 0.9rem;
+}
+
+.example:before {
+  content: "EXAMPLE: ";
+}
+
 /* table of contents */
 
 section#sec-toc ol {
