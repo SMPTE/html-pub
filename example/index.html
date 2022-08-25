@@ -8,10 +8,10 @@
   <script src="../smpte.js"></script>
   <link rel="stylesheet" href="../smpte.css" />
   <meta itemprop="pubType" content="AG" />
-  <meta itemprop="pubNumber" content="25" />
+  <meta itemprop="pubNumber" content="XX" />
   <meta itemprop="pubState" content="published" />
-  <meta itemprop="pubDateTime" content="2022-07-05" />
-  <title>Use of JSON in Engineering Documents</title>
+  <meta itemprop="pubDateTime" content="20XX-XX-XX" />
+  <title>HTML Template</title>
 </head>
 
 <body>
@@ -39,6 +39,37 @@
       <li><cite id="bib-ietf-rfc-8259">IETF RFC 8259</cite>, The JavaScript
       Object Notation (JSON) Data Interchange Format, T. Bray, <a>http://www.ietf.org/rfc/rfc8259.txt</a></li>
     </ul>
+  </section>
+
+  <section id="sec-terms">
+    <h2>Terms</h2>
+    <p>This section show how to use <code>&lt;dl&gt;</code> for terms, noted by <code>id="sec-terms"</code>, includes abbreviations as <code>&lt;dd class="abbr"&gt;</code>.</p>
+    <dl>
+      <dt id="group">Group</dt>
+      <dd>
+        <p>is the Group that authored the document (e.g., TC name, “31FS”)</p>
+      </dd>
+      <dt id="spreadsheet">Spreadsheet</dt>
+      <dd class="abbr">.xlsx</dd>
+      <dd>
+        <p>The Project Group shall decide which spreadsheet format (.xls or .xlsx) to use for each project. The preferred format is .xlsx.</p>
+      </dd>
+    </dl>
+  </section>
+
+  <section id="sec-details">
+    <h2>Details</h2>
+    <p>This section show how to use <code>&lt;dl&gt;</code> normally in sections that are not <code>id="sec-terms"</code>.</p>
+    <dl>
+      <dt>Chair</dt>
+      <dd>
+         <p>Just the name of the person who will be the main contact for the project. No email address – it will be on a public website. Usually the first listed proponent.</p>
+      </dd>
+      <dt>Description</dt>
+      <dd>
+         <p>A short description of the project’s purpose and objectives. This text is aimed at the public who will read it and thus should be able to understand the Project in general terms. There may be extra requirements for this field for the Public CD Process</p>
+      </dd>
+    </dl>
   </section>
 
   <section id="sec-smpte-json-structures">

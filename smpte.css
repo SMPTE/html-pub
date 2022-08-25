@@ -121,7 +121,7 @@ section.annex > h2 span.label {
   margin-left: 0;
 }
 
-#sec-terms dt {
+dt {
   margin-top: 1em;
   font-weight: bold;
 }
@@ -129,6 +129,11 @@ section.annex > h2 span.label {
 #sec-terms dt .label::after {
   content: "\A";
   white-space: pre;
+}
+
+dd.abbr {
+  margin-top: 0em;
+  font-weight: bold;
 }
 
 /* note */
