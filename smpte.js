@@ -102,7 +102,7 @@ function insertFrontMatter(docMetadata) {
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = FRONT_MATTER_ID;
-  sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
+  sec.innerHTML = `<div class="toc-ignore" id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
     <img id="smpte-logo" src="${resolveScriptRelativePath("smpte-logo.png")}" />
     <div id="long-doc-type">${longDoctype}</div>
@@ -135,8 +135,9 @@ function insertTOC(docMetadata) {
         continue;
 
       const headingNumber = subSection.querySelector(".heading-number");
+      const tocIgnore = subSection.querySelector(".toc-ignore")
 
-      if (! headingNumber)
+      if (!headingNumber && tocIgnore)
         continue;
 
       subSections.push(subSection);
@@ -144,7 +145,7 @@ function insertTOC(docMetadata) {
 
     if (subSections.length > 0) {
 
-      const tocItem = document.createElement("ol");
+      const tocItem = document.createElement("ul");
 
       for (const subSection of subSections) {
         let sectionRef = document.createElement("a");
@@ -156,7 +157,7 @@ function insertTOC(docMetadata) {
 
         tocItem.appendChild(sectionItem);
 
-        _processSubSections(sectionItem, subSection, level - 1);
+        _processSubSections(sectionItem, subSection, level - 3);
 
       }
 
@@ -178,11 +179,32 @@ function insertTOC(docMetadata) {
 
   const h2 = document.createElement("h2");
   h2.innerText = "Table of contents";
-  h2.className = "unnumbered";
+  h2.className = "unnumbered toc-ignore";
 
   toc.appendChild(h2);
 
   _processSubSections(toc, document.body, 1);
+}
+
+function insertScope(docMetadata) {
+  const sec = document.getElementById("sec-scope");
+
+  if (sec === null)
+    return;
+
+  let h2 = sec.getElementsByTagName("h2");
+
+  if (h2.length == 0) {
+    h2 = document.createElement("h2");
+    sec.insertBefore(h2, sec.firstChild);
+  } else if (h2.length == 1) {
+    h2 = h2[0];
+  } else {
+    logEvent("Scope section has multiple headings.");
+    return;
+  }
+
+  h2.innerText = "Scope";
 }
 
 function insertNormativeReferences(docMetadata) {
@@ -220,8 +242,41 @@ function insertNormativeReferences(docMetadata) {
   h2.innerText = "Normative references";
 }
 
+function insertTermsanddefinitions(docMetadata) {
+  const sec = document.getElementById("sec-terms-and-definitions");
+
+  if (sec === null)
+    return;
+
+  const p = document.createElement("p");
+
+  if (sec.childElementCount !== 0) {
+    p.innerHTML = `For the purposes of this document, the following terms and definitions apply.`
+    // will need to add functionality for external definteddterms
+  } else {
+    p.innerHTML = `No terms and definitions are listed in this document.`
+  }
+
+  sec.insertBefore(p, sec.firstChild);
+
+
+  let h2 = sec.getElementsByTagName("h2");
+
+  if (h2.length == 0) {
+    h2 = document.createElement("h2");
+    sec.insertBefore(h2, sec.firstChild);
+  } else if (h2.length == 1) {
+    h2 = h2[0];
+  } else {
+    logEvent("Terms and definitions section has multiple headings.");
+    return;
+  }
+
+  h2.innerText = "Terms and definitions";
+}
+
 function insertBibliography(docMetadata) {
-  const sec = document.getElementById("sec-bibliographic-references");
+  const sec = document.getElementById("sec-bibliography");
 
   if (sec === null)
     return;
@@ -311,6 +366,8 @@ function insertForeword(docMetadata) {
     logEvent("Missing required `foreword` section.");
     return;
   }
+
+  sec.classList.add("unnumbered");
 
   custom_text = sec.innerHTML;
 
@@ -617,7 +674,9 @@ function render() {
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
   insertConformance(docMetadata);
+  insertScope(docMetadata);
   insertNormativeReferences(docMetadata);
+  insertTermsanddefinitions(docMetadata);
   insertBibliography(docMetadata);
   numberSections(document.body, "");
   numberTables();

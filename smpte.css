@@ -46,7 +46,7 @@ h1 {
   font-style: italic;
 }
 
-#sec-front-matter #smpte-logo {
+#smpte-logo {
   float: right;
   width: 250px;
   margin: 1rem;
@@ -117,7 +117,7 @@ section.annex > h2 span.label {
 
 /* terms and definitions */
 
-#sec-terms dd {
+#sec-terms-and-definitions dd {
   margin-left: 0;
 }
 
@@ -126,7 +126,7 @@ dt {
   font-weight: bold;
 }
 
-#sec-terms dt .label::after {
+#sec-terms-and-definitions dt .label::after {
   content: "\A";
   white-space: pre;
 }
@@ -160,12 +160,15 @@ dd.abbr {
 
 /* table of contents */
 
-section#sec-toc ol {
+section#sec-toc ul {
   list-style-type: none;
-  padding: 0;
+  padding-inline-start: 2ch;
   margin: 0.25rem 0 0.25rem 0;
 }
 
+section#sec-toc li {
+
+}
 
 section#sec-toc span.heading-number {
   display: inline-block;
@@ -238,12 +241,13 @@ figure {
 
 /* references */
 
-#sec-bibliographic-references ul {
+#sec-bibliography ul {
   list-style-type: none;
+  margin-top: 1rem;
   padding: 0;
 }
 
-#sec-bibliographic-references li {
+#sec-bibliography li {
   margin-top: 1rem;
 }
 
