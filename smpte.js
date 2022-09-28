@@ -265,8 +265,6 @@ function insertTermsanddefinitions(docMetadata) {
       p.innerHTML = `For the purposes of this document, the terms and definitions given in ${extList_text} and the following apply:`
     }
 
-
-    // will need to add functionality for external definteddterms
   } else {
     console.log("neither exists")
     p.innerHTML = `No terms and definitions are listed in this document.` 

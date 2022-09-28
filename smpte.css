@@ -273,6 +273,16 @@ figure {
   white-space: nowrap;
 }
 
+#sec-normative-references .ext-ref::before {
+  white-space: pre;
+  content: '\A';
+}
+
+#sec-bibliography .ext-ref::before {
+  white-space: pre;
+  content: '\A';
+}
+
 .dfn-ref {
     text-decoration: underline blue dotted;
     color: black;
