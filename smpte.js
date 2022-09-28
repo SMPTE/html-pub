@@ -251,10 +251,25 @@ function insertTermsanddefinitions(docMetadata) {
   const p = document.createElement("p");
 
   if (sec.childElementCount !== 0) {
-    p.innerHTML = `For the purposes of this document, the following terms and definitions apply.`
+    
+    let defList = document.getElementById("terms-int-defs")
+    let extList = document.getElementById("terms-ext-defs")
+
+    if (extList === null && defList !== null) {
+      p.innerHTML = `For the purposes of this document, the following terms and definitions apply:`
+    } else if (extList !== null && defList === null) {
+      let extList_text = extList.innerHTML
+      p.innerHTML = `For the purposes of this document, the terms and definitions given in ${extList_text} apply.`
+    } else if (extList !== null && defList !== null) {
+      let extList_text = extList.innerHTML
+      p.innerHTML = `For the purposes of this document, the terms and definitions given in ${extList_text} and the following apply:`
+    }
+
+
     // will need to add functionality for external definteddterms
   } else {
-    p.innerHTML = `No terms and definitions are listed in this document.`
+    console.log("neither exists")
+    p.innerHTML = `No terms and definitions are listed in this document.` 
   }
 
   sec.insertBefore(p, sec.firstChild);
@@ -441,7 +456,7 @@ function numberSections(element, curHeadingNumber) {
       numText += headingCounter.toString();
       headingCounter++;
       headingNum.innerText = numText;
-
+      
       headingLabel.appendChild(headingNum);
       headingLabel.appendChild(document.createTextNode(" "));
     }
@@ -617,6 +632,7 @@ function resolveLinks(docMetadata) {
           logEvent(`Unresolved link: ${term}`);
         } else {
           anchor.href = "#" + definitions.get(term).id;
+          anchor.classList.add("dfn-ref");
         }
 
       }

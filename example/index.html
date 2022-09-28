@@ -62,16 +62,19 @@
   <!-- Start of Terms and definitions - Do not remove this section -->
   <section id="sec-terms-and-definitions">
 
-    <!-- Add `dt/dd` sub element pairs as needed in this section as needed for references. If no Normative references, remove the entire `dl` element. Pre text for this section is auto generated based on `dl` present or not. -->
-    <dl>
-      <dt id="group">Group</dt>
+    <!-- Use the `p` element to list external documents where Terms are defined (use same logic as referenced docs in the body of hte document as example shows). Add `dt/dd` sub element pairs as needed for Terms to be defined internally in this document. Remove either the `p` if no external Terms, or `dl` if no internally defined Terms. If no Terms needed to be defined at all, remove the both `p` and `dl` elements. Pre text for this section is auto generated based on what elements are present. -->
+
+    <p hidden id="terms-ext-defs"><a href="#bib-ietf-rfc-8259"></a> and <a href="#bib-ietf-rfc-7405"></a></p>
+
+    <dl id="terms-int-defs">
+      <dt><dfn>Group</dfn></dt>
       <dd>
-        <p>is the Group that authored the document (e.g., TC name, “31FS”)</p>
+        <p>is the group that authored the document (e.g., TC name, “31FS”)</p>
       </dd>
-      <dt id="spreadsheet">Spreadsheet</dt>
-      <dd class="abbr">.xlsx</dd>
+      <dt><dfn>Spreadsheet</dfn></dt>
+      <dd><abbr title="Spreadsheet">.xlsx</abbr></dd>
       <dd>
-        <p>The Project Group shall decide which spreadsheet format (.xls or .xlsx) to use for each project. The preferred format is .xlsx.</p>
+        <p>The project <a>Group</a> shall decide which spreadsheet format (.xls or .xlsx) to use for each project. The preferred format is .xlsx.</p>
       </dd>
     </dl>
   </section>
@@ -116,8 +119,8 @@
         the Engineering Document.
       </p>
       <p>
-        Each SMPTE JSON structure should be informatively specified by a JSON Schema
-        resource, which may be a SMPTE JSON Schema resource (see section 5), using
+        Each <a>SMPTE JSON structure</a> should be informatively specified by a JSON Schema
+        resource, which may be a <a>SMPTE JSON Schema</a> resource (see <a href="#sec-smpte-json-schema-resources"></a>), using
         the JSON Schema language as specified in <a href="#bib-draft-bhutton-json-schema-00"></a>.
       </p>
     </section>
@@ -125,7 +128,7 @@
   </section>
 
 <section id="sec-smpte-json-schema-resources">
-  <h2>SMPTE JSON Schema resources</h2>
+  <h2><dfn>SMPTE JSON Schema</dfn> resources</h2>
   
   <section id="sec-introduction">
     <h3>Introduction (informative)</h3>
@@ -147,7 +150,7 @@
     <section id="sec-id-keyword">
       <h4><code>$id</code> Keyword</h4>
       
-      <p>A SMPTE JSON Schema resource shall use the <code>$id</code> keyword in the root schema
+      <p>A <a>SMPTE JSON Schema</a> resource shall use the <code>$id</code> keyword in the root schema
       object, thereby providing the canonical URI for the JSON root schema.</p>
     </section>
     
@@ -178,15 +181,15 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       JSON Schema remain unchanged.</p>
       
       <p class="note">
-        No changes to SMPTE JSON Schema canonical URI are necessary following a Draft
-        Publication ballot since SMPTE JSON Schema canonical URI are constructed
+        No changes to <a>SMPTE JSON Schema</a> canonical URI are necessary following a Draft
+        Publication ballot since <a>SMPTE JSON Schema</a> canonical URI are constructed
         independently of the publication date of the Engineering Document.
       </p>
     </section>
     
     <section id="sec-examples">
       <h4>Examples (informative)</h4>
-      The following is an example SMPTE JSON Schema resource canonical URI:
+      The following is an example <a>SMPTE JSON Schema</a> resource canonical URI:
       
       <pre>https://www.smpte-ra.org/json-schema/456/2021/foo</pre>
       
@@ -213,7 +216,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       <h4>Registration (informative)</h4>
       
       <p>
-        The SMPTE JSON Schema resource canonical URI syntax ensures uniqueness across
+        The <a>SMPTE JSON Schema</a> resource canonical URI syntax ensures uniqueness across
         Engineering Documents, and thus no specific registration steps are required.
       </p>
 
@@ -228,14 +231,14 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   </section>
   
   <section id="sec-using-a-smpte-json-schema-resource">
-    <h3>Using a SMPTE JSON Schema Resource</h3>
+    <h3>Using a <a>SMPTE JSON Schema</a> Resource</h3>
     
-    <p>A SMPTE JSON Schema resource can be used informatively by an Engineering
+    <p>A <a>SMPTE JSON Schema</a> resource can be used informatively by an Engineering
     Document, either by inclusion or by reference.</p>
     
     <p class="note">The current specification of JSON Schema, though well-supported, is not a
     normatively referenceable document per the Standards Operations Manual (section
-    10 Normative References) and AG-03. Thus, provision of SMPTE JSON Schema
+    10 Normative References) and AG-03. Thus, provision of <a>SMPTE JSON Schema</a>
     resources, at this time, is strictly informative.</p>
   </section>
     
@@ -243,13 +246,13 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
     <h3>Version</h3>
     
     <p>
-      Whenever a SMPTE JSON Schema resource is provided, the Engineering Document
+      Whenever a <a>SMPTE JSON Schema</a> resource is provided, the Engineering Document
       shall provide an informative reference to the JSON Schema language specification
       to which it conforms (e.g., JSON Schema, as shown in the Bibliography).
     </p>
     
     <p>
-      A SMPTE JSON Schema resource shall use the <code>$schema</code> keyword in the root schema
+      A <a>SMPTE JSON Schema</a> resource shall use the <code>$schema</code> keyword in the root schema
       object.
     </p>
     
@@ -265,7 +268,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       absolute and/or contain non-empty fragments. </p>
       
     <p class="example">
-      <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items/definitions/rationalType</code> is a reference to a subschema within the SMPTE JSON Schema resource <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items</code> where the subschema represents the constraints for a JSON structure representing a rational value.
+      <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items/definitions/rationalType</code> is a reference to a subschema within the <a>SMPTE JSON Schema</a> resource <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items</code> where the subschema represents the constraints for a JSON structure representing a rational value.
     </p>
     
   </section>
@@ -273,7 +276,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   <section id="sec-keyword-order">
     <h3>Keyword Order</h3>
     
-    <p>The following keywords should appear as the first keywords in any SMPTE JSON Schema resource in this order:</p>
+    <p>The following keywords should appear as the first keywords in any <a>SMPTE JSON Schema</a> resource in this order:</p>
     
     <ul>
       <li><code>$schema,</code> as specified in <a href="#sec-version"></a></li>
@@ -292,7 +295,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
     <h3>License</h3>
     
     <p>
-      Any SMPTE JSON structure or SMPTE JSON Schema resource, whether provided within
+      Any <a>SMPTE JSON structure</a> or <a>SMPTE JSON Schema</a> resource, whether provided within
       the prose or as an Additional Element of an Engineering Document, shall be
       licensed according to <a href="#sec-json-document-license"></a>.
     </p>
@@ -304,9 +307,9 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   </section>
   
   <section id="sec-cc-license-schema-resources">
-    <h3>Copyright and License in SMPTE JSON Schema resources</h3>
+    <h3>Copyright and License in <a>SMPTE JSON Schema</a> resources</h3>
     
-    Any SMPTE JSON Schema resource shall include the copyright and license
+    Any <a>SMPTE JSON Schema</a> resource shall include the copyright and license
     provided in <a href="#sec-json-document-license"></a> in the form of the
     <code>$comment</code> element specified in <a href="#sec-license-element"></a>.
   </section>

@@ -131,6 +131,11 @@ dt {
   white-space: pre;
 }
 
+#sec-terms-and-definitions abbr {
+  margin-top: 1em;
+  font-weight: bold;
+}
+
 dd.abbr {
   margin-top: 0em;
   font-weight: bold;
@@ -266,6 +271,11 @@ figure {
 .ext-ref {
   word-break: keep-all;
   white-space: nowrap;
+}
+
+.dfn-ref {
+    text-decoration: underline blue dotted;
+    color: black;
 }
 
 /* code */
