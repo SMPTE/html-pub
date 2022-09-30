@@ -246,23 +246,13 @@ figure {
 
 /* references */
 
-#sec-bibliography ul {
+#sec-bibliography ul, #sec-normative-references ul {
   list-style-type: none;
   margin-top: 1rem;
   padding: 0;
 }
 
-#sec-bibliography li {
-  margin-top: 1rem;
-}
-
-#sec-normative-references ul {
-  list-style-type: none;
-  margin-top: 1rem;
-  padding: 0;
-}
-
-#sec-normative-references li {
+#sec-bibliography li, #sec-normative-references li {
   margin-top: 1rem;
 }
 
@@ -273,12 +263,7 @@ figure {
   white-space: nowrap;
 }
 
-#sec-normative-references .ext-ref::before {
-  white-space: pre;
-  content: '\A';
-}
-
-#sec-bibliography .ext-ref::before {
+#sec-normative-references .ext-ref::before, #sec-bibliography .ext-ref::before {
   white-space: pre;
   content: '\A';
 }

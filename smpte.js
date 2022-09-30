@@ -102,7 +102,7 @@ function insertFrontMatter(docMetadata) {
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = FRONT_MATTER_ID;
-  sec.innerHTML = `<div class="toc-ignore" id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
+  sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
     <img id="smpte-logo" src="${resolveScriptRelativePath("smpte-logo.png")}" />
     <div id="long-doc-type">${longDoctype}</div>
@@ -126,18 +126,14 @@ function insertTOC(docMetadata) {
       if (subSection.localName !== "section")
         continue;
 
-      if (!subSection.hasAttribute("id"))
+      const secId = subSection.getAttribute("id")
+
+      if (!secId || ['sec-front-matter', 'sec-toc'].includes(secId))
         continue;
 
       const heading = subSection.firstElementChild;
 
       if (!heading)
-        continue;
-
-      const headingNumber = subSection.querySelector(".heading-number");
-      const tocIgnore = subSection.querySelector(".toc-ignore")
-
-      if (!headingNumber && tocIgnore)
         continue;
 
       subSections.push(subSection);
@@ -179,7 +175,7 @@ function insertTOC(docMetadata) {
 
   const h2 = document.createElement("h2");
   h2.innerText = "Table of contents";
-  h2.className = "unnumbered toc-ignore";
+  toc.className = "unnumbered";
 
   toc.appendChild(h2);
 
@@ -242,7 +238,7 @@ function insertNormativeReferences(docMetadata) {
   h2.innerText = "Normative references";
 }
 
-function insertTermsanddefinitions(docMetadata) {
+function insertTermsAndDefinitions(docMetadata) {
   const sec = document.getElementById("sec-terms-and-definitions");
 
   if (sec === null)
@@ -259,10 +255,10 @@ function insertTermsanddefinitions(docMetadata) {
       p.innerHTML = `For the purposes of this document, the following terms and definitions apply:`
     } else if (extList !== null && defList === null) {
       let extList_text = extList.innerHTML
-      p.innerHTML = `For the purposes of this document, the terms and definitions given in ${extList_text} apply.`
+      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents apply:`
     } else if (extList !== null && defList !== null) {
       let extList_text = extList.innerHTML
-      p.innerHTML = `For the purposes of this document, the terms and definitions given in ${extList_text} and the following apply:`
+      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents and the additional terms and definitions apply:`
     }
 
   } else {
@@ -690,7 +686,7 @@ function render() {
   insertConformance(docMetadata);
   insertScope(docMetadata);
   insertNormativeReferences(docMetadata);
-  insertTermsanddefinitions(docMetadata);
+  insertTermsAndDefinitions(docMetadata);
   insertBibliography(docMetadata);
   numberSections(document.body, "");
   numberTables();
