@@ -141,7 +141,7 @@ function insertTOC(docMetadata) {
 
     if (subSections.length > 0) {
 
-      const tocItem = document.createElement("ul");
+      const tocItem = document.createElement("ol");
 
       for (const subSection of subSections) {
         let sectionRef = document.createElement("a");
