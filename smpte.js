@@ -126,17 +126,14 @@ function insertTOC(docMetadata) {
       if (subSection.localName !== "section")
         continue;
 
-      if (!subSection.hasAttribute("id"))
+      const secId = subSection.getAttribute("id")
+
+      if (!secId || ['sec-front-matter', 'sec-toc'].includes(secId))
         continue;
 
       const heading = subSection.firstElementChild;
 
       if (!heading)
-        continue;
-
-      const headingNumber = subSection.querySelector(".heading-number");
-
-      if (! headingNumber)
         continue;
 
       subSections.push(subSection);
@@ -156,7 +153,7 @@ function insertTOC(docMetadata) {
 
         tocItem.appendChild(sectionItem);
 
-        _processSubSections(sectionItem, subSection, level - 1);
+        _processSubSections(sectionItem, subSection, level - 3);
 
       }
 
@@ -178,11 +175,32 @@ function insertTOC(docMetadata) {
 
   const h2 = document.createElement("h2");
   h2.innerText = "Table of contents";
-  h2.className = "unnumbered";
+  toc.className = "unnumbered";
 
   toc.appendChild(h2);
 
   _processSubSections(toc, document.body, 1);
+}
+
+function insertScope(docMetadata) {
+  const sec = document.getElementById("sec-scope");
+
+  if (sec === null)
+    return;
+
+  let h2 = sec.getElementsByTagName("h2");
+
+  if (h2.length == 0) {
+    h2 = document.createElement("h2");
+    sec.insertBefore(h2, sec.firstChild);
+  } else if (h2.length == 1) {
+    h2 = h2[0];
+  } else {
+    logEvent("Scope section has multiple headings.");
+    return;
+  }
+
+  h2.innerText = "Scope";
 }
 
 function insertNormativeReferences(docMetadata) {
@@ -220,8 +238,54 @@ function insertNormativeReferences(docMetadata) {
   h2.innerText = "Normative references";
 }
 
+function insertTermsAndDefinitions(docMetadata) {
+  const sec = document.getElementById("sec-terms-and-definitions");
+
+  if (sec === null)
+    return;
+
+  const p = document.createElement("p");
+
+  if (sec.childElementCount !== 0) {
+    
+    let defList = document.getElementById("terms-int-defs")
+    let extList = document.getElementById("terms-ext-defs")
+
+    if (extList === null && defList !== null) {
+      p.innerHTML = `For the purposes of this document, the following terms and definitions apply:`
+    } else if (extList !== null && defList === null) {
+      let extList_text = extList.innerHTML
+      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents apply:`
+    } else if (extList !== null && defList !== null) {
+      let extList_text = extList.innerHTML
+      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents and the additional terms and definitions apply:`
+    }
+
+  } else {
+    console.log("neither exists")
+    p.innerHTML = `No terms and definitions are listed in this document.` 
+  }
+
+  sec.insertBefore(p, sec.firstChild);
+
+
+  let h2 = sec.getElementsByTagName("h2");
+
+  if (h2.length == 0) {
+    h2 = document.createElement("h2");
+    sec.insertBefore(h2, sec.firstChild);
+  } else if (h2.length == 1) {
+    h2 = h2[0];
+  } else {
+    logEvent("Terms and definitions section has multiple headings.");
+    return;
+  }
+
+  h2.innerText = "Terms and definitions";
+}
+
 function insertBibliography(docMetadata) {
-  const sec = document.getElementById("sec-bibliographic-references");
+  const sec = document.getElementById("sec-bibliography");
 
   if (sec === null)
     return;
@@ -312,6 +376,8 @@ function insertForeword(docMetadata) {
     return;
   }
 
+  sec.classList.add("unnumbered");
+
   custom_text = sec.innerHTML;
 
   if (docMetadata.pubType == "AG") {
@@ -384,7 +450,7 @@ function numberSections(element, curHeadingNumber) {
       numText += headingCounter.toString();
       headingCounter++;
       headingNum.innerText = numText;
-
+      
       headingLabel.appendChild(headingNum);
       headingLabel.appendChild(document.createTextNode(" "));
     }
@@ -560,6 +626,7 @@ function resolveLinks(docMetadata) {
           logEvent(`Unresolved link: ${term}`);
         } else {
           anchor.href = "#" + definitions.get(term).id;
+          anchor.classList.add("dfn-ref");
         }
 
       }
@@ -617,7 +684,9 @@ function render() {
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
   insertConformance(docMetadata);
+  insertScope(docMetadata);
   insertNormativeReferences(docMetadata);
+  insertTermsAndDefinitions(docMetadata);
   insertBibliography(docMetadata);
   numberSections(document.body, "");
   numberTables();

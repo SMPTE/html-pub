@@ -7,28 +7,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="../smpte.js"></script>
   <link rel="stylesheet" href="../smpte.css" />
+  <!-- Do not edit above this line -->
+  <!-- Start of editable section in header-->
+  <!-- Update only content attributes in each meta element below as needed -->
   <meta itemprop="pubType" content="AG" />
-  <meta itemprop="pubNumber" content="25" />
+  <meta itemprop="pubNumber" content="XX" />
   <meta itemprop="pubState" content="published" />
-  <meta itemprop="pubDateTime" content="2022-07-05" />
-  <title>Use of JSON in Engineering Documents</title>
+  <meta itemprop="pubDateTime" content="20XX-XX-XX" />
+  <!-- update text for title element as needed -->
+  <title>HTML Template</title>
+  <!-- End of editable section in header-->
 </head>
 
 <body>
 
-  <section id="sec-foreword" class="unnumbered"></section>
+  <!-- Start of TOC - Do not remove or add anything in this section, generation is automated -->
+  <section id="sec-toc"></section>
+  <!-- End of TOC -->
 
-  <section id="sec-toc" class="unnumbered"></section>
+  <!-- Start of Forward - Do not remove or add anything in this section, generation is automated -->
+  <section id="sec-foreword"></section>
+  <!-- End of Forward -->
 
+  <!-- Start of Scope - Do not remove this section -->
   <section id="sec-scope">
-    <h2>Scope</h2>
-    <p>This Administrative Guideline specifies selected uses of the JavaScript Object Notation (JSON) in SMPTE
-      Engineering Documents.</p>
+    <!-- Add paragraphs in this section as needed for scope -->
+    <p>This Administrative Guideline specifies selected uses of the JavaScript Object Notation (JSON) in SMPTE Engineering Documents.</p>
+
   </section>
+  <!-- End of Scope -->
 
+  <!-- Start of Conformance - Do not remove or add anything in this section, generation is automated -->
   <section id="sec-conformance"></section>
+  <!-- End of Conformance -->
 
+  <!-- Start of Normative references - Do not remove this section -->
   <section id="sec-normative-references">
+
+    <!-- Add `li` sub elements as needed in this section as needed for references. If no Normative references, remove the entire `ul` element. Pre text for this section is auto generated based on `ul` present or not. -->
     <ul>
       <li><cite id="bib-ietf-rfc-3986">IETF RFC 3986</cite>, Uniform Resource
       Identifiers (URI): Generic Syntax, T. Berners-Lee, et al., January 2005. <a>http://www.ietf.org/rfc/rfc3986.txt</a></li>
@@ -39,6 +55,45 @@
       <li><cite id="bib-ietf-rfc-8259">IETF RFC 8259</cite>, The JavaScript
       Object Notation (JSON) Data Interchange Format, T. Bray, <a>http://www.ietf.org/rfc/rfc8259.txt</a></li>
     </ul>
+
+  </section>
+  <!-- End of Normative references -->
+
+  <!-- Start of Terms and definitions - Do not remove this section -->
+  <section id="sec-terms-and-definitions">
+
+    <!-- Use the `ul` element to list external documents where Terms are defined (use same logic as referenced docs in the body of the document as example shows). Add `dt/dd` sub element pairs as needed for Terms to be defined internally in this document. Remove either the `ul` if no external Terms, or `dl` if no internally defined Terms. If no Terms needed to be defined at all, remove the both `ul` and `dl` elements. Pre text for this section is auto generated based on what elements are present. -->
+
+    <ul id="terms-ext-defs" itemscope="http://smpte.org/standards/external-definitions">
+      <li><a itemprop="external" href="#bib-ietf-rfc-8259"></a></li>
+      <li><a itemprop="external" href="#bib-ietf-rfc-7405"></a></li>
+    </ul>
+
+    <dl id="terms-int-defs">
+      <dt><dfn>Group</dfn></dt>
+      <dd>is the group that authored the document (e.g., TC name, “31FS”)
+      </dd>
+      <dt><dfn>Spreadsheet</dfn></dt>
+      <dd><abbr title="Spreadsheet">.xlsx</abbr></dd>
+      <dd>The project <a>Group</a> shall decide which spreadsheet format (.xls or .xlsx) to use for each project. The preferred format is .xlsx.
+      </dd>
+    </dl>
+  </section>
+  <!-- End of Terms and definitions -->
+
+  <!-- Start of editable area. Add sections as needed, following the examples below. `id` attribue is required for each section (and subsection) for linking into TOC. Headers are required for labeling each section. Use `h2` element for top level, and `h3`, `h4`, etc. for nested sub sections as needed. For Annexes, add `class="annex"` to the top level section element, as example shows. Numbering is auto generated, including nesting. --> 
+
+  <section id="sec-details">
+    <h2>Details</h2>
+    <p>This section show how to use <code>&lt;dl&gt;</code> normally in sections that are not <code>id="sec-terms-and-definitions"</code>.</p>
+    <dl>
+      <dt>Chair</dt>
+      <dd>Just the name of the person who will be the main contact for the project. No email address – it will be on a public website. Usually the first listed proponent.
+      </dd>
+      <dt>Description</dt>
+      <dd>A short description of the project’s purpose and objectives. This text is aimed at the public who will read it and thus should be able to understand the Project in general terms. There may be extra requirements for this field for the Public CD Process
+      </dd>
+    </dl>
   </section>
 
   <section id="sec-smpte-json-structures">
@@ -63,8 +118,8 @@
         the Engineering Document.
       </p>
       <p>
-        Each SMPTE JSON structure should be informatively specified by a JSON Schema
-        resource, which may be a SMPTE JSON Schema resource (see section 5), using
+        Each <a>SMPTE JSON structure</a> should be informatively specified by a JSON Schema
+        resource, which may be a <a>SMPTE JSON Schema</a> resource (see <a href="#sec-smpte-json-schema-resources"></a>), using
         the JSON Schema language as specified in <a href="#bib-draft-bhutton-json-schema-00"></a>.
       </p>
     </section>
@@ -72,7 +127,7 @@
   </section>
 
 <section id="sec-smpte-json-schema-resources">
-  <h2>SMPTE JSON Schema resources</h2>
+  <h2><dfn>SMPTE JSON Schema</dfn> resources</h2>
   
   <section id="sec-introduction">
     <h3>Introduction (informative)</h3>
@@ -94,7 +149,7 @@
     <section id="sec-id-keyword">
       <h4><code>$id</code> Keyword</h4>
       
-      <p>A SMPTE JSON Schema resource shall use the <code>$id</code> keyword in the root schema
+      <p>A <a>SMPTE JSON Schema</a> resource shall use the <code>$id</code> keyword in the root schema
       object, thereby providing the canonical URI for the JSON root schema.</p>
     </section>
     
@@ -125,15 +180,15 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       JSON Schema remain unchanged.</p>
       
       <p class="note">
-        No changes to SMPTE JSON Schema canonical URI are necessary following a Draft
-        Publication ballot since SMPTE JSON Schema canonical URI are constructed
+        No changes to <a>SMPTE JSON Schema</a> canonical URI are necessary following a Draft
+        Publication ballot since <a>SMPTE JSON Schema</a> canonical URI are constructed
         independently of the publication date of the Engineering Document.
       </p>
     </section>
     
     <section id="sec-examples">
       <h4>Examples (informative)</h4>
-      The following is an example SMPTE JSON Schema resource canonical URI:
+      The following is an example <a>SMPTE JSON Schema</a> resource canonical URI:
       
       <pre>https://www.smpte-ra.org/json-schema/456/2021/foo</pre>
       
@@ -160,7 +215,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       <h4>Registration (informative)</h4>
       
       <p>
-        The SMPTE JSON Schema resource canonical URI syntax ensures uniqueness across
+        The <a>SMPTE JSON Schema</a> resource canonical URI syntax ensures uniqueness across
         Engineering Documents, and thus no specific registration steps are required.
       </p>
 
@@ -175,14 +230,14 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   </section>
   
   <section id="sec-using-a-smpte-json-schema-resource">
-    <h3>Using a SMPTE JSON Schema Resource</h3>
+    <h3>Using a <a>SMPTE JSON Schema</a> Resource</h3>
     
-    <p>A SMPTE JSON Schema resource can be used informatively by an Engineering
+    <p>A <a>SMPTE JSON Schema</a> resource can be used informatively by an Engineering
     Document, either by inclusion or by reference.</p>
     
     <p class="note">The current specification of JSON Schema, though well-supported, is not a
     normatively referenceable document per the Standards Operations Manual (section
-    10 Normative References) and AG-03. Thus, provision of SMPTE JSON Schema
+    10 Normative References) and AG-03. Thus, provision of <a>SMPTE JSON Schema</a>
     resources, at this time, is strictly informative.</p>
   </section>
     
@@ -190,13 +245,13 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
     <h3>Version</h3>
     
     <p>
-      Whenever a SMPTE JSON Schema resource is provided, the Engineering Document
+      Whenever a <a>SMPTE JSON Schema</a> resource is provided, the Engineering Document
       shall provide an informative reference to the JSON Schema language specification
       to which it conforms (e.g., JSON Schema, as shown in the Bibliography).
     </p>
     
     <p>
-      A SMPTE JSON Schema resource shall use the <code>$schema</code> keyword in the root schema
+      A <a>SMPTE JSON Schema</a> resource shall use the <code>$schema</code> keyword in the root schema
       object.
     </p>
     
@@ -209,12 +264,10 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
     <p class="note">
       JSON Schema resources can comprise subschemas, where portions of a root
       schema document are separately identifiable by a URI-reference that are not
-      absolute and/or contain non-empty fragments.  For example,
-      <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items/definitions/rationalType</code>
-      is a reference to a subschema within the SMPTE JSON Schema resource
-      <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items</code>
-      where the subschema represents the constraints for a JSON structure
-      representing a rational value.
+      absolute and/or contain non-empty fragments. </p>
+      
+    <p class="example">
+      <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items/definitions/rationalType</code> is a reference to a subschema within the <a>SMPTE JSON Schema</a> resource <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items</code> where the subschema represents the constraints for a JSON structure representing a rational value.
     </p>
     
   </section>
@@ -222,7 +275,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   <section id="sec-keyword-order">
     <h3>Keyword Order</h3>
     
-    <p>The following keywords should appear as the first keywords in any SMPTE JSON Schema resource in this order:</p>
+    <p>The following keywords should appear as the first keywords in any <a>SMPTE JSON Schema</a> resource in this order:</p>
     
     <ul>
       <li><code>$schema,</code> as specified in <a href="#sec-version"></a></li>
@@ -241,7 +294,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
     <h3>License</h3>
     
     <p>
-      Any SMPTE JSON structure or SMPTE JSON Schema resource, whether provided within
+      Any <a>SMPTE JSON structure</a> or <a>SMPTE JSON Schema</a> resource, whether provided within
       the prose or as an Additional Element of an Engineering Document, shall be
       licensed according to <a href="#sec-json-document-license"></a>.
     </p>
@@ -253,9 +306,9 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   </section>
   
   <section id="sec-cc-license-schema-resources">
-    <h3>Copyright and License in SMPTE JSON Schema resources</h3>
+    <h3>Copyright and License in <a>SMPTE JSON Schema</a> resources</h3>
     
-    Any SMPTE JSON Schema resource shall include the copyright and license
+    Any <a>SMPTE JSON Schema</a> resource shall include the copyright and license
     provided in <a href="#sec-json-document-license"></a> in the form of the
     <code>$comment</code> element specified in <a href="#sec-license-element"></a>.
   </section>
@@ -316,17 +369,19 @@ are permitted provided that the following conditions are met:
   </section>
 </section>
 
-<section id="sec-bibliographic-references">
+<!-- End of editable sections -->
+
+<!-- Start of Bibliography - Do not remove this section -->
+<section id="sec-bibliography">
+  <!-- Add `li` sub elements as needed in this section as needed for references. If no Bibliographic references, remove the entire `ul` element. Pre text for this section is auto generated based on `ul` present or not. -->
   <ul>
-    <li><cite id="bib-draft-bhutton-json-schema-00">IETF
-    draft-bhutton-json-schema-00</cite>, Wright, A., H. Andrews; B. Hutton, G.
-    Dennis, "JSON Schema: A Media Type for Describing JSON Documents", Work in
-    Progress, December 8, 2020.
-    <a>https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00</a>
-    </li>
+    <li><cite id="bib-draft-bhutton-json-schema-00">IETF draft-bhutton-json-schema-00</cite>, Wright, A., H. Andrews; B. Hutton, G. Dennis, "JSON Schema: A Media Type for Describing JSON Documents", Work in Progress, December 8, 2020.
+    <a>https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00</a></li>
   </ul>
+
 </section>
+<!-- End of Normative references -->
 
+<!-- Do not edit below this line -->
 </body>
-
 </html>

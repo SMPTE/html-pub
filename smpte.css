@@ -46,7 +46,7 @@ h1 {
   font-style: italic;
 }
 
-#sec-front-matter #smpte-logo {
+#smpte-logo {
   float: right;
   width: 250px;
   margin: 1rem;
@@ -117,18 +117,28 @@ section.annex > h2 span.label {
 
 /* terms and definitions */
 
-#sec-terms dd {
+#sec-terms-and-definitions dd {
   margin-left: 0;
 }
 
-#sec-terms dt {
+dt {
   margin-top: 1em;
   font-weight: bold;
 }
 
-#sec-terms dt .label::after {
+#sec-terms-and-definitions dt .label::after {
   content: "\A";
   white-space: pre;
+}
+
+#sec-terms-and-definitions abbr {
+  margin-top: 1em;
+  font-weight: bold;
+}
+
+dd.abbr {
+  margin-top: 0em;
+  font-weight: bold;
 }
 
 /* note */
@@ -143,14 +153,27 @@ section.annex > h2 span.label {
   counter-increment: notes-counter;
 }
 
+/* example */
+
+.example {
+  font-size: 0.9rem;
+}
+
+.example:before {
+  content: "EXAMPLE: ";
+}
+
 /* table of contents */
 
 section#sec-toc ol {
   list-style-type: none;
-  padding: 0;
+  padding-inline-start: 2ch;
   margin: 0.25rem 0 0.25rem 0;
 }
 
+section#sec-toc li {
+
+}
 
 section#sec-toc span.heading-number {
   display: inline-block;
@@ -223,22 +246,13 @@ figure {
 
 /* references */
 
-#sec-bibliographic-references ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-#sec-bibliographic-references li {
-  margin-top: 1rem;
-}
-
-#sec-normative-references ul {
+#sec-bibliography ul, #sec-normative-references ul {
   list-style-type: none;
   margin-top: 1rem;
   padding: 0;
 }
 
-#sec-normative-references li {
+#sec-bibliography li, #sec-normative-references li {
   margin-top: 1rem;
 }
 
@@ -247,6 +261,16 @@ figure {
 .ext-ref {
   word-break: keep-all;
   white-space: nowrap;
+}
+
+#sec-normative-references .ext-ref::before, #sec-bibliography .ext-ref::before {
+  white-space: pre;
+  content: '\A';
+}
+
+.dfn-ref {
+    text-decoration: underline blue dotted;
+    color: black;
 }
 
 /* code */
