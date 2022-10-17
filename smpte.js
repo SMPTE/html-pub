@@ -290,15 +290,11 @@ function insertBibliography(docMetadata) {
   if (sec === null)
     return;
 
-  sec.classList.add("unnumbered");
-
-  const p = document.createElement("p");
-
   if (sec.childElementCount === 0) {
-    p.innerHTML = `There are no bibliographic references in this document.`
-  } 
-  
-  sec.insertBefore(p, sec.firstChild);
+    logEvent(`No informational references listed, Bibliography section must be removed`)
+  }
+
+  sec.classList.add("unnumbered");
 
   let h2 = sec.getElementsByTagName("h2");
 
