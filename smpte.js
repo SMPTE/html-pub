@@ -292,6 +292,14 @@ function insertBibliography(docMetadata) {
 
   sec.classList.add("unnumbered");
 
+  const p = document.createElement("p");
+
+  if (sec.childElementCount === 0) {
+    p.innerHTML = `There are no bibliographic references in this document.`
+  } 
+  
+  sec.insertBefore(p, sec.firstChild);
+
   let h2 = sec.getElementsByTagName("h2");
 
   if (h2.length == 0) {
