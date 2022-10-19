@@ -92,6 +92,12 @@ function insertFrontMatter(docMetadata) {
 
   const longDoctype = { "AG": "Administrative Guideline" }[docMetadata.pubType];
 
+  if (docMetadata.pubState == "draft") {
+    waterMark = `<div class="watermark">DRAFT</div>`
+  } else {
+    waterMark = ""
+  }
+
   const actualPubDateTime = (() => {
     if (docMetadata.pubDateTime === null)
       return new Date();
@@ -108,6 +114,7 @@ function insertFrontMatter(docMetadata) {
     <div id="long-doc-type">${longDoctype}</div>
     <h1>${docMetadata.pubTitle}</h1>
     <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>
+    ${waterMark}
   <hr />
   </section>`;
 
