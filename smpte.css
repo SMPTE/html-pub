@@ -294,12 +294,3 @@ pre {
 code {
   font-family: Consolas, Monaco, monospace;
 }
-
-/* watermarking for "draft" pubState */
-
-.watermark {
-  position:fixed;
-  color: rgba(0, 0, 0, 0.1);
-  font-size:15rem;
-  transform:rotate(-45deg);
-}

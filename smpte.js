@@ -93,7 +93,13 @@ function insertFrontMatter(docMetadata) {
   const longDoctype = { "AG": "Administrative Guideline" }[docMetadata.pubType];
 
   if (docMetadata.pubState == "draft") {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = resolveScriptRelativePath("smpte-pubState-draft.css");
+    document.getElementsByTagName('head')[0].appendChild(link);
+
     waterMark = `<div class="watermark">DRAFT</div>`
+
   } else {
     waterMark = ""
   }
