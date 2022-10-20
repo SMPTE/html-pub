@@ -182,11 +182,36 @@ function insertTOC(docMetadata) {
   _processSubSections(toc, document.body, 1);
 }
 
-function insertScope(docMetadata) {
-  const sec = document.getElementById("sec-scope");
+function insertIntroduction(docMetadata) {
+  const sec = document.getElementById("sec-introduction");
 
   if (sec === null)
     return;
+
+  sec.className = "unnumbered";
+
+  let h2 = sec.getElementsByTagName("h2");
+
+  if (h2.length == 0) {
+    h2 = document.createElement("h2");
+    sec.insertBefore(h2, sec.firstChild);
+  } else if (h2.length == 1) {
+    h2 = h2[0];
+  } else {
+    logEvent("Introduction section has multiple headings.");
+    return;
+  }
+
+  h2.innerText = "Introduction";
+}
+
+function insertScope(docMetadata) {
+  const sec = document.getElementById("sec-scope");
+
+  if (sec === null) {
+    logEvent("Missing required `scope` section.");
+    return;
+  }
 
   let h2 = sec.getElementsByTagName("h2");
 
@@ -206,8 +231,10 @@ function insertScope(docMetadata) {
 function insertNormativeReferences(docMetadata) {
   const sec = document.getElementById("sec-normative-references");
 
-  if (sec === null)
+  if (sec === null) {
+    logEvent("Missing required `normative references` section.");
     return;
+  }
 
   const p = document.createElement("p");
 
@@ -241,8 +268,10 @@ function insertNormativeReferences(docMetadata) {
 function insertTermsAndDefinitions(docMetadata) {
   const sec = document.getElementById("sec-terms-and-definitions");
 
-  if (sec === null)
+  if (sec === null) {
+    logEvent("Missing required `terms and definitions` section.");
     return;
+  }
 
   const p = document.createElement("p");
 
@@ -688,6 +717,7 @@ function render() {
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
   insertConformance(docMetadata);
+  insertIntroduction(docMetadata);
   insertScope(docMetadata);
   insertNormativeReferences(docMetadata);
   insertTermsAndDefinitions(docMetadata);
