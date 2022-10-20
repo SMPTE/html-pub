@@ -95,13 +95,8 @@ function insertFrontMatter(docMetadata) {
   if (docMetadata.pubState == "draft") {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = resolveScriptRelativePath("smpte-pubState-draft.css");
+    link.href = resolveScriptRelativePath("smpte-draft.css");
     document.getElementsByTagName('head')[0].appendChild(link);
-
-    waterMark = `<div class="watermark">DRAFT</div>`
-
-  } else {
-    waterMark = ""
   }
 
   const actualPubDateTime = (() => {
@@ -120,7 +115,6 @@ function insertFrontMatter(docMetadata) {
     <div id="long-doc-type">${longDoctype}</div>
     <h1>${docMetadata.pubTitle}</h1>
     <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>
-    ${waterMark}
   <hr />
   </section>`;
 
