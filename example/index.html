@@ -88,23 +88,12 @@
 
   <!-- Start of editable area. Add sections as needed, following the examples below. `id` attribue is required for each section (and subsection) for linking into TOC. Headers are required for labeling each section. Use `h2` element for top level, and `h3`, `h4`, etc. for nested sub sections as needed. For Annexes, add `class="annex"` to the top level section element, as example shows. Numbering is auto generated, including nesting. --> 
 
-  <section id="sec-details">
-    <h2>Details</h2>
-    <p>This section show how to use <code>&lt;dl&gt;</code> normally in sections that are not <code>id="sec-terms-and-definitions"</code>.</p>
-    <dl>
-      <dt>Chair</dt>
-      <dd>Just the name of the person who will be the main contact for the project. No email address – it will be on a public website. Usually the first listed proponent.
-      </dd>
-      <dt>Description</dt>
-      <dd>A short description of the project’s purpose and objectives. This text is aimed at the public who will read it and thus should be able to understand the Project in general terms. There may be extra requirements for this field for the Public CD Process
-      </dd>
-    </dl>
-  </section>
-
   <section id="sec-smpte-json-structures">
     <h2>SMPTE JSON structures</h2>
+
     <section id="sec-overview">
       <h3>Overview (informative)</h3> 
+
       The JSON Schema resource applicable to a JSON structure can specify constraints to which the structure is expected to conform.
     </section>
     
@@ -130,40 +119,106 @@
     
   </section>
 
-<section id="sec-smpte-json-schema-resources">
-  <h2><dfn>SMPTE JSON Schema</dfn> resources</h2>
-  
-  <section id="sec-introduction">
-    <h3>Introduction (informative)</h3>
-    
-    <p>Using the formal language of JSON Schema, descriptions of conformance
-    requirements for JSON structures can avoid some of the ambiguity inherent with
-    using English prose alone, while allowing the use of existing commercial tools
-    to facilitate testing and validation. It can also represent a significant
-    convenience to implementers, for example by supporting the ability to
-    automatically validate structures.</p>
-    
-    <p>Sample relative link to a <a href="sample.png">picture</a>.</p>
+  <section id="sec-smpte-json-schema-resources">
+    <h2><dfn>SMPTE JSON Schema</dfn> resources</h2>
 
-  </section>
-  
-  <section id="sec-canonical-uri">
-    <h3>Canonical URI</h3>
+    <p>
+      <a href="#table-preferred-ul"></a> shows how a table and explanation of the items in a table works.
+    </p>
+
+    <table id="table-preferred-ul">
+      <caption>Example <em>Preferred</em> Table 2 updated from SMPTE ST 2094-2 – Group Node and Set Key for DMCVT Sets</caption>
+      <thead>
+        <tr>
+          <th>Item Name</th>
+          <th>Symbol</th>
+          <th>Kind</th>
+          <th>Item UL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Color Transform Sets</td>
+          <td>ColorTransformSets</td>
+          <td>NODE</td>
+          <td>urn:smpte:ul:060e2b34.027F0101.05310000.00000000</td>
+        </tr>
+        <tr>
+          <td>DMCVT Generic Sets</td>
+          <td>DMCVTGenericSets</td>
+          <td>NODE</td>
+          <td>urn:smpte:ul:060e2b34.027F0101.05310100.00000000</td>
+        </tr>
+        <tr>
+          <td>DMCVT Generic Set 1</td>
+          <td>DMCVTGenericSet1</td>
+          <td>LEAF</td>
+          <td>urn:smpte:ul:060e2b34.027F0101.05310101.00000000</td>
+        </tr>
+        <tr>
+          <td>DMCVT Application Sets</td>
+          <td>DMCVTApplicationSets</td>
+          <td>NODE</td>
+          <td>urn:smpte:ul:060e2b34.027F0101.05310200.00000000</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+    <dl>
+      <dt>Item Name</dt>
+      <dd>
+        [optional in MXF documents] value of the <code>&lt;Name&gt;</code> element in the corresponding register for the UL. The case of the characters, whitespace and spellings shall be identical to the register.
+      </dd>
+      <dt>Symbol</dt>
+      <dd>
+        [required in MXF documents] value of the <code>&lt;Symbol&gt;</code> element in the corresponding register for the UL. The case of the characters and spellings shall be identical to the register.
+      </dd>
+      <dt>Kind</dt>
+      <dd>
+        value of the <code>&lt;Kind&gt;</code> element in the corresponding register for the UL
+      </dd>
+      <dt>Item UL</dt>
+      <dd>
+        value of the <code>&lt;UL&gt;</code> element in the corresponding register for the UL using the correct encoding style for the label
+      </dd>
+      <dt>Table title</dt>
+      <dd>
+        use of the word <code>Label</code> or <code>Element</code> or <code>Type</code> or <code>Group</code> is encouraged to help novice readers locate the register in which the UL can be found
+      </dd>
+    </dl>
     
-    <section id="sec-id-keyword">
-      <h4><code>$id</code> Keyword</h4>
+    <section id="sec-introduction">
+      <h3>Introduction (informative)</h3>
       
-      <p>A <a>SMPTE JSON Schema</a> resource shall use the <code>$id</code> keyword in the root schema
-      object, thereby providing the canonical URI for the JSON root schema.</p>
+      <p>Using the formal language of JSON Schema, descriptions of conformance
+      requirements for JSON structures can avoid some of the ambiguity inherent with
+      using English prose alone, while allowing the use of existing commercial tools
+      to facilitate testing and validation. It can also represent a significant
+      convenience to implementers, for example by supporting the ability to
+      automatically validate structures.</p>
+      
+      <p>Sample relative link to a <a href="sample.png">picture</a>.</p>
+
     </section>
     
-    <section id="sec-canonical-uri-syntax">
-      <h4>Canonical URI Syntax</h4>
+    <section id="sec-canonical-uri">
+      <h3>Canonical URI</h3>
       
-      The canonical URI shall conform to the <code>SCHEMAID</code> syntax below,
-      specified using <a href="#bib-ietf-rfc-5234"></a> and <a
-      href="#bib-ietf-rfc-7405"></a> and conforming to <a
-      href="#bib-ietf-rfc-3986"></a>.
+      <section id="sec-id-keyword">
+        <h4><code>$id</code> Keyword</h4>
+        
+        <p>A <a>SMPTE JSON Schema</a> resource shall use the <code>$id</code> keyword in the root schema
+        object, thereby providing the canonical URI for the JSON root schema.</p>
+      </section>
+      
+      <section id="sec-canonical-uri-syntax">
+        <h4>Canonical URI Syntax</h4>
+        
+        The canonical URI shall conform to the <code>SCHEMAID</code> syntax below,
+        specified using <a href="#bib-ietf-rfc-5234"></a> and <a
+        href="#bib-ietf-rfc-7405"></a> and conforming to <a
+        href="#bib-ietf-rfc-3986"></a>.
       
 <pre>
 SCHEMAID = %s"https://www.smpte-ra.org/json-schema/" PUBNUM "/" REVISION [ "/" SHORTNAME]
@@ -190,170 +245,174 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       </p>
     </section>
     
-    <section id="sec-examples">
-      <h4>Examples (informative)</h4>
-      The following is an example <a>SMPTE JSON Schema</a> resource canonical URI:
-      
-      <pre>https://www.smpte-ra.org/json-schema/456/2021/foo</pre>
-      
-      <p><a href="#table-examples"></a> lists examples.</p>
+      <section id="sec-examples">
+        <h4>Examples (informative)</h4>
+        The following is an example <a>SMPTE JSON Schema</a> resource canonical URI:
+        
+        <pre>https://www.smpte-ra.org/json-schema/456/2021/foo</pre>
+        
+        <p><a href="#table-examples"></a> lists examples.</p>
 
-      <table id="table-examples">
-        <caption>Examples</caption>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>URI</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Hello</td>
-            <td>https://www.smpte-ra.org/json-schema/456/2021/foo</td>
-          </tr>
-        </tbody>
-      </table>
+        <table id="table-examples">
+          <caption>Examples</caption>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>URI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Hello</td>
+              <td>https://www.smpte-ra.org/json-schema/456/2021/foo</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      
+      <section id="sec-registration">
+        <h4>Registration (informative)</h4>
+        
+        <p>
+          The <a>SMPTE JSON Schema</a> resource canonical URI syntax ensures uniqueness across
+          Engineering Documents, and thus no specific registration steps are required.
+        </p>
+
+        <p><a href="#figure-process-flowchart"></a> shows an example of the process.</p>
+
+        <figure id="figure-process-flowchart">
+          <figcaption>Example of the Process</figcaption>
+          <img class="figure" src="sample.png">
+        </figure>
+        
+      </section>
     </section>
-    
-    <section id="sec-registration">
-      <h4>Registration (informative)</h4>
+  
+    <section id="sec-using-a-smpte-json-schema-resource">
+      <h3>Using a <a>SMPTE JSON Schema</a> Resource</h3>
+      
+      <p>A <a>SMPTE JSON Schema</a> resource can be used informatively by an Engineering
+      Document, either by inclusion or by reference.</p>
+      
+      <p class="note">The current specification of JSON Schema, though well-supported, is not a
+      normatively referenceable document per the Standards Operations Manual (section
+      10 Normative References) and AG-03. Thus, provision of <a>SMPTE JSON Schema</a>
+      resources, at this time, is strictly informative.</p>
+    </section>
+      
+    <section id="sec-version">
+      <h3>Version</h3>
       
       <p>
-        The <a>SMPTE JSON Schema</a> resource canonical URI syntax ensures uniqueness across
-        Engineering Documents, and thus no specific registration steps are required.
+        Whenever a <a>SMPTE JSON Schema</a> resource is provided, the Engineering Document
+        shall provide an informative reference to the JSON Schema language specification
+        to which it conforms (e.g., JSON Schema, as shown in the Bibliography).
       </p>
-
-      <p><a href="#figure-process-flowchart"></a> shows an example of the process.</p>
-
-      <figure id="figure-process-flowchart">
-        <figcaption>Example of the Process</figcaption>
-        <img class="figure" src="sample.png">
-      </figure>
+      
+      <p>
+        A <a>SMPTE JSON Schema</a> resource shall use the <code>$schema</code> keyword in the root schema
+        object.
+      </p>
+      
+      <p class="note">
+        the <code>$schema</code> keyword is both used as JSON Schema dialect identifier and
+        as the identifier of a resource which is itself a JSON Schema resource to
+        evaluate conformance to that dialect.
+      </p>
+      
+      <p class="note">
+        JSON Schema resources can comprise subschemas, where portions of a root
+        schema document are separately identifiable by a URI-reference that are not
+        absolute and/or contain non-empty fragments. </p>
+        
+      <p class="example">
+        <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items/definitions/rationalType</code> is a reference to a subschema within the <a>SMPTE JSON Schema</a> resource <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items</code> where the subschema represents the constraints for a JSON structure representing a rational value.
+      </p>
       
     </section>
-  </section>
-  
-  <section id="sec-using-a-smpte-json-schema-resource">
-    <h3>Using a <a>SMPTE JSON Schema</a> Resource</h3>
     
-    <p>A <a>SMPTE JSON Schema</a> resource can be used informatively by an Engineering
-    Document, either by inclusion or by reference.</p>
-    
-    <p class="note">The current specification of JSON Schema, though well-supported, is not a
-    normatively referenceable document per the Standards Operations Manual (section
-    10 Normative References) and AG-03. Thus, provision of <a>SMPTE JSON Schema</a>
-    resources, at this time, is strictly informative.</p>
-  </section>
-    
-  <section id="sec-version">
-    <h3>Version</h3>
-    
-    <p>
-      Whenever a <a>SMPTE JSON Schema</a> resource is provided, the Engineering Document
-      shall provide an informative reference to the JSON Schema language specification
-      to which it conforms (e.g., JSON Schema, as shown in the Bibliography).
-    </p>
-    
-    <p>
-      A <a>SMPTE JSON Schema</a> resource shall use the <code>$schema</code> keyword in the root schema
-      object.
-    </p>
-    
-    <p class="note">
-      the <code>$schema</code> keyword is both used as JSON Schema dialect identifier and
-      as the identifier of a resource which is itself a JSON Schema resource to
-      evaluate conformance to that dialect.
-    </p>
-    
-    <p class="note">
-      JSON Schema resources can comprise subschemas, where portions of a root
-      schema document are separately identifiable by a URI-reference that are not
-      absolute and/or contain non-empty fragments. </p>
+    <section id="sec-keyword-order">
+      <h3>Keyword Order</h3>
       
-    <p class="example">
-      <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items/definitions/rationalType</code> is a reference to a subschema within the <a>SMPTE JSON Schema</a> resource <code>https://smpte-ra.org/schemas/2120-2/2021/smpte-tlx-items</code> where the subschema represents the constraints for a JSON structure representing a rational value.
-    </p>
-    
-  </section>
-  
-  <section id="sec-keyword-order">
-    <h3>Keyword Order</h3>
-    
-    <p>The following keywords should appear as the first keywords in any <a>SMPTE JSON Schema</a> resource in this order:</p>
-    
-    <ul>
-      <li><code>$schema,</code> as specified in <a href="#sec-version"></a></li>
-      <li><code>$id,</code> as specified in <a href="#sec-id-keyword"></a>; and,</li>
-      <li><code>$comment,</code> as specified in <a
-      href="#sec-cc-license-schema-resources"></a>.</li>
-    </ul>
+      <p>The following keywords should appear as the first keywords in any <a>SMPTE JSON Schema</a> resource in this order:</p>
+      
+      <ul>
+        <li><code>$schema,</code> as specified in <a href="#sec-version"></a></li>
+        <li><code>$id,</code> as specified in <a href="#sec-id-keyword"></a>; and,</li>
+        <li><code>$comment,</code> as specified in <a
+        href="#sec-cc-license-schema-resources"></a>.</li>
+      </ul>
 
+    </section>
   </section>
-</section>
 
-<section id="sec-copyright-and-license">
-  <h2>Copyright and License</h2>
-  
-  <section id="sec-license">
-    <h3>License</h3>
+  <section id="sec-copyright-and-license">
+    <h2>Copyright and License</h2>
     
-    <p>
-      Any <a>SMPTE JSON structure</a> or <a>SMPTE JSON Schema</a> resource, whether provided within
-      the prose or as an Additional Element of an Engineering Document, shall be
-      licensed according to <a href="#sec-json-document-license"></a>.
-    </p>
+    <section id="sec-license">
+      <h3>License</h3>
+      
+      <p>
+        Any <a>SMPTE JSON structure</a> or <a>SMPTE JSON Schema</a> resource, whether provided within
+        the prose or as an Additional Element of an Engineering Document, shall be
+        licensed according to <a href="#sec-json-document-license"></a>.
+      </p>
+      
+      <p class="note">
+        The license portion of Annex A is verbatim the BSD-3-Clause license
+        available at <a>https://spdx.org/licenses/BSD-3-Clause.html</a>.
+      </p>
+    </section>
     
-    <p class="note">
-      The license portion of Annex A is verbatim the BSD-3-Clause license
-      available at <a>https://spdx.org/licenses/BSD-3-Clause.html</a>.
-    </p>
+    <section id="sec-cc-license-schema-resources">
+      <h3>Copyright and License in <a>SMPTE JSON Schema</a> resources</h3>
+      
+      Any <a>SMPTE JSON Schema</a> resource shall include the copyright and license
+      provided in <a href="#sec-json-document-license"></a> in the form of the
+      <code>$comment</code> element specified in <a href="#sec-license-element"></a>.
+    </section>
   </section>
-  
-  <section id="sec-cc-license-schema-resources">
-    <h3>Copyright and License in <a>SMPTE JSON Schema</a> resources</h3>
-    
-    Any <a>SMPTE JSON Schema</a> resource shall include the copyright and license
-    provided in <a href="#sec-json-document-license"></a> in the form of the
-    <code>$comment</code> element specified in <a href="#sec-license-element"></a>.
-  </section>
-</section>
 
-<section class="annex" id="sec-json-document-license">
-  <h2>JSON Document License</h2>
+  <section class="annex" id="sec-json-document-license">
+    <h2>JSON Document License</h2>
 
-  <section id="sec-copyright-element">
-    <h3>Copyright Element</h3>
+    <section id="sec-copyright-element">
+      <h3>Copyright Element</h3>
+
 <pre>
+
 Copyright (c), Society of Motion Pictures and Television Engineers. 
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met: 
 </pre>
-<p><a href="#table-copyright-forms"></a> lists copyright forms.</p>
-<table id="table-copyright-forms">
-  <caption>Copyright Forms</caption>
-  <thead>
-    <tr>
-      <th>Name</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>(c)</td>
-    </tr>
-    <tr>
-      <td>©</td>
-    </tr>
-  </tbody>
-</table>
-  </section>
 
-  <section id="sec-license-element">
-    <h3>License Element</h3>
 
-  <p>The following example JSON Schema incorporates the above element in
-  accordance with <a href="#sec-cc-license-schema-resources"></a>, with the initial
-  keyword order recommended in <a href="#sec-keyword-order"></a>.</p>
+      <p><a href="#table-copyright-forms"></a> lists copyright forms.</p>
+      <table id="table-copyright-forms">
+        <caption>Copyright Forms</caption>
+        <thead>
+          <tr>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>(c)</td>
+          </tr>
+          <tr>
+            <td>©</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sec-license-element">
+      <h3>License Element</h3>
+
+      <p>The following example JSON Schema incorporates the above element in
+      accordance with <a href="#sec-cc-license-schema-resources"></a>, with the initial
+      keyword order recommended in <a href="#sec-keyword-order"></a>.</p>
 
 <pre>
 {
