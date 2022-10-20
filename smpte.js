@@ -96,7 +96,7 @@ function insertFrontMatter(docMetadata) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = resolveScriptRelativePath("smpte-draft.css");
-    document.getElementsByTagName('head')[0].appendChild(link);
+    document.head.appendChild(link);
   }
 
   const actualPubDateTime = (() => {
