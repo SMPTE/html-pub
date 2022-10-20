@@ -92,6 +92,13 @@ function insertFrontMatter(docMetadata) {
 
   const longDoctype = { "AG": "Administrative Guideline" }[docMetadata.pubType];
 
+  if (docMetadata.pubState == "draft") {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = resolveScriptRelativePath("smpte-draft.css");
+    document.head.appendChild(link);
+  }
+
   const actualPubDateTime = (() => {
     if (docMetadata.pubDateTime === null)
       return new Date();
