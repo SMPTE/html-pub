@@ -69,12 +69,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 const path = require('path');
 const fs = require('fs');
-const process = require('process');
-const { s3 } = require("@aws-sdk/client-s3");
+const process = require("process");
+const { S3Client, PutObjectCommand} = require("@aws-sdk/client-s3");
 const puppeteer = require('puppeteer');
 const child_process = require('child_process');
-
-const s3Client = new S3({ region: common.HOA_REGION });
 
 /**
  * Recursively mirror all contents from a source directory to a target directory.
@@ -129,11 +127,12 @@ function mirrorDir(srcDir, targetDir) {
 
     } else if (srcStat.isFile()) {
 
-      await s3Client.putObject({
-        Body: createReadStream(srcPath),
+      const cmd = new PutObjectCommand({
+        Body: fs.createReadStream(srcPath),
         Bucket: bucket,
         Key: dstKey
       });
+      await s3Client.send(cmd);
 
     }
   }
@@ -155,16 +154,16 @@ async function build(configFilePath, refBranch) {
   const s3Bucket = process.env.AWS_S3_BUCKET;
   const s3KeyPrefix = process.env.AWS_S3_KEY_PREFIX;
   const pubDocName = config.pubDocName || "index.html";
-  const refBranch = refBranch || config.latestEditionTag || null;
+  refBranch = refBranch || config.latestEditionTag || null;
   const buildDirPath = config.buildDirPath || "build";
   const refDirName = config.refDirName || "ref";
   const pubDirName = config.pubDirName || "pub";
   const pubRLName = config.pubRLName || "rl.html";
 
+  let version = null;
 
-  let commitHash = null;
   try {
-    commitHash = child_process.execSync(`git -C ${path.dirname(docPath)} rev-parse --short HEAD`);
+    version = child_process.execSync(`git rev-parse HEAD`).toString().trim();
   } catch (e) {
     throw Error("Cannot retrieve commit hash.");
   }
@@ -181,7 +180,7 @@ async function build(configFilePath, refBranch) {
   if (! s3KeyPrefix)
     throw Error("The environment variable `AWS_S3_KEY_PREFIX` must be set.");
 
-  const s3Client = new S3({ region: s3Region });
+  const s3Client = new S3Client({ region: s3Region });
 
   /* build the publication directory */
 
@@ -189,11 +188,13 @@ async function build(configFilePath, refBranch) {
 
   const pubDirPath = path.join(buildDirPath, pubDirName);
 
+  fs.rmSync(pubDirPath, { recursive: true, force: true });
+
   mirrorDir(path.dirname(docPath), pubDirPath);
 
   /* render the document */
 
-  const renderedDoc = await render(docPath, commitHash);
+  const renderedDoc = await render(docPath);
 
   const renderedDocPath = path.join(pubDirPath, pubDocName);
 
@@ -210,7 +211,7 @@ async function build(configFilePath, refBranch) {
 
     child_process.execSync(`git worktree add -f ${refDirPath} ${refBranch}`);
 
-    const renderedRef = await render(path.join(refDirPath, docPath), commitHash);
+    const renderedRef = await render(path.join(refDirPath, docPath));
 
     const renderedRefPath = path.join(buildDirPath, "ref.html");
 
@@ -226,11 +227,18 @@ async function build(configFilePath, refBranch) {
 
   /* upload to AWS */
 
-  s3SyncDir(pubDirPath, s3Client, s3Bucket, s3KeyPrefix + commitHash + "/");
+  s3SyncDir(pubDirPath, s3Client, s3Bucket, s3KeyPrefix + version + "/");
 
 }
 
-async function render(docPath, commitHash) {
+async function render(docPath) {
+
+  let commitHash = null;
+  try {
+    commitHash = child_process.execSync(`git -C ${path.dirname(docPath)} rev-parse HEAD`).toString().trim();
+  } catch (e) {
+    throw Error("Cannot retrieve commit hash.");
+  }
 
   /* render the page */
 
