@@ -1,23 +1,7 @@
 name: Build SMTPE specification
 
-on:
-  workflow_call:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'pull_request'
-    steps:
-    - name: Update apt
-      run: sudo apt-get update
-
-    - name: Checkout repo
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        ref: ${{ github.event.pull_request.head.sha }}
-        submodules: true
-
+runs:
+  steps:
     - name: Install node dependencies
       env:
         PUPPETEER_PRODUCT: chrome
