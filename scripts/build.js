@@ -147,11 +147,22 @@ async function build(configFilePath) {
 
     const refDirPath = path.join(buildDirPath, refDirName);
 
+    if (fs.existsSync(refDirPath))
+      child_process.execSync(`git worktree remove -f ${refDirPath}`);
+
     child_process.execSync(`git worktree add -f ${refDirPath} ${refBranch}`);
 
     const renderedRef = await render(path.join(refDirPath, docPath));
 
-    fs.writeFileSync(path.join(buildDirPath, "ref.html"), renderedRef.docHTML);
+    const renderedRefPath = path.join(buildDirPath, "ref.html");
+
+    fs.writeFileSync(renderedRefPath, renderedRef.docHTML);
+
+    /* bash ${HTMLDIFF_PL} ${RENDERED_OLD_PATH} ${RENDERED_NEW_PATH} ${BUILT_SPEC_DIR}/${REDLINE_FILENAME} */
+
+    const rlDocPath = path.join(pubDirPath, pubRLName);
+
+    child_process.execSync(`perl lib/htmldiff/htmldiff.pl ${renderedRefPath} ${renderedDocPath} ${rlDocPath}`);
 
   }
 
