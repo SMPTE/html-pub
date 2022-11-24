@@ -28,7 +28,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 /*
 # root "/" commit-hash -> commit (clean)
 # root "/" commit-hash "/index.html" ->commit (clean)
-# root "/" commit-hash "/rl-pub.html" -> commit (diff to most recent edition)
 # root "/" commit-hash "/rl.html" -> commit (diff to parent branch)
 
 # spec
@@ -71,8 +70,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 const path = require('path');
 const fs = require('fs');
 const process = require('process');
+const { s3 } = require("@aws-sdk/client-s3");
 const puppeteer = require('puppeteer');
 const child_process = require('child_process');
+
+const s3Client = new S3({ region: common.HOA_REGION });
 
 /**
  * Recursively mirror all contents from a source directory to a target directory.
@@ -103,7 +105,41 @@ function mirrorDir(srcDir, targetDir) {
   }
 }
 
-async function build(configFilePath) {
+/**
+ * Recursively uploads all contents from a source directory to a target S3 bucket.
+ * Only normal files and directories are considered.
+ *
+ * @param s3Client S3 object
+ * @param bucket S3 bucket name
+ * @param srcDir Source directory
+ * @param dstPrefix AWS S3 bucket prefix
+ */
+ async function s3SyncDir(srcDir, s3Client, bucket, dstPrefix) {
+
+  for(let srcName of fs.readdirSync(srcDir)) {
+
+    const dstKey = dstPrefix + srcName;
+
+    const srcPath = path.join(srcDir, srcName);
+    const srcStat = fs.statSync(srcPath);
+
+    if (srcStat.isDirectory()) {
+
+      s3SyncDir(srcPath, s3Client, bucket, dstKey + "/");
+
+    } else if (srcStat.isFile()) {
+
+      await s3Client.putObject({
+        Body: createReadStream(srcPath),
+        Bucket: bucket,
+        Key: dstKey
+      });
+
+    }
+  }
+}
+
+async function build(configFilePath, refBranch) {
 
   /* retrieve build config */
 
@@ -114,16 +150,38 @@ async function build(configFilePath) {
     throw Error("Could not read the publication config file.");
   }
 
-  if (! ("docPath" in config))
-    throw Error("The config file must provide the path to the document.");
-
   const docPath = config.docPath;
+  const s3Region = process.env.AWS_S3_REGION;
+  const s3Bucket = process.env.AWS_S3_BUCKET;
+  const s3KeyPrefix = process.env.AWS_S3_KEY_PREFIX;
   const pubDocName = config.pubDocName || "index.html";
-  const refBranch = config.latestEditionTag || null;
+  const refBranch = refBranch || config.latestEditionTag || null;
   const buildDirPath = config.buildDirPath || "build";
   const refDirName = config.refDirName || "ref";
   const pubDirName = config.pubDirName || "pub";
-  const pubRLName = config.pubRLName || "rl-pub.html";
+  const pubRLName = config.pubRLName || "rl.html";
+
+
+  let commitHash = null;
+  try {
+    commitHash = child_process.execSync(`git -C ${path.dirname(docPath)} rev-parse --short HEAD`);
+  } catch (e) {
+    throw Error("Cannot retrieve commit hash.");
+  }
+
+  if (! docPath)
+    throw Error("The config file must provide the path to the document.");
+
+  if (! s3Region)
+    throw Error("The environment variable `AWS_S3_REGION` must be set.");
+
+  if (! s3Bucket)
+    throw Error("The environment variable `AWS_S3_BUCKET` must be set.");
+
+  if (! s3KeyPrefix)
+    throw Error("The environment variable `AWS_S3_KEY_PREFIX` must be set.");
+
+  const s3Client = new S3({ region: s3Region });
 
   /* build the publication directory */
 
@@ -135,7 +193,7 @@ async function build(configFilePath) {
 
   /* render the document */
 
-  const renderedDoc = await render(docPath);
+  const renderedDoc = await render(docPath, commitHash);
 
   const renderedDocPath = path.join(pubDirPath, pubDocName);
 
@@ -152,7 +210,7 @@ async function build(configFilePath) {
 
     child_process.execSync(`git worktree add -f ${refDirPath} ${refBranch}`);
 
-    const renderedRef = await render(path.join(refDirPath, docPath));
+    const renderedRef = await render(path.join(refDirPath, docPath), commitHash);
 
     const renderedRefPath = path.join(buildDirPath, "ref.html");
 
@@ -166,16 +224,13 @@ async function build(configFilePath) {
 
   }
 
+  /* upload to AWS */
+
+  s3SyncDir(pubDirPath, s3Client, s3Bucket, s3KeyPrefix + commitHash + "/");
+
 }
 
-async function render(docPath) {
-
-  /* retrieve the git commit hash */
-
-  let commitHash = null;
-  try {
-    commitHash = child_process.execSync(`git -C ${path.dirname(docPath)} rev-parse --short HEAD`);
-  } finally {}
+async function render(docPath, commitHash) {
 
   /* render the page */
 
