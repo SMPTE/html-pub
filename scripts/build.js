@@ -38,6 +38,14 @@ const { S3Client, PutObjectCommand} = require("@aws-sdk/client-s3");
 const puppeteer = require('puppeteer');
 const child_process = require('child_process');
 
+
+
+/**
+ * Infers the content type of a file based on its path.
+ *
+ * @param filePath Path of the file
+ * @returns Content type
+ */
 function guessContentTypeFromExtenstion(filePath) {
 
   switch (path.extname(filePath)) {
@@ -143,6 +151,7 @@ async function build(configFilePath, refBranch) {
   const refDirName = config.refDirName || "ref";
   const pubDirName = config.pubDirName || "pub";
   const pubRLName = config.pubRLName || "rl.html";
+  const pubLinksDocName = "pr-links.md";
 
   let version = null;
 
@@ -209,10 +218,25 @@ async function build(configFilePath, refBranch) {
 
   /* upload to AWS */
 
-  s3SyncDir(pubDirPath, s3Client, s3Bucket, s3KeyPrefix + version + "/");
+  const s3PubKeyPrefix = s3KeyPrefix + version + "/";
 
-  /* create link document */
+  s3SyncDir(pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
 
+  /* create links */
+
+  const pubLinksDocPath = path.join(buildDirPath, pubLinksDocName);
+
+  const cleanURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}`);
+  const redlineURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${pubRLName}`);
+
+  fs.writeFileSync(
+    pubLinksDocPath,
+`Review links:
+* [Clean](${cleanURL})
+* [Redline](${redlineURL})`
+  )
+
+  process.stdout.write(pubLinksDocPath);
 }
 
 async function render(docPath) {
