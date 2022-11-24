@@ -37,6 +37,7 @@ const process = require("process");
 const { S3Client, PutObjectCommand} = require("@aws-sdk/client-s3");
 const puppeteer = require('puppeteer');
 const child_process = require('child_process');
+const { argv } = require('process');
 
 
 
@@ -130,13 +131,13 @@ function mirrorDir(srcDir, targetDir) {
   }
 }
 
-async function build(configFilePath, refBranch) {
+async function build(refBranch) {
 
   /* retrieve build config */
 
   let config = null;
   try {
-    config = JSON.parse(fs.readFileSync(configFilePath));
+    config = JSON.parse(fs.readFileSync(".smpte-build.json"));
   } catch {
     throw Error("Could not read the publication config file.");
   }
@@ -154,7 +155,6 @@ async function build(configFilePath, refBranch) {
   const pubLinksDocName = "pr-links.md";
 
   let version = null;
-
   try {
     version = child_process.execSync(`git rev-parse HEAD`).toString().trim();
   } catch (e) {
@@ -163,15 +163,6 @@ async function build(configFilePath, refBranch) {
 
   if (! docPath)
     throw Error("The config file must provide the path to the document.");
-
-  if (! s3Region)
-    throw Error("The environment variable `AWS_S3_REGION` must be set.");
-
-  if (! s3Bucket)
-    throw Error("The environment variable `AWS_S3_BUCKET` must be set.");
-
-  if (! s3KeyPrefix)
-    throw Error("The environment variable `AWS_S3_KEY_PREFIX` must be set.");
 
   const s3Client = new S3Client({ region: s3Region });
 
@@ -218,23 +209,33 @@ async function build(configFilePath, refBranch) {
 
   /* upload to AWS */
 
-  const s3PubKeyPrefix = s3KeyPrefix + version + "/";
-
-  s3SyncDir(pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
-
-  /* create links */
-
   const pubLinksDocPath = path.join(buildDirPath, pubLinksDocName);
 
-  const cleanURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}`);
-  const redlineURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${pubRLName}`);
+  if (s3Region && s3Bucket && s3KeyPrefix) {
 
-  fs.writeFileSync(
-    pubLinksDocPath,
-`Review links:
-* [Clean](${cleanURL})
-* [Redline](${redlineURL})`
-  )
+    const s3PubKeyPrefix = s3KeyPrefix + version + "/";
+
+    s3SyncDir(pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
+
+    /* create links */
+
+    const cleanURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}`);
+    const redlineURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${pubRLName}`);
+
+    fs.writeFileSync(
+      pubLinksDocPath,
+      "Review links:\n* [Clean](${cleanURL})\n* [Redline](${redlineURL})\n"
+    )
+
+  } else {
+    console.warn("Skipping AWS upload and PR link creation. One of the following \
+    environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX");
+
+    fs.writeFileSync(
+      pubLinksDocPath,
+      "No links available"
+    )
+  }
 
   process.stdout.write(pubLinksDocPath);
 }
@@ -281,4 +282,4 @@ async function render(docPath) {
   };
 }
 
-build(".smpte-build.json").catch(e => { console.error(e) });
+build(argv[2] || null).catch(e => { console.error(e) });

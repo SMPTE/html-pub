@@ -33,6 +33,10 @@ function resolveScriptRelativePath(path) {
   return new URL(path, _SCRIPT_PATH);
 }
 
+function resolveStaticResourcePath(resourceName) {
+  return typeof _STATIC_ROOT_PATH === "undefined" ? resolveScriptRelativePath(`static/${resourceName}`) : `${_STATIC_ROOT_PATH}/${resourceName}`;
+}
+
 function asyncFetchLocal(url) {
   return new Promise(function(resolve, reject) {
     var xhr = new XMLHttpRequest
@@ -92,12 +96,8 @@ function insertFrontMatter(docMetadata) {
 
   const longDoctype = { "AG": "Administrative Guideline" }[docMetadata.pubType];
 
-  if (docMetadata.pubState == "draft") {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = resolveScriptRelativePath("smpte-draft.css");
-    document.head.appendChild(link);
-  }
+  if (docMetadata.pubState == "draft")
+    asyncAddStylesheet(resolveScriptRelativePath("smpte-draft.css"));
 
   const actualPubDateTime = (() => {
     if (docMetadata.pubDateTime === null)
@@ -111,7 +111,7 @@ function insertFrontMatter(docMetadata) {
   sec.id = FRONT_MATTER_ID;
   sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
-    <img id="smpte-logo" src="${resolveScriptRelativePath("smpte-logo.png")}" />
+    <img id="smpte-logo" src="${resolveStaticResourcePath("smpte-logo.png")}" />
     <div id="long-doc-type">${longDoctype}</div>
     <h1>${docMetadata.pubTitle}</h1>
     <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>
@@ -748,6 +748,7 @@ function listEvents() {
 
 document.addEventListener('DOMContentLoaded', () => {
   try {
+    asyncAddStylesheet(resolveScriptRelativePath("smpte.css"));
     render();
   } catch (e) {
     logEvent(e);
