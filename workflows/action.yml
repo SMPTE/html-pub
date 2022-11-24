@@ -1,5 +1,13 @@
 name: Build SMTPE specification
 
+inputs:
+  AWS_S3_REGION:
+    required: true
+  AWS_S3_BUCKET:
+    required: true
+  AWS_S3_KEY_PREFIX:
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -10,16 +18,9 @@ runs:
         npm install puppeteer
         npm install @aws-sdk/client-s3
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_S3_REGION }}
-
     - name: Build and deploy spec
       env:
-        AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-        AWS_S3_KEY_PREFIX: ${{ secrets.AWS_S3_KEY_PREFIX }}
+        AWS_S3_REGION: ${{ inputs.AWS_S3_REGION }}
+        AWS_S3_BUCKET: ${{ inputs.AWS_S3_BUCKET }}
+        AWS_S3_KEY_PREFIX: ${{ inputs.AWS_S3_KEY_PREFIX }}
       run: node tooling/scripts/build.js
