@@ -34,7 +34,7 @@ function resolveScriptRelativePath(path) {
 }
 
 function resolveStaticResourcePath(resourceName) {
-  return typeof _STATIC_ROOT_PATH === "undefined" ? resolveScriptRelativePath(`static/${resourceName}`) : `${_STATIC_ROOT_PATH}/${resourceName}`;
+  return typeof _STATIC_ROOT_PATH === "undefined" ? resolveScriptRelativePath(`static/${resourceName}`) : `${_STATIC_ROOT_PATH}${resourceName}`;
 }
 
 function asyncFetchLocal(url) {

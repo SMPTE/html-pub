@@ -153,6 +153,7 @@ async function build(refBranch) {
   const pubDirName = config.pubDirName || "pub";
   const pubRLName = config.pubRLName || "rl.html";
   const pubLinksDocName = "pr-links.md";
+  const pubStaticDirName = "_static/";
 
   let version = null;
   try {
@@ -176,15 +177,19 @@ async function build(refBranch) {
 
   mirrorDir(path.dirname(docPath), pubDirPath);
 
+  mirrorDir(path.join(__dirname, "../static"), path.join(pubDirPath, pubStaticDirName));
+
   /* render the document */
 
-  const renderedDoc = await render(docPath);
+  const renderedDoc = await render(docPath, pubStaticDirName);
 
   const renderedDocPath = path.join(pubDirPath, pubDocName);
 
   fs.writeFileSync(renderedDocPath, renderedDoc.docHTML);
 
   /* generate the redline, if requested */
+
+  const rlDocPath = path.join(pubDirPath, pubRLName);
 
   if (refBranch !== null) {
 
@@ -195,15 +200,21 @@ async function build(refBranch) {
 
     child_process.execSync(`git worktree add -f ${refDirPath} ${refBranch}`);
 
-    const renderedRef = await render(path.join(refDirPath, docPath));
+    const refDocPath = path.join(refDirPath, docPath);
 
-    const renderedRefPath = path.join(buildDirPath, "ref.html");
+    if (fs.existsSync(refDocPath)) {
 
-    fs.writeFileSync(renderedRefPath, renderedRef.docHTML);
+      const renderedRef = await render(refDocPath, pubStaticDirName);
 
-    const rlDocPath = path.join(pubDirPath, pubRLName);
+      const renderedRefPath = path.join(buildDirPath, "ref.html");
 
-    child_process.execSync(`perl lib/htmldiff/htmldiff.pl ${renderedRefPath} ${renderedDocPath} ${rlDocPath}`);
+      fs.writeFileSync(renderedRefPath, renderedRef.docHTML);
+
+      child_process.execSync(`perl lib/htmldiff/htmldiff.pl ${renderedRefPath} ${renderedDocPath} ${rlDocPath}`);
+
+    } else {
+      console.warn("No reference document to compare.");
+    }
 
   }
 
@@ -222,14 +233,22 @@ async function build(refBranch) {
     const cleanURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}`);
     const redlineURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${pubRLName}`);
 
-    fs.writeFileSync(
-      pubLinksDocPath,
-      "Review links:\n* [Clean](${cleanURL})\n* [Redline](${redlineURL})\n"
-    )
+    if (fs.existsSync(rlDocPath)) {
+      fs.writeFileSync(
+        pubLinksDocPath,
+        "Review links:\n* [Clean](${cleanURL})\n* [Redline](${redlineURL})\n"
+      )
+    } else {
+      fs.writeFileSync(
+        pubLinksDocPath,
+        "Review link:\n* [Clean](${cleanURL})\n"
+      )
+    }
+
 
   } else {
     console.warn("Skipping AWS upload and PR link creation. One of the following \
-    environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX");
+environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX.");
 
     fs.writeFileSync(
       pubLinksDocPath,
@@ -240,7 +259,7 @@ async function build(refBranch) {
   process.stdout.write(pubLinksDocPath);
 }
 
-async function render(docPath) {
+async function render(docPath, staticRootPath) {
 
   let commitHash = null;
   try {
@@ -256,6 +275,10 @@ async function render(docPath) {
   });
 
   const page = await browser.newPage();
+
+  await page.evaluateOnNewDocument((e) => {
+    window._STATIC_ROOT_PATH = e;
+  }, staticRootPath);
 
   await page.goto("file://" + path.resolve(docPath) + (commitHash ? "?build-hash=" + commitHash : ""));
 
