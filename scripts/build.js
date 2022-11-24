@@ -29,42 +29,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 # root "/" commit-hash -> commit (clean)
 # root "/" commit-hash "/index.html" ->commit (clean)
 # root "/" commit-hash "/rl.html" -> commit (diff to parent branch)
-
-# spec
-# - render
-# - listAssets
-
-# read args
-#   - current branch/commit
-#   - base branch/commit (optional)
-#   - path to config file (optional)
-#   - path to links markdown doc
-
-# read config
-
-# clone repo to "current_spec_repo"
-
-# render current spec
-#   render(specDir = "current_spec_repo", renderedSpecFileName, buildDir = "current_spec")
-
-# if (ref exists)
-
-# clone ref repo to "ref_spec_repo"
-
-# render ref spec
-#   render(specDir = "ref_spec_repo", renderedSpecFileName, buildDir = "ref_spec")
-
-# if (diff between current and ref)
-
-# generate redline
-
-# endif (diff between current and ref)
-
-# endif (ref exists)
-
-# generate PR message
-
-# push to AWS
 */
 
 const path = require('path');
@@ -73,6 +37,20 @@ const process = require("process");
 const { S3Client, PutObjectCommand} = require("@aws-sdk/client-s3");
 const puppeteer = require('puppeteer');
 const child_process = require('child_process');
+
+function guessContentTypeFromExtenstion(filePath) {
+
+  switch (path.extname(filePath)) {
+    case ".html":
+      return "text/html";
+    case ".png":
+      return "image/png";
+    default:
+      return null;
+  }
+
+}
+
 
 /**
  * Recursively mirror all contents from a source directory to a target directory.
@@ -127,10 +105,16 @@ function mirrorDir(srcDir, targetDir) {
 
     } else if (srcStat.isFile()) {
 
+      const contentType = guessContentTypeFromExtenstion(srcPath);
+
+      if (contentType === null)
+        throw Error(`Unknown content type for: ${srcPath}`);
+
       const cmd = new PutObjectCommand({
         Body: fs.createReadStream(srcPath),
         Bucket: bucket,
-        Key: dstKey
+        Key: dstKey,
+        ContentType: contentType
       });
       await s3Client.send(cmd);
 
@@ -217,8 +201,6 @@ async function build(configFilePath, refBranch) {
 
     fs.writeFileSync(renderedRefPath, renderedRef.docHTML);
 
-    /* bash ${HTMLDIFF_PL} ${RENDERED_OLD_PATH} ${RENDERED_NEW_PATH} ${BUILT_SPEC_DIR}/${REDLINE_FILENAME} */
-
     const rlDocPath = path.join(pubDirPath, pubRLName);
 
     child_process.execSync(`perl lib/htmldiff/htmldiff.pl ${renderedRefPath} ${renderedDocPath} ${rlDocPath}`);
@@ -228,6 +210,8 @@ async function build(configFilePath, refBranch) {
   /* upload to AWS */
 
   s3SyncDir(pubDirPath, s3Client, s3Bucket, s3KeyPrefix + version + "/");
+
+  /* create link document */
 
 }
 
