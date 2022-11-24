@@ -1,6 +1,7 @@
 name: Build SMTPE specification
 
 runs:
+  using: "composite"
   steps:
     - name: Install node dependencies
       env:
