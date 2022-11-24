@@ -14,11 +14,13 @@ runs:
     - name: Install node dependencies
       env:
         PUPPETEER_PRODUCT: chrome
+      shell: bash
       run: |
         npm install puppeteer
         npm install @aws-sdk/client-s3
 
     - name: Build and deploy spec
+      shell: bash
       env:
         AWS_S3_REGION: ${{ inputs.AWS_S3_REGION }}
         AWS_S3_BUCKET: ${{ inputs.AWS_S3_BUCKET }}
