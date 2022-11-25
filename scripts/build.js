@@ -236,12 +236,12 @@ async function build(refBranch) {
     if (fs.existsSync(rlDocPath)) {
       fs.writeFileSync(
         pubLinksDocPath,
-        "Review links:\n* [Clean](${cleanURL})\n* [Redline](${redlineURL})\n"
+        `Review links:\n* [Clean](${cleanURL})\n* [Redline](${redlineURL})\n`
       )
     } else {
       fs.writeFileSync(
         pubLinksDocPath,
-        "Review link:\n* [Clean](${cleanURL})\n"
+        `Review link:\n* [Clean](${cleanURL})\n`
       )
     }
 
