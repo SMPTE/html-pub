@@ -34,7 +34,7 @@ function resolveScriptRelativePath(path) {
 }
 
 function resolveStaticResourcePath(resourceName) {
-  return typeof _STATIC_ROOT_PATH === "undefined" ? resolveScriptRelativePath(`static/${resourceName}`) : `${_STATIC_ROOT_PATH}${resourceName}`;
+  return `tooling/static/${resourceName}`;
 }
 
 function asyncFetchLocal(url) {
@@ -109,9 +109,9 @@ function insertFrontMatter(docMetadata) {
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = FRONT_MATTER_ID;
-  sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
+  sec.innerHTML = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
-    <img id="smpte-logo" src="${resolveStaticResourcePath("smpte-logo.png")}" />
+    <img id="smpte-logo" src="${resolveStaticResourcePath("smpte-logo.png")}" alt="SMPTE logo" />
     <div id="long-doc-type">${longDoctype}</div>
     <h1>${docMetadata.pubTitle}</h1>
     <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>

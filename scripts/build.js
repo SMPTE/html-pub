@@ -25,12 +25,6 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-/*
-# root "/" commit-hash -> commit (clean)
-# root "/" commit-hash "/index.html" ->commit (clean)
-# root "/" commit-hash "/rl.html" -> commit (diff to parent branch)
-*/
-
 const path = require('path');
 const fs = require('fs');
 const process = require("process");
@@ -146,9 +140,7 @@ async function build(buildPaths, baseRef, lastEdRef) {
   if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.baseRedlineName)))
     throw Error(`The document directory cannot contain an entry named ${buildPaths.baseRedlineName}`);
 
-  const indexPath = path.join(buildPaths.docDirPath, buildPaths.renderedDocName);
-
-  if (path.relative(indexPath, buildPaths.docPath).length > 0 && fs.existsSync(indexPath))
+  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.renderedDocName)))
     throw Error(`The document directory cannot contain an entry named ${buildPaths.renderedDocName}`);
 
   /* create the build directory if it does not already exists */
@@ -161,13 +153,9 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   mirrorDir(buildPaths.docDirPath, buildPaths.pubDirPath);
 
-  /* populate the static tooling directory */
-
-  mirrorDir(path.join(__dirname, "../static"), buildPaths.pubStaticDirPath);
-
   /* render the document */
 
-  const renderedDoc = await render(path.join(buildPaths.pubDirPath, buildPaths.renderedDocName), buildPaths.pubStaticDirName);
+  const renderedDoc = await render(buildPaths.docPath);
 
   fs.writeFileSync(buildPaths.renderedDocPath, renderedDoc.docHTML);
 
@@ -205,15 +193,15 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
   try {
 
-    const refConfig = BuildConfig(buildPaths.refDirPath);
-
-    const r = await render(refConfig.docPath, null);
+    const r = await render(path.join(buildPaths.refDirPath, buildPaths.docPath));
 
     fs.writeFileSync(refPath, r.docHTML);
 
     child_process.execSync(`perl lib/htmldiff/htmldiff.pl ${refPath} ${buildPaths.renderedDocPath} ${rlPath}`);
 
-  } finally {}
+  } catch (e) {
+    console.warn("Redline generation failed.")
+  }
 
 }
 
@@ -256,7 +244,7 @@ async function s3Upload(buildPaths, versionKey) {
   fs.writeFileSync(buildPaths.getPubLinksPath(), linksDocContents);
 }
 
-async function render(docPath, staticRootPath) {
+async function render(docPath) {
 
   let commitHash = null;
   try {
@@ -273,11 +261,9 @@ async function render(docPath, staticRootPath) {
 
   const page = await browser.newPage();
 
-  await page.evaluateOnNewDocument((e) => {
-    window._STATIC_ROOT_PATH = e;
-  }, staticRootPath);
+  const pageURL = "file://" + path.resolve(docPath) + (commitHash ? "?build-hash=" + commitHash : "");
 
-  await page.goto("file://" + path.resolve(docPath) + (commitHash ? "?build-hash=" + commitHash : ""));
+  await page.goto(pageURL);
 
   const docTitle = await page.evaluate(() => document.title);
 
@@ -303,15 +289,15 @@ async function render(docPath, staticRootPath) {
 }
 
 class BuildPaths {
-  constructor(docPath) {
+  constructor() {
 
-    if (docPath === null)
-      throw Error("Path to the document is missing");
-    this.docPath = docPath;
+    this.docPath = "doc/main.html";
     this.docDirPath = path.dirname(this.docPath);
     this.docName = path.basename(this.docPath);
 
     this.buildDirPath = "build";
+
+    this.pubStaticDirName = "static";
 
     this.pubDirPath = path.join(this.buildDirPath, "pub");
 
@@ -330,9 +316,6 @@ class BuildPaths {
     this.baseRedlineName = "base-rl.html";
     this.baseRedlinePath = path.join(this.pubDirPath, this.baseRedlineName);
     this.baseRedLineRefPath = path.join(this.buildDirPath, this.baseRedlineName);
-
-    this.pubStaticDirName = "smpte-static";
-    this.pubStaticDirPath = path.join(this.pubDirPath, this.pubStaticDirName);
   }
 
 }
@@ -346,10 +329,6 @@ class BuildConfig {
       throw Error("Could not read the publication config file.");
     }
 
-    if (! config.docPath)
-      throw Error("The config file must provide the path to the document.");
-
-    this.docPath = config.docPath;
     this.lastEdRef = config.latestEditionTag || null;
   }
 }
@@ -365,7 +344,7 @@ async function main() {
 
   /* initialize the build paths */
 
-  const buildPaths = new BuildPaths(config.docPath);
+  const buildPaths = new BuildPaths();
 
   /* get the target commit and reference commits */
 
