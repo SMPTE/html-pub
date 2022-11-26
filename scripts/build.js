@@ -146,8 +146,10 @@ async function build(buildPaths, baseRef, lastEdRef) {
   if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.baseRedlineName)))
     throw Error(`The document directory cannot contain an entry named ${buildPaths.baseRedlineName}`);
 
-  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubDocName)))
-    throw Error(`The document directory cannot contain an entry named ${buildPaths.pubDocName}`);
+  const indexPath = path.join(buildPaths.docDirPath, buildPaths.renderedDocName);
+
+  if (path.relative(indexPath, buildPaths.docPath).length > 0 && fs.existsSync(indexPath))
+    throw Error(`The document directory cannot contain an entry named ${buildPaths.renderedDocName}`);
 
   /* create the build directory if it does not already exists */
 
@@ -165,7 +167,7 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   /* render the document */
 
-  const renderedDoc = await render(path.join(buildPaths.pubDirPath, buildPaths.pubDocName), buildPaths.pubStaticDirName);
+  const renderedDoc = await render(path.join(buildPaths.pubDirPath, buildPaths.renderedDocName), buildPaths.pubStaticDirName);
 
   fs.writeFileSync(buildPaths.renderedDocPath, renderedDoc.docHTML);
 
@@ -363,7 +365,7 @@ async function main() {
 
   /* initialize the build paths */
 
-  const buildPaths = new BuildPaths(docPath);
+  const buildPaths = new BuildPaths(config.docPath);
 
   /* get the target commit and reference commits */
 
@@ -385,7 +387,12 @@ async function main() {
 
   /* validate source document */
 
-  child_process.execSync(`html5validator --errors-only ${buildPaths.getDocPath()}`);
+  try {
+    child_process.execSync(`html5validator --errors-only ${buildPaths.docPath}`);
+  } catch (e) {
+    console.error(e.stdout.toString());
+    throw Error("Document validation failed.");
+  }
 
   /* build document */
 
@@ -393,7 +400,12 @@ async function main() {
 
   /* validate rendered document */
 
-  child_process.execSync(`html5validator --errors-only ${buildPaths.getRenderedDocPath()}`);
+  try {
+    child_process.execSync(`html5validator --errors-only ${buildPaths.renderedDocPath}`);
+  } catch (e) {
+    console.error(e.stdout.toString());
+    throw Error("Rendered document validation failed.");
+  }
 
   /* skip deployment if validating only */
 
