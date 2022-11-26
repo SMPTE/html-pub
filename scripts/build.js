@@ -39,7 +39,9 @@ const puppeteer = require('puppeteer');
 const child_process = require('child_process');
 const { argv } = require('process');
 
-
+/**
+ * build.js (validate | build | deploy)
+ */
 
 /**
  * Infers the content type of a file based on its path.
@@ -131,132 +133,125 @@ function mirrorDir(srcDir, targetDir) {
   }
 }
 
-async function build(refBranch) {
+async function build(buildPaths, baseRef, lastEdRef) {
 
-  /* retrieve build config */
+  /* make sure the document directory does not contain conflicting names */
 
-  let config = null;
-  try {
-    config = JSON.parse(fs.readFileSync(".smpte-build.json"));
-  } catch {
-    throw Error("Could not read the publication config file.");
-  }
+  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubStaticDirName)))
+    throw Error(`The document directory cannot contain an entry named ${buildPaths.pubStaticDirName}`);
 
-  const docPath = config.docPath;
-  const s3Region = process.env.AWS_S3_REGION;
-  const s3Bucket = process.env.AWS_S3_BUCKET;
-  const s3KeyPrefix = process.env.AWS_S3_KEY_PREFIX;
-  const pubDocName = config.pubDocName || "index.html";
-  refBranch = refBranch || config.latestEditionTag || null;
-  const buildDirPath = config.buildDirPath || "build";
-  const refDirName = config.refDirName || "ref";
-  const pubDirName = config.pubDirName || "pub";
-  const pubRLName = config.pubRLName || "rl.html";
-  const pubLinksDocName = "pr-links.md";
-  const pubStaticDirName = "_static/";
+  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubRedlineName)))
+    throw Error(`The document directory cannot contain an entry named ${buildPaths.pubRedlineName}`);
 
-  let version = null;
-  try {
-    version = child_process.execSync(`git rev-parse HEAD`).toString().trim();
-  } catch (e) {
-    throw Error("Cannot retrieve commit hash.");
-  }
+  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.baseRedlineName)))
+    throw Error(`The document directory cannot contain an entry named ${buildPaths.baseRedlineName}`);
 
-  if (! docPath)
-    throw Error("The config file must provide the path to the document.");
+  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubDocName)))
+    throw Error(`The document directory cannot contain an entry named ${buildPaths.pubDocName}`);
 
-  const s3Client = new S3Client({ region: s3Region });
+  /* create the build directory if it does not already exists */
 
-  /* build the publication directory */
+  fs.mkdirSync(buildPaths.buildDirPath, {"recursive" : true});
 
-  fs.mkdirSync(buildDirPath, {"recursive" : true});
+  /* populate the publication directory */
 
-  const pubDirPath = path.join(buildDirPath, pubDirName);
+  fs.rmSync(buildPaths.pubDirPath, { recursive: true, force: true });
 
-  fs.rmSync(pubDirPath, { recursive: true, force: true });
+  mirrorDir(buildPaths.docDirPath, buildPaths.pubDirPath);
 
-  mirrorDir(path.dirname(docPath), pubDirPath);
+  /* populate the static tooling directory */
 
-  mirrorDir(path.join(__dirname, "../static"), path.join(pubDirPath, pubStaticDirName));
+  mirrorDir(path.join(__dirname, "../static"), buildPaths.pubStaticDirPath);
 
   /* render the document */
 
-  const renderedDoc = await render(docPath, pubStaticDirName);
+  const renderedDoc = await render(path.join(buildPaths.pubDirPath, buildPaths.pubDocName), buildPaths.pubStaticDirName);
 
-  const renderedDocPath = path.join(pubDirPath, pubDocName);
+  fs.writeFileSync(buildPaths.renderedDocPath, renderedDoc.docHTML);
 
-  fs.writeFileSync(renderedDocPath, renderedDoc.docHTML);
+  /* generate base redline, if requested */
 
-  /* generate the redline, if requested */
+  if (baseRef !== null) {
 
-  const rlDocPath = path.join(pubDirPath, pubRLName);
+    generateRedline(buildPaths, baseRef, buildPaths.baseRedLineRefPath, buildPaths.baseRedlinePath);
 
-  if (refBranch !== null) {
+    if (! fs.existsSync(buildPaths.baseRedlinePath))
+      console.warn("Could not generate base redline.");
 
-    const refDirPath = path.join(buildDirPath, refDirName);
+  }
 
-    if (fs.existsSync(refDirPath))
-      child_process.execSync(`git worktree remove -f ${refDirPath}`);
+  /* generate pub redline, if requested */
 
-    child_process.execSync(`git worktree add -f ${refDirPath} ${refBranch}`);
+  if (lastEdRef !== null) {
 
-    const refDocPath = path.join(refDirPath, docPath);
+    generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
 
-    if (fs.existsSync(refDocPath)) {
-
-      const renderedRef = await render(refDocPath, pubStaticDirName);
-
-      const renderedRefPath = path.join(buildDirPath, "ref.html");
-
-      fs.writeFileSync(renderedRefPath, renderedRef.docHTML);
-
-      child_process.execSync(`perl lib/htmldiff/htmldiff.pl ${renderedRefPath} ${renderedDocPath} ${rlDocPath}`);
-
-    } else {
-      console.warn("No reference document to compare.");
+    if (! fs.existsSync(buildPaths.pubRedlinePath)) {
+      console.warn("Could not generate redline against the latest edition.");
     }
 
   }
 
-  /* upload to AWS */
+}
 
-  const pubLinksDocPath = path.join(buildDirPath, pubLinksDocName);
+async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
+
+  if (fs.existsSync(buildPaths.refDirPath))
+    child_process.execSync(`git worktree remove -f ${buildPaths.refDirPath}`);
+
+  child_process.execSync(`git worktree add -f ${buildPaths.refDirPath} ${refCommit}`);
+
+  try {
+
+    const refConfig = BuildConfig(buildPaths.refDirPath);
+
+    const r = await render(refConfig.docPath, null);
+
+    fs.writeFileSync(refPath, r.docHTML);
+
+    child_process.execSync(`perl lib/htmldiff/htmldiff.pl ${refPath} ${buildPaths.renderedDocPath} ${rlPath}`);
+
+  } finally {}
+
+}
+
+async function s3Upload(buildPaths, versionKey) {
+  const s3Region = process.env.AWS_S3_REGION;
+  const s3Bucket = process.env.AWS_S3_BUCKET;
+  const s3KeyPrefix = process.env.AWS_S3_KEY_PREFIX;
+
+  let linksDocContents;
 
   if (s3Region && s3Bucket && s3KeyPrefix) {
 
-    const s3PubKeyPrefix = s3KeyPrefix + version + "/";
+    const s3Client = new S3Client({ region: s3Region });
+
+    const s3PubKeyPrefix = s3KeyPrefix + versionKey + "/";
 
     s3SyncDir(pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
 
     /* create links */
 
-    const cleanURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}`);
-    const redlineURL = encodeURI(`http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${pubRLName}`);
+    const cleanURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}`;
+    linksDocContents = `[Clean](${encodeURI(cleanURL)})\n`
 
-    if (fs.existsSync(rlDocPath)) {
-      fs.writeFileSync(
-        pubLinksDocPath,
-        `Review links:\n* [Clean](${cleanURL})\n* [Redline](${redlineURL})\n`
-      )
-    } else {
-      fs.writeFileSync(
-        pubLinksDocPath,
-        `Review link:\n* [Clean](${cleanURL})\n`
-      )
+    if (fs.existsSync(buildPaths.getBaseRedlinePath())) {
+      const baseRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.getBaseRedlineName()}`;
+      linksDocContents += `[Redline to current draft](${encodeURI(baseRedlineURL)})\n`
     }
 
+    if (fs.existsSync(buildPaths.getPubRedlinePath())) {
+      const pubRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.getPubRedlineName()}`;
+      linksDocContents += `[Redline to most recent edition](${encodeURI(pubRedlineURL)})\n`
+    }
 
   } else {
-    console.warn("Skipping AWS upload and PR link creation. One of the following \
-environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX.");
+    console.warn("Skipping AWS upload. One of the following environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX.");
 
-    fs.writeFileSync(
-      pubLinksDocPath,
-      "No links available"
-    )
+    linksDocContents = "No links available";
   }
 
-  process.stdout.write(pubLinksDocPath);
+  fs.writeFileSync(buildPaths.getPubLinksPath(), linksDocContents);
 }
 
 async function render(docPath, staticRootPath) {
@@ -305,4 +300,113 @@ async function render(docPath, staticRootPath) {
   };
 }
 
-build(argv[2] || null).catch(e => { console.error(e) });
+class BuildPaths {
+  constructor(docPath) {
+
+    if (docPath === null)
+      throw Error("Path to the document is missing");
+    this.docPath = docPath;
+    this.docDirPath = path.dirname(this.docPath);
+    this.docName = path.basename(this.docPath);
+
+    this.buildDirPath = "build";
+
+    this.pubDirPath = path.join(this.buildDirPath, "pub");
+
+    this.renderedDocName = "index.html";
+    this.renderedDocPath = path.join(this.pubDirPath, this.renderedDocName);
+
+    this.refDirPath = path.join(this.buildDirPath, "ref");
+    this.renderedRefDocPath = path.join(this.buildDirPath, "ref.html");
+
+    this.pubLinksPath = path.join(this.buildDirPath, "pr-links.md")
+
+    this.pubRedlineName = "pub-rl.html";
+    this.pubRedlinePath = path.join(this.pubDirPath, this.pubRedlineName);
+    this.pubRedLineRefPath = path.join(this.buildDirPath, this.pubRedlineName);
+
+    this.baseRedlineName = "base-rl.html";
+    this.baseRedlinePath = path.join(this.pubDirPath, this.baseRedlineName);
+    this.baseRedLineRefPath = path.join(this.buildDirPath, this.baseRedlineName);
+
+    this.pubStaticDirName = "smpte-static";
+    this.pubStaticDirPath = path.join(this.pubDirPath, this.pubStaticDirName);
+  }
+
+}
+
+class BuildConfig {
+  constructor(docDirPath) {
+    let config = null;
+    try {
+      config = JSON.parse(fs.readFileSync(path.join(docDirPath, ".smpte-build.json")));
+    } catch {
+      throw Error("Could not read the publication config file.");
+    }
+
+    if (! config.docPath)
+      throw Error("The config file must provide the path to the document.");
+
+    this.docPath = config.docPath;
+    this.lastEdRef = config.latestEditionTag || null;
+  }
+}
+
+async function main() {
+  /* retrieve build phase */
+
+  const buildPhase = argv[2] || "validate";
+
+  /* retrieve build config */
+
+  const config = new BuildConfig(".");
+
+  /* initialize the build paths */
+
+  const buildPaths = new BuildPaths(docPath);
+
+  /* get the target commit and reference commits */
+
+  const baseRef = process.env.GITHUB_BASE_REF || null;
+
+  let branchName = null;
+  try {
+    branchName = child_process.execSync(`git rev-parse --abbrev-ref HEAD`).toString().trim();
+  } catch (e) {
+    throw Error("Cannot retrieve branch name.");
+  }
+
+  let commitHash = null;
+  try {
+    commitHash = child_process.execSync(`git rev-parse HEAD`).toString().trim();
+  } catch (e) {
+    throw Error("Cannot retrieve commit hash.");
+  }
+
+  /* validate source document */
+
+  child_process.execSync(`html5validator --errors-only ${buildPaths.getDocPath()}`);
+
+  /* build document */
+
+  await build(buildPaths, baseRef, config.lastEdRef);
+
+  /* validate rendered document */
+
+  child_process.execSync(`html5validator --errors-only ${buildPaths.getRenderedDocPath()}`);
+
+  /* skip deployment if validating only */
+
+  if (buildPhase === "validate")
+    return;
+
+  /* deploy to S3 */
+
+  s3Upload(buildPaths, branchName);
+
+  s3Upload(buildPaths, commitHash);
+
+}
+
+
+main().catch(e => { console.error(e) });
