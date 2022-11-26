@@ -17,6 +17,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Install jing
+      run: sudo apt-get install jing
+
+    - name: Install vnu
+      run: sudo pip install html5validator==0.4.2
+
     - name: Install node dependencies
       env:
         PUPPETEER_PRODUCT: chrome
