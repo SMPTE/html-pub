@@ -173,10 +173,11 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   if (baseRef !== null) {
 
-    generateRedline(buildPaths, baseRef, buildPaths.baseRedLineRefPath, buildPaths.baseRedlinePath);
-
-    if (! fs.existsSync(buildPaths.baseRedlinePath))
+    try {
+      await generateRedline(buildPaths, baseRef, buildPaths.baseRedLineRefPath, buildPaths.baseRedlinePath);
+    } catch (e) {
       console.warn("Could not generate base redline.");
+    }
 
   }
 
@@ -184,9 +185,9 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   if (lastEdRef !== null) {
 
-    generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
-
-    if (! fs.existsSync(buildPaths.pubRedlinePath)) {
+    try {
+      await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
+    } catch (e) {
       console.warn("Could not generate redline against the latest edition.");
     }
 
@@ -201,17 +202,14 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
   child_process.execSync(`git worktree add -f ${buildPaths.refDirPath} ${refCommit}`);
 
-  try {
+  if (! fs.existsSync(buildPaths.refDirPath))
+    throw Error("Reference file does not exist");
 
-    const r = await render(path.join(buildPaths.refDirPath, buildPaths.docPath));
+  const r = await render(path.join(buildPaths.refDirPath, buildPaths.docPath));
 
-    fs.writeFileSync(refPath, r.docHTML);
+  fs.writeFileSync(refPath, r.docHTML);
 
-    child_process.execSync(`perl lib/htmldiff/htmldiff.pl ${refPath} ${buildPaths.renderedDocPath} ${rlPath}`);
-
-  } catch (e) {
-    console.warn("Redline generation failed.")
-  }
+  child_process.execSync(`perl lib/htmldiff/htmldiff.pl ${refPath} ${buildPaths.renderedDocPath} ${rlPath}`);
 
 }
 
@@ -256,12 +254,7 @@ async function s3Upload(buildPaths, versionKey) {
 
 async function render(docPath) {
 
-  let commitHash = null;
-  try {
-    commitHash = child_process.execSync(`git -C ${path.dirname(docPath)} rev-parse HEAD`).toString().trim();
-  } catch (e) {
-    throw Error("Cannot retrieve commit hash.");
-  }
+  const commitHash = child_process.execSync(`git -C ${path.dirname(docPath)} rev-parse HEAD`, {stdio: ['ignore', 'pipe', 'ignore']}).toString().trim();
 
   /* render the page */
 
