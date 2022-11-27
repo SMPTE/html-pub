@@ -231,7 +231,7 @@ async function s3Upload(buildPaths, versionKey) {
     /* create links */
 
     const cleanURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}`;
-    linksDocContents = `[Clean](${encodeURI(cleanURL)})\n`
+    linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`
 
     if (fs.existsSync(buildPaths.baseRedlinePath)) {
       const baseRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.getBaseRedlineName()}`;
@@ -246,7 +246,7 @@ async function s3Upload(buildPaths, versionKey) {
   } else {
     console.warn("Skipping AWS upload. One of the following environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX.");
 
-    linksDocContents = "No links available";
+    linksDocContents += "No links available";
   }
 
   fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
