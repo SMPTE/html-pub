@@ -264,7 +264,7 @@ async function render(docPath) {
 
   const page = await browser.newPage();
 
-  const pageURL = "file://" + path.resolve(docPath) + (commitHash ? "?build-hash=" + commitHash : "");
+  const pageURL = "file://" + path.resolve(docPath) + (commitHash ? "?buildHash=" + commitHash : "");
 
   await page.goto(pageURL);
 
