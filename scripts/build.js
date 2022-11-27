@@ -50,6 +50,10 @@ function guessContentTypeFromExtenstion(filePath) {
       return "text/html";
     case ".png":
       return "image/png";
+    case ".svg":
+      return "image/svg";
+    case ".css":
+      return "text/css";
     default:
       return null;
   }
@@ -60,25 +64,31 @@ function guessContentTypeFromExtenstion(filePath) {
 /**
  * Recursively mirror all contents from a source directory to a target directory.
  * Only normal files and directories are considered.
+ * Excludes all directories and files under ${srcDir}/tooling with the exception of
+ * ${srcDir}/tooling/static
  *
  * @param srcDir Source directory
  * @param targetDir Target directory
  */
-function mirrorDir(srcDir, targetDir) {
-  fs.mkdirSync(targetDir, {"recursive" : true});
+function mirrorDirExcludeNonStaticTooling(srcDir, targetDir, relParentPath) {
+  relParentPath = relParentPath || "";
 
-  for(let srcName of fs.readdirSync(srcDir)) {
+  fs.mkdirSync(path.join(targetDir, relParentPath), {"recursive" : true});
 
-    const dstPath = path.join(targetDir, srcName);
+  for(let srcName of fs.readdirSync(path.join(srcDir, relParentPath))) {
 
-    const srcPath = path.join(srcDir, srcName);
+    const relSrcPath = path.join(relParentPath, srcName);
+
+    const srcPath = path.join(srcDir, relSrcPath);
+    const dstPath = path.join(targetDir, relSrcPath);
+
     const srcStat = fs.statSync(srcPath);
-
     if (srcStat.isDirectory()) {
 
-      mirrorDir(srcPath, dstPath);
+      if (relParentPath !== "tooling" || relSrcPath === "tooling/static")
+        mirrorDirExcludeNonStaticTooling(srcDir, targetDir, relSrcPath);
 
-    } else if (srcStat.isFile()) {
+    } else if (srcStat.isFile() && relParentPath !== "tooling") {
 
       fs.copyFileSync(srcPath, dstPath);
 
@@ -151,7 +161,7 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   fs.rmSync(buildPaths.pubDirPath, { recursive: true, force: true });
 
-  mirrorDir(buildPaths.docDirPath, buildPaths.pubDirPath);
+  mirrorDirExcludeNonStaticTooling(buildPaths.docDirPath, buildPaths.pubDirPath);
 
   /* render the document */
 
@@ -218,19 +228,19 @@ async function s3Upload(buildPaths, versionKey) {
 
     const s3PubKeyPrefix = s3KeyPrefix + versionKey + "/";
 
-    s3SyncDir(pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
+    s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
 
     /* create links */
 
     const cleanURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}`;
     linksDocContents = `[Clean](${encodeURI(cleanURL)})\n`
 
-    if (fs.existsSync(buildPaths.getBaseRedlinePath())) {
+    if (fs.existsSync(buildPaths.baseRedlinePath)) {
       const baseRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.getBaseRedlineName()}`;
       linksDocContents += `[Redline to current draft](${encodeURI(baseRedlineURL)})\n`
     }
 
-    if (fs.existsSync(buildPaths.getPubRedlinePath())) {
+    if (fs.existsSync(buildPaths.pubRedlinePath)) {
       const pubRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.getPubRedlineName()}`;
       linksDocContents += `[Redline to most recent edition](${encodeURI(pubRedlineURL)})\n`
     }
@@ -241,7 +251,7 @@ async function s3Upload(buildPaths, versionKey) {
     linksDocContents = "No links available";
   }
 
-  fs.writeFileSync(buildPaths.getPubLinksPath(), linksDocContents);
+  fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
 }
 
 async function render(docPath) {
