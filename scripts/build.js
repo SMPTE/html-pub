@@ -220,7 +220,7 @@ async function s3Upload(buildPaths, versionKey) {
   const s3Bucket = process.env.AWS_S3_BUCKET;
   const s3KeyPrefix = process.env.AWS_S3_KEY_PREFIX;
 
-  let linksDocContents;
+  let linksDocContents = "# Review links\n";
 
   if (s3Region && s3Bucket && s3KeyPrefix) {
 
