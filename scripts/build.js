@@ -388,8 +388,10 @@ async function main() {
 
   /* skip deployment if validating only */
 
-  if (buildPhase === "validate")
+  if (buildPhase === "validate") {
+    console.warn("Skipping deploy to S3.");
     return;
+  }
 
   /* deploy to S3 */
 

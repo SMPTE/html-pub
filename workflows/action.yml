@@ -46,7 +46,7 @@ runs:
         AWS_S3_REGION: ${{ inputs.AWS_S3_REGION }}
         AWS_S3_BUCKET: ${{ inputs.AWS_S3_BUCKET }}
         AWS_S3_KEY_PREFIX: ${{ inputs.AWS_S3_KEY_PREFIX }}
-      run: node doc/tooling/scripts/build.js
+      run: node doc/tooling/scripts/build.js deploy
 
     - name: Determine which pull request we are on
       uses: jwalton/gh-find-current-pr@v1
@@ -61,4 +61,4 @@ runs:
       with:
         number: ${{ steps.finder.outputs.pr }}
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-        path: build/pr-links.md
+        path: ./build/pr-links.md
