@@ -270,6 +270,8 @@ async function render(docPath) {
 
   const pageURL = "file://" + path.resolve(docPath) + (commitHash ? "?buildHash=" + commitHash : "");
 
+  console.log(`Rendering the document at ${pageURL}`)
+
   await page.goto(pageURL);
 
   const docTitle = await page.evaluate(() => document.title);
