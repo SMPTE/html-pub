@@ -178,7 +178,7 @@ async function build(buildPaths, baseRef, lastEdRef) {
     try {
       await generateRedline(buildPaths, baseRef, buildPaths.baseRedLineRefPath, buildPaths.baseRedlinePath);
     } catch (e) {
-      console.warn(`Could not generate a redline against base: ${baseRef}.`);
+      console.warn(`Could not generate a redline: ${e}.`);
     }
 
   }
@@ -192,7 +192,7 @@ async function build(buildPaths, baseRef, lastEdRef) {
     try {
       await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
     } catch (e) {
-      console.warn(`Could not generate redline against the latest edition tag: ${lastEdRef}.`);
+      console.warn(`Could not generate a redline: ${e}.`);
     }
 
   }
@@ -357,12 +357,15 @@ async function main() {
 
   const baseRef = process.env.GITHUB_BASE_REF || null;
 
-  let branchName = null;
-  try {
-    branchName = child_process.execSync(`git branch --show-current`).toString().trim();
-    console.log(`Currently on branch: ${branchName}`);
-  } catch (e) {
-    throw Error("Cannot retrieve branch name.");
+  let branchName = process.env.GITHUB_REF;
+
+  if (branchName == null) {
+    try {
+      branchName = child_process.execSync(`git branch --show-current`).toString().trim();
+      console.log(`Currently on branch: ${branchName}`);
+    } catch (e) {
+      throw Error("Cannot retrieve branch name.");
+    }
   }
 
   let commitHash = null;
