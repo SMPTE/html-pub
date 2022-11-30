@@ -369,7 +369,7 @@ async function main() {
   let branchName = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
   if (typeof branchName == "undefined") {
     try {
-      branchName = child_process.execSync(`git branch --show-current`).toString().trim();
+      branchName = child_process.execSync(`git rev-parse --abbrev-ref HEAD`).toString().trim();
     } catch (e) {
       throw Error("Cannot retrieve branch name.");
     }
