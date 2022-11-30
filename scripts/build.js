@@ -202,9 +202,9 @@ async function build(buildPaths, baseRef, lastEdRef) {
 async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
   if (fs.existsSync(buildPaths.refDirPath))
-    child_process.execSync(`git worktree remove -f ${buildPaths.refDirPath}`);
+    fs.rmSync(buildPaths.refDirPath, { recursive: true, force: true });
 
-  child_process.execSync(`git worktree add -f ${buildPaths.refDirPath} ${refCommit}`);
+  child_process.execSync(`git clone -b ${refCommit} . ${buildPaths.refDirPath}`);
 
   if (! fs.existsSync(buildPaths.refDirPath))
     throw Error("Reference file does not exist");
