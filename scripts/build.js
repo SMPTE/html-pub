@@ -238,12 +238,12 @@ async function s3Upload(buildPaths, versionKey) {
     linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`
 
     if (fs.existsSync(buildPaths.baseRedlinePath)) {
-      const baseRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.getBaseRedlineName()}`;
+      const baseRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.baseRedlineName}`;
       linksDocContents += `[Redline to current draft](${encodeURI(baseRedlineURL)})\n`
     }
 
     if (fs.existsSync(buildPaths.pubRedlinePath)) {
-      const pubRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.getPubRedlineName()}`;
+      const pubRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.pubRedlineName}`;
       linksDocContents += `[Redline to most recent edition](${encodeURI(pubRedlineURL)})\n`
     }
 
@@ -367,7 +367,7 @@ async function main() {
   const baseRef = process.env.GITHUB_BASE_REF || null;
 
   let branchName = process.env.GITHUB_REF_NAME;
-  if (branchName == null) {
+  if (typeof branchName == "undefined") {
     try {
       branchName = child_process.execSync(`git branch --show-current`).toString().trim();
     } catch (e) {
