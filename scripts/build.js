@@ -355,7 +355,7 @@ async function main() {
 
   let branchName = null;
   try {
-    branchName = child_process.execSync(`git rev-parse --abbrev-ref HEAD`).toString().trim();
+    branchName = child_process.execSync(`git branch --show-current`).toString().trim();
   } catch (e) {
     throw Error("Cannot retrieve branch name.");
   }
