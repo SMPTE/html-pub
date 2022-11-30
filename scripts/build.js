@@ -274,25 +274,32 @@ async function render(docPath) {
 
   const docTitle = await page.evaluate(() => document.title);
 
-  await page.evaluate(() => {
-    /* remove all scripts */
-    const elements = document.getElementsByTagName('script');
-    for (let i = elements.length - 1; i >= 0; i--)
-      elements[i].parentNode.removeChild(elements[i]);
+  try {
 
-    /* refuse to render if there are page errors */
-    if (listEvents().length)
-      throw new Error(`Page has errors`);
-  })
+    await page.evaluate(() => {
+      /* remove all scripts */
+      const elements = document.getElementsByTagName('script');
+      for (let i = elements.length - 1; i >= 0; i--)
+        elements[i].parentNode.removeChild(elements[i]);
 
-  const docHTML = await page.content();
+      /* refuse to render if there are page errors */
+      if (listEvents().length)
+        throw new Error(`Page has errors`);
+    })
 
-  await browser.close();
+    const docHTML = await page.content();
 
-  return {
-    "docHTML": docHTML,
-    "docTitle": docTitle
-  };
+    return {
+      "docHTML": docHTML,
+      "docTitle": docTitle
+    };
+
+  } finally {
+
+    await browser.close();
+
+  }
+
 }
 
 class BuildPaths {
@@ -358,23 +365,23 @@ async function main() {
   const baseRef = process.env.GITHUB_BASE_REF || null;
 
   let branchName = process.env.GITHUB_REF;
-
   if (branchName == null) {
     try {
       branchName = child_process.execSync(`git branch --show-current`).toString().trim();
-      console.log(`Currently on branch: ${branchName}`);
+      
     } catch (e) {
       throw Error("Cannot retrieve branch name.");
     }
   }
+  console.log(`Current branch: ${branchName}`);
 
   let commitHash = null;
   try {
     commitHash = child_process.execSync(`git rev-parse HEAD`).toString().trim();
-    console.log(`Currently commit hash: ${commitHash}`);
   } catch (e) {
     throw Error("Cannot retrieve commit hash.");
   }
+  console.log(`Current commit hash: ${commitHash}`);
 
   /* validate source document */
 
