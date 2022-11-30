@@ -366,7 +366,7 @@ async function main() {
 
   const baseRef = process.env.GITHUB_BASE_REF || null;
 
-  let branchName = process.env.GITHUB_REF_NAME;
+  let branchName = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
   if (typeof branchName == "undefined") {
     try {
       branchName = child_process.execSync(`git branch --show-current`).toString().trim();
