@@ -204,7 +204,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
   if (fs.existsSync(buildPaths.refDirPath))
     fs.rmSync(buildPaths.refDirPath, { recursive: true, force: true });
 
-  child_process.execSync(`git clone -b ${refCommit} . ${buildPaths.refDirPath}`);
+  child_process.execSync(`git clone --recurse-submodules -b ${refCommit} . ${buildPaths.refDirPath}`);
 
   if (! fs.existsSync(buildPaths.refDirPath))
     throw Error("Reference file does not exist");
@@ -366,11 +366,10 @@ async function main() {
 
   const baseRef = process.env.GITHUB_BASE_REF || null;
 
-  let branchName = process.env.GITHUB_REF;
+  let branchName = process.env.GITHUB_REF_NAME;
   if (branchName == null) {
     try {
       branchName = child_process.execSync(`git branch --show-current`).toString().trim();
-      
     } catch (e) {
       throw Error("Cannot retrieve branch name.");
     }
