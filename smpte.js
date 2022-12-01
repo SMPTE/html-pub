@@ -77,7 +77,7 @@ function loadDocMetadata() {
   metadata.pubNumber = params.get("pubNumber") || getHeadMetadata("pubNumber");
   metadata.pubDateTime = params.get("pubDateTime") || getHeadMetadata("pubDateTime");
 
-  if (["pub", "draft"].indexOf(metadata.pubState))
+  if (["pub", "draft"].indexOf(metadata.pubState) === -1)
     logEvent(`Unknown publication status: ${metadata.pubState}`);
 
   return metadata;
@@ -103,7 +103,7 @@ function insertFrontMatter(docMetadata) {
     asyncAddStylesheet(resolveScriptRelativePath("smpte-draft.css"));
 
   const actualPubDateTime = (() => {
-    if (docMetadata.pubDateTime === null)
+    if (docMetadata.pubDateTime === null || docMetadata.pubState == "draft")
       return new Date();
 
     return docMetadata.pubDateTime;
@@ -130,7 +130,7 @@ function insertFrontMatter(docMetadata) {
     <img id="smpte-logo" src="${resolveStaticResourcePath("smpte-logo.png")}" alt="SMPTE logo" />
     <div id="long-doc-type">${longDoctype}</div>
     <h1>${docMetadata.pubTitle}</h1>
-    <div id="doc-status">${publicationState} ${actualPubDateTime}</div>
+    <div id="doc-status">${publicationState} - ${actualPubDateTime}</div>
   <hr />
   </section>`;
 
