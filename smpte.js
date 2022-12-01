@@ -33,6 +33,10 @@ function resolveScriptRelativePath(path) {
   return new URL(path, _SCRIPT_PATH);
 }
 
+function resolveStaticResourcePath(resourceName) {
+  return `tooling/static/${resourceName}`;
+}
+
 function asyncFetchLocal(url) {
   return new Promise(function(resolve, reject) {
     var xhr = new XMLHttpRequest
@@ -73,6 +77,9 @@ function loadDocMetadata() {
   metadata.pubNumber = params.get("pubNumber") || getHeadMetadata("pubNumber");
   metadata.pubDateTime = params.get("pubDateTime") || getHeadMetadata("pubDateTime");
 
+  if (["pub", "draft"].indexOf(metadata.pubState) === -1)
+    logEvent(`Unknown publication status: ${metadata.pubState}`);
+
   return metadata;
 }
 
@@ -92,29 +99,38 @@ function insertFrontMatter(docMetadata) {
 
   const longDoctype = { "AG": "Administrative Guideline" }[docMetadata.pubType];
 
-  if (docMetadata.pubState == "draft") {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = resolveScriptRelativePath("smpte-draft.css");
-    document.head.appendChild(link);
-  }
+  if (docMetadata.pubState == "draft")
+    asyncAddStylesheet(resolveScriptRelativePath("smpte-draft.css"));
 
   const actualPubDateTime = (() => {
-    if (docMetadata.pubDateTime === null)
+    if (docMetadata.pubDateTime === null || docMetadata.pubState == "draft")
       return new Date();
 
     return docMetadata.pubDateTime;
   })();
 
+  let publicationState;
+
+  switch (docMetadata.pubState) {
+    case "draft":
+      publicationState = "Draft";
+      break;
+    case "pub":
+      publicationState = "Published";
+      break
+    default:
+      publicationState = "XXX";
+  }
+
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = FRONT_MATTER_ID;
-  sec.innerHTML = `<div id="doc-designator" itemtype="http://purl.org/dc/elements/1.1/">
+  sec.innerHTML = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
-    <img id="smpte-logo" src="${resolveScriptRelativePath("smpte-logo.png")}" />
+    <img id="smpte-logo" src="${resolveStaticResourcePath("smpte-logo.png")}" alt="SMPTE logo" />
     <div id="long-doc-type">${longDoctype}</div>
     <h1>${docMetadata.pubTitle}</h1>
-    <div id="doc-status">${docMetadata.pubState} ${actualPubDateTime}</div>
+    <div id="doc-status">${publicationState} - ${actualPubDateTime}</div>
   <hr />
   </section>`;
 
@@ -583,6 +599,29 @@ function numberFigures() {
   }
 }
 
+function numberNotes() {
+
+  for (let section of document.querySelectorAll("section")) {
+
+    let notes = [];
+
+    for (const child of section.children)
+      if (child.classList.contains("note"))
+        notes.push(child);
+
+    if (notes.length > 1) {
+      let counter = 1;
+      for (let note of notes) {
+        note.insertBefore(document.createTextNode(`NOTE ${counter++} — `), note.firstChild);
+      }
+
+    } else if (notes.length === 1) {
+      notes[0].insertBefore(document.createTextNode(`NOTE — `), notes[0].firstChild);
+    }
+
+  }
+}
+
 function _normalizeTerm(term) {
   return term.trim().toLowerCase().replace(/\s+/g," ");
 }
@@ -732,6 +771,7 @@ function render() {
   numberSections(document.body, "");
   numberTables();
   numberFigures();
+  numberNotes();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
 }
@@ -748,6 +788,7 @@ function listEvents() {
 
 document.addEventListener('DOMContentLoaded', () => {
   try {
+    asyncAddStylesheet(resolveScriptRelativePath("smpte.css"));
     render();
   } catch (e) {
     logEvent(e);

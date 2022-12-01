@@ -1,0 +1,64 @@
+name: Build SMTPE specification
+
+inputs:
+  AWS_S3_REGION:
+    required: true
+  AWS_S3_BUCKET:
+    required: true
+  AWS_S3_KEY_PREFIX:
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    required: true
+  AWS_ACCESS_KEY_ID:
+    required: true
+  GITHUB_TOKEN:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install jing
+      shell: bash
+      run: sudo apt-get install jing
+
+    - name: Install vnu
+      shell: bash
+      run: sudo pip install html5validator==0.4.2
+
+    - name: Install node dependencies
+      env:
+        PUPPETEER_PRODUCT: chrome
+      shell: bash
+      run: |
+        npm install puppeteer
+        npm install @aws-sdk/client-s3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1-node16
+      with:
+        aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ inputs.AWS_S3_REGION }}
+
+    - name: Build and deploy spec
+      shell: bash
+      env:
+        AWS_S3_REGION: ${{ inputs.AWS_S3_REGION }}
+        AWS_S3_BUCKET: ${{ inputs.AWS_S3_BUCKET }}
+        AWS_S3_KEY_PREFIX: ${{ inputs.AWS_S3_KEY_PREFIX }}
+      run: node doc/tooling/scripts/build.js deploy
+
+    - name: Determine which pull request we are on
+      uses: jwalton/gh-find-current-pr@v1
+      if: github.event_name == 'pull_request'
+      id: finder
+      with:
+        github-token: ${{ inputs.GITHUB_TOKEN }}
+
+    - name: Add review links to the pull request
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: github.event_name == 'pull_request' && steps.finder
+      with:
+        number: ${{ steps.finder.outputs.pr }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        path: ./build/pr-links.md

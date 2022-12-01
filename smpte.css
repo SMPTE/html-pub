@@ -148,11 +148,6 @@ dd.abbr {
   margin-left: 1rem;
 }
 
-.note:before {
-  content: "NOTE " counter(notes-counter) " — ";
-  counter-increment: notes-counter;
-}
-
 /* example */
 
 .example {
@@ -167,7 +162,6 @@ dd.abbr {
 
 section#sec-toc ol {
   list-style-type: none;
-  padding-inline-start: 2ch;
   margin: 0.25rem 0 0.25rem 0;
 }
 
