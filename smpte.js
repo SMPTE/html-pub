@@ -599,6 +599,29 @@ function numberFigures() {
   }
 }
 
+function numberNotes() {
+
+  for (let section of document.querySelectorAll("section")) {
+
+    let notes = [];
+
+    for (const child of section.children)
+      if (child.classList.contains("note"))
+        notes.push(child);
+
+    if (notes.length > 1) {
+      let counter = 1;
+      for (let note of notes) {
+        note.insertBefore(document.createTextNode(`NOTE ${counter++} — `), note.firstChild);
+      }
+
+    } else if (notes.length === 1) {
+      notes[0].insertBefore(document.createTextNode(`NOTE — `), notes[0].firstChild);
+    }
+
+  }
+}
+
 function _normalizeTerm(term) {
   return term.trim().toLowerCase().replace(/\s+/g," ");
 }
@@ -748,6 +771,7 @@ function render() {
   numberSections(document.body, "");
   numberTables();
   numberFigures();
+  numberNotes();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
 }
