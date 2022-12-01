@@ -204,7 +204,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
   if (fs.existsSync(buildPaths.refDirPath))
     fs.rmSync(buildPaths.refDirPath, { recursive: true, force: true });
 
-  child_process.execSync(`git clone --recurse-submodules -b ${refCommit} . ${buildPaths.refDirPath}`);
+  child_process.execSync(`git clone --recurse-submodules -b origin/${refCommit} . ${buildPaths.refDirPath}`);
 
   if (! fs.existsSync(buildPaths.refDirPath))
     throw Error("Reference file does not exist");
