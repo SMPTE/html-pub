@@ -30,9 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 _SCRIPT_PATH = (new URL(document.currentScript.src)).pathname;
 
 function resolveScriptRelativePath(path) {
-  const relPath = "../".repeat(location.pathname.split("/").length - 1) +
-    _SCRIPT_PATH.split("/").slice(0, -1).join("/") + path;
-  return relPath;
+  return _SCRIPT_PATH.split("/").slice(0, -1).concat([path]).join("/");
 }
 
 function resolveStaticResourcePath(resourceName) {

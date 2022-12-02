@@ -70,7 +70,7 @@ function guessContentTypeFromExtenstion(filePath) {
  * @param srcDir Source directory
  * @param targetDir Target directory
  */
-function mirrorDirExcludeNonStaticTooling(srcDir, targetDir, relParentPath) {
+function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
   relParentPath = relParentPath || "";
 
   fs.mkdirSync(path.join(targetDir, relParentPath), {"recursive" : true});
@@ -85,10 +85,10 @@ function mirrorDirExcludeNonStaticTooling(srcDir, targetDir, relParentPath) {
     const srcStat = fs.statSync(srcPath);
     if (srcStat.isDirectory()) {
 
-      if (relParentPath !== "tooling" || relSrcPath === "tooling/static")
-        mirrorDirExcludeNonStaticTooling(srcDir, targetDir, relSrcPath);
+      if (relParentPath !== "tooling")
+        mirrorDirExcludeTooling(srcDir, targetDir, relSrcPath);
 
-    } else if (srcStat.isFile() && relParentPath !== "tooling") {
+    } else if (srcStat.isFile()) {
 
       fs.copyFileSync(srcPath, dstPath);
 
@@ -161,13 +161,20 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   fs.rmSync(buildPaths.pubDirPath, { recursive: true, force: true });
 
-  mirrorDirExcludeNonStaticTooling(buildPaths.docDirPath, buildPaths.pubDirPath);
+  mirrorDirExcludeTooling(buildPaths.docDirPath, buildPaths.pubDirPath);
 
   /* render the document */
 
   const renderedDoc = await render(buildPaths.docPath);
 
   fs.writeFileSync(buildPaths.renderedDocPath, renderedDoc.docHTML);
+
+  /* mirror static directory */
+
+  mirrorDirExcludeTooling(
+    path.join(path.dirname(renderedDoc.scriptPath), buildPaths.pubStaticDirName),
+    path.join(buildPaths.pubDirPath, buildPaths.pubStaticDirName)
+    );
 
   /* generate base redline, if requested */
 
@@ -266,23 +273,29 @@ async function render(docPath) {
     args: ["--disable-dev-shm-usage", "--allow-file-access-from-files"],
   });
 
-  const page = await browser.newPage();
-
-  const pageURL = "file://" + path.resolve(docPath) + (commitHash ? "?buildHash=" + commitHash : "");
-
-  console.log(`Rendering the document at ${pageURL}`)
-
-  await page.goto(pageURL);
-
-  const docTitle = await page.evaluate(() => document.title);
-
   try {
+
+    const page = await browser.newPage();
+
+    const pageURL = "file://" + path.resolve(docPath) + (commitHash ? "?buildHash=" + commitHash : "");
+
+    console.log(`Rendering the document at ${pageURL}`)
+
+    await page.goto(pageURL);
+
+    const docTitle = await page.evaluate(() => document.title);
+
+    const scriptPath = await page.evaluate(() => _SCRIPT_PATH);
 
     await page.evaluate(() => {
       /* remove all scripts */
       const elements = document.getElementsByTagName('script');
       for (let i = elements.length - 1; i >= 0; i--)
         elements[i].parentNode.removeChild(elements[i]);
+
+      /* update the location of static assets */
+
+      document.getElementById("smpte-logo").src = "static/smpte-logo.png";
 
       /* refuse to render if there are page errors */
       if (listEvents().length)
@@ -293,7 +306,8 @@ async function render(docPath) {
 
     return {
       "docHTML": docHTML,
-      "docTitle": docTitle
+      "docTitle": docTitle,
+      "scriptPath": scriptPath
     };
 
   } finally {
