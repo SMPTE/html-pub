@@ -338,11 +338,11 @@ class BuildPaths {
 
 class BuildConfig {
   constructor(docDirPath) {
-    let config = null;
+    let config = {};
     try {
       config = JSON.parse(fs.readFileSync(path.join(docDirPath, ".smpte-build.json")));
     } catch {
-      throw Error("Could not read the publication config file.");
+      console.log("Could not read the publication config file.");
     }
 
     this.lastEdRef = config.latestEditionTag || null;

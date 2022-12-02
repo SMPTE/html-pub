@@ -27,14 +27,16 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-_SCRIPT_PATH = document.currentScript.src;
+_SCRIPT_PATH = (new URL(document.currentScript.src)).pathname;
 
 function resolveScriptRelativePath(path) {
-  return new URL(path, _SCRIPT_PATH);
+  const relPath = "../".repeat(location.pathname.split("/").length - 1) +
+    _SCRIPT_PATH.split("/").slice(0, -1).join("/") + path;
+  return relPath;
 }
 
 function resolveStaticResourcePath(resourceName) {
-  return `tooling/static/${resourceName}`;
+  return resolveScriptRelativePath(`static/${resourceName}`);
 }
 
 function asyncFetchLocal(url) {
