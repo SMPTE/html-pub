@@ -54,8 +54,10 @@ function guessContentTypeFromExtenstion(filePath) {
       return "image/svg";
     case ".css":
       return "text/css";
+    case ".txt":
+      return "text/plain";
     default:
-      return null;
+      return "application/octet-stream";
   }
 
 }
