@@ -220,7 +220,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
   fs.writeFileSync(refPath, r.docHTML);
 
-  child_process.execSync(`perl doc/tooling/lib/htmldiff/htmldiff.pl ${refPath} ${buildPaths.renderedDocPath} ${rlPath}`);
+  child_process.execSync(`perl ${path.dirname(r.scriptPath)}/lib/htmldiff/htmldiff.pl ${refPath} ${buildPaths.renderedDocPath} ${rlPath}`);
 
 }
 
