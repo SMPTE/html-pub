@@ -68,7 +68,18 @@
     </section>
 
     <section id="sec-snippets">
-      <h3>Embedding snippets</h3>
+      <h3>External code snippets</h3>
+
+      <p>External code snippets can be inserted by setting the <code>data-include</code> attribute on a <code>pre</code> element to
+      the relative path of the snippet. For example:</p>
+
+      <pre>&lt;pre data-include=&quot;snippets/example.txt&quot;&gt;&lt;/pre&gt;</pre>
+
+      <p>results in:</p>
+
+      <pre data-include="snippets/example.txt"></pre>
+
+      <p>Keeping code snippets separate from the main element allows the snippets to be individually formatted and validated.</p>
     </section>
   </section>
 
@@ -82,6 +93,11 @@
 
   <section id="sec-gh-integration">
     <h2>GitHub integration</h2>
+
+    <p>In order to automate the creation of clean and redline copies of document when commits are pushed to GitHub, the following
+    workflow file should be used:</p>
+
+    <pre data-include="../.github/workflows/main.yml"></pre>
   </section>
 
 </body>

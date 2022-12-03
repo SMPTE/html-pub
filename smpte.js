@@ -757,9 +757,21 @@ function resolveLinks(docMetadata) {
   }
 }
 
+function insertSnippets() {
+  Array.from(
+    document.querySelectorAll("pre[data-include]"),
+    (e) => {
+      asyncFetchLocal(e.getAttribute("data-include"))
+        .then(data => e.textContent = data)
+        .catch(err => logError("Cannot fetch: " + err));
+    }
+  );
+}
+
 function render() {
   let docMetadata = loadDocMetadata();
 
+  insertSnippets();
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
   insertConformance(docMetadata);

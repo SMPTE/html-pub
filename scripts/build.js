@@ -43,7 +43,7 @@ const { argv } = require('process');
  * @param filePath Path of the file
  * @returns Content type
  */
-function guessContentTypeFromExtenstion(filePath) {
+function guessContentTypeFromExtension(filePath) {
 
   switch (path.extname(filePath)) {
     case ".html":
@@ -54,8 +54,10 @@ function guessContentTypeFromExtenstion(filePath) {
       return "image/svg";
     case ".css":
       return "text/css";
+    case ".txt":
+      return "text/plain";
     default:
-      return null;
+      return "application/octet-stream";
   }
 
 }
@@ -120,10 +122,7 @@ function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
 
     } else if (srcStat.isFile()) {
 
-      const contentType = guessContentTypeFromExtenstion(srcPath);
-
-      if (contentType === null)
-        throw Error(`Unknown content type for: ${srcPath}`);
+      const contentType = guessContentTypeFromExtension(srcPath);
 
       const cmd = new PutObjectCommand({
         Body: fs.createReadStream(srcPath),
@@ -220,7 +219,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
   fs.writeFileSync(refPath, r.docHTML);
 
-  child_process.execSync(`perl doc/tooling/lib/htmldiff/htmldiff.pl ${refPath} ${buildPaths.renderedDocPath} ${rlPath}`);
+  child_process.execSync(`perl ${path.dirname(r.scriptPath)}/lib/htmldiff/htmldiff.pl ${refPath} ${buildPaths.renderedDocPath} ${rlPath}`);
 
 }
 
