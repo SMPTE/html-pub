@@ -83,6 +83,9 @@ function loadDocMetadata() {
   return metadata;
 }
 
+
+const SMPTE_FRONT_MATTER_ID = "sec-front-matter";
+
 function insertFrontMatter(docMetadata) {
   const body = document.body;
 
@@ -90,8 +93,7 @@ function insertFrontMatter(docMetadata) {
     throw "Missing body element"
   }
 
-  const FRONT_MATTER_ID = "sec-front-matter";
-  let sec = document.getElementById(FRONT_MATTER_ID);
+  let sec = document.getElementById(SMPTE_FRONT_MATTER_ID);
 
   if (sec !== null) {
     throw "Front matter section already exists."
@@ -124,7 +126,7 @@ function insertFrontMatter(docMetadata) {
 
   sec = document.createElement("section");
   sec.className = "unnumbered";
-  sec.id = FRONT_MATTER_ID;
+  sec.id = SMPTE_FRONT_MATTER_ID;
   sec.innerHTML = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
     <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
     <img id="smpte-logo" src="${resolveStaticResourcePath("smpte-logo.png")}" alt="SMPTE logo" />
@@ -136,6 +138,8 @@ function insertFrontMatter(docMetadata) {
 
   body.insertBefore(sec, body.firstChild);
 }
+
+const SMPTE_TOC_ID = "sec-toc";
 
 function insertTOC(docMetadata) {
   function _processSubSections(parentTOCItem, section, level) {
@@ -186,15 +190,13 @@ function insertTOC(docMetadata) {
 
   }
 
-  if (! document.body) {
-    logEvent("No document body")
-    return;
+  let toc = document.getElementById(SMPTE_TOC_ID);
+
+  if (toc === null) {
+    toc = document.createElement("section");
+    toc.id = SMPTE_TOC_ID;
+    document.body.insertBefore(toc, document.getElementById(SMPTE_FRONT_MATTER_ID).nextSibling);
   }
-
-  const toc = document.getElementById("sec-toc");
-
-  if (toc === null)
-    return;
 
   const h2 = document.createElement("h2");
   h2.innerText = "Table of contents";
@@ -205,8 +207,10 @@ function insertTOC(docMetadata) {
   _processSubSections(toc, document.body, 1);
 }
 
+const SMPTE_INTRODUCTION_ID = "sec-introduction";
+
 function insertIntroduction(docMetadata) {
-  const sec = document.getElementById("sec-introduction");
+  const sec = document.getElementById(SMPTE_INTRODUCTION_ID);
 
   if (sec === null)
     return;
@@ -228,11 +232,13 @@ function insertIntroduction(docMetadata) {
   h2.innerText = "Introduction";
 }
 
+const SMPTE_SCOPE_ID = "sec-scope";
+
 function insertScope(docMetadata) {
-  const sec = document.getElementById("sec-scope");
+  const sec = document.getElementById(SMPTE_SCOPE_ID);
 
   if (sec === null) {
-    logEvent("Missing required `scope` section.");
+    logEvent("Missing required scope section.");
     return;
   }
 
@@ -251,12 +257,16 @@ function insertScope(docMetadata) {
   h2.innerText = "Scope";
 }
 
+
+const SMPTE_NORM_REFS_ID = "sec-normative-references";
+
 function insertNormativeReferences(docMetadata) {
-  const sec = document.getElementById("sec-normative-references");
+  let sec = document.getElementById(SMPTE_NORM_REFS_ID);
 
   if (sec === null) {
-    logEvent("Missing required `normative references` section.");
-    return;
+    sec = document.createElement("section");
+    sec.id = SMPTE_NORM_REFS_ID;
+    document.body.insertBefore(sec, document.getElementById(SMPTE_CONFORMANCE_ID).nextSibling);
   }
 
   const p = document.createElement("p");
@@ -288,38 +298,39 @@ function insertNormativeReferences(docMetadata) {
   h2.innerText = "Normative references";
 }
 
+const SMPTE_TERMS_ID = "sec-terms-and-definitions";
+
 function insertTermsAndDefinitions(docMetadata) {
-  const sec = document.getElementById("sec-terms-and-definitions");
+  let sec = document.getElementById(SMPTE_TERMS_ID);
 
   if (sec === null) {
-    logEvent("Missing required `terms and definitions` section.");
-    return;
+    sec = document.createElement("section");
+    sec.id = SMPTE_TERMS_ID;
+    document.body.insertBefore(sec, document.getElementById(SMPTE_NORM_REFS_ID).nextSibling);
   }
 
   const p = document.createElement("p");
 
   if (sec.childElementCount !== 0) {
-    
-    let defList = document.getElementById("terms-int-defs")
-    let extList = document.getElementById("terms-ext-defs")
+
+    let defList = document.getElementById("terms-int-defs");
+    let extList = document.getElementById("terms-ext-defs");
 
     if (extList === null && defList !== null) {
-      p.innerHTML = `For the purposes of this document, the following terms and definitions apply:`
+      p.innerHTML = `For the purposes of this document, the following terms and definitions apply:`;
     } else if (extList !== null && defList === null) {
-      let extList_text = extList.innerHTML
-      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents apply:`
+      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents apply:`;
     } else if (extList !== null && defList !== null) {
-      let extList_text = extList.innerHTML
-      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents and the additional terms and definitions apply:`
+      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents and the additional terms and definitions apply:`;
     }
 
   } else {
-    console.log("neither exists")
     p.innerHTML = `No terms and definitions are listed in this document.` 
   }
 
   sec.insertBefore(p, sec.firstChild);
 
+  /* set the heading */
 
   let h2 = sec.getElementsByTagName("h2");
 
@@ -363,12 +374,17 @@ function insertBibliography(docMetadata) {
   h2.innerText = "Bibliography";
 }
 
+const SMPTE_CONFORMANCE_ID = "sec-conformance";
+
 function insertConformance(docMetadata) {
-  const sec = document.getElementById("sec-conformance");
+
+  let sec = document.getElementById(SMPTE_CONFORMANCE_ID);
 
   if (sec === null) {
-    logEvent("Missing required `conformance` section.");
-    return;
+    sec = document.createElement("section");
+    sec.id = SMPTE_CONFORMANCE_ID;
+
+    document.body.insertBefore(sec, document.getElementById(SMPTE_SCOPE_ID).nextSibling);
   }
 
   let implConformance = "";
@@ -424,12 +440,15 @@ ${implConformance}
   `;
 }
 
+const SMPTE_FOREWORD_ID = "sec-foreword";
+
 function insertForeword(docMetadata) {
-  let sec = document.getElementById("sec-foreword");
+  let sec = document.getElementById(SMPTE_FOREWORD_ID);
 
   if (sec === null) {
-    logEvent("Missing required `foreword` section.");
-    return;
+    sec = document.createElement("section");
+    sec.id = SMPTE_FOREWORD_ID;
+    document.body.insertBefore(sec, document.getElementById(SMPTE_FRONT_MATTER_ID).nextSibling);
   }
 
   sec.classList.add("unnumbered");
@@ -772,13 +791,15 @@ function render() {
   let docMetadata = loadDocMetadata();
 
   insertSnippets();
+
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
-  insertConformance(docMetadata);
   insertIntroduction(docMetadata);
   insertScope(docMetadata);
+  insertConformance(docMetadata);
   insertNormativeReferences(docMetadata);
   insertTermsAndDefinitions(docMetadata);
+
   insertBibliography(docMetadata);
   numberSections(document.body, "");
   numberTables();
