@@ -266,7 +266,7 @@ function insertNormativeReferences(docMetadata) {
   if (sec === null) {
     sec = document.createElement("section");
     sec.id = SMPTE_NORM_REFS_ID;
-    document.body.insertBefore(sec, document.getElementById(SMPTE_SCOPE_ID).nextSibling);
+    document.body.insertBefore(sec, document.getElementById(SMPTE_CONFORMANCE_ID).nextSibling);
   }
 
   const p = document.createElement("p");
@@ -384,13 +384,7 @@ function insertConformance(docMetadata) {
     sec = document.createElement("section");
     sec.id = SMPTE_CONFORMANCE_ID;
 
-    let prevSibling = document.getElementById(SMPTE_INTRODUCTION_ID);
-
-    if (prevSibling === null) {
-      prevSibling = document.getElementById(SMPTE_FOREWORD_ID);
-    }
-
-    document.body.insertBefore(sec, prevSibling.nextSibling);
+    document.body.insertBefore(sec, document.getElementById(SMPTE_SCOPE_ID).nextSibling);
   }
 
   let implConformance = "";
