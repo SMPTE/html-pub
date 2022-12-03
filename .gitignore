@@ -1,0 +1,13 @@
+# SMPTE HTML Publication artifacts
+/build
+
+# MacOS
+.DS_Store
+._*
+
+# Unix
+*~
+
+# Windows
+Thumbs.db
+.vscode

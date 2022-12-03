@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+
+<head itemscope="itemscope" itemtype="http://smpte.org/standards/documents">
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="../smpte.js"></script>
+  <meta itemprop="pubType" content="AG" />
+  <meta itemprop="pubNumber" content="XX" />
+  <meta itemprop="pubState" content="draft" />
+  <meta itemprop="pubDateTime" content="20XX-XX-XX" />
+  <title>Editing HTML documents</title>
+</head>
+
+<body>
+
+  <section id="sec-toc"></section>
+
+  <section id="sec-foreword"></section>
+
+  <section id="sec-introduction">
+    <p>Authoring SMPTE documents consist of two aspects:</p>
+    <ul>
+      <li>structure and syntax of the document; and</li>
+      <li>managing revisions using GitHub.</li>
+    </ul>
+  </section>
+
+  <section id="sec-scope">
+    <p>This Administrative Guideline describes the process for auhtoring SMPTE documents using HTML.</p>
+  </section>
+
+  <section id="sec-conformance"></section>
+
+  <section id="sec-normative-references">
+  </section>
+
+  <section id="sec-terms-and-definitions"></section>
+
+  <section id="sec-directory-layout">
+    <h2>Directory layout</h2>
+
+    <p>A document consists of multiple files arranged in the following directory structure:</p>
+
+    <ul>
+      <li><code>doc/main.html</code>: main element of the document(see <a href="#sec-main-element"></a>).</li>
+      <li><code>doc/images/</code>: directory containing images referenced by the main element (see) <a href="#sec-figures"></a>).</li>
+      <li><code>doc/snippets/</code>: directory containing snippets embedded in the main element (see <a href="#sec-snippets"></a>).</li>
+      <li><code>tooling/</code>: directory consisting of the tools necessary to render SMPTE documents (see <a href="#sec-tooling"></a>).</li>
+      <li><code>.smpte-build.json</code>: JSON file used to configure the HTML rendering process (see <a href="#sec-build-configuration"></a>).</li>
+      <li><code>.gitignore</code>: Prevents build and operating system artifacts from being tracked by Git.</li>
+      <li><code>.github/workflows/main.yml</code>: Allows automated HTML rendering and redlining in GitHub (see <a href="#sec-gh-integration"></a>).</li>
+    </ul>
+  </section>
+
+  <section id="sec-main-element">
+    <h2>Main element structure and syntax</h2>
+
+    <section id="sec-main-skeleton">
+      <h3>Minimal document</h3>
+    </section>
+
+    <section></section>
+
+    <section id="sec-figures">
+      <h3>Figures</h3>
+    </section>
+
+    <section id="sec-snippets">
+      <h3>Embedding snippets</h3>
+    </section>
+  </section>
+
+  <section id="sec-tooling">
+    <h2>Tooling</h2>
+  </section>
+
+  <section id="sec-build-configuration">
+    <h2>Build configuration</h2>
+  </section>
+
+  <section id="sec-gh-integration">
+    <h2>GitHub integration</h2>
+  </section>
+
+</body>
+</html>
