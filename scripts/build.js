@@ -43,7 +43,7 @@ const { argv } = require('process');
  * @param filePath Path of the file
  * @returns Content type
  */
-function guessContentTypeFromExtenstion(filePath) {
+function guessContentTypeFromExtension(filePath) {
 
   switch (path.extname(filePath)) {
     case ".html":
@@ -122,10 +122,7 @@ function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
 
     } else if (srcStat.isFile()) {
 
-      const contentType = guessContentTypeFromExtenstion(srcPath);
-
-      if (contentType === null)
-        throw Error(`Unknown content type for: ${srcPath}`);
+      const contentType = guessContentTypeFromExtension(srcPath);
 
       const cmd = new PutObjectCommand({
         Body: fs.createReadStream(srcPath),
