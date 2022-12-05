@@ -663,7 +663,10 @@ function resolveLinks(docMetadata) {
 
     const terms = new Set();
 
-    terms.add(baseTerm);    
+    terms.add(baseTerm);
+
+    if (baseTerm.slice(-1) !== "s")
+      terms.add(baseTerm + "s");
 
     if (dfn.hasAttribute("data-lt")) {
       dfn.getAttribute("data-lt").split("|").forEach(t => terms.add(_normalizeTerm(t)));
