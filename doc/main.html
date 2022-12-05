@@ -29,7 +29,7 @@
 
   <section id="sec-normative-references">
     <ul>
-      <li><cite id="bib-HTML-5">HTML Standard</cite>, Living Standard. <a>https://html.spec.whatwg.org/</a></li>
+      <li><cite id="bib-HTML-5">HTML Standard</cite>, Living Standard. <a>https://html.spec.whatwg.org/multipage/</a></li>
     </ul>
   </section>
 
@@ -54,7 +54,8 @@
 
     <section id="sec-structure">
       <h3>Overall structure</h3>
-        <p>The main element is a well-formed HTML document as specified at <a href="#bib-HTML-5"></a>.</p>
+        <p>The main element shall be an HTML document represented using the XML syntax, as specified at <a
+        href="#bib-HTML-5"></a>.</p>
 
         <p>The basic structure of the main element is illustrated at <a href="#fig-structure-doc"></a>.</p>
 
@@ -67,6 +68,71 @@
 
     <section id="sec-head-element">
       <h3><code>head</code> element</h3>
+
+      <section>
+        <h4>General</h4>
+
+        <p>The <code>head</code> element shall contain the following:</p>
+
+        <ul>
+          <li><code>itemscope</code> attribute equal to <code>itemscope</code>;</li>
+          <li><code>itemtype</code> attribute equal to <code>http://smpte.org/standards/documents</code>;</li>
+          <li><code>&lt;meta charset=&quot;utf-8&quot; /&gt;</code>;</li>
+          <li><code>&lt;meta http-equiv=&quot;x-ua-compatible&quot; content=&quot;ie=edge&quot; /&gt;</code>;</li>
+          <li><code>&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot; /&gt;</code></li>
+          <li>a <code>script</code> element whose <code>src</code> attribute links to the <code>smpte.js</code> module in the
+          <code>tooling</code> directory;</li>
+          <li>a <code>meta</code> element that conforms to <a href="#sec-pubType"></a>;</li>
+          <li>a <code>meta</code> element that conforms to <a href="#sec-pubNumber"></a>;</li>
+          <li>a <code>meta</code> element that conforms to <a href="#sec-pubState"></a>;</li>
+          <li>a <code>meta</code> element that conforms to <a href="#sec-pubDateTime"></a>, if the document is published;</li>
+        </ul>
+
+        <p>The <code>title</code> element shall be equal to the title of the document, without any document number.</p>
+      </section>
+
+      <section id="sec-pubType">
+        <h4>pubType</h4>
+
+        <p>The element shall have an <code>itemprop</code> attribute equal to <code>pubType</code>.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to one of the following values:</p>
+
+        <ul>
+          <li><code>AG</code>, if the document is an Administrative Guideline.</li>
+        </ul>
+      </section>
+
+      <section id="sec-pubNumber">
+        <h4>pubNumber</h4>
+
+        <p>The element shall have an <code>itemprop</code> attribute equal to <code>pubNumber</code>.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to the document number.</p>
+      </section>
+
+      <section id="sec-pubState">
+        <h4>pubState</h4>
+
+        <p>The element shall have an <code>itemprop</code> attribute equal to <code>pubState</code>.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to one of the following values:</p>
+
+        <ul>
+          <li><code>draft</code>, if the document is a draft.</li>
+          <li><code>pub</code>, if the document is published.</li>
+        </ul>
+      </section>
+
+      <section id="sec-pubDateTime">
+        <h4>pubDateTime</h4>
+
+        <p>The element shall have an <code>itemprop</code> attribute equal to <code>pubDateTime</code>.</p>
+
+        <p>The element shall have a <code>content</code> attribute that conforms to the pattern <code>YYYY-MM-DD</code>, where
+        <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day of the publication date of the
+        document.</p>
+      </section>
     </section>
 
     <section>
