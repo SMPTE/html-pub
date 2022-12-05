@@ -102,7 +102,7 @@ function insertFrontMatter(docMetadata) {
   const longDoctype = { "AG": "Administrative Guideline" }[docMetadata.pubType];
 
   if (docMetadata.pubState == "draft")
-    asyncAddStylesheet(resolveScriptRelativePath("smpte-draft.css"));
+    asyncAddStylesheet(resolveScriptRelativePath("css/smpte-draft.css"));
 
   const actualPubDateTime = (() => {
     if (docMetadata.pubDateTime === null || docMetadata.pubState == "draft")
@@ -824,7 +824,7 @@ function listEvents() {
 
 document.addEventListener('DOMContentLoaded', () => {
   try {
-    asyncAddStylesheet(resolveScriptRelativePath("smpte.css"));
+    asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
     render();
   } catch (e) {
     logEvent(e);
@@ -832,7 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (listEvents().length > 0) {
 
-    asyncAddStylesheet(resolveScriptRelativePath("smpte-errors.css"));
+    asyncAddStylesheet(resolveScriptRelativePath("css/smpte-errors.css"));
 
     const eventList = document.createElement('ol');
     eventList.id = "event-list";
