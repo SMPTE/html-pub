@@ -34,7 +34,6 @@ function validate(doc, logger) {
   validateBody(doc.body, logger);
 }
 
-
 function validatePubType(head, logger) {
   const e = head.querySelector("meta[itemprop = 'pubType']");
 
@@ -141,35 +140,82 @@ function validateNormRefs(e, logger) {
   return true;
 }
 
-function validateClause(e, logger) {
+function validateExternalDefs(e, logger) {
+  if (e.tagName !== "UL" || e.id !== "terms-ext-defs")
+    return false;
 
-  function _validateClause(e, lvl, logger) {
-
-    let containsSection = false;
-    let containsNonSection = false;
-
-    for (let i = 0; i < e.childElementCount; i++) {
-      const child = e.children[i];
-
-      if (i == 0) {
-        if (child.tagName === `H${lvl}`)
-          continue;
-        logger.error(`Section ${e.id} is missing a heading.`);
+  for (const li of e.children) {
+    if (li.tagName === "LI") {
+      if (li.childElementCount !== 1 || li.firstElementChild.tagName !== "A") {
+        logger.error(`External definitions: each <li> element must contain exactly one <a> element.`);
       }
+    } else {
+      logger.error(`External definitions: the <ul> element must contain only <li> elements.`);
+    }
+  }
 
-      if (child.tagName === "SECTION") {
-        containsSection = true;
+  return true;
+}
 
-        _validateClause(child, lvl + 1 , logger)
-      } else {
-        containsNonSection = true;
-      }
+function validateInternalDefs(e, logger) {
+  if (e.tagName !== "DL" || e.id !== "terms-int-defs")
+    return false;
+
+  return true;
+}
+
+function validateDefs(e, logger) {
+  if (e.id !== "sec-terms-definitions-clause")
+    return false;
+
+  let hasExternalDefs = false;
+  let hasInternalDefs = false;
+
+  for (const child of e.children) {
+    if (validateExternalDefs(child, logger)) {
+      hasExternalDefs = true;
+      if (hasInternalDefs)
+        logger.error(`Terms and definitions: external definitions must come first.`);
+    } else if (validateInternalDefs(child, logger)) {
+      hasInternalDefs = true;
+    } else {
+      logger.error(`Terms and definitions: unknown element`);
+    }
+  }
+
+  return true;
+}
+
+
+function _validateClause(e, lvl, logger) {
+
+  let containsSection = false;
+  let containsNonSection = false;
+
+  for (let i = 0; i < e.childElementCount; i++) {
+    const child = e.children[i];
+
+    if (i == 0) {
+      if (child.tagName === `H${lvl}`)
+        continue;
+      logger.error(`Section ${e.id} is missing a heading.`);
     }
 
-    if (containsSection && containsNonSection)
-      logger.error(`Section ${e.id} combines section and non-section content.`);
+    if (child.tagName === "SECTION") {
+      containsSection = true;
 
+      _validateClause(child, lvl + 1 , logger)
+    } else {
+      containsNonSection = true;
+    }
   }
+
+  if (containsSection && containsNonSection)
+    logger.error(`Section ${e.id} combines section and non-section content.`);
+
+}
+
+function validateClause(e, logger) {
 
   _validateClause(e, 2, logger);
 
@@ -202,6 +248,7 @@ function validateBody(body, logger) {
     [validateScope, 1, 1],
     [validateConformance, 0, 1],
     [validateNormRefs, 0, 1],
+    [validateDefs, 0, 1],
     [validateClause, 0, Infinity],
     [validateAnnex, 0, Infinity],
     [validateBibliography, 0, 1],
