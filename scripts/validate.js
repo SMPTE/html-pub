@@ -142,18 +142,47 @@ function validateNormRefs(e, logger) {
 }
 
 function validateClause(e, logger) {
-  const h = e.firstElementChild;
 
-  if (h === null || h.tagName !== "H2") {
-    logger.error("Missing heading.");
-    return false;
+  function _validateClause(e, lvl, logger) {
+
+    let containsSection = false;
+    let containsNonSection = false;
+
+    for (let i = 0; i < e.childElementCount; i++) {
+      const child = e.children[i];
+
+      if (i == 0) {
+        if (child.tagName === `H${lvl}`)
+          continue;
+        logger.error(`Section ${e.id} is missing a heading.`);
+      }
+
+      if (child.tagName === "SECTION") {
+        containsSection = true;
+
+        _validateClause(child, lvl + 1 , logger)
+      } else {
+        containsNonSection = true;
+      }
+    }
+
+    if (containsSection && containsNonSection)
+      logger.error(`Section ${e.id} combines section and non-section content.`);
+
   }
+
+  _validateClause(e, 2, logger);
 
   return true;
 }
 
 function validateAnnex(e, logger) {
-  return e.classList.has("annex");
+  if (! e.classList.has("annex"))
+    return false;
+
+  _validateClause(e, 2, logger);
+
+  return true;
 }
 
 function validateBibliography(e, logger) {
