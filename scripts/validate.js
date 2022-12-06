@@ -287,9 +287,12 @@ function validateBody(body, logger) {
   }
 }
 
+exports.validate = validate;
+
 async function main() {
   const dom = new jsdom.JSDOM(fs.readFileSync(process.argv[2]));
   validate(dom.window.document, console);
 }
 
-main().catch(e => { console.error(e) });
+if (require.main === module)
+  main().catch(e => { console.error(e) });
