@@ -28,47 +28,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 const fs = require('fs');
 const path = require('path');
 const jsdom = require("jsdom");
-const {validate} = require("../../scripts/validate")
+const { smpteValidate, ErrorLogger } = require("../../scripts/validate")
 
 const testDirPath = "test/resources/html/validation";
-
-class TestingLogger {
-  constructor() {
-    this.hasFailed_ = false;
-    this.errors_ = [];
-  }
-
-  error(msg) {
-    this.hasFailed_ = true;
-    this.errors_.push(msg);
-  }
-
-  warn(msg) {
-  }
-
-  log(msg) {
-  }
-
-  info(msg) {
-  }
-
-  hasFailed() {
-    return this.hasFailed_;
-  }
-
-  errorList() {
-    return this.errors_;
-  }
-}
 
 async function _test(path) {
   const dom = new jsdom.JSDOM(fs.readFileSync(path));
 
   const expectation = dom.window.document.head.querySelector("meta[itemprop='test']").getAttribute("content");
 
-  const logger = new TestingLogger();
+  const logger = new ErrorLogger();
 
-  validate(dom.window.document, logger);
+  smpteValidate(dom.window.document, logger);
 
   const hasPassed = (expectation === "valid") ? !logger.hasFailed() : logger.hasFailed();
 

@@ -29,10 +29,38 @@ const jsdom = require("jsdom");
 const process = require('process');
 const fs = require('fs');
 
-function validate(doc, logger) {
+class ErrorLogger {
+  constructor() {
+    this.hasFailed_ = false;
+    this.errors_ = [];
+  }
+
+  error(msg) {
+    this.hasFailed_ = true;
+    this.errors_.push(msg);
+  }
+
+  warn(msg) {}
+
+  log(msg) {}
+
+  info(msg) {}
+
+  hasFailed() {
+    return this.hasFailed_;
+  }
+
+  errorList() {
+    return this.errors_;
+  }
+}
+exports.ErrorLogger = ErrorLogger;
+
+function smpteValidate(doc, logger) {
   validateHead(doc.head, logger);
   validateBody(doc.body, logger);
 }
+exports.smpteValidate = smpteValidate;
 
 function validatePubType(head, logger) {
   const e = head.querySelector("meta[itemprop = 'pubType']");
@@ -287,11 +315,9 @@ function validateBody(body, logger) {
   }
 }
 
-exports.validate = validate;
-
 async function main() {
   const dom = new jsdom.JSDOM(fs.readFileSync(process.argv[2]));
-  validate(dom.window.document, console);
+  smpteValidate(dom.window.document, console);
 }
 
 if (require.main === module)
