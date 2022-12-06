@@ -308,7 +308,7 @@ async function render(docPath) {
     return {
       "docHTML": docHTML,
       "docTitle": docTitle,
-      "scriptPath": scriptPath
+      "scriptPath": decodeURI(scriptPath)
     };
 
   } finally {
