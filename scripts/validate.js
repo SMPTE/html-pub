@@ -193,7 +193,7 @@ function validateInternalDefs(e, logger) {
 }
 
 function validateDefs(e, logger) {
-  if (e.id !== "sec-terms-definitions-clause")
+  if (e.id !== "sec-terms-and-definitions")
     return false;
 
   let hasExternalDefs = false;
@@ -207,7 +207,7 @@ function validateDefs(e, logger) {
     } else if (validateInternalDefs(child, logger)) {
       hasInternalDefs = true;
     } else {
-      logger.error(`Terms and definitions: unknown element`);
+      logger.error(`Terms and definitions: unknown element ${child.tagName}`);
     }
   }
 
@@ -244,6 +244,8 @@ function _validateClause(e, lvl, logger) {
 }
 
 function validateClause(e, logger) {
+  if (e.classList.contains("annex") || e.id === "sec-bibliography")
+    return false;
 
   _validateClause(e, 2, logger);
 
@@ -251,7 +253,7 @@ function validateClause(e, logger) {
 }
 
 function validateAnnex(e, logger) {
-  if (! e.classList.has("annex"))
+  if (! e.classList.contains("annex"))
     return false;
 
   _validateClause(e, 2, logger);
