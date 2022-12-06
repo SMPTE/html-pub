@@ -32,6 +32,8 @@ const { S3Client, PutObjectCommand} = require("@aws-sdk/client-s3");
 const puppeteer = require('puppeteer');
 const child_process = require('child_process');
 const { argv } = require('process');
+const { smpteValidate, ErrorLogger } = require("./validate");
+const jsdom = require("jsdom");
 
 /**
  * build.js (validate | build | deploy)
@@ -403,8 +405,19 @@ async function main() {
     child_process.execSync(`html5validator --errors-only ${buildPaths.docPath}`);
   } catch (e) {
     console.error(e.stdout.toString());
-    throw Error("Document validation failed.");
+    throw Error("HTML validation failed.");
   }
+
+  /* validate document structure */
+
+  const logger = new ErrorLogger();
+
+  const dom = new jsdom.JSDOM(fs.readFileSync(buildPaths.docPath));
+
+  smpteValidate(dom.window.document, logger);
+
+  if (logger.hasFailed())
+    throw Error(`SMPTE schema validation failed:\n${logger.errorList().join("\n")}`);
 
   /* build document */
 

@@ -17,21 +17,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install jing
-      shell: bash
-      run: sudo apt-get install jing
-
     - name: Install vnu
       shell: bash
       run: sudo pip install html5validator==0.4.2
 
     - name: Install node dependencies
-      env:
-        PUPPETEER_PRODUCT: chrome
       shell: bash
-      run: |
-        npm install puppeteer
-        npm install @aws-sdk/client-s3
+      run: npm install ${GITHUB_ACTION_PATH}/..
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1-node16
