@@ -284,6 +284,8 @@ async function render(docPath) {
 
     await page.goto(pageURL);
 
+    await page.waitForNavigation({waitUntil: "networkidle0"});
+
     const docTitle = await page.evaluate(() => document.title);
 
     const scriptPath = await page.evaluate(() => _SCRIPT_PATH);
