@@ -97,7 +97,7 @@ function loadDocMetadata() {
 
 const SMPTE_FRONT_MATTER_ID = "sec-front-matter";
 
-function insertFrontMatter(docMetadata) {
+async function insertFrontMatter(docMetadata) {
   const body = document.body;
 
   if (body === null) {
@@ -138,7 +138,9 @@ function insertFrontMatter(docMetadata) {
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = SMPTE_FRONT_MATTER_ID;
-  fetchAndInsertTemplate(
+  body.insertBefore(sec, body.firstChild);
+
+  return fetchAndInsertTemplate(
     sec,
     resolveScriptRelativePath("boilerplate/front-matter.html"),
     {
@@ -152,7 +154,6 @@ function insertFrontMatter(docMetadata) {
     }
   );
 
-  body.insertBefore(sec, body.firstChild);
 }
 
 const SMPTE_TOC_ID = "sec-toc";
@@ -225,7 +226,7 @@ function insertTOC(docMetadata) {
 
 const SMPTE_INTRODUCTION_ID = "sec-introduction";
 
-function insertIntroduction(docMetadata) {
+async function insertIntroduction(docMetadata) {
   const sec = document.getElementById(SMPTE_INTRODUCTION_ID);
 
   if (sec === null)
@@ -233,24 +234,14 @@ function insertIntroduction(docMetadata) {
 
   sec.className = "unnumbered";
 
-  let h2 = sec.getElementsByTagName("h2");
-
-  if (h2.length == 0) {
-    h2 = document.createElement("h2");
-    sec.insertBefore(h2, sec.firstChild);
-  } else if (h2.length == 1) {
-    h2 = h2[0];
-  } else {
-    logEvent("Introduction section has multiple headings.");
-    return;
-  }
-
+  const h2 = document.createElement("h2");
   h2.innerText = "Introduction";
+  sec.insertBefore(h2, sec.firstChild);
 }
 
 const SMPTE_SCOPE_ID = "sec-scope";
 
-function insertScope(docMetadata) {
+async function insertScope(docMetadata) {
   const sec = document.getElementById(SMPTE_SCOPE_ID);
 
   if (sec === null) {
@@ -258,25 +249,15 @@ function insertScope(docMetadata) {
     return;
   }
 
-  let h2 = sec.getElementsByTagName("h2");
-
-  if (h2.length == 0) {
-    h2 = document.createElement("h2");
-    sec.insertBefore(h2, sec.firstChild);
-  } else if (h2.length == 1) {
-    h2 = h2[0];
-  } else {
-    logEvent("Scope section has multiple headings.");
-    return;
-  }
-
+  const h2 = document.createElement("h2");
   h2.innerText = "Scope";
+  sec.insertBefore(h2, sec.firstChild);
 }
 
 
 const SMPTE_NORM_REFS_ID = "sec-normative-references";
 
-function insertNormativeReferences(docMetadata) {
+async function insertNormativeReferences(docMetadata) {
   let sec = document.getElementById(SMPTE_NORM_REFS_ID);
 
   if (sec === null) {
@@ -285,35 +266,30 @@ function insertNormativeReferences(docMetadata) {
     document.body.insertBefore(sec, document.getElementById(SMPTE_CONFORMANCE_ID).nextSibling);
   }
 
-  const p = document.createElement("p");
+  const hasReferences = sec.childElementCount !== 0;
 
-  if (sec.childElementCount !== 0) {
-    fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/normative-refs-some.html"));
-  } else {
-    fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/normative-refs-none.html"));
-  }
+  /* add the heading */
 
-  sec.insertBefore(p, sec.firstChild);
-
-
-  let h2 = sec.getElementsByTagName("h2");
-
-  if (h2.length == 0) {
-    h2 = document.createElement("h2");
-    sec.insertBefore(h2, sec.firstChild);
-  } else if (h2.length == 1) {
-    h2 = h2[0];
-  } else {
-    logEvent("Normative reference section has multiple headings.");
-    return;
-  }
-
+  const h2 = document.createElement("h2");
   h2.innerText = "Normative references";
+  sec.insertBefore(h2, sec.firstChild);
+
+  /* add the boilerplate */
+
+  const p = document.createElement("p");
+  sec.insertBefore(p, h2.nextSibling);
+
+  if (hasReferences) {
+    return fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/normative-refs-some.html"));
+  } else {
+    return fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/normative-refs-none.html"));
+  }
+
 }
 
 const SMPTE_TERMS_ID = "sec-terms-and-definitions";
 
-function insertTermsAndDefinitions(docMetadata) {
+async function insertTermsAndDefinitions(docMetadata) {
   let sec = document.getElementById(SMPTE_TERMS_ID);
 
   if (sec === null) {
@@ -322,45 +298,33 @@ function insertTermsAndDefinitions(docMetadata) {
     document.body.insertBefore(sec, document.getElementById(SMPTE_NORM_REFS_ID).nextSibling);
   }
 
-  const p = document.createElement("p");
+  /* add the heading */
 
-  if (sec.childElementCount !== 0) {
-
-    let defList = document.getElementById("terms-int-defs");
-    let extList = document.getElementById("terms-ext-defs");
-
-    if (extList === null && defList !== null) {
-      fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-int-only.html"));
-    } else if (extList !== null && defList === null) {
-      fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-ext-only.html"));
-    } else if (extList !== null && defList !== null) {
-      fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-ext-int.html"));
-    }
-
-  } else {
-    fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-none.html"));
-  }
-
-  sec.insertBefore(p, sec.firstChild);
-
-  /* set the heading */
-
-  let h2 = sec.getElementsByTagName("h2");
-
-  if (h2.length == 0) {
-    h2 = document.createElement("h2");
-    sec.insertBefore(h2, sec.firstChild);
-  } else if (h2.length == 1) {
-    h2 = h2[0];
-  } else {
-    logEvent("Terms and definitions section has multiple headings.");
-    return;
-  }
-
+  const h2 = document.createElement("h2");
   h2.innerText = "Terms and definitions";
+  sec.insertBefore(h2, sec.firstChild);
+
+  /* add the boilerplate */
+
+  const p = document.createElement("p");
+  sec.insertBefore(p, h2.nextSibling);
+
+  let defList = document.getElementById("terms-int-defs");
+  let extList = document.getElementById("terms-ext-defs");
+
+  if (extList === null && defList !== null) {
+    return fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-int-only.html"));
+  } else if (extList !== null && defList === null) {
+    return fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-ext-only.html"));
+  } else if (extList !== null && defList !== null) {
+    return fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-ext-int.html"));
+  } else {
+    return fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-none.html"));
+  }
+
 }
 
-function insertBibliography(docMetadata) {
+async function insertBibliography(docMetadata) {
   const sec = document.getElementById("sec-bibliography");
 
   if (sec === null)
@@ -372,19 +336,9 @@ function insertBibliography(docMetadata) {
 
   sec.classList.add("unnumbered");
 
-  let h2 = sec.getElementsByTagName("h2");
-
-  if (h2.length == 0) {
-    h2 = document.createElement("h2");
-    sec.insertBefore(h2, sec.firstChild);
-  } else if (h2.length == 1) {
-    h2 = h2[0];
-  } else {
-    logEvent("Bibliography section has multiple headings.");
-    return;
-  }
-
+  const h2 = document.createElement("h2");
   h2.innerText = "Bibliography";
+  sec.insertBefore(h2, sec.firstChild);
 }
 
 const SMPTE_CONFORMANCE_ID = "sec-conformance";
@@ -400,23 +354,32 @@ async function insertConformance(docMetadata) {
     document.body.insertBefore(sec, document.getElementById(SMPTE_SCOPE_ID).nextSibling);
   }
 
+  /* replace with boilerplate */
+
+  const userConformance = sec.innerHTML.trim();
+
   let implConformance = "";
-  const hasUserConformance = sec.innerText.trim().length;
 
   if (docMetadata.pubType !== "AG") {
-    if (! hasUserConformance)
+    if (userConformance.length === 0)
       implConformance = await asyncFetchLocal(resolveScriptRelativePath("boilerplate/eng-doc-conformance.html"));
     else
-      implConformance = sec.innerText.innerHTML;
-  } else if (hasUserConformance) {
+      implConformance = userConformance;
+  } else if (userConformance.length > 0) {
     logEvent("Conformance section not used in AGs.");
   }
 
-  fetchAndInsertTemplate(
+  await fetchAndInsertTemplate(
     sec,
     resolveScriptRelativePath("boilerplate/conformance.html"),
     {implConformance: implConformance}
   );
+
+  /* add heading */
+
+  const h2 = document.createElement("h2");
+  h2.innerText = "Conformance";
+  sec.insertBefore(h2, sec.firstChild);
 }
 
 const SMPTE_FOREWORD_ID = "sec-foreword";
@@ -429,19 +392,18 @@ async function insertForeword(docMetadata) {
     sec.id = SMPTE_FOREWORD_ID;
     document.body.insertBefore(sec, document.getElementById(SMPTE_FRONT_MATTER_ID).nextSibling);
   }
-
   sec.classList.add("unnumbered");
+
+  /* replace with boilerplate */
+
+  const userText = sec.innerHTML;
 
   let docSpecificText = "";
 
   if (docMetadata.pubType === "AG")
     docSpecificText = await asyncFetchLocal(resolveScriptRelativePath("boilerplate/foreword-ag-add.html"));
 
-  console.log(docSpecificText);
-
-  const userText = sec.innerHTML;
-
-  fetchAndInsertTemplate(
+  await fetchAndInsertTemplate(
     sec,
     resolveScriptRelativePath("boilerplate/foreword.html"),
     {
@@ -449,6 +411,12 @@ async function insertForeword(docMetadata) {
       docSpecificText: docSpecificText
     }
   );
+
+  /* insert heading */
+
+  const h2 = document.createElement("h2");
+  h2.innerText = "Foreword";
+  sec.insertBefore(h2, sec.firstChild);
 }
 
 function numberSections(element, curHeadingNumber) {
@@ -756,20 +724,20 @@ function insertSnippets() {
   );
 }
 
-function render() {
+async function render() {
   let docMetadata = loadDocMetadata();
 
   insertSnippets();
 
-  insertFrontMatter(docMetadata);
-  insertForeword(docMetadata);
-  insertIntroduction(docMetadata);
-  insertScope(docMetadata);
-  insertConformance(docMetadata);
-  insertNormativeReferences(docMetadata);
-  insertTermsAndDefinitions(docMetadata);
+  await insertFrontMatter(docMetadata);
+  await insertForeword(docMetadata);
+  await insertIntroduction(docMetadata);
+  await insertScope(docMetadata);
+  await insertConformance(docMetadata);
+  await insertNormativeReferences(docMetadata);
+  await insertTermsAndDefinitions(docMetadata);
+  await insertBibliography(docMetadata);
 
-  insertBibliography(docMetadata);
   numberSections(document.body, "");
   numberTables();
   numberFigures();
@@ -788,10 +756,10 @@ function listEvents() {
   return _events;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   try {
     asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
-    render();
+    await render();
   } catch (e) {
     logEvent(e);
   }
