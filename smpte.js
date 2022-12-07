@@ -54,7 +54,18 @@ async function asyncAddStylesheet(url) {
       s.textContent = data;
       document.head.appendChild(s);
       })
-    .catch(err => logError("Cannot fetch: " + err));
+    .catch(err => logEvent("Cannot fetch: " + err));
+}
+
+function fetchAndInsertTemplate(element, templateURL, kvpairs) {
+  return asyncFetchLocal(templateURL)
+    .then((data) => {
+      if (typeof kvpairs != "undefined")
+        for (const field of  Object.keys(kvpairs))
+          data = data.replace(`{{${field}}}`, kvpairs[field]);
+      element.innerHTML = data;
+    })
+    .catch(err => logEvent("Cannot fetch: " + err));
 }
 
 function getHeadMetadata(paramName) {
@@ -127,14 +138,19 @@ function insertFrontMatter(docMetadata) {
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = SMPTE_FRONT_MATTER_ID;
-  sec.innerHTML = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-    <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
-    <img id="smpte-logo" src="${resolveStaticResourcePath("smpte-logo.png")}" alt="SMPTE logo" />
-    <div id="long-doc-type">${longDoctype}</div>
-    <h1>${docMetadata.pubTitle}</h1>
-    <div id="doc-status">${publicationState} - ${actualPubDateTime}</div>
-  <hr />
-  </section>`;
+  fetchAndInsertTemplate(
+    sec,
+    resolveScriptRelativePath("boilerplate/front-matter.html"),
+    {
+      pubType: docMetadata.pubType,
+      pubNumber: docMetadata.pubNumber,
+      smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),
+      longDoctype: longDoctype,
+      pubTitle: docMetadata.pubTitle,
+      publicationState: publicationState,
+      actualPubDateTime: actualPubDateTime
+    }
+  );
 
   body.insertBefore(sec, body.firstChild);
 }
@@ -272,12 +288,9 @@ function insertNormativeReferences(docMetadata) {
   const p = document.createElement("p");
 
   if (sec.childElementCount !== 0) {
-    p.innerHTML = `The following documents are referred to in the text in such a way that some or all of
-     their content constitutes requirements of this document. For dated references, only the edition cited
-      applies. For undated references, the latest edition of the referenced document
-       (including any amendments) applies.`
+    fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/normative-refs-some.html"));
   } else {
-    p.innerHTML = `There are no normative references in this document.`
+    fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/normative-refs-none.html"));
   }
 
   sec.insertBefore(p, sec.firstChild);
@@ -317,15 +330,15 @@ function insertTermsAndDefinitions(docMetadata) {
     let extList = document.getElementById("terms-ext-defs");
 
     if (extList === null && defList !== null) {
-      p.innerHTML = `For the purposes of this document, the following terms and definitions apply:`;
+      fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-int-only.html"));
     } else if (extList !== null && defList === null) {
-      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents apply:`;
+      fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-ext-only.html"));
     } else if (extList !== null && defList !== null) {
-      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents and the additional terms and definitions apply:`;
+      fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-ext-int.html"));
     }
 
   } else {
-    p.innerHTML = `No terms and definitions are listed in this document.` 
+    fetchAndInsertTemplate(p, resolveScriptRelativePath("boilerplate/defs-none.html"));
   }
 
   sec.insertBefore(p, sec.firstChild);
@@ -376,7 +389,7 @@ function insertBibliography(docMetadata) {
 
 const SMPTE_CONFORMANCE_ID = "sec-conformance";
 
-function insertConformance(docMetadata) {
+async function insertConformance(docMetadata) {
 
   let sec = document.getElementById(SMPTE_CONFORMANCE_ID);
 
@@ -388,61 +401,27 @@ function insertConformance(docMetadata) {
   }
 
   let implConformance = "";
+  const hasUserConformance = sec.innerText.trim().length;
 
   if (docMetadata.pubType !== "AG") {
-
-    if (sec.innerText.trim().length === 0) {
-
-      implConformance = `<p>A conformant implementation according to this document is one that
-      includes all mandatory provisions ("shall") and, if implemented, all recommended provisions
-      ("should") as described. A conformant implementation need not implement
-      optional provisions ("may") and need not implement them as described.</p>`;
-
-    } else {
-
+    if (! hasUserConformance)
+      implConformance = await asyncFetchLocal(resolveScriptRelativePath("boilerplate/eng-doc-conformance.html"));
+    else
       implConformance = sec.innerText.innerHTML;
-
-    }
-
-  } else if (sec.innerText.trim().length !== 0) {
+  } else if (hasUserConformance) {
     logEvent("Conformance section not used in AGs.");
   }
 
-  sec.innerHTML = `
-  <h2>Conformance</h2>
-  <p>Normative text is text that describes elements of the design that are indispensable or contains the
-   conformance language keywords: "shall", "should", or "may". Informative text is text that is potentially
-    helpful to the user, but not indispensable, and can be removed, changed, or added editorially without
-     affecting interoperability. Informative text does not contain any conformance keywords. </p>
-     
-  <p>All text in this document is, by default, normative, except: the Introduction, any section explicitly
-  labeled as "Informative" or individual paragraphs that start with "Note:" </p>
-
-<p>The keywords "shall" and "shall not" indicate requirements strictly to be followed in order to conform to the
-document and from which no deviation is permitted.</p>
-
-<p>The keywords, "should" and "should not" indicate that, among several possibilities, one is recommended
-  as particularly suitable, without mentioning or excluding others; or that a certain course of action
-  is preferred but not necessarily required; or that (in the negative form) a certain possibility
-   or course of action is deprecated but not prohibited.</p>
-
-<p>The keywords "may" and "need not" indicate courses of action permissible within the limits of the document. </p>
-
-<p>The keyword "reserved" indicates a provision that is not defined at this time, shall not be used,
-  and may be defined in the future. The keyword "forbidden" indicates "reserved" and in addition
-   indicates that the provision will never be defined in the future.</p>
-
-${implConformance}
-
-<p>Unless otherwise specified, the order of precedence of the types of normative information in
-  this document shall be as follows: Normative prose shall be the authoritative definition;
-  Tables shall be next; then formal languages; then figures; and then any other language forms.</p>
-  `;
+  fetchAndInsertTemplate(
+    sec,
+    resolveScriptRelativePath("boilerplate/conformance.html"),
+    {implConformance: implConformance}
+  );
 }
 
 const SMPTE_FOREWORD_ID = "sec-foreword";
 
-function insertForeword(docMetadata) {
+async function insertForeword(docMetadata) {
   let sec = document.getElementById(SMPTE_FOREWORD_ID);
 
   if (sec === null) {
@@ -453,36 +432,23 @@ function insertForeword(docMetadata) {
 
   sec.classList.add("unnumbered");
 
-  custom_text = sec.innerHTML;
+  let docSpecificText = "";
 
-  if (docMetadata.pubType == "AG") {
-    desc = `<p>This Standards Administrative Guideline forms an adjunct to the use and
-    interpretation of the SMPTE Standards Operations Manual. In the event of a
-    conflict, the Operations Manual shall prevail.</p>`;
-  } else {
-    desc = "";
-  }
+  if (docMetadata.pubType === "AG")
+    docSpecificText = await asyncFetchLocal(resolveScriptRelativePath("boilerplate/foreword-ag-add.html"));
 
-  sec.innerHTML = `
-  <h2>Foreword</h2>
-  <p><a href="https://www.smpte.org">SMPTE (the Society of
-    Motion Picture and Television Engineers)</a> is an
-    internationally-recognized standards developing organization. Headquartered
-    and incorporated in the United States of America, SMPTE has members in over
-    80 countries on six continents. SMPTE’s Engineering Documents, including
-    Standards, Recommended Practices, and Engineering Guidelines, are prepared
-    by SMPTE’s Technology Committees. Participation in these Committees is open
-    to all with a bona fide interest in their work. SMPTE cooperates closely
-    with other standards-developing organizations, including ISO, IEC and ITU.
-    SMPTE Engineering Documents are drafted in accordance with the rules given
-    in its Standards Operations Manual.</p>
+  console.log(docSpecificText);
 
-    ${desc}
+  const userText = sec.innerHTML;
 
-    ${custom_text}
-
-  <p id="copyright-text">Copyright © The Society of Motion Picture and
-    Television Engineers.</p>`;
+  fetchAndInsertTemplate(
+    sec,
+    resolveScriptRelativePath("boilerplate/foreword.html"),
+    {
+      userText: userText,
+      docSpecificText: docSpecificText
+    }
+  );
 }
 
 function numberSections(element, curHeadingNumber) {
