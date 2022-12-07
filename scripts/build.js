@@ -282,9 +282,7 @@ async function render(docPath) {
 
     console.log(`Rendering the document at ${pageURL}`)
 
-    await page.goto(pageURL);
-
-    await page.waitForNavigation({waitUntil: "networkidle0"});
+    await page.goto(pageURL, {waitUntil: "networkidle0"});
 
     const docTitle = await page.evaluate(() => document.title);
 
