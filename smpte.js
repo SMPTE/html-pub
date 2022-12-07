@@ -758,7 +758,7 @@ function listEvents() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
+    await asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
     await render();
   } catch (e) {
     logEvent(e);
@@ -766,7 +766,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (listEvents().length > 0) {
 
-    asyncAddStylesheet(resolveScriptRelativePath("css/smpte-errors.css"));
+    await asyncAddStylesheet(resolveScriptRelativePath("css/smpte-errors.css"));
 
     const eventList = document.createElement('ol');
     eventList.id = "event-list";
