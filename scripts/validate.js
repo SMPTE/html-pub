@@ -57,6 +57,15 @@ class ErrorLogger {
 exports.ErrorLogger = ErrorLogger;
 
 function smpteValidate(doc, logger) {
+  /* skip OM validation for now */
+
+  const e = doc.head.querySelector("meta[itemprop = 'pubType']");
+
+  if (e === null || e.getAttribute("content") === "OM") {
+      logger.info("OM, skipping validation");
+      return;
+  }
+
   validateHead(doc.head, logger);
   validateBody(doc.body, logger);
 }
