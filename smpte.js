@@ -57,6 +57,13 @@ async function asyncAddStylesheet(url) {
     .catch(err => logError("Cannot fetch: " + err));
 }
 
+function fillTemplate(template, data) {
+  if (typeof data != "undefined" && data !== null)
+    for (const field of  Object.keys(data))
+      template = template.replace(`{{${field}}}`, data[field]);
+  return template;
+}
+
 function getHeadMetadata(paramName) {
   let e = document.querySelector("head meta[itemprop='" + paramName + "']");
 
@@ -73,9 +80,13 @@ function loadDocMetadata() {
   metadata.pubTitle = document.title;
 
   metadata.pubType = params.get("pubType") || getHeadMetadata("pubType");
+  if (["OM", "AG"].indexOf(metadata.pubType) === -1)
+    logEvent(`Unknown publication type: ${metadata.pubType}`);
+
   metadata.pubState = params.get("pubState") || getHeadMetadata("pubState");
   metadata.pubNumber = params.get("pubNumber") || getHeadMetadata("pubNumber");
   metadata.pubDateTime = params.get("pubDateTime") || getHeadMetadata("pubDateTime");
+  metadata.effectiveDateTime = params.get("effectiveDateTime") || getHeadMetadata("effectiveDateTime");
 
   if (["pub", "draft"].indexOf(metadata.pubState) === -1)
     logEvent(`Unknown publication status: ${metadata.pubState}`);
@@ -83,15 +94,27 @@ function loadDocMetadata() {
   return metadata;
 }
 
+const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
+<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{pubNumber}}</span></div>
+<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
+<div id="long-doc-type">{{longDocType}}</div>
+<h1>{{pubTitle}}</h1>
+<div id="doc-status">{{publicationState}} - {{actualPubDateTime}}</div>
+<hr />`
+
+const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
+<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{pubNumber}}</span></div>
+<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
+<div id="long-doc-type">{{longDocType}}</div>
+<h1>{{pubTitle}}</h1>
+<div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
+<div id="doc-effective">Effective date: {{effectiveDateTime}}</div>
+<hr />`
 
 const SMPTE_FRONT_MATTER_ID = "sec-front-matter";
 
 function insertFrontMatter(docMetadata) {
-  const body = document.body;
 
-  if (body === null) {
-    throw "Missing body element"
-  }
 
   let sec = document.getElementById(SMPTE_FRONT_MATTER_ID);
 
@@ -99,7 +122,10 @@ function insertFrontMatter(docMetadata) {
     throw "Front matter section already exists."
   }
 
-  const longDoctype = { "AG": "Administrative Guideline" }[docMetadata.pubType];
+  const longDocType = {
+    "AG": "Administrative Guideline",
+    "OM": "Operations Manual"
+  }[docMetadata.pubType];
 
   if (docMetadata.pubState == "draft")
     asyncAddStylesheet(resolveScriptRelativePath("css/smpte-draft.css"));
@@ -118,7 +144,10 @@ function insertFrontMatter(docMetadata) {
       publicationState = "Draft";
       break;
     case "pub":
-      publicationState = "Published";
+      if (docMetadata.pubType === "OM")
+        publicationState = "Approved by Board of Governors";
+      else
+        publicationState = "Published";
       break
     default:
       publicationState = "XXX";
@@ -127,14 +156,21 @@ function insertFrontMatter(docMetadata) {
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = SMPTE_FRONT_MATTER_ID;
-  sec.innerHTML = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-    <span itemprop="publisher">SMPTE</span> <span id="doc-type">${docMetadata.pubType}</span> <span id="doc-number">${docMetadata.pubNumber}</span></div>
-    <img id="smpte-logo" src="${resolveStaticResourcePath("smpte-logo.png")}" alt="SMPTE logo" />
-    <div id="long-doc-type">${longDoctype}</div>
-    <h1>${docMetadata.pubTitle}</h1>
-    <div id="doc-status">${publicationState} - ${actualPubDateTime}</div>
-  <hr />
-  </section>`;
+
+  sec.innerHTML = fillTemplate(
+    docMetadata.pubState === "pub" && docMetadata.pubType === "OM" ? SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE : SMPTE_FRONT_MATTER_BOILERPLATE,
+    {
+      longDocType: longDocType,
+      publicationState: publicationState,
+      smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),
+      actualPubDateTime: actualPubDateTime,
+      ...docMetadata
+    }
+    );
+
+  const body = document.body;
+  if (body === null)
+    throw "Missing body element"
 
   body.insertBefore(sec, body.firstChild);
 }
@@ -263,6 +299,12 @@ const SMPTE_NORM_REFS_ID = "sec-normative-references";
 function insertNormativeReferences(docMetadata) {
   let sec = document.getElementById(SMPTE_NORM_REFS_ID);
 
+  if (docMetadata.pubType == "OM") {
+    if (sec !== null)
+      logEvent("OM must not contain normative references.");
+    return;
+  }
+
   if (sec === null) {
     sec = document.createElement("section");
     sec.id = SMPTE_NORM_REFS_ID;
@@ -302,6 +344,12 @@ const SMPTE_TERMS_ID = "sec-terms-and-definitions";
 
 function insertTermsAndDefinitions(docMetadata) {
   let sec = document.getElementById(SMPTE_TERMS_ID);
+
+  if (docMetadata.pubType == "OM") {
+    if (sec !== null)
+      logEvent("OM must not contain terms and definitions.");
+    return;
+  }
 
   if (sec === null) {
     sec = document.createElement("section");
@@ -380,6 +428,12 @@ function insertConformance(docMetadata) {
 
   let sec = document.getElementById(SMPTE_CONFORMANCE_ID);
 
+  if (docMetadata.pubType == "OM") {
+    if (sec !== null)
+      logEvent("OM must not contain a Conformance section.");
+    return;
+  }
+
   if (sec === null) {
     sec = document.createElement("section");
     sec.id = SMPTE_CONFORMANCE_ID;
@@ -442,10 +496,54 @@ ${implConformance}
 
 const SMPTE_FOREWORD_ID = "sec-foreword";
 
+SMPTE_AG_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
+<p><a href="https://www.smpte.org">SMPTE (the Society of
+Motion Picture and Television Engineers)</a> is an
+internationally-recognized standards developing organization. Headquartered
+and incorporated in the United States of America, SMPTE has members in over
+80 countries on six continents. SMPTE’s Engineering Documents, including
+Standards, Recommended Practices, and Engineering Guidelines, are prepared
+by SMPTE’s Technology Committees. Participation in these Committees is open
+to all with a bona fide interest in their work. SMPTE cooperates closely
+with other standards-developing organizations, including ISO, IEC and ITU.
+SMPTE Engineering Documents are drafted in accordance with the rules given
+in its Standards Operations Manual.</p>
+
+<p>This Standards Administrative Guideline forms an adjunct to the use and
+interpretation of the SMPTE Standards Operations Manual. In the event of a
+conflict, the Operations Manual shall prevail.</p>
+
+<p id="copyright-text">Copyright © The Society of Motion Picture and
+Television Engineers.</p>`
+
+SMPTE_DOC_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
+<p><a href="https://www.smpte.org">SMPTE (the Society of
+Motion Picture and Television Engineers)</a> is an
+internationally-recognized standards developing organization. Headquartered
+and incorporated in the United States of America, SMPTE has members in over
+80 countries on six continents. SMPTE’s Engineering Documents, including
+Standards, Recommended Practices, and Engineering Guidelines, are prepared
+by SMPTE’s Technology Committees. Participation in these Committees is open
+to all with a bona fide interest in their work. SMPTE cooperates closely
+with other standards-developing organizations, including ISO, IEC and ITU.
+SMPTE Engineering Documents are drafted in accordance with the rules given
+in its Standards Operations Manual.</p>
+
+{{authorProse}}
+
+<p id="copyright-text">Copyright © The Society of Motion Picture and
+Television Engineers.</p>`
+
 function insertForeword(docMetadata) {
   let sec = document.getElementById(SMPTE_FOREWORD_ID);
 
-  if (sec === null) {
+  if (docMetadata.pubType == "OM") {
+    if (sec !== null)
+      logEvent("OM must not contain a Foreword section.");
+    return;
+  }
+
+  if (sec === null && docMetadata.pubType != "OM") {
     sec = document.createElement("section");
     sec.id = SMPTE_FOREWORD_ID;
     document.body.insertBefore(sec, document.getElementById(SMPTE_FRONT_MATTER_ID).nextSibling);
@@ -453,36 +551,16 @@ function insertForeword(docMetadata) {
 
   sec.classList.add("unnumbered");
 
-  custom_text = sec.innerHTML;
+  authorProse = sec.innerHTML;
 
   if (docMetadata.pubType == "AG") {
-    desc = `<p>This Standards Administrative Guideline forms an adjunct to the use and
-    interpretation of the SMPTE Standards Operations Manual. In the event of a
-    conflict, the Operations Manual shall prevail.</p>`;
+    if (authorProse.trim().length > 0)
+      logEvent("AGs cannot contain author-specified Foreword prose.")
+    sec.innerHTML = SMPTE_AG_FOREWORD_BOILERPLATE;
   } else {
-    desc = "";
+    sec.innerHTML = fillTemplate(SMPTE_AG_FOREWORD_BOILERPLATE, {authorProse: authorProse});
   }
 
-  sec.innerHTML = `
-  <h2>Foreword</h2>
-  <p><a href="https://www.smpte.org">SMPTE (the Society of
-    Motion Picture and Television Engineers)</a> is an
-    internationally-recognized standards developing organization. Headquartered
-    and incorporated in the United States of America, SMPTE has members in over
-    80 countries on six continents. SMPTE’s Engineering Documents, including
-    Standards, Recommended Practices, and Engineering Guidelines, are prepared
-    by SMPTE’s Technology Committees. Participation in these Committees is open
-    to all with a bona fide interest in their work. SMPTE cooperates closely
-    with other standards-developing organizations, including ISO, IEC and ITU.
-    SMPTE Engineering Documents are drafted in accordance with the rules given
-    in its Standards Operations Manual.</p>
-
-    ${desc}
-
-    ${custom_text}
-
-  <p id="copyright-text">Copyright © The Society of Motion Picture and
-    Television Engineers.</p>`;
 }
 
 function numberSections(element, curHeadingNumber) {
