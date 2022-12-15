@@ -25,11 +25,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-const jsdom = require("jsdom");
-const process = require('process');
-const fs = require('fs');
+import * as smpte from "./common.mjs";
 
-class ErrorLogger {
+export class ErrorLogger {
   constructor() {
     this.hasFailed_ = false;
     this.errors_ = [];
@@ -54,27 +52,16 @@ class ErrorLogger {
     return this.errors_;
   }
 }
-exports.ErrorLogger = ErrorLogger;
 
-function smpteValidate(doc, logger) {
-  /* skip OM validation for now */
-
-  const e = doc.head.querySelector("meta[itemprop = 'pubType']");
-
-  if (e === null || e.getAttribute("content") === "OM") {
-      logger.info("OM, skipping validation");
-      return;
-  }
-
+export function smpteValidate(doc, logger) {
   validateHead(doc.head, logger);
   validateBody(doc.body, logger);
 }
-exports.smpteValidate = smpteValidate;
 
 function validatePubType(head, logger) {
   const e = head.querySelector("meta[itemprop = 'pubType']");
 
-  if (e === null || e.getAttribute("content") !== "AG")
+  if (e === null || ! smpte.VALID_PUBTYPES.has(e.getAttribute("content")))
     logger.error("pubType invalid");
 }
 
@@ -325,11 +312,3 @@ function validateBody(body, logger) {
 
   }
 }
-
-async function main() {
-  const dom = new jsdom.JSDOM(fs.readFileSync(process.argv[2]));
-  smpteValidate(dom.window.document, console);
-}
-
-if (require.main === module)
-  main().catch(e => { console.error(e) });

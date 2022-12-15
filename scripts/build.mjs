@@ -25,15 +25,16 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-const path = require('path');
-const fs = require('fs');
-const process = require("process");
-const { S3Client, PutObjectCommand} = require("@aws-sdk/client-s3");
-const puppeteer = require('puppeteer');
-const child_process = require('child_process');
-const { argv } = require('process');
-const { smpteValidate, ErrorLogger } = require("./validate");
-const jsdom = require("jsdom");
+import * as path from "path";
+import * as fs from "fs";
+import * as process from "process";
+import { S3Client, PutObjectCommand} from "@aws-sdk/client-s3";
+import * as puppeteer from "puppeteer";
+import * as child_process from "child_process";
+import { argv } from "process";
+import * as jsdom from "jsdom";
+
+import { smpteValidate, ErrorLogger } from "../js/validate.mjs";
 
 /**
  * build.js (validate | build | deploy)
