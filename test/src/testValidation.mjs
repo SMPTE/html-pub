@@ -25,10 +25,11 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-const fs = require('fs');
-const path = require('path');
-const jsdom = require("jsdom");
-const { smpteValidate, ErrorLogger } = require("../../scripts/validate")
+import * as jsdom from "jsdom"
+import * as process from "process";
+import * as fs from "fs";
+import * as path from "path";
+import {smpteValidate, ErrorLogger} from "../../js/validate.mjs";
 
 const testDirPath = "test/resources/html/validation";
 
@@ -53,18 +54,13 @@ async function _test(path) {
   return hasPassed;
 }
 
-async function main() {
-  const testResults = await Promise.all(fs.readdirSync(testDirPath).map(n => _test(path.join(testDirPath, n))));
+const testResults = await Promise.all(fs.readdirSync(testDirPath).map(n => _test(path.join(testDirPath, n))));
 
-  const isSuccess = testResults.every(e => e);
+const isSuccess = testResults.every(e => e);
 
-  if (isSuccess)
-    console.log("Validation tests passed");
-  else
-    console.log("Some validation tests failed");
+if (isSuccess)
+  console.log("Validation tests passed");
+else
+  console.log("Some validation tests failed");
 
-  process.exitCode = isSuccess ? 0 : 1;
-}
-
-
-main().catch(e => { console.error(e) });
+process.exit(isSuccess ? 0 : 1);
