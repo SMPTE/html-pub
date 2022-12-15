@@ -58,10 +58,14 @@ export function smpteValidate(doc, logger) {
   validateBody(doc.body, logger);
 }
 
-function validatePubType(head, logger) {
-  const e = head.querySelector("meta[itemprop = 'pubType']");
+function getPubType(head, logger) {
+  return head.querySelector("meta[itemprop = 'pubType']");
+}
 
-  if (e === null || ! smpte.VALID_PUBTYPES.has(e.getAttribute("content")))
+function validatePubType(head, logger) {
+  const pubType = getPubType(head, logger);
+
+  if (pubType === null || ! smpte.VALID_PUBTYPES.has(pubType.getAttribute("content")))
     logger.error("pubType invalid");
 }
 
@@ -97,6 +101,26 @@ function validatePubDateTime(head, logger) {
     logger.error("pubDateTime invalid");
 }
 
+function validateEffectiveDateTime(head, logger) {
+  const effectiveDateTime = head.querySelector("meta[itemprop = 'effectiveDateTime']");
+
+  const isOM = getPubType(head, logger).getAttribute("content") === smpte.OM_PUBTYPE;
+
+  if (!isOM) {
+    if (effectiveDateTime !== null)
+      logger.error("effectiveDateTime is only be present for OMs");
+    return;
+  }
+
+  if (effectiveDateTime === null) {
+    logger.error("effectiveDateTime is required for OMs");
+    return;
+  }
+
+  if (! /\d{4}-\d{2}-\d{2}/.test(effectiveDateTime.getAttribute("content")))
+    logger.error("effectiveDateTime invalid");
+}
+
 function validateHead(head, logger) {
   if (head.getAttribute("itemscope") !== "itemscope")
     logger.error("head@itemscope is invalid");
@@ -107,6 +131,7 @@ function validateHead(head, logger) {
   validatePubNumer(head, logger);
   validatePubState(head, logger);
   validatePubDateTime(head, logger);
+  validateEffectiveDateTime(head, logger);
 }
 
 function validateIntroduction(e, logger) {
