@@ -310,7 +310,7 @@ function validateBody(body, logger) {
 
   for (const child of body.children) {
     if (child.tagName !== "SECTION") {
-      logger.error(`Invalid element: ${child.tagName}`);
+      logger.error(`Invalid element in <body>: ${child.tagName}`);
       continue;
     }
 
