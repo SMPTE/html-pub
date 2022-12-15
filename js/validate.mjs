@@ -247,7 +247,7 @@ function _validateClause(e, lvl, logger) {
     if (i == 0) {
       if (child.tagName === `H${lvl}`)
         continue;
-      logger.error(`Section ${e.id} is missing a heading.`);
+      logger.error(`Section ${e.id} is missing a heading <h${lvl}>.`);
     }
 
     if (child.tagName === "SECTION") {
