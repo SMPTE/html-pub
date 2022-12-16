@@ -542,13 +542,12 @@
         <h4>Citing bibliographic references</h4>
 
         <p>When citing a bibliographic reference in the prose, an <code>a</code> element with its <code>href</code> attribute
-          referencing a <code>cite</code> element from the <a>Bibliography</a> section shall be used. The text of the
-          link will be automatically set to the contents of the
-          <code>cite</code> element.</p>
+        referencing a <code>cite</code> element from the <a>Bibliography</a> section shall be used. The text of the link will be
+        automatically set to the contents of the <code>cite</code> element.</p>
 
-            <p class="example">
+        <p class="example">
 <code>&lt;a href=&quot;#bib-iso-directives-part2&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#bib-iso-directives-part2"></a>.
-            </p>
+        </p>
       </section>
 
 
@@ -567,7 +566,7 @@
       </section>
 
       <section id="sec-dfn-element">
-        <h4>Defining terms</h4>
+        <h4>Inline terms</h4>
 
         <p>A <dfn data-lt="alternate1|alternate2">term</dfn> can be defined by wrapping it in a <code>dfn</code> element.</p>
 
@@ -621,33 +620,39 @@
       <section id="sec-figure-element">
         <h4>Figures</h4>
 
-        <p>Figures can be inserted by using a <code>figure</code> element with the following requirements:</p>
+        <p>A figure can be inserted using a <code>figure</code> element with the following requirements:</p>
 
+        <p>The <code>figure</code> element shall contain:</p>
         <ul>
-          <li><code>id</code> attribute shall be present, the value prefixed with <code>figure-</code></li>
-          <li>shall contain one <code>img</code> element, with <code>class</code> attribute present with value <code>figure</code></li>
-          <li>shall contain one <code>figcaption</code> element BELOW, with value that describes the figure</li>
+          <li>an <code>id</code> attribute whose value starts with <code>figure-</code></li>
+          <li>one <code>img</code> element</li>
+          <li>one <code>figcaption</code> element following the <code>img</code> element</li>
         </ul>
 
-        <p>For example:</p>
+        <p>Figures are automatically numbered.</p>
 
+        <div class="example">
 <pre>
 &lt;figure id=&quot;figure-sample-image&quot;&gt;
-  &lt;img class=&quot;figure&quot; src=&quot;media/sample.png&quot;&gt;
+  &lt;img src=&quot;media/sample.png&quot;&gt;
   &lt;figcaption&gt;Example of a figure&lt;/figcaption&gt;
 &lt;/figure&gt;
 </pre>
 
-        <p>results in:</p>
+        <p>is rendered as</p>
 
         <figure id="figure-sample-image">
           <img class="figure" src="media/sample.png">
           <figcaption>Example of a figure</figcaption>
         </figure>
+        </div>
 
-        <p>When using references to a figure anywhere on the page, an <code>a</code> element with <code>href</code> attribute value equal to the figure's <code>id </code> attribute shall be used. This will generate an auto link to the <code>figure</code> element with <i>Figure</i> and its numerical value (i.e. <a href="#figure-sample-image"></a>) rendered on the page. Example as follows:</p>
+        <p>When referencing a figure in the prose, an <code>a</code> element with its <code>href</code> attribute referencing the
+        <code>figure</code> element shall be used. The text of the link will be automatically set to the number of the figure.</p>
 
-<pre>&lt;a href=&quot;#figure-sample-image&quot;&gt;&lt;/a&gt;</pre>
+          <p class="example">
+  <code>&lt;a href=&quot;#figure-sample-image&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#figure-sample-image"></a>.
+          </p>
 
       </section>
 
