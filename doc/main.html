@@ -639,37 +639,39 @@
 &lt;/figure&gt;
 </pre>
 
-        <p>is rendered as</p>
+          <p>is rendered as</p>
 
-        <figure id="figure-sample-image">
-          <img class="figure" src="media/sample.png">
-          <figcaption>Example of a figure</figcaption>
-        </figure>
+          <figure id="figure-sample-image">
+            <img class="figure" src="media/sample.png">
+            <figcaption>Example of a figure</figcaption>
+          </figure>
         </div>
 
         <p>When referencing a figure in the prose, an <code>a</code> element with its <code>href</code> attribute referencing the
         <code>figure</code> element shall be used. The text of the link will be automatically set to the number of the figure.</p>
 
-          <p class="example">
-  <code>&lt;a href=&quot;#figure-sample-image&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#figure-sample-image"></a>.
-          </p>
+        <div class="example">
+<code>&lt;a href=&quot;#figure-sample-image&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#figure-sample-image"></a>.
+        </div>
 
       </section>
 
       <section id="sec-table-element">
         <h4>Tables</h4>
 
-        <p>Tables can be inserted by using a <code>table</code> element with the following requirements:</p>
+        <p>Tables can be inserted by using a <code>table</code> element.</p>
+        
+        <p>The <code>table</code> element shall contain:</p>
 
         <ul>
-          <li><code>id</code> attribute shall be present, the value prefixed with <code>tab-</code></li>
-          <li>shall contain one <code>caption</code> element ABOVE, with value that describes the table</li>
-          <li>shall contain one <code>thead</code> element, containing one <code>tr</code> element, with <code>th</code> element(s) as needed for each column header</li>
-          <li>shall contain one <code>tbody</code> element, with <code>tr</code> element(s) as needed for each row</li>
+          <li>an <code>id</code> attribute whose value starts with <code>tab-</code></li>
+          <li>one <code>caption</code> element as the first child of the <code>table</code> element</li>
+          <li>one <code>thead</code> element, containing one <code>tr</code> element, with <code>th</code> element(s) as needed for
+          each column header</li>
+          <li>one <code>tbody</code> element, with <code>tr</code> element(s) as needed for each row</li>
         </ul>
 
-        <p>For example:</p>
-
+        <div class="example">
 <pre>
 &lt;table id=&quot;tab-sample-tabledata&quot;&gt;
   &lt;caption&gt;Sample Table&lt;/caption&gt;
@@ -692,60 +694,59 @@
 &lt;/table&gt;
 </pre>
 
-        <p>results in:</p>
+          <p>is rendered as</p>
 
-        <table id="tab-sample-tabledata">
-          <caption>Sample Table</caption>
-          <thead>
-            <tr>
-              <th>Sample Number</th>
-              <th>Sample Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>0001</td>
-              <td>Name 01</td>
-            </tr>
-            <tr>
-              <td>0002</td>
-              <td>Name 02</td>
-            </tr>
-          </tbody>
-        </table>
+          <table id="tab-sample-tabledata">
+            <caption>Sample Table</caption>
+            <thead>
+              <tr>
+                <th>Sample Number</th>
+                <th>Sample Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0001</td>
+                <td>Name 01</td>
+              </tr>
+              <tr>
+                <td>0002</td>
+                <td>Name 02</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-        <p>When using references to a figure anywhere on the page, an <code>a</code> element with <code>href</code> attribute value equal to the tables's <code>id </code> attribute shall be used. This will generate an auto link to the <code>table</code> element with <i>Table</i> and its numerical value (i.e. <a href="#tab-sample-tabledata"></a>) rendered on the page. Example as follows:</p>
-
-<pre>&lt;a href=&quot;#tab-sample-tabledata&quot;&gt;&lt;/a&gt;</pre>
-
+        <p>When referencing a table in the prose, an <code>a</code> element with its <code>href</code> attribute referencing the
+        <code>table</code> element shall be used. The text of the link will be automatically set to the number of the table.</p>
+  
+        <div class="example">
+<code>&lt;a href=&quot;#tab-sample-tabledata&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#tab-sample-tabledata"></a>.
+        </div>
       </section>
 
       <section id="sec-snippets-element">
         <h4>External code snippets</h4>
 
         <p>External code snippets can be inserted by setting the <code>data-include</code> attribute on a <code>pre</code> element to
-        the relative path of the snippet. For example:</p>
+        the relative path of the snippet.</p>
 
-        <pre>&lt;pre data-include=&quot;snippets/example.txt&quot;&gt;&lt;/pre&gt;</pre>
+        <div class="example">
+          <pre>&lt;pre data-include=&quot;snippets/example.txt&quot;&gt;&lt;/pre&gt;</pre>
 
-        <p>results in:</p>
+          <p>is rendered as</p>
 
-        <pre data-include="snippets/example.txt"></pre>
+          <pre data-include="snippets/example.txt"></pre>
+        </div>
 
         <p>Keeping code snippets separate from the main element allows the snippets to be individually formatted and validated.</p>
       </section>
 
       <section id="sec-code-element">
-        <h4>Internal code samples</h4>
+        <h4>Internal code snippets</h4>
 
-        <p>Internal code samples can be inserted by using <code>pre</code> element with the following requirement:</p>
-
-        <ul>
-          <li>the <code>pre</code> element and all code sample shall start at the begining of the HTML line, with no left margin</li>
-        </ul>
-
-        <p>For example:</p>
-
+        <p>Internal code snippets can be inserted by using <code>pre</code> element.</p>
+        <div class="example">
 <pre>
 &lt;pre&gt;
 SCHEMAID = %s"https://www.smpte-ra.org/json-schema/" PUBNUM "/" REVISION [ "/" SHORTNAME]
@@ -755,53 +756,53 @@ REVISION = STABLEREV
 STABLEREV = 4(DIGIT) [2(DIGIT)]
 &lt;pre&gt;
 </pre>
+        </div>
 
+        <p>The <code>pre</code> element preserves all white space. As a result, the <code>pre</code> element and its contents should not
+        be indented.</p>
       </section>
 
       <section id="sec-note-class">
         <h4>Notes</h4>
 
-        <p>Notes can be inserted by using <code>p</code> element with a <code>class</code> attribute value of <code>note</code></p>
+        <p>Notes can be inserted by using <code>p</code> or <code>div</code> element whose <code>class</code> attribute is equal to
+        <code>note</code>.</p>
 
-        <p>Notes will automatically be formatted, prepended with <i>Note - </i>, and numbered (or not) based on the section they are in and number of notes per section as per <a href="#bib-iso-directives-part2"></a>.
+        <p>Notes will automatically be formatted, e.g. prepended with the text <i>NOTE</i>, and numbered.</p>
 
-        <p>For example:</p>
-
+        <div class="example">
 <pre>
 &lt;p class=&quot;note&quot;&gt;
   The license portion of Annex A is verbatim the BSD-3-Clause license
   available at &lt;a&gt;https://spdx.org/licenses/BSD-3-Clause.html&lt;/a&gt;.
 &lt;/p&gt;
 </pre>
-      
-        <p>results in:</p>
 
-        <p class="note">
-          The license portion of Annex A is verbatim the BSD-3-Clause license
-          available at <a>https://spdx.org/licenses/BSD-3-Clause.html</a>.
-        </p>
+        <p>is rendered as</p>
+        </div>
 
+        <p class="note">The license portion of Annex A is verbatim the BSD-3-Clause license available at
+          <a>https://spdx.org/licenses/BSD-3-Clause.html</a>.</p>
 
       </section>
 
       <section id="sec-example-class">
         <h4>Examples</h4>
 
-        <p>Examples can be inserted by using <code>p</code> element with a <code>class</code> attribute value of <code>example</code>.</p>
+        <p>Examples can be inserted by using <code>div</code> element whose <code>class</code> attribute is equal to
+        <code>example</code>.</p>
 
-        <p>Examples will automatically be formatted and prepended with <i>EXAMPLE:</i>.
+        <p>Notes will automatically be formatted, e.g. prepended with the text <i>EXAMPLE</i>, and numbered.</p>
 
-        <p>For example:</p>
-
+        <div class="example">
 <pre>
 &lt;p class=&quot;example&quot;&gt;The number &lt;i&gt;0.0003&lt;/i&gt; can be written 
 &lt;i&gt;3 × 10−4&lt;/i&gt; but is never written &lt;i&gt;3e−4&lt;/i&gt;.&lt;/p&gt;
 </pre>
 
         <p>results in:</p>
-
-        <p class="example">The number <i>0.0003</i> can be written 
-          <i>3 × 10−4</i> but is never written <i>3e−4</i>.</p>
+        </div>
+        <div class="example">The number 0.0003 can be written 3×10−4 but is never written 3e−4.</div>
 
       </section>
 
