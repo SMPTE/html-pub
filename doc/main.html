@@ -29,7 +29,9 @@
 
   <section id="sec-normative-references">
     <ul>
-      <li><cite id="bib-HTML-5">HTML Standard</cite>, Living Standard. <a>https://html.spec.whatwg.org/multipage/</a></li>
+      <li>
+        <cite id="bib-HTML-5">HTML Standard</cite>, Living Standard. 
+        <a>https://html.spec.whatwg.org/multipage/</a></li>
     </ul>
   </section>
 
@@ -64,12 +66,15 @@
           <figcaption>Basic structure of the main element.</figcaption>
         </figure>
 
+        <p>The <code>smpte.js</code> script contains the code that renders the HTML document provided by the author into an HTML
+        document approprtiate for publication. This rendering happens automatically when loading the document in a web browser.</p>
+
     </section>
 
     <section id="sec-head-element">
       <h3><code>head</code> element</h3>
 
-      <section>
+      <section id="sec-general">
         <h4>General</h4>
 
         <p>The <code>head</code> element shall contain the following:</p>
@@ -85,11 +90,20 @@
           <li>a <code>meta</code> element that conforms to <a href="#sec-pubType"></a>;</li>
           <li>a <code>meta</code> element that conforms to <a href="#sec-pubNumber"></a>;</li>
           <li>a <code>meta</code> element that conforms to <a href="#sec-pubState"></a>;</li>
-          <li>a <code>meta</code> element that conforms to <a href="#sec-effectiveDateTime"></a>;</li>
-          <li>a <code>meta</code> element that conforms to <a href="#sec-pubDateTime"></a>, if the document is published;</li>
+          <li>a <code>meta</code> element that conforms to <a href="#sec-effectiveDateTime"></a>, if and only if <code>pubType
+          </code> is <code>OM</code>;</li>
+          <li>a <code>meta</code> element that conforms to <a href="#sec-pubDateTime"></a>, if <code>pubState</code> is
+          <code>pub</code>;</li>
         </ul>
 
         <p>The <code>title</code> element shall be equal to the title of the document, without any document number.</p>
+
+        <p>The <code>head</code> element may contain the following:</p>
+
+        <ul>
+          <li>Additional <code>script</code> elements.</li>
+        </ul>
+
       </section>
 
       <section id="sec-pubType">
@@ -143,8 +157,20 @@
 
         <p>The element shall have a <code>content</code> attribute that conforms to the pattern <code>YYYY-MM-DD</code>, where
         <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day that the document becomes effective.</p>
+      </section>
 
-        <p>The element shall be present if and only if <code>pubType </code> is <code>OM</code>.</p>
+      <section id="sec-additional-script-elements">
+        <h4>Additional <code>script</code> elements</h4>
+
+        <p>Addition <code>script</code> elements can be used to import JavaScript libraries to assist with document layout, e.g. <a
+        href="https://www.mathjax.org/">MathJax</a></p>
+
+        <div class="example">
+<pre>&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=es6&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; id=&quot;MathJax-script&quot;
+  async src=&quot;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js&quot;&gt;
+&lt;/script&gt;</pre>
+        </div>
       </section>
     </section>
 
@@ -161,132 +187,218 @@
           <caption>Ordered sequence of <code>section</code> elements comprising the <code>body</code> element.</caption>
           <thead>
             <tr>
+              <th>Section Name</th>
               <th>Cardinality</th>
-              <th>Section</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>0..1</td>
-              <td><a>introduction section</a></td>
+              <td><a>Foreword</a></td>
+              <td>0 or 1</td>
             </tr>
             <tr>
-              <td>1</td>
-              <td><a>scope section</a></td>
-            <tr>
-              <td>0..1</td>
-              <td><a>conformance section</a></td>
+              <td><a>Introduction</a></td>
+              <td>0 or 1</td>
             </tr>
             <tr>
-              <td>0..1</td>
-              <td><a>normative references section</a></td>
+              <td><a>Scope</a></td>
+              <td>Exactly 1</td>
             <tr>
-              <td>0..1</td>
-              <td><a>terms and definitions section</a></td>
+              <td><a>Conformance</a></td>
+              <td>0 or 1</td>
             </tr>
             <tr>
-              <td>0..*</td>
-              <td><a>prose section</a></td>
+              <td><a>Normative references</a></td>
+              <td>0 or 1</td>
+            <tr>
+              <td><a>Terms and definitions</a></td>
+              <td>0 or 1</td>
             </tr>
             <tr>
-              <td>0..*</td>
-              <td><a>annex section</a></td>
+              <td><a>Prose section</a></td>
+              <td>0 or more</td>
             </tr>
             <tr>
-              <td>0..1</td>
-              <td><a>bibliography section</a></td>
+              <td><a>Annex section</a></td>
+              <td>0 or more</td>
+            </tr>
+            <tr>
+              <td><a>Bibliography</a></td>
+              <td>0 or 1</td>
             </tr>
           </tbody>
         </table>
 
+        <p>From the author-supplied <code>section</code> elements specified at <a href="#tab-body-structure"></a>, the tooling
+        generates a document structure that conforms to SMPTE editorial requirements. For example:</p>
+
+        <ul>
+          <li>clauses are numbered automatically;</li>
+          <li>headings of <code>section</code> elements other than <a>Prose sections</a> and <a>Annex sections</a> are
+          automatically generated;</li>
+          <li>boilerplate is added, including the SMPTE masthead.</li>
+        </ul>
+
+      </section>
+
+      <section id="sec-foreword-section">
+        <h4>Foreword section</h4>
+
+        <p>The <dfn>Foreword</dfn> section contains author-supplied prose, e.g. list of substantive changes since the last edition,
+        that is added to the SMPTE boilerplate text.</p>
+
+        <p>The absence of this section indicates that no author-supplied prose was provided.</p>
+
+        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+        <code>sec-foreword</code>.</p>
+
+        <p>The heading shall not be present.</p>
+
+        <div class="example">
+<pre>&lt;section id=&quot;sec-foreword&quot;&gt;
+  &lt;p&gt;This is the additional infomation relevant to the document.&lt;/p&gt;
+&lt;/section&gt;
+</pre>
+        </div>
       </section>
 
       <section id="sec-introduction-section">
-        <h4>introduction section</h4>
+        <h4>Introduction section</h4>
 
-        <p>The <dfn>introduction section</dfn> contains the introduction of the document.</p>
+        <p>The <dfn>Introduction</dfn> section contains author-supplied prose that forms the introduction of the document.</p>
 
+        <p>The absence of this section indicates that the document has no introduction.</p>
+
+        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+        <code>sec-introduction</code>.</p>
+
+        <p>The heading shall not be present.</p>
+
+        <div class="example">
 <pre>&lt;section id=&quot;sec-introduction&quot;&gt;
   &lt;p&gt;This is the introduction.&lt;/p&gt;
 &lt;/section&gt;
 </pre>
+        </div>
 
-        <p>The <code>id</code> attribute shall be present and equal to <code>sec-introduction</code>.</p>
-
-        <p>The heading will be generated automatically.</p>
       </section>
 
       <section id="sec-scope-section">
-        <h4>Scope</h4>
+        <h4>Scope section</h4>
 
-        <p>The <dfn>scope section</dfn> contains the scope of the document.</p>
+        <p>The <dfn>Scope</dfn> section contains author-supplied prose that forms the scope of the document.</p>
 
+        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+        <code>sec-scope</code>.</p>
+
+        <p>The heading shall not be present.</p>
+
+        <div class="example">
 <pre>&lt;section id=&quot;sec-scope&quot;&gt;
   &lt;p&gt;This is the scope.&lt;/p&gt;
 &lt;/section&gt;</pre>
+        </div>
 
-        <p>The <code>id</code> attribute shall be present and equal to <code>sec-scope</code>.</p>
-
-        <p>The heading will be generated automatically.</p>
       </section>
 
       <section id="sec-conformance-section">
-        <h4>Conformance</h4>
+        <h4>Conformance section</h4>
 
-        <p>The <dfn>conformance section</dfn> contains conformance requirements and definitions, beyond the usual SMPTE conformance
-        statements.</p>
+        <p>The <dfn>Conformance</dfn> section contains author-supplied, conformance-related prose that is added to the SMPTE
+        boilerplate text.</p>
 
+        <p>The absence of this section indicates that no author-supplied, conformance-related prose is provided.</p>
+
+        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+        <code>sec-conformance</code>.</p>
+
+        <p>The heading shall not be present.</p>
+
+        <div class="example">
 <pre>&lt;section id=&quot;sec-conformance&quot;&gt;
   &lt;p&gt;These are additional conformance requirements and definitions.&lt;/p&gt;
 &lt;/section&gt;
 </pre>
-
-        <p>The <code>id</code> attribute shall be present and equal to <code>sec-conformance</code>.</p>
-
-        <p>The heading will be generated automatically.</p>
+        </div>
       </section>
 
       <section id="sec-norm-refs-section">
-        <h4>Normative references</h4>
+        <h4>Normative references section</h4>
 
-        <p>The <dfn>normative references section</dfn> contains a single unordered list <code>ul</code> where each element
-        <code>li</code> is a normative reference.</p>
-
-<pre>&lt;section id=&quot;sec-normative-references&quot;&gt;
-  &lt;ul&gt;
-    &lt;li&gt;
-      &lt;cite id=&quot;bib-ietf-rfc-3986&quot;&gt;IETF RFC 3986&lt;/cite&gt;, Uniform Resource Identifiers (URI): Generic Syntax,
-      T. Berners-Lee, et al., January 2005. &lt;a&gt;http://www.ietf.org/rfc/rfc3986.txt&lt;/a&gt;
-    &lt;/li&gt;
-  &lt;/ul&gt;
-&lt;/section&gt;</pre>
+        <p>The <dfn>Normative references</dfn> section collects normative references cited in the document.</p>
 
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
         <code>sec-normative-references</code>.</p>
 
-        <p>The heading and boilerplate of the section will be generated automatically.</p>
+        <p>The heading shall not be present.</p>
 
-        <p>Each <code>li</code> element shall contain one <code>cite</code> element that contains the text that will be used when
-        citing the reference in the prose.</p>
+        <p>The absence of this section indicates that no normative references are cited by the document.</p>
 
-        <p>Each <code>li</code> element may contain one <code>a</code> element that contains a location where the reference can be
-        retrieved.</p>
+        <p>If present, the section shall contain a single <code>ul</code> element where each <code>li</code>
+          element is a normative reference, such that:</p>
 
-        <p>The <code>id</code> attribute shall be present on each <code>cite</code> element, and is used to
-        link the reference from the prose as follows:</p>
+        <ul>
+          <li>Each <code>li</code> element shall contain one <code>cite</code> element, with value that contains the text that will
+          be used when citing the reference in the prose.</li>
+          <li>The <code>cite</code> element shall contain an <code>id</code> attribute with value prefixed by
+          <code>bib-</code>.</li>
+          <li>Each <code>li</code> element may contain additional title infomation.
+          <li>Each <code>li</code> element may contain one <code>a</code> element that contains a location where the reference can
+          be retrieved.</li>
+        </ul>
 
-        <pre>&lt;a href=&quot;#bib-ietf-rfc-3986&quot;&gt;&lt;/a&gt;</pre>
+        <div class="example">
+<pre>&lt;section id=&quot;sec-normative-references&quot;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;
+      &lt;cite id=&quot;bib-HTML-5&quot;&gt;HTML Standard&lt;/cite&gt;, Living Standard. 
+        &lt;a&gt;https://html.spec.whatwg.org/multipage/&lt;/a&gt;&lt;/li&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/section&gt;</pre>
+</div>
+
       </section>
 
       <section id="sec-terms-definitions-clause">
-        <h4>Terms and definitions</h4>
+        <h4>Terms and definitions section</h4>
 
-        <p>The <dfn>terms and definitions section</dfn> contains terms that are not defined within the clauses of the document
-        itself.</p>
+        <p>The <dfn>Terms and definitions</dfn> section collects terms, abbreviations and symbols that are not defined inline the
+        clauses of the document, as described in <a href="#sec-dfn-element"></a>.</p>
+
+        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+        <code>sec-terms-and-definitions</code>.</p>
+
+        <p>The heading shall not be present.</p>
+
+        <p>The absence of this section indicates that all terms and abbreviations are defined inline the clauses of the
+        document.</p>
+
+        <p>If present, the <code>section</code> contains one or both of the following elements:</p>
+
+        <ul>
+          <li>a <code>ul</code> element that cites external definitions, subject to the following constraints:
+            <ul>
+              <li>The <code>id</code> attribute of the <code>ul</code> element shall be equal to <code>terms-ext-defs</code>.</li>
+              <li>Each <code>li</code> element contains a citation link to a normative reference (see <a
+              href="#sec-norm-refs-section"></a>), whose definitions are included by reference.</li>
+            </ul>
+          </li>
+          <li>a <code>dl</code> element that contains individual definitions and abbreviations, subject to the following
+          constraints:
+            <ul>
+              <li>The <code>id</code> attribute of the <code>dl</code> element shall be equal to <code>terms-int-defs</code>.</li>
+              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol</li>
+              <li>Each <code>dd</code> element contains the matching definition</li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="example">
 <pre>
 &lt;section id=&quot;sec-terms-and-definitions&quot;&gt;
   &lt;ul id=&quot;terms-ext-defs&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;#bib-ietf-rfc-8259&quot;&gt;&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#bib-HTML-5&quot;&gt;&lt;/a&gt;&lt;/li&gt;
   &lt;/ul&gt;
   &lt;dl id=&quot;terms-int-defs&quot;&gt;
     &lt;dt&gt;&lt;dfn&gt;key number&lt;/dfn&gt;&lt;/dt&gt;
@@ -295,156 +407,405 @@
   &lt;/dl&gt;
 &lt;/section&gt;
 </pre>
-        <p>The <code>id</code> attribute of the <code>section</code> element shall be equal to
-        <code>sec-terms-and-definitions</code>.</p>
+        </div>
 
-        <p>The heading of the <code>section</code> element is generated automatically.</p>
-
-        <p>The <code>section</code> contains of two optional elements:</p>
-        <ul>
-          <li>an unordered list <code>ul</code> whose <code>li</code> elements each contain a link to a normative references whose
-          definitions are included by reference; and</li>
-          <li>an optional definition list <code>dl</code> that contains individual definitions.</li>
-        </ul>
-
-        <p>The <code>id</code> attribute of <code>ul</code> element shall be equal to <code>terms-ext-defs</code>.</p>
-
-        <p>The <code>id</code> attribute of <code>dl</code> element shall be equal to <code>terms-int-defs</code>.</p>
+        <p class="note">The boilerplate of the section will be generated automatically.</p>
 
       </section>
 
       <section id="sec-prose-section">
-        <h4>Prose</h4>
+        <h4>Prose section(s)</h4>
 
-        <p>A <dfn>prose section</dfn> contains technical prose.</p>
+        <p>Each <dfn>Prose section</dfn> contains author-supplied technical prose.</p>
 
-<pre>&lt;section id=&quot;sec-clause-1&quot;&gt;
-  &lt;h2&gt;Clause heading&lt;/h2&gt;
-  &lt;section id=&quot;sec-subclause-1&quot;&gt;
-    &lt;h3&gt;Heading of subclause 1&lt;/h3&gt;
+        <p>A <a>Prose section</a> may contain other nested <a>Prose sections</a>. If any child of a <a>Prose section</a> is a
+        <a>Prose section</a>, then all children shall be <a>Prose sections</a>.</p>
+
+        <p>The <code>id</code> attribute shall be present and its value should be prefixed with <code>sec-</code>.</p>
+
+        <p>The <code>class</code> attribute of a <a>Prose section</a> shall not contain the <code>annex</code> class.</p>
+
+        <p>A section heading element of the appropriate level shall be present, starting with level 2 (<code>h2</code>) for all
+        <a>Prose sections</a> that are children of the <code>body</code> element.</p>
+
+        <p><a>Prose sections</a> are automatically numbered, so neither the heading element nor its <code>id</code> attribute should
+        contain numbering information.</p>
+
+        <div class="example">
+<pre>&lt;section id=&quot;sec-prose-clause&quot;&gt;
+  &lt;h2&gt;Prose Clause&lt;/h2&gt;
+  &lt;section id=&quot;sec-prose-sub-clause&quot;&gt;
+    &lt;h3&gt;Prose Sub Clause&lt;/h3&gt;
     &lt;p&gt;Some technical content&lt;/p&gt;
   &lt;/section&gt;
-  &lt;section id=&quot;sec-subclause-2&quot;&gt;
-    &lt;h3&gt;Heading of subclause 2&lt;/h3&gt;
+  &lt;section id=&quot;sec-next-prose-sub-clause&quot;&gt;
+    &lt;h3&gt;Next Prose Sub Clause&lt;/h3&gt;
     &lt;p&gt;Some technical content&lt;/p&gt;
   &lt;/section&gt;
 &lt;/section&gt;
 </pre>
+        </div>
 
-        <p>The <code>id</code> attribute shall be present.</p>
-
-        <p>A section heading element of the appropriate level shall be present, starting with level 2 (<code>h2</code>) for
-        all <a>prose sections</a> that are children of the <code>body</code> element.</p>
-
-        <p>A <a>prose section</a> may contain other <a>prose sections</a>. If any child of a <a>prose section</a> is a <a>prose section</a>,
-        then all children shall be <a>prose sections</a>.</p>
-
-        <p>The <code>class</code> attribute of a <a>prose section</a> shall not contain the <code>annex</code> class.</p>
-
-        <p>A <a>prose section</a> will be automatically numbered.</p>
       </section>
 
       <section id="sec-annex-section">
-        <h4>Annex</h4>
+        <h4>Annex section(s)</h4>
 
-        <p>An <dfn>annex section</dfn> contains a technical annex.</p>
+        <p>An <dfn>Annex section</dfn> contains an author-supplied technical annex.</p>
 
-<pre>&lt;section class=&quot;annex&quot; id=&quot;sec-annex-1&quot;&gt;
-  &lt;h2&gt;Annex heading&lt;/h2&gt;
-  &lt;section id=&quot;sec-subclause-1&quot;&gt;
-    &lt;h3&gt;Heading of subclause 1&lt;/h3&gt;
+        <p>The requirements for an <a>Annex section</a> are the same as those of a <a>Prose section</a>, with the exception that the
+        <a>Annex section</a> shall contain the <code>class</code> attribute with value of <code>annex</code>.</p>
+
+        <p>An <a>Annex section</a> shall not contain nested <a>annex sections</a>.</p>
+
+        <div class="example">
+<pre>&lt;section class=&quot;annex&quot; id=&quot;sec-addtional-info&quot;&gt;
+  &lt;h2&gt;Additional Info&lt;/h2&gt;
+  &lt;section id=&quot;sec-addtional-info-sub-section&quot;&gt;
+    &lt;h3&gt;Additional Info Sub Section&lt;/h3&gt;
     &lt;p&gt;Some technical content&lt;/p&gt;
   &lt;/section&gt;
-  &lt;section id=&quot;sec-subclause-2&quot;&gt;
-    &lt;h3&gt;Heading of subclause 2&lt;/h3&gt;
+  &lt;section id=&quot;sec-addtional-info-sub-section-more&quot;&gt;
+    &lt;h3&gt;Additional Info Sub Section More&lt;/h3&gt;
     &lt;p&gt;Some technical content&lt;/p&gt;
   &lt;/section&gt;
 &lt;/section&gt;
 </pre>
+        </div>
 
-        <p>The requirements for an <a>annex section</a> are the same as those of a <a>prose section</a>, with the exception that the
-        <code>class</code> attribute of an <a>annex section</a> shall contain the <code>annex</code> class.</p>
       </section>
 
-      <section>
-        <h4>Bibliography</h4>
+      <section id="sec-bibliography-section">
+        <h4>Bibliography section</h4>
 
-        <p>The <dfn>bibliography section</dfn> contains a single unordered list <code>ul</code> where each element <code>li</code>
-        is an informative reference.</p>
+        <p>The <dfn>Bibliography</dfn> section contains author-supplied bibliographic references.</p>
 
+        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+        <code>sec-bibliography</code>.</p>
+
+        <p>The heading shall not be present.</p>
+
+        <p>The absence of this section indicates that no bibliographic references are cited by the document.</p>
+
+        <p>If present, the section shall contain a single <code>ul</code> element that conform to the same requirement as the
+        <code>ul</code> element of the <a>normative references</a> section.</p>
+
+        <div class="example">
 <pre>&lt;section id=&quot;sec-bibliography&quot;&gt;
   &lt;ul&gt;
     &lt;li&gt;
-      &lt;cite id=&quot;bib-draft-bhutton-json-schema-00&quot;&gt;IETF draft-bhutton-json-schema-00&lt;/cite&gt;, Wright, A., H. Andrews; B. Hutton,
-      G. Dennis, &quot;JSON Schema: A Media Type for Describing JSON Documents&quot;, Work in Progress, December 8, 2020.
-      &lt;a&gt;https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;cite id=&quot;bib-iso-directives-part2&quot;&gt;ISO/IEC Directives, Part 2&lt;/cite&gt;,
+      Principles and rules for the structure and drafting of ISO and IEC documents (Ninth edition, 2021)
+      &lt;a&gt;https://www.iso.org/sites/directives/current/part2/index.xhtml&lt;/a&gt;&lt;/li&gt;
     &lt;/li&gt;
   &lt;/ul&gt;
 &lt;/section&gt;</pre>
+          </div>
 
-        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
-        <code>sec-normative-references</code>.</p>
-
-        <p>The heading and boilerplate of the section will be generated automatically.</p>
-
-        <p>Each <code>li</code> element shall contain one <code>cite</code> element that contains the text that will be used when
-        citing the reference in the prose.</p>
-
-        <p>Each <code>li</code> element may contain one <code>a</code> element that contains a location where the reference can be
-        retrieved.</p>
-
-        <p>The <code>id</code> attribute shall be present on each <code>cite</code> element, and is used to
-        link the reference from the prose as follows:</p>
-
-        <pre>&lt;a href=&quot;#bib-draft-bhutton-json-schema-00&quot;&gt;&lt;/a&gt;</pre>
       </section>
+
     </section>
 
     <section id="sec-other-elements">
       <h3>Other elements</h3>
 
-      <section id="sec-dfn-element">
-        <h4>Definitions</h4>
+      <section id="sec-section-linking">
+        <h4>Referencing clauses</h4>
 
-        <p>A term can be defined anywhere in the main element using the <code>dfn</code> element:</p>
+        <p>When referencing a clause, an <code>a</code> element with its <code>href</code> attribute referencing a
+        <code>section</code> element shall be used. The text of the link will be automatically set to section number.</p>
 
-        <pre>&lt;dfn data-lt=&quot;alternate1|alternate2&quot;&gt;term&lt;/dfn&gt;</pre>
+  <div class="example">
+    <code>&lt;a href=&quot;#sec-scope&quot;&gt;&lt;/a&gt;</code> is rendered as <a
+    href="#sec-scope"></a> and <code>&lt;a href=&quot;#sec-section-linking&quot;&gt;&lt;/a&gt;</code> is rendered as <a
+    href="#sec-section-linking">.</a>
+  </div>
 
-        <p>
-          The optional <code>data-lt</code> attribute specify alternate forms of the term, each separated by a <code>|</code> character,
-          that can be used to link to the definition.
+      </section>
+
+      <section id="sec-normative-linking">
+        <h4>Citing normative references</h4>
+
+        <p>When citing a normative reference, an <code>a</code> element with its <code>href</code> attribute referencing a
+          <code>cite</code> element from the <a>normative references</a> section shall be used. The text of the link will be
+          automatically set to the contents of the
+          <code>cite</code> element.</p>
+
+          <p class="example">
+  <code>&lt;a href=&quot;#bib-HTML-5&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#bib-HTML-5"></a>.
+          </p>
+
+      </section>
+
+
+      <section id="sec-bibliographic-linking">
+        <h4>Citing bibliographic references</h4>
+
+        <p>When citing a bibliographic reference in the prose, an <code>a</code> element with its <code>href</code> attribute
+        referencing a <code>cite</code> element from the <a>Bibliography</a> section shall be used. The text of the link will be
+        automatically set to the contents of the <code>cite</code> element.</p>
+
+        <p class="example">
+<code>&lt;a href=&quot;#bib-iso-directives-part2&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#bib-iso-directives-part2"></a>.
         </p>
+      </section>
+
+
+      <section id="sec-external-links">
+        <h4>External links</h4>
+
+        <p>Links to external resources shall be written by wrapping the URL in an <code>a</code> element</p>
+
+        <p class="example">
+  <code>&lt;a&gt;https://www.iso.org/sites/directives/current/part2/index.xhtml&lt;/a&gt;</code> is rendered as
+  <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a>.
+        </p>
+
+        <p class="note">An <code>href</code> attribute will automatically be generated. 
+
+      </section>
+
+      <section id="sec-dfn-element">
+        <h4>Inline terms</h4>
+
+        <p>A <dfn data-lt="alternate1|alternate2">term</dfn> can be defined by wrapping it in a <code>dfn</code> element.</p>
+
+        <p class="example">
+        <code>&lt;dfn data-lt=&quot;alternate1|alternate2&quot;&gt;term&lt;/dfn&gt;</code>
+        </p>
+
+        <p>The optional <code>data-lt</code> attribute specify alternate forms of the <a>term</a>, each separated by a
+        <code>|</code>  character.</p>
 
         <p>An optional <code>id</code> attribute can be specified; otherwise one will be generated automatically.</p>
 
-        The definition above can be referred to using one of the following forms:
+        <div class="example">
+          <p>The definition above can be referenced using one of the following forms:</p>
+          <ul>
+            <li><code>&lt;a&gt;term&lt;/a&gt;</code>, which is rendered as <a>term</a></li>
+            <li><code>&lt;a&gt;alternate1&lt;/a&gt;</code>, which is rendered as <a>alternate1</a></li>
+            <li><code>&lt;a&gt;alternate2&lt;/a&gt;</code>, which is rendered as <a>alternate2</a></li>
+          </ul>
+        </div>
 
-        <ul>
-          <li><code>&lt;a&gt;term&lt;/a&gt;</code></li>
-          <li><code>&lt;a&gt;alternate1&lt;/a&gt;</code></li>
-          <li><code>&lt;a&gt;alternate2&lt;/a&gt;</code></li>
-        </ul>
+      </section>
+
+      <section id="sec-dl-element">
+        <h4>Lists of key-value pairs</h4>
+
+        <p>A <code>dl</code> element can be used for key-value pairs lists.</p>
+
+        <p>Since styling is automatically applied to <code>dl</code> elements, author should not specify additional formatting,
+        either in the form of CSS styles or using markup such as the <code>b</code> element.</p>
+
+        <p>At least one <code>dd</code> shall be present for each <code>dt</code> element.</p>
+
+        <div class="example">
+<pre>
+&lt;dl&gt;
+  &lt;dt&gt;imperative forms&lt;dt&gt;
+  &lt;dd&gt;&quot;see&quot;&lt;/dd&gt;
+  &lt;dt&gt;non-imperative forms&lt;/dt&gt;
+  &lt;dd&gt;&quot;according to&quot;&lt;/dd&gt;
+  &lt;dd&gt;&quot;as defined in&quot;&lt;/dd&gt;
+  &lt;dd&gt;&quot;as specified in&quot;&lt;/dd&gt;
+  &lt;dd&gt;&quot;details as given in&quot;&lt;/dd&gt;
+  &lt;dd&gt;&quot;in accordance with&quot;&lt;/dd&gt;
+&lt;/dl&gt;
+</pre>
+        </div>
 
       </section>
 
       <section id="sec-figure-element">
         <h4>Figures</h4>
+
+        <p>A figure can be inserted using a <code>figure</code> element with the following requirements:</p>
+
+        <p>The <code>figure</code> element shall contain:</p>
+        <ul>
+          <li>an <code>id</code> attribute whose value starts with <code>figure-</code></li>
+          <li>one <code>img</code> element</li>
+          <li>one <code>figcaption</code> element following the <code>img</code> element</li>
+        </ul>
+
+        <p>Figures are automatically numbered.</p>
+
+        <div class="example">
+<pre>
+&lt;figure id=&quot;figure-sample-image&quot;&gt;
+  &lt;img src=&quot;media/sample.png&quot;&gt;
+  &lt;figcaption&gt;Example of a figure&lt;/figcaption&gt;
+&lt;/figure&gt;
+</pre>
+
+          <p>is rendered as</p>
+
+          <figure id="figure-sample-image">
+            <img class="figure" src="media/sample.png">
+            <figcaption>Example of a figure</figcaption>
+          </figure>
+        </div>
+
+        <p>When referencing a figure in the prose, an <code>a</code> element with its <code>href</code> attribute referencing the
+        <code>figure</code> element shall be used. The text of the link will be automatically set to the number of the figure.</p>
+
+        <div class="example">
+<code>&lt;a href=&quot;#figure-sample-image&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#figure-sample-image"></a>.
+        </div>
+
+      </section>
+
+      <section id="sec-table-element">
+        <h4>Tables</h4>
+
+        <p>Tables can be inserted by using a <code>table</code> element.</p>
+        
+        <p>The <code>table</code> element shall contain:</p>
+
+        <ul>
+          <li>an <code>id</code> attribute whose value starts with <code>tab-</code></li>
+          <li>one <code>caption</code> element as the first child of the <code>table</code> element</li>
+          <li>one <code>thead</code> element, containing one <code>tr</code> element, with <code>th</code> element(s) as needed for
+          each column header</li>
+          <li>one <code>tbody</code> element, with <code>tr</code> element(s) as needed for each row</li>
+        </ul>
+
+        <div class="example">
+<pre>
+&lt;table id=&quot;tab-sample-tabledata&quot;&gt;
+  &lt;caption&gt;Sample Table&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Sample Number&lt;/th&gt;
+      &lt;th&gt;Sample Name&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;0001&lt;/td&gt;
+      &lt;td&gt;Name 01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;0002&lt;/td&gt;
+      &lt;td&gt;Name 02&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</pre>
+
+          <p>is rendered as</p>
+
+          <table id="tab-sample-tabledata">
+            <caption>Sample Table</caption>
+            <thead>
+              <tr>
+                <th>Sample Number</th>
+                <th>Sample Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0001</td>
+                <td>Name 01</td>
+              </tr>
+              <tr>
+                <td>0002</td>
+                <td>Name 02</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>When referencing a table in the prose, an <code>a</code> element with its <code>href</code> attribute referencing the
+        <code>table</code> element shall be used. The text of the link will be automatically set to the number of the table.</p>
+  
+        <div class="example">
+<code>&lt;a href=&quot;#tab-sample-tabledata&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#tab-sample-tabledata"></a>.
+        </div>
       </section>
 
       <section id="sec-snippets-element">
         <h4>External code snippets</h4>
 
         <p>External code snippets can be inserted by setting the <code>data-include</code> attribute on a <code>pre</code> element to
-        the relative path of the snippet. For example:</p>
+        the relative path of the snippet.</p>
 
-        <pre>&lt;pre data-include=&quot;snippets/example.txt&quot;&gt;&lt;/pre&gt;</pre>
+        <div class="example">
+          <pre>&lt;pre data-include=&quot;snippets/example.txt&quot;&gt;&lt;/pre&gt;</pre>
 
-        <p>results in:</p>
+          <p>is rendered as</p>
 
-        <pre data-include="snippets/example.txt"></pre>
+          <pre data-include="snippets/example.txt"></pre>
+        </div>
 
         <p>Keeping code snippets separate from the main element allows the snippets to be individually formatted and validated.</p>
       </section>
+
+      <section id="sec-code-element">
+        <h4>Internal code snippets</h4>
+
+        <p>Internal code snippets can be inserted by using <code>pre</code> element.</p>
+        <div class="example">
+<pre>
+&lt;pre&gt;
+SCHEMAID = %s"https://www.smpte-ra.org/json-schema/" PUBNUM "/" REVISION [ "/" SHORTNAME]
+SHORTNAME = 1*4("/" 1*(ALPHA / DIGIT / "-" / "_" / ".") )
+PUBNUM = 1*(DIGIT) ["-" 1*(DIGIT)]
+REVISION = STABLEREV
+STABLEREV = 4(DIGIT) [2(DIGIT)]
+&lt;pre&gt;
+</pre>
+        </div>
+
+        <p>The <code>pre</code> element preserves all white space. As a result, the <code>pre</code> element and its contents should not
+        be indented.</p>
+      </section>
+
+      <section id="sec-note-class">
+        <h4>Notes</h4>
+
+        <p>Notes can be inserted by using <code>p</code> or <code>div</code> element whose <code>class</code> attribute is equal to
+        <code>note</code>.</p>
+
+        <p>Notes will automatically be formatted, e.g. prepended with the text <i>NOTE</i>, and numbered.</p>
+
+        <div class="example">
+<pre>
+&lt;p class=&quot;note&quot;&gt;
+  The license portion of Annex A is verbatim the BSD-3-Clause license
+  available at &lt;a&gt;https://spdx.org/licenses/BSD-3-Clause.html&lt;/a&gt;.
+&lt;/p&gt;
+</pre>
+
+          <p>is rendered as</p>
+
+          <p class="note">The license portion of Annex A is verbatim the BSD-3-Clause license available at
+          <a>https://spdx.org/licenses/BSD-3-Clause.html</a>.</p>
+        </div>
+
+      </section>
+
+      <section id="sec-example-class">
+        <h4>Examples</h4>
+
+        <p>Examples can be inserted by using <code>div</code> element whose <code>class</code> attribute is equal to
+        <code>example</code>.</p>
+
+        <p>Notes will automatically be formatted, e.g. prepended with the text <i>EXAMPLE</i>, and numbered.</p>
+
+        <div class="example">
+<pre>
+&lt;p class=&quot;example&quot;&gt;The number &lt;i&gt;0.0003&lt;/i&gt; can be written 
+&lt;i&gt;3 × 10−4&lt;/i&gt; but is never written &lt;i&gt;3e−4&lt;/i&gt;.&lt;/p&gt;
+</pre>
+
+          <p>results in:</p>
+          <div class="example">The number 0.0003 can be written 3×10−4 but is never written 3e−4.</div>
+        </div>
+
+      </section>
+
     </section>
   </section>
 
@@ -463,6 +824,15 @@
     workflow file should be used:</p>
 
     <pre data-include="../.github/workflows/main.yml"></pre>
+  </section>
+
+  <section id="sec-bibliography">
+    <ul>
+      <li><cite id="bib-iso-directives-part2">ISO/IEC Directives, Part 2</cite>, Principles and rules for the structure and drafting of ISO and IEC documents (Ninth edition, 2021)
+        <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
+      <li><cite id="bib-smpte-ag-16">SMPTE AG-16</cite>, Standards Style Guide
+        <a>https://www.smpte.org/about/policies-and-governance</a></li>
+    </ul>
   </section>
 
 </body>

@@ -702,9 +702,17 @@ function numberNotes() {
 
     let notes = [];
 
-    for (const child of section.children)
-      if (child.classList.contains("note"))
-        notes.push(child);
+    function _findNotes(e) {
+      for (const child of e.children) {
+        if (child.tagName === "SECTION")
+          continue;
+        if (child.classList.contains("note"))
+          notes.push(child);
+          _findNotes(child);
+      }
+    }
+
+    _findNotes(section);
 
     if (notes.length > 1) {
       let counter = 1;
@@ -714,6 +722,36 @@ function numberNotes() {
 
     } else if (notes.length === 1) {
       notes[0].insertBefore(document.createTextNode(`NOTE — `), notes[0].firstChild);
+    }
+
+  }
+}
+
+function numberExamples() {
+
+  for (let section of document.querySelectorAll("section")) {
+
+    const examples = [];
+
+    function _findExamples(e) {
+      for (const child of e.children) {
+        if (child.tagName === "SECTION")
+          continue;
+        if (child.classList.contains("example"))
+          examples.push(child);
+        _findExamples(child);
+      }
+    }
+
+    _findExamples(section);
+
+    if (examples.length > 1) {
+      let counter = 1;
+      for (let example of examples)
+        example.insertBefore(document.createTextNode(`EXAMPLE ${counter++} — `), example.firstChild);
+
+    } else if (examples.length === 1) {
+      examples[0].insertBefore(document.createTextNode(`EXAMPLE — `), examples[0].firstChild);
     }
 
   }
@@ -838,7 +876,15 @@ function resolveLinks(docMetadata) {
         anchor.innerText = "Figure " + target.querySelector(".heading-number").innerText
         
       } else if (target.localName === "section") {
-        anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
+
+        const targetNumber = target.firstElementChild.firstElementChild.innerText.trim();
+
+        if (target.parentElement.tagName === "BODY")
+          anchor.innerText = "Clause "+ targetNumber;
+        else if (target.classList.contains("annex"))
+          anchor.innerText = "Annex "+ targetNumber;
+        else
+          anchor.innerText = targetNumber;
 
       } else {
         logEvent(`Anchor points to ambiguous #${target_id}`)
@@ -886,6 +932,7 @@ function render() {
   numberTables();
   numberFigures();
   numberNotes();
+  numberExamples();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
 }
