@@ -85,6 +85,7 @@
           <li>a <code>meta</code> element that conforms to <a href="#sec-pubType"></a>;</li>
           <li>a <code>meta</code> element that conforms to <a href="#sec-pubNumber"></a>;</li>
           <li>a <code>meta</code> element that conforms to <a href="#sec-pubState"></a>;</li>
+          <li>a <code>meta</code> element that conforms to <a href="#sec-effectiveDateTime"></a>;</li>
           <li>a <code>meta</code> element that conforms to <a href="#sec-pubDateTime"></a>, if the document is published;</li>
         </ul>
 
@@ -99,7 +100,8 @@
         <p>The element shall have a <code>content</code> attribute equal to one of the following values:</p>
 
         <ul>
-          <li><code>AG</code>, if the document is an Administrative Guideline.</li>
+          <li><code>AG</code>, if the document is an Administrative Guideline;</li>
+          <li><code>OM</code>, if the document is an Operations Manual.</li>
         </ul>
       </section>
 
@@ -132,6 +134,17 @@
         <p>The element shall have a <code>content</code> attribute that conforms to the pattern <code>YYYY-MM-DD</code>, where
         <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day of the publication date of the
         document.</p>
+      </section>
+
+      <section id="sec-effectiveDateTime">
+        <h4>effectiveDateTime</h4>
+
+        <p>The element shall have an <code>itemprop</code> attribute equal to <code>effectiveDateTime</code>.</p>
+
+        <p>The element shall have a <code>content</code> attribute that conforms to the pattern <code>YYYY-MM-DD</code>, where
+        <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day that the document becomes effective.</p>
+
+        <p>The element shall be present if and only if <code>pubType </code> is <code>OM</code>.</p>
       </section>
     </section>
 
