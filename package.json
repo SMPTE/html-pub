@@ -2,7 +2,7 @@
   "name": "smpte-html-pub-tooling",
   "version": "1.0.0",
   "scripts": {
-    "test": "node test/src/testValidation.js"
+    "test": "node test/src/testValidation.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.224.0",

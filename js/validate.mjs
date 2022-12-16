@@ -25,11 +25,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-const jsdom = require("jsdom");
-const process = require('process');
-const fs = require('fs');
+import * as smpte from "./common.mjs";
 
-class ErrorLogger {
+export class ErrorLogger {
   constructor() {
     this.hasFailed_ = false;
     this.errors_ = [];
@@ -54,18 +52,20 @@ class ErrorLogger {
     return this.errors_;
   }
 }
-exports.ErrorLogger = ErrorLogger;
 
-function smpteValidate(doc, logger) {
+export function smpteValidate(doc, logger) {
   validateHead(doc.head, logger);
   validateBody(doc.body, logger);
 }
-exports.smpteValidate = smpteValidate;
+
+function getPubType(head, logger) {
+  return head.querySelector("meta[itemprop = 'pubType']");
+}
 
 function validatePubType(head, logger) {
-  const e = head.querySelector("meta[itemprop = 'pubType']");
+  const pubType = getPubType(head, logger);
 
-  if (e === null || e.getAttribute("content") !== "AG")
+  if (pubType === null || ! smpte.VALID_PUBTYPES.has(pubType.getAttribute("content")))
     logger.error("pubType invalid");
 }
 
@@ -101,6 +101,26 @@ function validatePubDateTime(head, logger) {
     logger.error("pubDateTime invalid");
 }
 
+function validateEffectiveDateTime(head, logger) {
+  const effectiveDateTime = head.querySelector("meta[itemprop = 'effectiveDateTime']");
+
+  const isOM = getPubType(head, logger).getAttribute("content") === smpte.OM_PUBTYPE;
+
+  if (!isOM) {
+    if (effectiveDateTime !== null)
+      logger.error("effectiveDateTime is only be present for OMs");
+    return;
+  }
+
+  if (effectiveDateTime === null) {
+    logger.error("effectiveDateTime is required for OMs");
+    return;
+  }
+
+  if (! /\d{4}-\d{2}-\d{2}/.test(effectiveDateTime.getAttribute("content")))
+    logger.error("effectiveDateTime invalid");
+}
+
 function validateHead(head, logger) {
   if (head.getAttribute("itemscope") !== "itemscope")
     logger.error("head@itemscope is invalid");
@@ -111,6 +131,7 @@ function validateHead(head, logger) {
   validatePubNumer(head, logger);
   validatePubState(head, logger);
   validatePubDateTime(head, logger);
+  validateEffectiveDateTime(head, logger);
 }
 
 function validateIntroduction(e, logger) {
@@ -226,7 +247,7 @@ function _validateClause(e, lvl, logger) {
     if (i == 0) {
       if (child.tagName === `H${lvl}`)
         continue;
-      logger.error(`Section ${e.id} is missing a heading.`);
+      logger.error(`Section ${e.id} is missing a heading <h${lvl}>.`);
     }
 
     if (child.tagName === "SECTION") {
@@ -289,7 +310,7 @@ function validateBody(body, logger) {
 
   for (const child of body.children) {
     if (child.tagName !== "SECTION") {
-      logger.error(`Invalid element: ${child.tagName}`);
+      logger.error(`Invalid element in <body>: ${child.tagName}`);
       continue;
     }
 
@@ -316,11 +337,3 @@ function validateBody(body, logger) {
 
   }
 }
-
-async function main() {
-  const dom = new jsdom.JSDOM(fs.readFileSync(process.argv[2]));
-  smpteValidate(dom.window.document, console);
-}
-
-if (require.main === module)
-  main().catch(e => { console.error(e) });
