@@ -702,9 +702,17 @@ function numberNotes() {
 
     let notes = [];
 
-    for (const child of section.children)
-      if (child.classList.contains("note"))
-        notes.push(child);
+    function _findNotes(e) {
+      for (const child of e.children) {
+        if (child.tagName === "SECTION")
+          continue;
+        if (child.classList.contains("note"))
+          notes.push(child);
+          _findNotes(child);
+      }
+    }
+
+    _findNotes(section);
 
     if (notes.length > 1) {
       let counter = 1;
@@ -723,11 +731,19 @@ function numberExamples() {
 
   for (let section of document.querySelectorAll("section")) {
 
-    let examples = [];
+    const examples = [];
 
-    for (const child of section.children)
-      if (child.classList.contains("example"))
-        examples.push(child);
+    function _findExamples(e) {
+      for (const child of e.children) {
+        if (child.tagName === "SECTION")
+          continue;
+        if (child.classList.contains("example"))
+          examples.push(child);
+        _findExamples(child);
+      }
+    }
+
+    _findExamples(section);
 
     if (examples.length > 1) {
       let counter = 1;
