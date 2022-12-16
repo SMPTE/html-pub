@@ -719,6 +719,28 @@ function numberNotes() {
   }
 }
 
+function numberExamples() {
+
+  for (let section of document.querySelectorAll("section")) {
+
+    let examples = [];
+
+    for (const child of section.children)
+      if (child.classList.contains("example"))
+        examples.push(child);
+
+    if (examples.length > 1) {
+      let counter = 1;
+      for (let example of examples)
+        example.insertBefore(document.createTextNode(`EXAMPLE ${counter++} — `), example.firstChild);
+
+    } else if (examples.length === 1) {
+      examples[0].insertBefore(document.createTextNode(`EXAMPLE — `), examples[0].firstChild);
+    }
+
+  }
+}
+
 function _normalizeTerm(term) {
   return term.trim().toLowerCase().replace(/\s+/g," ");
 }
@@ -886,6 +908,7 @@ function render() {
   numberTables();
   numberFigures();
   numberNotes();
+  numberExamples();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
 }

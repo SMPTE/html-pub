@@ -152,10 +152,7 @@ dd.abbr {
 
 .example {
   font-size: 0.9rem;
-}
-
-.example:before {
-  content: "EXAMPLE: ";
+  margin-left: 1rem;
 }
 
 /* table of contents */
