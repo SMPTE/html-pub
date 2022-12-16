@@ -860,7 +860,15 @@ function resolveLinks(docMetadata) {
         anchor.innerText = "Figure " + target.querySelector(".heading-number").innerText
         
       } else if (target.localName === "section") {
-        anchor.innerText = target.firstElementChild.firstElementChild.innerText.trim();
+
+        const targetNumber = target.firstElementChild.firstElementChild.innerText.trim();
+
+        if (target.parentElement.tagName === "BODY")
+          anchor.innerText = "Clause "+ targetNumber;
+        else if (target.classList.contains("annex"))
+          anchor.innerText = "Annex "+ targetNumber;
+        else
+          anchor.innerText = targetNumber;
 
       } else {
         logEvent(`Anchor points to ambiguous #${target_id}`)

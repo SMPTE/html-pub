@@ -165,12 +165,12 @@
         <p>Addition <code>script</code> elements can be used to import JavaScript libraries to assist with document layout, e.g. <a
         href="https://www.mathjax.org/">MathJax</a></p>
 
-        <p class="example">
+        <div class="example">
 <pre>&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=es6&quot;&gt;&lt;/script&gt;
 &lt;script type=&quot;text/javascript&quot; id=&quot;MathJax-script&quot;
   async src=&quot;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js&quot;&gt;
 &lt;/script&gt;</pre>
-        </p>
+        </div>
       </section>
     </section>
 
@@ -358,15 +358,6 @@
 &lt;/section&gt;</pre>
 </div>
 
-        <p>When citing a normative reference, an <code>a</code> element with its <code>href</code> attribute referencing a
-        <code>cite</code> element from the <a>normative references</a> section shall be used. The text of the link will be
-        automatically set to the contents of the
-        <code>cite</code> element.</p>
-
-        <p class="example">
-<code>&lt;a href=&quot;#bib-HTML-5&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#bib-HTML-5"></a>.
-        </div>
-
       </section>
 
       <section id="sec-terms-definitions-clause">
@@ -511,16 +502,6 @@
 &lt;/section&gt;</pre>
           </div>
 
-          <p>When citing a bibliographic reference in the prose, an <code>a</code> element with its <code>href</code> attribute
-          referencing a <code>cite</code> element from the <a>Bibliography</a> section shall be used. The text of the
-          link will be automatically set to the contents of the
-          <code>cite</code> element.</p>
-
-            <p class="example">
-    <code>&lt;a href=&quot;#bib-iso-directives-part2&quot;&gt;&lt;/a&gt;</code> is rendered as <a
-    href="#bib-iso-directives-part2"></a>.
-            </div>
-
       </section>
 
     </section>
@@ -529,69 +510,98 @@
       <h3>Other elements</h3>
 
       <section id="sec-section-linking">
-        <h4>Section linking</h4>
+        <h4>Referencing clauses</h4>
 
-        <p>When using references to an internal section anywhere on the page, an <code>a</code> element with <code>href</code> attribute value equal to the section's <code>id </code> attribute shall be used. This will generate an auto link back to the <code>section</code> element with its section number/letter (i.e. <a href="#sec-section-linking"></a> - this section) rendered on the page. Example as follows:</p>
+        <p>When referencing a clause, an <code>a</code> element with its <code>href</code> attribute referencing a
+        <code>section</code> element shall be used. The text of the link will be automatically set to section number.</p>
 
-  <pre>&lt;a href=&quot;#sec-prose-sub-clause&quot;&gt;&lt;/a&gt;</pre>
+  <div class="example">
+    <code>&lt;a href=&quot;#sec-scope&quot;&gt;&lt;/a&gt;</code> is rendered as <a
+    href="#sec-scope"></a> and <code>&lt;a href=&quot;#sec-section-linking&quot;&gt;&lt;/a&gt;</code> is rendered as <a
+    href="#sec-section-linking">.</a>
+  </div>
 
       </section>
+
+      <section id="sec-normative-linking">
+        <h4>Citing normative references</h4>
+
+        <p>When citing a normative reference, an <code>a</code> element with its <code>href</code> attribute referencing a
+          <code>cite</code> element from the <a>normative references</a> section shall be used. The text of the link will be
+          automatically set to the contents of the
+          <code>cite</code> element.</p>
+
+          <p class="example">
+  <code>&lt;a href=&quot;#bib-HTML-5&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#bib-HTML-5"></a>.
+          </p>
+
+      </section>
+
+
+      <section id="sec-bibliographic-linking">
+        <h4>Citing bibliographic references</h4>
+
+        <p>When citing a bibliographic reference in the prose, an <code>a</code> element with its <code>href</code> attribute
+          referencing a <code>cite</code> element from the <a>Bibliography</a> section shall be used. The text of the
+          link will be automatically set to the contents of the
+          <code>cite</code> element.</p>
+
+            <p class="example">
+<code>&lt;a href=&quot;#bib-iso-directives-part2&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#bib-iso-directives-part2"></a>.
+            </p>
+      </section>
+
 
       <section id="sec-external-links">
         <h4>External links</h4>
 
-        <p>Links to external resources shall be written by wrapping the URL in a <code>a</code> element as follows:</p>
+        <p>Links to external resources shall be written by wrapping the URL in an <code>a</code> element</p>
 
-  <pre>&lt;a&gt;https://www.iso.org/sites/directives/current/part2/index.xhtml&lt;/a&gt;</pre>
+        <p class="example">
+  <code>&lt;a&gt;https://www.iso.org/sites/directives/current/part2/index.xhtml&lt;/a&gt;</code> is rendered as
+  <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a>.
+        </p>
 
-        <p>An <code>href</code> attribute will automatically be generated. 
+        <p class="note">An <code>href</code> attribute will automatically be generated. 
 
       </section>
 
       <section id="sec-dfn-element">
-        <h4>Definitions</h4>
+        <h4>Defining terms</h4>
 
-        <p>A <dfn data-lt="alternate1|alternate2">term</dfn> can be defined anywhere in the main element using the <code>dfn</code> element:</p>
+        <p>A <dfn data-lt="alternate1|alternate2">term</dfn> can be defined by wrapping it in a <code>dfn</code> element.</p>
 
-        <pre>&lt;dfn data-lt=&quot;alternate1|alternate2&quot;&gt;term&lt;/dfn&gt;</pre>
-
-        <p>
-          The optional <code>data-lt</code> attribute specify alternate forms of the term, each separated by a <code>|</code> character,
-          that can be used to non-obtrusively link to the definition.
+        <p class="example">
+        <code>&lt;dfn data-lt=&quot;alternate1|alternate2&quot;&gt;term&lt;/dfn&gt;</code>
         </p>
+
+        <p>The optional <code>data-lt</code> attribute specify alternate forms of the <a>term</a>, each separated by a
+        <code>|</code>  character.</p>
 
         <p>An optional <code>id</code> attribute can be specified; otherwise one will be generated automatically.</p>
 
-        <p>The definition above can be referred to in the prose using one of the following forms:</p>
-
-<pre>
-&lt;a&gt;term&lt;/a&gt;
-&lt;a&gt;alternate1&lt;/a&gt;
-&lt;a&gt;alternate2&lt;/a&gt;
-</pre>
-        <p>results in:</p>
-
-        <p>
-          <a>term</a>
-          <a>alternate1</a>
-          <a>alternate2</a>
-        </p>
-
+        <div class="example">
+          <p>The definition above can be referenced using one of the following forms:</p>
+          <ul>
+            <li><code>&lt;a&gt;term&lt;/a&gt;</code>, which is rendered as <a>term</a></li>
+            <li><code>&lt;a&gt;alternate1&lt;/a&gt;</code>, which is rendered as <a>alternate1</a></li>
+            <li><code>&lt;a&gt;alternate2&lt;/a&gt;</code>, which is rendered as <a>alternate2</a></li>
+          </ul>
+        </div>
 
       </section>
 
       <section id="sec-dl-element">
-        <h4>Generic <code>dl</code> usage</h4>
+        <h4>Lists of key-value pairs</h4>
 
-        <p><code>dl</code> elements may be used with the following requirement:</p>
+        <p>A <code>dl</code> element can be used for key-value pairs lists.</p>
 
-        <ul>
-          <li>no <code>class</code> formatting or <code>b</code> applied to <code>dt</code></li>
-          <li>at least one <code>dd</code> shall be present for each <code>dt</code></li>
-        </ul>
+        <p>Since styling is automatically applied to <code>dl</code> elements, author should not specify additional formatting,
+        either in the form of CSS styles or using markup such as the <code>b</code> element.</p>
 
-        <p>For example:</p>
+        <p>At least one <code>dd</code> shall be present for each <code>dt</code> element.</p>
 
+        <div class="example">
 <pre>
 &lt;dl&gt;
   &lt;dt&gt;imperative forms&lt;dt&gt;
@@ -604,8 +614,7 @@
   &lt;dd&gt;&quot;in accordance with&quot;&lt;/dd&gt;
 &lt;/dl&gt;
 </pre>
-
-        <p><code>dl</code> elements will automatically be formatted.</p>
+        </div>
 
       </section>
 
