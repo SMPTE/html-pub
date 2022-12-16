@@ -35,6 +35,52 @@
     </ul>
   </section>
 
+  <section id="sec-quick-start">
+    <h2>Quick start</h2>
+
+    <ol>
+      <li>
+        <a href="https://git-scm.com/">Install the git source control system</a>
+      </li>
+      <li>
+        Install a text editor and local web server.
+      </li>
+      <li>
+        Create a git repo:
+<pre>mkdir my-git-repo
+cd my-git-repo
+git init</pre>
+      </li>
+      <li>
+        Add the HTML tooling as a submodule:
+<pre>git submodule add https://github.com/SMPTE/html-pub.git tooling</pre>
+      </li>
+      <li>
+        Create a skeleton document:
+<pre>mkdir doc
+cp tooling/doc/snippets/skeleton.html doc/main.html
+</pre>
+      </li>
+      <li>
+        Add a <code>.gitignore</code> file:
+<pre>cp tooling/.gitignore .
+</pre>
+     </li>
+     <li>
+      Add the GitHub continuous integration script:
+<pre>
+cp -R tooling/.github .
+</pre>
+    </li>
+    <li>
+      Add the build configuration file:
+<pre>
+cp tooling/.smpte-build.json .
+</pre>
+    </li>
+  </ol>
+  </section>
+
   <section id="sec-directory-layout">
     <h2>Directory layout</h2>
 
@@ -45,7 +91,7 @@
       <li><code>doc/media/</code>: directory containing media referenced by the main element (see <a href="#sec-figure-element"></a>).</li>
       <li><code>doc/snippets/</code>: directory containing snippets embedded in the main element (see <a href="#sec-snippets-element"></a>).</li>
       <li><code>tooling/</code>: directory consisting of the tools necessary to render SMPTE documents (see <a href="#sec-tooling"></a>).</li>
-      <li><code>.smpte-build.json</code>: JSON file used to configure the HTML rendering process (see <a href="#sec-build-configuration"></a>).</li>
+      <li><code>.smpte-build.json</code>: JSON file used to configure the HTML rendering process (see <a href="#sec-building"></a>).</li>
       <li><code>.gitignore</code>: Prevents build and operating system artifacts from being tracked by Git.</li>
       <li><code>.github/workflows/main.yml</code>: Allows automated HTML rendering and redlining in GitHub (see <a href="#sec-gh-integration"></a>).</li>
     </ul>
@@ -625,7 +671,7 @@
         <p>The <code>figure</code> element shall contain:</p>
         <ul>
           <li>an <code>id</code> attribute whose value starts with <code>figure-</code></li>
-          <li>one <code>img</code> element</li>
+          <li>one <code>img</code> or <code>pre</code> element</li>
           <li>one <code>figcaption</code> element following the <code>img</code> element</li>
         </ul>
 
@@ -811,10 +857,65 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
 
   <section id="sec-tooling">
     <h2>Tooling</h2>
-  </section>
 
-  <section id="sec-build-configuration">
-    <h2>Build configuration</h2>
+      <section>
+        <h3>Overview</h3>
+      </section>
+
+      <section>
+        <h3>Rendering</h3>
+      </section>
+
+      <section id="sec-building">
+        <h3>Building</h3>
+
+        <p>Building the document for publication involves the following steps:</p>
+
+        <ol>
+          <li>Validating the document</li>
+          <li>Rendering the document</li>
+          <li>Creating redlines from the rendered document</li>
+          <li>Uploading the rendered document and corresponding redlines to S3</li>
+        </ol>
+
+        <p>The build process is carried by the build script <code>scripts/build.mjs</code>. This script is usually executed by the
+        GitHub workflow.</p>
+
+        <p>In order to upload to S3, the build process looks for the following environment variables:</p>
+
+        <dl>
+          <dt><code>AWS_S3_REGION</code></dt>
+          <dd>Region where the S3 bucket lives, e.g., <code>us-west-1</code></dd>
+          <dt><code>AWS_S3_BUCKET</code></dt>
+          <dd>Name of the S3 bucket, e.g., <code>smpte-html-pub</code></dd>
+          <dt><code>AWS_S3_KEY_PREFIX</code></dt>
+          <dd>Prefix used when creating the S3 key where the document is stored, e.g., <code>ag99/</code></dd>
+          <dt><code>AWS_ACCESS_KEY_ID</code></dt>
+          <dd>ID of an AWS Access Key</dd>
+          <dt><code>AWS_SECRET_ACCESS_KEY</code></dt>
+          <dd>Value of the AWS Access Key</dd>
+        </dl>
+
+      <p>The AWS Access Key shall have write and read permissions to the bucket.</p>
+
+      <p>The S3 upload step can be skipped by providing the <code>validate</code> argument to the build script.</p>
+
+      <p>The build process can be configured using the <code>.smpte-build.json</code> file which is contains a JSON object that
+      conforms to the JSON schema at <a href="#figure-build-configuration-schema"></a>.</p>
+
+      <figure id="figure-build-configuration-schema">
+        <pre data-include="../json/schema/build-configuration.json"></pre>
+        <figcaption>Schema for the build configuration file <code>.smpte-build.json</code>.</figcaption>
+      </figure>
+
+      <p>If present or not equal to <code>null</code>, the <code>latestEditionTag</code> property contains the Git tag or commit
+      that is used when generating a redline against the latest published edition of the document.</p>
+
+      <div class="example">
+  <pre data-include="../.smpte-build.json"></pre>
+      </div>
+    </section>
+
   </section>
 
   <section id="sec-gh-integration">
