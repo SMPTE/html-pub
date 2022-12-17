@@ -40,6 +40,7 @@ runs:
         AWS_S3_REGION: ${{ inputs.AWS_S3_REGION }}
         AWS_S3_BUCKET: ${{ inputs.AWS_S3_BUCKET }}
         AWS_S3_KEY_PREFIX: ${{ inputs.AWS_S3_KEY_PREFIX }}
+        AWS_DEPLOY_PREFIX: ${{ inputs.AWS_DEPLOY_PREFIX }}
       run: node ${GITHUB_ACTION_PATH}/../scripts/build.mjs deploy
 
     - name: Determine which pull request we are on
