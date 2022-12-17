@@ -1,6 +1,8 @@
 name: Build SMTPE specification
 
 inputs:
+  AWS_DEPLOY_PREFIX:
+    required: false
   AWS_S3_REGION:
     required: true
   AWS_S3_BUCKET:
