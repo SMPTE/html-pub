@@ -878,8 +878,13 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
           <li>Uploading the rendered document and corresponding redlines to S3</li>
         </ol>
 
-        <p>The build process is carried by the build script <code>scripts/build.mjs</code>. This script is usually executed by the
-        GitHub workflow.</p>
+        <p>The build process is carried by the build script <code>scripts/build.mjs</code>, which is usually executed by the
+        GitHub workflow. The script has the following dependencies:</p>
+
+        <ul>
+          <li><a href="https://nodejs.org/">node</a> dependencies specified in <code>./package.json</code></li>
+          <li><a href="https://validator.w3.org/">HTML 5 validator</a> available as a Python package using <code>pip install html5validator</code></li>
+        </ul>
 
         <p>In order to upload to S3, the build process looks for the following environment variables:</p>
 
