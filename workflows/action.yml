@@ -1,17 +1,13 @@
 name: Build SMTPE specification
 
 inputs:
-  AWS_DEPLOY_PREFIX:
+  CANONICAL_LINK_PREFIX:
     required: false
   AWS_S3_REGION:
     required: true
   AWS_S3_BUCKET:
     required: true
   AWS_S3_KEY_PREFIX:
-    required: true
-  AWS_SECRET_ACCESS_KEY:
-    required: true
-  AWS_ACCESS_KEY_ID:
     required: true
   GITHUB_TOKEN:
     required: true
@@ -27,20 +23,13 @@ runs:
       shell: bash
       run: npm install ${GITHUB_ACTION_PATH}/..
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1-node16
-      with:
-        aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ inputs.AWS_S3_REGION }}
-
     - name: Build and deploy spec
       shell: bash
       env:
         AWS_S3_REGION: ${{ inputs.AWS_S3_REGION }}
         AWS_S3_BUCKET: ${{ inputs.AWS_S3_BUCKET }}
         AWS_S3_KEY_PREFIX: ${{ inputs.AWS_S3_KEY_PREFIX }}
-        AWS_DEPLOY_PREFIX: ${{ inputs.AWS_DEPLOY_PREFIX }}
+        CANONICAL_LINK_PREFIX: ${{ inputs.CANONICAL_LINK_PREFIX }}
       run: node ${GITHUB_ACTION_PATH}/../scripts/build.mjs deploy
 
     - name: Determine which pull request we are on

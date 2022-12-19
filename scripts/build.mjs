@@ -243,7 +243,7 @@ async function s3Upload(buildPaths, versionKey) {
 
     /* create links */
 
-    const deployPrefix = process.env.AWS_DEPLOY_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
+    const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
 
     const cleanURL = `${deployPrefix}${s3PubKeyPrefix}`;
     linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`
