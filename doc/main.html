@@ -38,43 +38,67 @@
   <section id="sec-quick-start">
     <h2>Quick start</h2>
 
-    <ol>
-      <li>
-        <a href="https://git-scm.com/">Install the git source control system</a>
-      </li>
-      <li>
-        Install a text editor and local web server.
-      </li>
-      <li>
-        Create a git repo:
+    <section id="sec-for-doc-editors">
+      <h3>For document editors</h3>
+
+      <ol>
+        <li>
+          <a href="https://git-scm.com/">Install the git source control system</a>
+        </li>
+        <li>
+          Install a text editor and local web server.
+        </li>
+        <li>
+          Create a git repo:
 <pre>mkdir my-git-repo
 cd my-git-repo
 git init</pre>
-      </li>
-      <li>
-        Add the HTML tooling as a submodule:
-<pre>git submodule add https://github.com/SMPTE/html-pub.git tooling</pre>
-      </li>
-      <li>
-        Create a skeleton document:
+        </li>
+        <li>
+          Add the HTML tooling as a submodule:
+  <pre>git submodule add https://github.com/SMPTE/html-pub.git tooling</pre>
+        </li>
+        <li>
+          Create a skeleton document:
 <pre>mkdir doc
-cp tooling/doc/snippets/skeleton.html doc/main.html
-</pre>
-      </li>
-      <li>
-        Add a <code>.gitignore</code> file:
-<pre>cp tooling/.gitignore .
-</pre>
-     </li>
-    <li>
-      Add the build configuration file:
+cp tooling/doc/snippets/skeleton.html doc/main.html</pre>
+        </li>
+        <li>
+          Add a <code>.gitignore</code> file:
+<pre>cp tooling/.gitignore .</pre>
+       </li>
+      </ol>
+    </section>
+
+    <section id="sec-for-repo-admins">
+      <h3>For GitHub repo administrators</h3>
+
+      <ol>
+        <li>Follow the steps at <a href="#sec-for-doc-editors"></a>.</li>
+        <li>Add a workflow file:
+<pre>cp tooling/.github .</pre>
+          Edit the <code>.github/workflows/main.yml</code> file to update the environment variables as specified at <a
+          href="#sec-gh-integration"></a>.
+        </li>
+        <li>
+          Add the build configuration file:
 <pre>
 cp tooling/.smpte-build.json .
 </pre>
-    </li>
-  </ol>
+        </li>
+        <li>Add the various SMPTE boilerplate documents: <i>REAMDE.md</i>, <i>CONTRIBUTING.md</i>, <i>CONFIDENTIALITY.md</i>,
+        <i>LICENSE.md</i> and <i>PATENTS.md</i>.</li>
+      </ol>
+    </section>
 
-  <p>See <a href="#sec-gh-integration"></a> for integration with GitHub workflows.</p>
+    <section id="sec-for-aws-admins">
+      <h3>For AWS administrators</h3>
+
+      <ol>
+        <li>Create an AWS role as specified at <a href="#sec-aws-integration"></a>.</li>
+      </ol>
+    </section>
+
   </section>
 
   <section id="sec-directory-layout">
@@ -761,7 +785,7 @@ cp tooling/.smpte-build.json .
 
         <p>When referencing a table in the prose, an <code>a</code> element with its <code>href</code> attribute referencing the
         <code>table</code> element shall be used. The text of the link will be automatically set to the number of the table.</p>
-  
+
         <div class="example">
 <code>&lt;a href=&quot;#tab-sample-tabledata&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#tab-sample-tabledata"></a>.
         </div>
@@ -874,7 +898,10 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
     <section>
       <h3>Rendering</h3>
 
-      <p></p>
+      <p>At the heart of the tooling is the rendering code at <code>smpte.js</code>.</p>
+
+      <p>The rendering code tuns in browser and is imported using a <code>script</code> element (see <a
+      href="#sec-head-element"></a>).</p>
     </section>
 
     <section id="sec-building">
