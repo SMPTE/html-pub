@@ -42,7 +42,8 @@ runs:
     - name: Add review links to the pull request
       uses: marocchino/sticky-pull-request-comment@v2
       if: github.event_name == 'pull_request' && steps.finder
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       with:
         number: ${{ steps.finder.outputs.pr }}
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         path: ./build/pr-links.md
