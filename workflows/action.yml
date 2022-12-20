@@ -44,4 +44,5 @@ runs:
       if: github.event_name == 'pull_request' && steps.finder
       with:
         number: ${{ steps.finder.outputs.pr }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         path: ./build/pr-links.md
