@@ -66,12 +66,6 @@ cp tooling/doc/snippets/skeleton.html doc/main.html
 <pre>cp tooling/.gitignore .
 </pre>
      </li>
-     <li>
-      Add the GitHub continuous integration script:
-<pre>
-cp -R tooling/.github .
-</pre>
-    </li>
     <li>
       Add the build configuration file:
 <pre>
@@ -79,6 +73,8 @@ cp tooling/.smpte-build.json .
 </pre>
     </li>
   </ol>
+
+  <p>See <a href="#sec-gh-integration"></a> for integration with GitHub workflows.</p>
   </section>
 
   <section id="sec-directory-layout">
@@ -858,50 +854,57 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
   <section id="sec-tooling">
     <h2>Tooling</h2>
 
-      <section>
-        <h3>Overview</h3>
-      </section>
+    <section>
+      <h3>Overview</h3>
 
-      <section>
-        <h3>Rendering</h3>
-      </section>
+      <p>The SMPTE HTML publication tooling consists of several components:</p>
 
-      <section id="sec-building">
-        <h3>Building</h3>
+      <ul>
+        <li>Rendering code (<code>smpte.js</code>) that renders the author-supplied HTML document into a publication-ready HTML
+        document. The rendering involves numbering clauses, inserting boilerplate, etc., and takes place directly in the web
+        browser used by the author.</li>
+        <li>Building code (<code>scripts/build.mjs</code>) that automates the process of validating, rendering, generating
+        redlines and uploading publication artifacts to Amazon S3.</li>
+        <li>A GitHub workflow (<code>.github/workflows/main.yml</code> and <code>workflows/action.yml</code>) that automatically
+        executes the building code whenever a change is made to the GitHub repository where the document is tracked.</li>
+        <li>Amazon AWS infrastructure where the publication artifacts are deployed.</li>
+      </ul>
+    </section>
 
-        <p>Building the document for publication involves the following steps:</p>
+    <section>
+      <h3>Rendering</h3>
+    </section>
 
-        <ol>
-          <li>Validating the document</li>
-          <li>Rendering the document</li>
-          <li>Creating redlines from the rendered document</li>
-          <li>Uploading the rendered document and corresponding redlines to S3</li>
-        </ol>
+    <section id="sec-building">
+      <h3>Building</h3>
 
-        <p>The build process is carried by the build script <code>scripts/build.mjs</code>, which is usually executed by the
-        GitHub workflow. The script has the following dependencies:</p>
+      <p>Building the document for publication involves the following steps:</p>
 
-        <ul>
-          <li><a href="https://nodejs.org/">node</a> dependencies specified in <code>./package.json</code></li>
-          <li><a href="https://validator.w3.org/">HTML 5 validator</a> available as a Python package using <code>pip install html5validator</code></li>
-        </ul>
+      <ol>
+        <li>Validating the document</li>
+        <li>Rendering the document</li>
+        <li>Creating redlines from the rendered document</li>
+        <li>Uploading the rendered document and corresponding redlines to S3</li>
+      </ol>
 
-        <p>In order to upload to S3, the build process looks for the following environment variables:</p>
+      <p>The build process is carried by the build script <code>scripts/build.mjs</code>, which is usually executed by the
+      GitHub workflow (see <a href="#sec-gh-integration"></a>). The script has the following dependencies:</p>
 
-        <dl>
-          <dt><code>AWS_S3_REGION</code></dt>
-          <dd>Region where the S3 bucket lives, e.g., <code>us-west-1</code></dd>
-          <dt><code>AWS_S3_BUCKET</code></dt>
-          <dd>Name of the S3 bucket, e.g., <code>smpte-html-pub</code></dd>
-          <dt><code>AWS_S3_KEY_PREFIX</code></dt>
-          <dd>Prefix used when creating the S3 key where the document is stored, e.g., <code>ag99/</code></dd>
-          <dt><code>AWS_ACCESS_KEY_ID</code></dt>
-          <dd>ID of an AWS Access Key</dd>
-          <dt><code>AWS_SECRET_ACCESS_KEY</code></dt>
-          <dd>Value of the AWS Access Key</dd>
-        </dl>
+      <ul>
+        <li><a href="https://nodejs.org/">node</a> dependencies specified in <code>./package.json</code></li>
+        <li><a href="https://validator.w3.org/">HTML 5 validator</a> available as a Python package using <code>pip install html5validator</code></li>
+      </ul>
 
-      <p>The AWS Access Key shall have write and read permissions to the bucket.</p>
+      <p>The build process looks for the following environment variables:</p>
+
+      <ul>
+        <li><a><code>AWS_S3_REGION</code></a></li>
+        <li><a><code>AWS_S3_BUCKET</code></a></li>
+        <li><a><code>AWS_S3_KEY_PREFIX</code></a></li>
+        <li><a><code>CANONICAL_LINK_PREFIX</code></a></li>
+      </ul>
+
+      <p>The build process also expects the AWS environment to be set up to allow access to the bucket.</p>
 
       <p>The S3 upload step can be skipped by providing the <code>validate</code> argument to the build script.</p>
 
@@ -921,15 +924,95 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       </div>
     </section>
 
-  </section>
+    <section id="sec-gh-integration">
+      <h3>GitHub integration</h3>
 
-  <section id="sec-gh-integration">
-    <h2>GitHub integration</h2>
+      <p>To automatically create and upload to S3 the clean and redline copies of the document when commits are pushed to GitHub,
+      the workflow file at <a href="#figure-workflow-file"></a> is stored at <code>.github/workflows/main.yml</code> in the
+      repository.</p>
 
-    <p>In order to automate the creation of clean and redline copies of document when commits are pushed to GitHub, the following
-    workflow file should be used:</p>
+      <figure id="figure-workflow-file">
+        <pre data-include="../.github/workflows/main.yml"></pre>
+        <figcaption>GitHub workflow file.</figcaption>
+      </figure>
 
-    <pre data-include="../.github/workflows/main.yml"></pre>
+      <p>The following environment variables are set for each repository:</p>
+
+      <dl>
+        <dt><code>AWS_S3_REGION</code></dt>
+        <dd>Set to <a><code>AWS_S3_REGION</code></a>.</dd>
+        <dt><code>AWS_S3_BUCKET</code></dt>
+        <dd>Set to <a><code>AWS_S3_BUCKET</code></a>.</dd>
+        <dt><code>AWS_S3_KEY_PREFIX</code></dt>
+        <dd>Set to <a><code>AWS_S3_KEY_PREFIX</code></a>.</dd>
+        <dt><dfn><code>CANONICAL_LINK_PREFIX</code></dfn></dt>
+        <dd>If set, used to generate the links to publication artifacts that are referenced from the GitHub pull request.</dd>
+        <dt><dfn><code>AWS_ROLE</code></dfn></dt>
+        <dd>ARN of the AWS role assigned to the respository (see <a href="#sec-aws-integration"></a>).</dd>
+      </dl>
+
+      <p>When the workflow is executed on a GitHub pull request, a comment that contains links to the clean and redline documents
+      is automatically added to the pull request. The links use one of the following prefixes:</p>
+
+      <ul>
+        <li><code><a>CANONICAL_LINK_PREFIX</a>/<a>AWS_S3_KEY_PREFIX</a></code>, if <a><code>CANONICAL_LINK_PREFIX</code></a> is set;</li>
+        <li><code>http://<a>AWS_S3_BUCKET</a>.s3-website-<a>AWS_S3_REGION</a>.amazonaws.com/<a>AWS_S3_KEY_PREFIX</a></code>, otherwise.</li>
+      </ul>
+
+    </section>
+
+    <section id="sec-aws-integration">
+      <h3>Amazon AWS integration</h3>
+
+      <p>The tooling uploads publication artifacts to an S3 bucket according to the following parameters:</p>
+
+      <dl>
+        <dt><dfn><code>AWS_S3_REGION</code></dfn></dt>
+        <dd>Region where the S3 bucket lives, e.g., <code>us-west-1</code></dd>
+        <dt><dfn><code>AWS_S3_BUCKET</code></dfn></dt>
+        <dd>Name of the S3 bucket, e.g., <code>html-doc-pub</code></dd>
+        <dt><dfn><code>AWS_S3_KEY_PREFIX</code></dfn></dt>
+        <dd>Prefix used when creating the S3 key where the document is stored, e.g., <code>draft/ag05/</code></dd>
+      </dl>
+
+      <div class="example">
+        <p>Given <code>AWS_S3_BUCKET=html-doc-pub</code> and <code>AWS_S3_KEY_PREFIX=draft/ag05/</code>, the tooling uploads
+        publication artifacts under the prefix <code>s3://html-doc-pub/draft/ag05/</code>.</p>
+      </div>
+
+      <p>The tooling needs permission to upload objects to the bucket. To limit the impact of errors and malicious attacks, each
+      GitHub repository is associated with a distinct <a
+      href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-idp_oidc.html">OIDC role</a> that grants the
+      tooling permissions only to a subset of the S3 bucket. This avoids maintaining IAM users and storing GitHub secrets.</p>
+
+      <p>The trust policy for the role associated with one GitHub repository is specified at <a href="#figure-oidc-trust"></a>.</p>
+
+      <figure id="figure-oidc-trust">
+        <pre data-include="snippets/oidc-trust.json"></pre>
+        <figcaption>Trust policy for the role associated with each GitHub repository. <code>&lt;name of repo&gt;</code> is
+        the name of the repository.</figcaption>
+      </figure>
+
+      <p>The permissions for the role associated with one GitHub repository is specified at <a
+      href="#figure-oidc-permissions"></a>.</p>
+
+      <figure id="figure-oidc-permissions">
+        <pre data-include="snippets/oidc-permissions.json"></pre>
+        <figcaption>Permissions granted to the role associated with each GitHub repository, where <code>&lt;name of
+        bucket&gt;</code> is replaced by <a><code>AWS_S3_BUCKET</code></a> and <code>&lt;s3 prefix&gt;</code> by
+        <a><code>AWS_S3_KEY_PREFIX</code></a>.</figcaption>
+      </figure>
+
+      <p>The bucket is made public using the policy at <a href="#figure-bucket-policy"></a>.</p>
+
+      <figure id="figure-bucket-policy"">
+        <pre data-include="snippets/bucket-policy.json"></pre>
+        <figcaption>Public bucket policy.</figcaption>
+      </figure>
+
+      <p>The contents of the bucket is also made available through a Cloudfront distribution, which allows the publication artifacts
+        to be made available through a custom domain name and TLS (currently <code>https://doc.smpte-doc.org/</code>).</p>
+    </section>
   </section>
 
   <section id="sec-bibliography">
