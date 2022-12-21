@@ -5,7 +5,6 @@ on: [push, pull_request]
 env:
   AWS_REGION: us-east-1
   AWS_S3_BUCKET: html-doc-pub
-#  AWS_S3_KEY_PREFIX: staging/html-pub/
   AWS_ROLE: arn:aws:iam::189079736792:role/gh-actions-html-pub
   CANONICAL_LINK_PREFIX: https://doc.smpte-doc.org/
 
@@ -26,6 +25,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           submodules: true
 
+      - name: Set repository name
+        run: echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
       - name: Check out all branches with the exception of the current branch
         run: CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD); for i in `git branch -a | grep remote | grep -v HEAD | grep -v ${CUR_BRANCH}`; do git branch --track ${i#remotes/origin/} $i; done
 
@@ -37,8 +39,8 @@ jobs:
 
       - uses: ./workflows
         with:
-          AWS_S3_REGION: ${{ env.AWS_REGION }}
-          AWS_S3_BUCKET: 	${{ env.AWS_S3_BUCKET }}
-          AWS_S3_KEY_PREFIX: "${{github.repository}}/"
-          CANONICAL_LINK_PREFIX: ${{ env.CANONICAL_LINK_PREFIX }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_S3_REGION: ${{env.AWS_REGION}}
+          AWS_S3_BUCKET: 	${{env.AWS_S3_BUCKET}}
+          AWS_S3_KEY_PREFIX: "${{env.REPOSITORY_NAME}}/"
+          CANONICAL_LINK_PREFIX: ${{env.CANONICAL_LINK_PREFIX}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
