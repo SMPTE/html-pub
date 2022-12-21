@@ -239,6 +239,8 @@ async function s3Upload(buildPaths, versionKey) {
 
     const s3PubKeyPrefix = s3KeyPrefix + versionKey + "/";
 
+    console.log(`Uploading to bucket ${s3Bucket} at key ${s3PubKeyPrefix}`);
+
     s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
 
     /* create links */
