@@ -5,7 +5,7 @@ on: [push, pull_request]
 env:
   AWS_REGION: us-east-1
   AWS_S3_BUCKET: html-doc-pub
-  AWS_S3_KEY_PREFIX: draft/html-pub/
+  AWS_S3_KEY_PREFIX: staging/html-pub/
   AWS_ROLE: arn:aws:iam::189079736792:role/gh-actions-html-pub
   CANONICAL_LINK_PREFIX: https://doc.smpte-doc.org/
 
