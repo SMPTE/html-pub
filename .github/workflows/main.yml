@@ -50,7 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Build and deploy document (HTML Pub repo)
-        uses: ./tooling/workflows
+        uses: ./workflows
         if: github.repository == 'SMPTE/html-pub'
         with:
           AWS_S3_REGION: ${{env.AWS_REGION}}
