@@ -71,14 +71,12 @@ cp tooling/doc/snippets/skeleton.html doc/main.html</pre>
     </section>
 
     <section id="sec-for-repo-admins">
-      <h3>For GitHub repo administrators</h3>
+      <h3>For administrators</h3>
 
       <ol>
         <li>Follow the steps at <a href="#sec-for-doc-editors"></a>.</li>
         <li>Add a workflow file:
 <pre>cp tooling/.github .</pre>
-          Edit the <code>.github/workflows/main.yml</code> file to update the environment variables as specified at <a
-          href="#sec-gh-integration"></a>.
         </li>
         <li>
           Add the build configuration file:
@@ -88,14 +86,6 @@ cp tooling/.smpte-build.json .
         </li>
         <li>Add the various SMPTE boilerplate documents: <i>REAMDE.md</i>, <i>CONTRIBUTING.md</i>, <i>CONFIDENTIALITY.md</i>,
         <i>LICENSE.md</i> and <i>PATENTS.md</i>.</li>
-      </ol>
-    </section>
-
-    <section id="sec-for-aws-admins">
-      <h3>For AWS administrators</h3>
-
-      <ol>
-        <li>Create an AWS role as specified at <a href="#sec-aws-integration"></a>.</li>
       </ol>
     </section>
 
@@ -965,19 +955,17 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
         <figcaption>GitHub workflow file.</figcaption>
       </figure>
 
-      <p>The following environment variables are set for each repository:</p>
+      <p>The workflow file defines the following environment variabls:</p>
 
       <dl>
         <dt><code>AWS_S3_REGION</code></dt>
-        <dd>Set to <a><code>AWS_S3_REGION</code></a>.</dd>
+        <dd>Used to set <a><code>AWS_S3_REGION</code></a>.</dd>
         <dt><code>AWS_S3_BUCKET</code></dt>
-        <dd>Set to <a><code>AWS_S3_BUCKET</code></a>.</dd>
-        <dt><code>AWS_S3_KEY_PREFIX</code></dt>
-        <dd>Set to <a><code>AWS_S3_KEY_PREFIX</code></a>.</dd>
+        <dd>Used to set <a><code>AWS_S3_BUCKET</code></a>.</dd>
         <dt><dfn><code>CANONICAL_LINK_PREFIX</code></dfn></dt>
         <dd>If set, used to generate the links to publication artifacts that are referenced from the GitHub pull request.</dd>
         <dt><dfn><code>AWS_ROLE</code></dfn></dt>
-        <dd>ARN of the AWS role assigned to the respository (see <a href="#sec-aws-integration"></a>).</dd>
+        <dd>ARN of the AWS role used by the workflow to upload files to S3 (see <a href="#sec-aws-integration"></a>).</dd>
       </dl>
 
       <p>When the workflow is executed on a GitHub pull request, a comment that contains links to the clean and redline documents
@@ -987,6 +975,8 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
         <li><code><a>CANONICAL_LINK_PREFIX</a>/<a>AWS_S3_KEY_PREFIX</a></code>, if <a><code>CANONICAL_LINK_PREFIX</code></a> is set;</li>
         <li><code>http://<a>AWS_S3_BUCKET</a>.s3-website-<a>AWS_S3_REGION</a>.amazonaws.com/<a>AWS_S3_KEY_PREFIX</a></code>, otherwise.</li>
       </ul>
+
+      <p>The workflow file automatically sets <a><code>AWS_S3_KEY_PREFIX</code></a> to the name of the repository.</p>
 
     </section>
 
@@ -1005,21 +995,18 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       </dl>
 
       <div class="example">
-        <p>Given <code>AWS_S3_BUCKET=html-doc-pub</code> and <code>AWS_S3_KEY_PREFIX=draft/ag05/</code>, the tooling uploads
-        publication artifacts under the prefix <code>s3://html-doc-pub/draft/ag05/</code>.</p>
+        <p>Given <code>AWS_S3_BUCKET=html-doc-pub</code> and <code>AWS_S3_KEY_PREFIX=ag-05/</code>, the tooling uploads
+        publication artifacts under the prefix <code>s3://html-doc-pub/ag05/</code>.</p>
       </div>
 
-      <p>The tooling needs permission to upload objects to the bucket. To limit the impact of errors and malicious attacks, each
-      GitHub repository is associated with a distinct <a
-      href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-idp_oidc.html">OIDC role</a> that grants the
-      tooling permissions only to a subset of the S3 bucket. This avoids maintaining IAM users and storing GitHub secrets.</p>
+      <p>An <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-idp_oidc.html">OIDC role</a> grants the
+      tooling permissions to upload objects to the bucket. This avoids maintaining IAM users and storing GitHub secrets.</p>
 
       <p>The trust policy for the role associated with one GitHub repository is specified at <a href="#figure-oidc-trust"></a>.</p>
 
       <figure id="figure-oidc-trust">
         <pre data-include="snippets/oidc-trust.json"></pre>
-        <figcaption>Trust policy for the role associated with each GitHub repository. <code>&lt;name of repo&gt;</code> is
-        the name of the repository.</figcaption>
+        <figcaption>Trust policy for the OIDC role.</figcaption>
       </figure>
 
       <p>The permissions for the role associated with one GitHub repository is specified at <a
@@ -1028,15 +1015,15 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       <figure id="figure-oidc-permissions">
         <pre data-include="snippets/oidc-permissions.json"></pre>
         <figcaption>Permissions granted to the role associated with each GitHub repository, where <code>&lt;name of
-        bucket&gt;</code> is replaced by <a><code>AWS_S3_BUCKET</code></a> and <code>&lt;s3 prefix&gt;</code> by
-        <a><code>AWS_S3_KEY_PREFIX</code></a>.</figcaption>
+        bucket&gt;</code> is replaced by <a><code>AWS_S3_BUCKET</code></a>.</figcaption>
       </figure>
 
       <p>The bucket is made public using the policy at <a href="#figure-bucket-policy"></a>.</p>
 
       <figure id="figure-bucket-policy">
         <pre data-include="snippets/bucket-policy.json"></pre>
-        <figcaption>Public bucket policy.</figcaption>
+        <figcaption>Public bucket policy where <code>&lt;name of bucket&gt;</code> is replaced by
+        <a><code>AWS_S3_BUCKET</code></a></figcaption>
       </figure>
 
       <p>The contents of the bucket is also made available through a Cloudfront distribution, which allows the publication artifacts
@@ -1046,10 +1033,11 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
 
   <section id="sec-bibliography">
     <ul>
-      <li><cite id="bib-iso-directives-part2">ISO/IEC Directives, Part 2</cite>, Principles and rules for the structure and drafting of ISO and IEC documents (Ninth edition, 2021)
-        <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
+      <li><cite id="bib-iso-directives-part2">ISO/IEC Directives, Part 2</cite>, Principles and rules for the structure and drafting
+      of ISO and IEC documents (Ninth edition, 2021)
+      <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
       <li><cite id="bib-smpte-ag-16">SMPTE AG-16</cite>, Standards Style Guide
-        <a>https://www.smpte.org/about/policies-and-governance</a></li>
+      <a>https://www.smpte.org/about/policies-and-governance</a></li>
     </ul>
   </section>
 
