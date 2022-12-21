@@ -16,6 +16,8 @@ jobs:
     permissions:
       id-token: write
       contents: write
+      pull-requests: write
+
     steps:
 
       - name: Checkout repo
@@ -37,7 +39,19 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - uses: ./workflows
+      - name: Build and deploy document (local)
+        uses: ./tooling/workflows
+        if: github.repository != 'SMPTE/html-pub'
+        with:
+          AWS_S3_REGION: ${{env.AWS_REGION}}
+          AWS_S3_BUCKET: 	${{env.AWS_S3_BUCKET}}
+          AWS_S3_KEY_PREFIX: "${{env.REPOSITORY_NAME}}/"
+          CANONICAL_LINK_PREFIX: ${{env.CANONICAL_LINK_PREFIX}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Build and deploy document (HTML Pub repo)
+        uses: ./tooling/workflows
+        if: github.repository == 'SMPTE/html-pub'
         with:
           AWS_S3_REGION: ${{env.AWS_REGION}}
           AWS_S3_BUCKET: 	${{env.AWS_S3_BUCKET}}
