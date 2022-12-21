@@ -2,24 +2,59 @@ name: Build SMPTE document
 
 on: [push, pull_request]
 
+env:
+  AWS_REGION: us-east-1
+  AWS_S3_BUCKET: html-doc-pub
+  AWS_ROLE: arn:aws:iam::189079736792:role/gh-actions-html-pub
+  CANONICAL_LINK_PREFIX: https://doc.smpte-doc.org/
+
 jobs:
   build:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'pull_request'
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+
     steps:
+
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
           submodules: true
+
+      - name: Set repository name
+        run: echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
       - name: Check out all branches with the exception of the current branch
         run: CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD); for i in `git branch -a | grep remote | grep -v HEAD | grep -v ${CUR_BRANCH}`; do git branch --track ${i#remotes/origin/} $i; done
-      - uses: ./workflows
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
-          AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_S3_KEY_PREFIX: ${{ secrets.AWS_S3_KEY_PREFIX }}
-          AWS_ACCESS_KEY_ID: ${{ secrets. AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build and deploy document (local)
+        uses: ./tooling/workflows
+        if: github.repository != 'SMPTE/html-pub'
+        with:
+          AWS_S3_REGION: ${{env.AWS_REGION}}
+          AWS_S3_BUCKET: 	${{env.AWS_S3_BUCKET}}
+          AWS_S3_KEY_PREFIX: "${{env.REPOSITORY_NAME}}/"
+          CANONICAL_LINK_PREFIX: ${{env.CANONICAL_LINK_PREFIX}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Build and deploy document (HTML Pub repo)
+        uses: ./workflows
+        if: github.repository == 'SMPTE/html-pub'
+        with:
+          AWS_S3_REGION: ${{env.AWS_REGION}}
+          AWS_S3_BUCKET: 	${{env.AWS_S3_BUCKET}}
+          AWS_S3_KEY_PREFIX: "${{env.REPOSITORY_NAME}}/"
+          CANONICAL_LINK_PREFIX: ${{env.CANONICAL_LINK_PREFIX}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

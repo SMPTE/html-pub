@@ -35,6 +35,62 @@
     </ul>
   </section>
 
+  <section id="sec-quick-start">
+    <h2>Quick start</h2>
+
+    <section id="sec-for-doc-editors">
+      <h3>For document editors</h3>
+
+      <ol>
+        <li>
+          <a href="https://git-scm.com/">Install the git source control system</a>
+        </li>
+        <li>
+          Install a text editor and local web server.
+        </li>
+        <li>
+          Create a git repo:
+<pre>mkdir my-git-repo
+cd my-git-repo
+git init</pre>
+        </li>
+        <li>
+          Add the HTML tooling as a submodule:
+  <pre>git submodule add https://github.com/SMPTE/html-pub.git tooling</pre>
+        </li>
+        <li>
+          Create a skeleton document:
+<pre>mkdir doc
+cp tooling/doc/snippets/skeleton.html doc/main.html</pre>
+        </li>
+        <li>
+          Add a <code>.gitignore</code> file:
+<pre>cp tooling/.gitignore .</pre>
+       </li>
+      </ol>
+    </section>
+
+    <section id="sec-for-repo-admins">
+      <h3>For administrators</h3>
+
+      <ol>
+        <li>Follow the steps at <a href="#sec-for-doc-editors"></a>.</li>
+        <li>Add a workflow file:
+<pre>cp tooling/.github .</pre>
+        </li>
+        <li>
+          Add the build configuration file:
+<pre>
+cp tooling/.smpte-build.json .
+</pre>
+        </li>
+        <li>Add the various SMPTE boilerplate documents: <i>REAMDE.md</i>, <i>CONTRIBUTING.md</i>, <i>CONFIDENTIALITY.md</i>,
+        <i>LICENSE.md</i> and <i>PATENTS.md</i>.</li>
+      </ol>
+    </section>
+
+  </section>
+
   <section id="sec-directory-layout">
     <h2>Directory layout</h2>
 
@@ -45,7 +101,7 @@
       <li><code>doc/media/</code>: directory containing media referenced by the main element (see <a href="#sec-figure-element"></a>).</li>
       <li><code>doc/snippets/</code>: directory containing snippets embedded in the main element (see <a href="#sec-snippets-element"></a>).</li>
       <li><code>tooling/</code>: directory consisting of the tools necessary to render SMPTE documents (see <a href="#sec-tooling"></a>).</li>
-      <li><code>.smpte-build.json</code>: JSON file used to configure the HTML rendering process (see <a href="#sec-build-configuration"></a>).</li>
+      <li><code>.smpte-build.json</code>: JSON file used to configure the HTML rendering process (see <a href="#sec-building"></a>).</li>
       <li><code>.gitignore</code>: Prevents build and operating system artifacts from being tracked by Git.</li>
       <li><code>.github/workflows/main.yml</code>: Allows automated HTML rendering and redlining in GitHub (see <a href="#sec-gh-integration"></a>).</li>
     </ul>
@@ -625,7 +681,7 @@
         <p>The <code>figure</code> element shall contain:</p>
         <ul>
           <li>an <code>id</code> attribute whose value starts with <code>figure-</code></li>
-          <li>one <code>img</code> element</li>
+          <li>one <code>img</code> or <code>pre</code> element</li>
           <li>one <code>figcaption</code> element following the <code>img</code> element</li>
         </ul>
 
@@ -719,7 +775,7 @@
 
         <p>When referencing a table in the prose, an <code>a</code> element with its <code>href</code> attribute referencing the
         <code>table</code> element shall be used. The text of the link will be automatically set to the number of the table.</p>
-  
+
         <div class="example">
 <code>&lt;a href=&quot;#tab-sample-tabledata&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#tab-sample-tabledata"></a>.
         </div>
@@ -811,27 +867,177 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
 
   <section id="sec-tooling">
     <h2>Tooling</h2>
-  </section>
 
-  <section id="sec-build-configuration">
-    <h2>Build configuration</h2>
-  </section>
+    <section>
+      <h3>Overview</h3>
 
-  <section id="sec-gh-integration">
-    <h2>GitHub integration</h2>
+      <p>The SMPTE HTML publication tooling consists of several components:</p>
 
-    <p>In order to automate the creation of clean and redline copies of document when commits are pushed to GitHub, the following
-    workflow file should be used:</p>
+      <ul>
+        <li>Rendering code (<code>smpte.js</code>) that renders the author-supplied HTML document into a publication-ready HTML
+        document. The rendering involves numbering clauses, inserting boilerplate, etc., and takes place directly in the web
+        browser used by the author.</li>
+        <li>Building code (<code>scripts/build.mjs</code>) that automates the process of validating, rendering, generating
+        redlines and uploading publication artifacts to Amazon S3.</li>
+        <li>A GitHub workflow (<code>.github/workflows/main.yml</code> and <code>workflows/action.yml</code>) that automatically
+        executes the building code whenever a change is made to the GitHub repository where the document is tracked.</li>
+        <li>Amazon AWS infrastructure where the publication artifacts are deployed.</li>
+      </ul>
+    </section>
 
-    <pre data-include="../.github/workflows/main.yml"></pre>
+    <section>
+      <h3>Rendering</h3>
+
+      <p>At the heart of the tooling is the rendering code at <code>smpte.js</code>.</p>
+
+      <p>The rendering code tuns in browser and is imported using a <code>script</code> element (see <a
+      href="#sec-head-element"></a>).</p>
+    </section>
+
+    <section id="sec-building">
+      <h3>Building</h3>
+
+      <p>Building the document for publication involves the following steps:</p>
+
+      <ol>
+        <li>Validating the document</li>
+        <li>Rendering the document</li>
+        <li>Creating redlines from the rendered document</li>
+        <li>Uploading the rendered document and corresponding redlines to S3</li>
+      </ol>
+
+      <p>The build process is carried by the build script <code>scripts/build.mjs</code>, which is usually executed by the
+      GitHub workflow (see <a href="#sec-gh-integration"></a>). The script has the following dependencies:</p>
+
+      <ul>
+        <li><a href="https://nodejs.org/">node</a> dependencies specified in <code>./package.json</code></li>
+        <li><a href="https://validator.w3.org/">HTML 5 validator</a> available as a Python package using <code>pip install html5validator</code></li>
+      </ul>
+
+      <p>The build process looks for the following environment variables:</p>
+
+      <ul>
+        <li><a><code>AWS_S3_REGION</code></a></li>
+        <li><a><code>AWS_S3_BUCKET</code></a></li>
+        <li><a><code>AWS_S3_KEY_PREFIX</code></a></li>
+        <li><a><code>CANONICAL_LINK_PREFIX</code></a></li>
+      </ul>
+
+      <p>The build process also expects the AWS environment to be set up to allow access to the bucket.</p>
+
+      <p>The S3 upload step can be skipped by providing the <code>validate</code> argument to the build script.</p>
+
+      <p>The build process can be configured using the <code>.smpte-build.json</code> file which is contains a JSON object that
+      conforms to the JSON schema at <a href="#figure-build-configuration-schema"></a>.</p>
+
+      <figure id="figure-build-configuration-schema">
+        <pre data-include="../json/schema/build-configuration.json"></pre>
+        <figcaption>Schema for the build configuration file <code>.smpte-build.json</code>.</figcaption>
+      </figure>
+
+      <p>If present or not equal to <code>null</code>, the <code>latestEditionTag</code> property contains the Git tag or commit
+      that is used when generating a redline against the latest published edition of the document.</p>
+
+      <div class="example">
+  <pre data-include="../.smpte-build.json"></pre>
+      </div>
+    </section>
+
+    <section id="sec-gh-integration">
+      <h3>GitHub integration</h3>
+
+      <p>To automatically create and upload to S3 the clean and redline copies of the document when commits are pushed to GitHub,
+      the workflow file at <a href="#figure-workflow-file"></a> is stored at <code>.github/workflows/main.yml</code> in the
+      repository.</p>
+
+      <figure id="figure-workflow-file">
+        <pre data-include="../.github/workflows/main.yml"></pre>
+        <figcaption>GitHub workflow file.</figcaption>
+      </figure>
+
+      <p>The workflow file defines the following environment variabls:</p>
+
+      <dl>
+        <dt><code>AWS_S3_REGION</code></dt>
+        <dd>Used to set <a><code>AWS_S3_REGION</code></a>.</dd>
+        <dt><code>AWS_S3_BUCKET</code></dt>
+        <dd>Used to set <a><code>AWS_S3_BUCKET</code></a>.</dd>
+        <dt><dfn><code>CANONICAL_LINK_PREFIX</code></dfn></dt>
+        <dd>If set, used to generate the links to publication artifacts that are referenced from the GitHub pull request.</dd>
+        <dt><dfn><code>AWS_ROLE</code></dfn></dt>
+        <dd>ARN of the AWS role used by the workflow to upload files to S3 (see <a href="#sec-aws-integration"></a>).</dd>
+      </dl>
+
+      <p>When the workflow is executed on a GitHub pull request, a comment that contains links to the clean and redline documents
+      is automatically added to the pull request. The links use one of the following prefixes:</p>
+
+      <ul>
+        <li><code><a>CANONICAL_LINK_PREFIX</a>/<a>AWS_S3_KEY_PREFIX</a></code>, if <a><code>CANONICAL_LINK_PREFIX</code></a> is set;</li>
+        <li><code>http://<a>AWS_S3_BUCKET</a>.s3-website-<a>AWS_S3_REGION</a>.amazonaws.com/<a>AWS_S3_KEY_PREFIX</a></code>, otherwise.</li>
+      </ul>
+
+      <p>The workflow file automatically sets <a><code>AWS_S3_KEY_PREFIX</code></a> to the name of the repository.</p>
+
+    </section>
+
+    <section id="sec-aws-integration">
+      <h3>Amazon AWS integration</h3>
+
+      <p>The tooling uploads publication artifacts to an S3 bucket according to the following parameters:</p>
+
+      <dl>
+        <dt><dfn><code>AWS_S3_REGION</code></dfn></dt>
+        <dd>Region where the S3 bucket lives, e.g., <code>us-west-1</code></dd>
+        <dt><dfn><code>AWS_S3_BUCKET</code></dfn></dt>
+        <dd>Name of the S3 bucket, e.g., <code>html-doc-pub</code></dd>
+        <dt><dfn><code>AWS_S3_KEY_PREFIX</code></dfn></dt>
+        <dd>Prefix used when creating the S3 key where the document is stored, e.g., <code>draft/ag05/</code></dd>
+      </dl>
+
+      <div class="example">
+        <p>Given <code>AWS_S3_BUCKET=html-doc-pub</code> and <code>AWS_S3_KEY_PREFIX=ag-05/</code>, the tooling uploads
+        publication artifacts under the prefix <code>s3://html-doc-pub/ag05/</code>.</p>
+      </div>
+
+      <p>An <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-idp_oidc.html">OIDC role</a> grants the
+      tooling permissions to upload objects to the bucket. This avoids maintaining IAM users and storing GitHub secrets.</p>
+
+      <p>The trust policy for the role associated with one GitHub repository is specified at <a href="#figure-oidc-trust"></a>.</p>
+
+      <figure id="figure-oidc-trust">
+        <pre data-include="snippets/oidc-trust.json"></pre>
+        <figcaption>Trust policy for the OIDC role.</figcaption>
+      </figure>
+
+      <p>The permissions for the role associated with one GitHub repository is specified at <a
+      href="#figure-oidc-permissions"></a>.</p>
+
+      <figure id="figure-oidc-permissions">
+        <pre data-include="snippets/oidc-permissions.json"></pre>
+        <figcaption>Permissions granted to the role associated with each GitHub repository, where <code>&lt;name of
+        bucket&gt;</code> is replaced by <a><code>AWS_S3_BUCKET</code></a>.</figcaption>
+      </figure>
+
+      <p>The bucket is made public using the policy at <a href="#figure-bucket-policy"></a>.</p>
+
+      <figure id="figure-bucket-policy">
+        <pre data-include="snippets/bucket-policy.json"></pre>
+        <figcaption>Public bucket policy where <code>&lt;name of bucket&gt;</code> is replaced by
+        <a><code>AWS_S3_BUCKET</code></a></figcaption>
+      </figure>
+
+      <p>The contents of the bucket is also made available through a Cloudfront distribution, which allows the publication artifacts
+        to be made available through a custom domain name and TLS (currently <code>https://doc.smpte-doc.org/</code>).</p>
+    </section>
   </section>
 
   <section id="sec-bibliography">
     <ul>
-      <li><cite id="bib-iso-directives-part2">ISO/IEC Directives, Part 2</cite>, Principles and rules for the structure and drafting of ISO and IEC documents (Ninth edition, 2021)
-        <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
+      <li><cite id="bib-iso-directives-part2">ISO/IEC Directives, Part 2</cite>, Principles and rules for the structure and drafting
+      of ISO and IEC documents (Ninth edition, 2021)
+      <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
       <li><cite id="bib-smpte-ag-16">SMPTE AG-16</cite>, Standards Style Guide
-        <a>https://www.smpte.org/about/policies-and-governance</a></li>
+      <a>https://www.smpte.org/about/policies-and-governance</a></li>
     </ul>
   </section>
 

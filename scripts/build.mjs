@@ -239,20 +239,24 @@ async function s3Upload(buildPaths, versionKey) {
 
     const s3PubKeyPrefix = s3KeyPrefix + versionKey + "/";
 
+    console.log(`Uploading to bucket ${s3Bucket} at key ${s3PubKeyPrefix}`);
+
     s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
 
     /* create links */
 
-    const cleanURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}`;
+    const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
+
+    const cleanURL = `${deployPrefix}${s3PubKeyPrefix}`;
     linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`
 
     if (fs.existsSync(buildPaths.baseRedlinePath)) {
-      const baseRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.baseRedlineName}`;
+      const baseRedlineURL = `${deployPrefix}${s3PubKeyPrefix}${buildPaths.baseRedlineName}`;
       linksDocContents += `[Redline to current draft](${encodeURI(baseRedlineURL)})\n`
     }
 
     if (fs.existsSync(buildPaths.pubRedlinePath)) {
-      const pubRedlineURL = `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/${s3PubKeyPrefix}${buildPaths.pubRedlineName}`;
+      const pubRedlineURL = `${deployPrefix}${s3PubKeyPrefix}${buildPaths.pubRedlineName}`;
       linksDocContents += `[Redline to most recent edition](${encodeURI(pubRedlineURL)})\n`
     }
 
