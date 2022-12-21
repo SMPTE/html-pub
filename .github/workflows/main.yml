@@ -39,6 +39,6 @@ jobs:
         with:
           AWS_S3_REGION: ${{ env.AWS_REGION }}
           AWS_S3_BUCKET: 	${{ env.AWS_S3_BUCKET }}
-          AWS_S3_KEY_PREFIX: ${{ env.AWS_S3_KEY_PREFIX }}
+          AWS_S3_KEY_PREFIX: ${{ env.GITHUB_REPOSITORY }}/
           CANONICAL_LINK_PREFIX: ${{ env.CANONICAL_LINK_PREFIX }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
