@@ -1,0 +1,18 @@
+# SMPTE HTML Publication artifacts
+/build
+/package.json
+/package-lock.json
+
+# MacOS
+.DS_Store
+._*
+
+# Unix
+*~
+
+# Windows
+Thumbs.db
+.vscode
+
+# npm
+/node_modules
