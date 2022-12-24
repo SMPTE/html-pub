@@ -288,12 +288,12 @@ function validateElementsAnnex(e, logger) {
 
   if (e.firstElementChild.tagName === "OL" && e.childElementCount === 1) {
     for (const li of e.firstElementChild.children) {
-      if (li.tagName === "LI" && li.id) {
-        if (li.firstElementChild.tagName !== "A" || li.childElementCount !== 1 || !li.firstElementChild.title || !li.firstElementChild.href) {
-          logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title and href attributes.`);
+      if (li.tagName === "LI") {
+        if (li.firstElementChild.tagName !== "A" || !li.firstElementChild.id || li.childElementCount !== 1 || !li.firstElementChild.title || !li.firstElementChild.href) {
+          logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes.`);
         }
       } else {
-        logger.error(`The <ol> element of the Elements Annex must contain only <li> elements with an id attribute.`);
+        logger.error(`The <ol> element of the Elements Annex must contain only <li> elements`);
       }
     }
   } else {

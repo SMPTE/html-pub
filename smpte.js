@@ -445,11 +445,25 @@ function insertElementsAnnex(docMetadata) {
   h2.innerText = "Elements";
   sec.insertBefore(h2, sec.firstChild);
 
+  let counter = "a".charCodeAt();
+
   for(const e of sec.querySelectorAll("li > a")) {
+
+    const headingNum = document.createElement("span");
+    headingNum.className = "heading-number";
+    headingNum.innerText = String.fromCharCode(counter++);
+
+    const headingLabel = document.createElement("span");
+    headingLabel.className = "heading-label";
+    headingLabel.appendChild(headingNum);
+    headingLabel.appendChild(document.createTextNode("."));
+
+    e.parentElement.insertBefore(headingLabel, e);
+
     e.innerText = "(link)";
 
     if (e.title) {
-      e.parentElement.insertBefore(document.createTextNode(e.title + " "), e);
+      e.parentElement.insertBefore(document.createTextNode(" " + e.title + " "), e);
     } else {
       logEvent("All links listed in the Elements Annex must have a title attribute.")
     }
@@ -962,10 +976,11 @@ function resolveLinks(docMetadata) {
         else
           anchor.innerText = targetNumber;
 
-      } else if (target.localName === "li" && target.parentElement.parentElement.id === "sec-elements") {
+      } else if (target.parentElement.parentElement.parentElement.id === "sec-elements") {
         /* element */
 
-        anchor.innerText = "Element " + String.fromCharCode(target.value + "a".charCodeAt());
+        anchor.innerText = "Element " + target.parentElement.querySelector(".heading-number").innerText;
+
       } else {
         logEvent(`Anchor points to ambiguous #${target_id}`)
         anchor.innerText = "????";

@@ -250,7 +250,7 @@ figure {
 /* elements */
 
 #sec-elements ol {
-  list-style-type: lower-alpha;
+  list-style-type: none;
 }
 
 /* links */
