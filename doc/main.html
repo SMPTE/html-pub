@@ -50,7 +50,8 @@
     <ul>
       <li><code>doc/main.html</code>: main element of the document (see <a href="#sec-main-element"></a>).</li>
       <li><code>doc/media/</code>: directory containing media referenced by the main element (see <a href="#sec-figure-element"></a>).</li>
-      <li><code>doc/elements/</code>: directory containing any element of the document (see <a href="#sec-elements-section"></a>).</li>
+      <li><code>doc/elements/</code>: directory containing non-prose elements of the document (see <a
+      href="#sec-elements-section"></a>).</li>
       <li><code>doc/snippets/</code>: directory containing snippets embedded in the main element (see <a href="#sec-snippets-element"></a>).</li>
       <li><code>tooling/</code>: directory consisting of the tools necessary to render SMPTE documents (see <a href="#sec-tooling"></a>).</li>
       <li><code>.smpte-build.json</code>: JSON file used to configure the HTML rendering process (see <a href="#sec-building"></a>).</li>
@@ -490,7 +491,7 @@
       <section id="sec-elements-section">
         <h4>Elements</h4>
 
-        <p>The <dfn>elements section</dfn> collects the elements of the document.</p>
+        <p>The <dfn>elements section</dfn> collects the non-prose elements of the document.</p>
 
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
         <code>sec-elements</code>.</p>
@@ -582,14 +583,14 @@
       </section>
 
       <section id="sec-elements-linking">
-        <h4>Citing elements</h4>
+        <h4>Citing non-prose elements</h4>
 
-        <p>When citing an element, an <code>a</code> element with its <code>href</code> attribute referencing a
-          <code>a</code> element from the <a>elements section</a> shall be used.</p>
+        <p>When citing an non-prose element of the document, an <code>a</code> element with its <code>href</code> attribute
+        referencing a <code>a</code> element from the <a>elements section</a> shall be used.</p>
 
-          <p class="example">
-  <code>&lt;a href=&quot;#element-a&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#element-a"></a>.
-          </p>
+        <div class="example">
+<code>&lt;a href=&quot;#element-a&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#element-a"></a>.
+        </div>
 
       </section>
 
