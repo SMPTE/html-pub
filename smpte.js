@@ -877,14 +877,16 @@ function resolveLinks(docMetadata) {
         
       } else if (target.localName === "section") {
 
-        const targetNumber = target.firstElementChild.firstElementChild.innerText.trim();
+        const targetNumber = target.querySelector(".heading-number").innerText;
 
-        if (target.parentElement.tagName === "BODY")
-          anchor.innerText = "Clause "+ targetNumber;
-        else if (target.classList.contains("annex"))
-          anchor.innerText = "Annex "+ targetNumber;
-        else
+        if (target.parentElement.tagName === "BODY") {
+          if (target.classList.contains("annex"))
+            anchor.innerText = "Annex "+ targetNumber;
+          else
+            anchor.innerText = "Clause "+ targetNumber;
+        } else {
           anchor.innerText = targetNumber;
+        }
 
       } else {
         logEvent(`Anchor points to ambiguous #${target_id}`)
