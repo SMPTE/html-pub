@@ -422,6 +422,55 @@ function insertBibliography(docMetadata) {
   h2.innerText = "Bibliography";
 }
 
+const SMPTE_ELEMENTS_ID = "sec-elements";
+
+function insertElementsAnnex(docMetadata) {
+  const sec = document.getElementById(SMPTE_ELEMENTS_ID);
+
+  if (sec === null)
+    return;
+
+  if (sec.children.length !== 1 || sec.firstElementChild.tagName !== "OL") {
+    logEvent(`Elements section must contain a single <ol> element.`);
+    return;
+  }
+
+  sec.classList.add("annex");
+
+  const intro = document.createElement("p");
+  intro.innerText = "This annex lists non-prose elements of this document."
+  sec.insertBefore(intro, sec.firstChild);
+
+  const h2 = document.createElement("h2");
+  h2.innerText = "Additional elements";
+  sec.insertBefore(h2, sec.firstChild);
+
+  let counter = "a".charCodeAt();
+
+  for(const e of sec.querySelectorAll("li > a")) {
+
+    const headingNum = document.createElement("span");
+    headingNum.className = "heading-number";
+    headingNum.innerText = String.fromCharCode(counter++);
+
+    const headingLabel = document.createElement("span");
+    headingLabel.className = "heading-label";
+    headingLabel.appendChild(headingNum);
+    headingLabel.appendChild(document.createTextNode("."));
+
+    e.parentElement.insertBefore(headingLabel, e);
+
+    e.innerText = "(link)";
+
+    if (e.title) {
+      e.parentElement.insertBefore(document.createTextNode(" " + e.title + " "), e);
+    } else {
+      logEvent("All links listed in the Elements Annex must have a title attribute.")
+    }
+
+  }
+}
+
 const SMPTE_CONFORMANCE_ID = "sec-conformance";
 
 function insertConformance(docMetadata) {
@@ -727,6 +776,47 @@ function numberNotes() {
   }
 }
 
+function numberElements() {
+  let counter = 1;
+
+  for (let e of document.querySelectorAll("#sec-elements li")) {
+
+    let numPrefix = "";
+
+    if (section.classList.contains("annex")) {
+      counter = 1;
+      numPrefix = section.querySelector(".heading-number").innerText + ".";
+    }
+
+    for (let figure of section.querySelectorAll("figure")) {
+
+      const figcaption = figure.querySelector("figcaption");
+  
+      if (figcaption === null) {
+        logEvent(`Figure is missing a caption`);
+        continue;
+      }
+
+      const headingLabel = document.createElement("span");
+      headingLabel.className = "heading-label";
+  
+      const headingNumberElement = document.createElement("span");
+      headingNumberElement.className = "heading-number";
+      headingNumberElement.innerText = numPrefix + counter;
+      
+      headingLabel.appendChild(document.createTextNode("Figure "));
+      headingLabel.appendChild(headingNumberElement);
+      headingLabel.appendChild(document.createTextNode(" –⁠ "));
+
+
+      figcaption.insertBefore(headingLabel, figcaption.firstChild);
+      
+      counter++;
+    }
+
+  }
+}
+
 function numberExamples() {
 
   for (let section of document.querySelectorAll("section")) {
@@ -888,6 +978,11 @@ function resolveLinks(docMetadata) {
           anchor.innerText = targetNumber;
         }
 
+      } else if (target.parentElement.parentElement.parentElement.id === "sec-elements") {
+        /* element */
+
+        anchor.innerText = "Element " + target.parentElement.querySelector(".heading-number").innerText;
+
       } else {
         logEvent(`Anchor points to ambiguous #${target_id}`)
         anchor.innerText = "????";
@@ -929,6 +1024,7 @@ function render() {
   insertNormativeReferences(docMetadata);
   insertTermsAndDefinitions(docMetadata);
 
+  insertElementsAnnex(docMetadata);
   insertBibliography(docMetadata);
   numberSections(document.body, "");
   numberTables();

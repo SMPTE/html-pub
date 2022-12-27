@@ -247,6 +247,12 @@ figure {
   margin-top: 1rem;
 }
 
+/* elements */
+
+#sec-elements ol {
+  list-style-type: none;
+}
+
 /* links */
 
 .ext-ref {

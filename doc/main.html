@@ -99,6 +99,8 @@ cp tooling/.smpte-build.json .
     <ul>
       <li><code>doc/main.html</code>: main element of the document (see <a href="#sec-main-element"></a>).</li>
       <li><code>doc/media/</code>: directory containing media referenced by the main element (see <a href="#sec-figure-element"></a>).</li>
+      <li><code>doc/elements/</code>: directory containing non-prose elements of the document (see <a
+      href="#sec-elements-section"></a>).</li>
       <li><code>doc/snippets/</code>: directory containing snippets embedded in the main element (see <a href="#sec-snippets-element"></a>).</li>
       <li><code>tooling/</code>: directory consisting of the tools necessary to render SMPTE documents (see <a href="#sec-tooling"></a>).</li>
       <li><code>.smpte-build.json</code>: JSON file used to configure the HTML rendering process (see <a href="#sec-building"></a>).</li>
@@ -277,6 +279,10 @@ cp tooling/.smpte-build.json .
             <tr>
               <td><a>Annex section</a></td>
               <td>0 or more</td>
+            </tr>
+            <tr>
+              <td><a>Additional elements section</a></td>
+              <td>0 or 1</td>
             </tr>
             <tr>
               <td><a>Bibliography</a></td>
@@ -531,6 +537,42 @@ cp tooling/.smpte-build.json .
 
       </section>
 
+      <section id="sec-elements-section">
+        <h4>Additional elements section</h4>
+
+        <p>The <dfn>additional elements section</dfn> collects the non-prose elements of the document.</p>
+
+        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+        <code>sec-elements</code>.</p>
+
+        <p>The heading of the section shall not be present.</p>
+
+        <p>If present, the section shall:</p>
+        <ul>
+          <li>come immediately before the <a>Bibliography</a> section; and</li>
+          <li>contain a single ordered list <code>ol</code> where each element <code>li</code> contains exactly one <code>a</code>
+          that links to an element of the document.</li>
+        </ul>
+
+        <p>Each <code>a</code> element shall have:</p>
+        <ul>
+          <li>an <code>id</code> attribute whose value is prefixed with <code>element-</code>;</li>
+          <li>a <code>title</code> attribute that provides a short description of the element;</li>
+          <li>a <code>href</code> attribute that links to the element itself, typically in the <code>doc/elements</code>
+          directory.</li>
+        </ul>
+
+        <div class="example">
+<pre>&lt;section id=&quot;sec-elements&quot;&gt;
+  &lt;ol&gt;
+    &lt;li&gt;
+      &lt;a id=&quot;element-a&quot; title=&quot;Description of the elemnent&quot; href=&quot;./elements/form.docx&quot;&gt;&lt;/a&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/section&gt;</pre>
+        </div>
+      </section>
+
       <section id="sec-bibliography-section">
         <h4>Bibliography section</h4>
 
@@ -593,6 +635,17 @@ cp tooling/.smpte-build.json .
 
       </section>
 
+      <section id="sec-elements-linking">
+        <h4>Citing non-prose elements</h4>
+
+        <p>When citing an non-prose element of the document, an <code>a</code> element with its <code>href</code> attribute
+        referencing a <code>a</code> element from the <a>additional elements section</a> shall be used.</p>
+
+        <div class="example">
+<code>&lt;a href=&quot;#element-a&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#element-a"></a>.
+        </div>
+
+      </section>
 
       <section id="sec-bibliographic-linking">
         <h4>Citing bibliographic references</h4>
@@ -1029,6 +1082,12 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       <p>The contents of the bucket is also made available through a Cloudfront distribution, which allows the publication artifacts
         to be made available through a custom domain name and TLS (currently <code>https://doc.smpte-doc.org/</code>).</p>
     </section>
+  </section>
+
+  <section id="sec-elements">
+    <ol>
+      <li><a id="element-a" title="Sample text element" href="./elements/sample.txt"></a></li>
+    </ol>
   </section>
 
   <section id="sec-bibliography">

@@ -265,7 +265,7 @@ function _validateClause(e, lvl, logger) {
 }
 
 function validateClause(e, logger) {
-  if (e.classList.contains("annex") || e.id === "sec-bibliography")
+  if (e.classList.contains("annex") || e.id === "sec-bibliography" || e.id === "sec-elements")
     return false;
 
   _validateClause(e, 2, logger);
@@ -278,6 +278,27 @@ function validateAnnex(e, logger) {
     return false;
 
   _validateClause(e, 2, logger);
+
+  return true;
+}
+
+function validateElementsAnnex(e, logger) {
+  if (e.id !== "sec-elements")
+    return false;
+
+  if (e.firstElementChild.tagName === "OL" && e.childElementCount === 1) {
+    for (const li of e.firstElementChild.children) {
+      if (li.tagName === "LI") {
+        if (li.firstElementChild.tagName !== "A" || !li.firstElementChild.id || li.childElementCount !== 1 || !li.firstElementChild.title || !li.firstElementChild.href) {
+          logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes.`);
+        }
+      } else {
+        logger.error(`The <ol> element of the Elements Annex must contain only <li> elements`);
+      }
+    }
+  } else {
+    logger.error(`The Elements Annex section must contain a single <ol> element.`);
+  }
 
   return true;
 }
@@ -302,6 +323,7 @@ function validateBody(body, logger) {
     [validateDefs, 0, 1],
     [validateClause, 0, Infinity],
     [validateAnnex, 0, Infinity],
+    [validateElementsAnnex, 0, 1],
     [validateBibliography, 0, 1],
   ];
 
@@ -319,18 +341,24 @@ function validateBody(body, logger) {
     while (index < sectionDefs.length) {
       sectionDef = sectionDefs.at(index);
 
-      if ((sectionDef.at(0))(child, logger))
+      if ((sectionDef.at(0))(child, logger)) {
+        matchCount++;
         break;
+      }
+
+      index++;
 
       if (matchCount < sectionDef.at(1))
         logger.error(`Too few instances of ${sectionDef.at(0).name}`);
 
-      matchCount = 0
+      matchCount = 0;
 
-      index++;
     }
 
-    matchCount++;
+    if (index >= sectionDefs.length) {
+      logger.error(`Expected ${sectionDef.at(0).name} but found ${child.tagName} with id ${child.id}`);
+      break
+    }
 
     if (matchCount > sectionDef.at(2))
       logger.error(`Too few instances of ${sectionDef.at(0).name}`);
