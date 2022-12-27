@@ -341,18 +341,24 @@ function validateBody(body, logger) {
     while (index < sectionDefs.length) {
       sectionDef = sectionDefs.at(index);
 
-      if ((sectionDef.at(0))(child, logger))
+      if ((sectionDef.at(0))(child, logger)) {
+        matchCount++;
         break;
+      }
+
+      index++;
 
       if (matchCount < sectionDef.at(1))
         logger.error(`Too few instances of ${sectionDef.at(0).name}`);
 
-      matchCount = 0
+      matchCount = 0;
 
-      index++;
     }
 
-    matchCount++;
+    if (index >= sectionDefs.length) {
+      logger.error(`Expected ${sectionDef.at(0).name} but found ${child.tagName} with id ${child.id}`);
+      break
+    }
 
     if (matchCount > sectionDef.at(2))
       logger.error(`Too few instances of ${sectionDef.at(0).name}`);
