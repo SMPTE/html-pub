@@ -213,7 +213,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
   if (fs.existsSync(buildPaths.refDirPath))
     fs.rmSync(buildPaths.refDirPath, { recursive: true, force: true });
 
-  child_process.execSync(`git clone --recurse-submodules -b ${refCommit} . ${buildPaths.refDirPath}`);
+  child_process.execSync(`git clone --recurse-submodules -b ${refCommit} . "${buildPaths.refDirPath}"`);
 
   if (! fs.existsSync(buildPaths.refDirPath))
     throw Error("Reference file does not exist");
@@ -222,7 +222,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
   fs.writeFileSync(refPath, r.docHTML);
 
-  child_process.execSync(`perl ${path.dirname(r.scriptPath)}/lib/htmldiff/htmldiff.pl ${refPath} ${buildPaths.renderedDocPath} ${rlPath}`);
+  child_process.execSync(`perl "${path.dirname(r.scriptPath)}/lib/htmldiff/htmldiff.pl" "${refPath}" "${buildPaths.renderedDocPath}" "${rlPath}"`);
 
 }
 
@@ -271,7 +271,7 @@ async function s3Upload(buildPaths, versionKey) {
 
 async function render(docPath) {
 
-  const commitHash = child_process.execSync(`git -C ${path.dirname(docPath)} rev-parse HEAD`, {stdio: ['ignore', 'pipe', 'ignore']}).toString().trim();
+  const commitHash = child_process.execSync(`git -C "${path.dirname(docPath)}" rev-parse HEAD`, {stdio: ['ignore', 'pipe', 'ignore']}).toString().trim();
 
   /* render the page */
 
@@ -407,7 +407,7 @@ async function main() {
   /* validate source document */
 
   try {
-    child_process.execSync(`html5validator --errors-only ${buildPaths.docPath}`);
+    child_process.execSync(`html5validator --errors-only "${buildPaths.docPath}"`);
   } catch (e) {
     console.error(e.stdout.toString());
     throw Error("HTML validation failed.");
@@ -431,7 +431,7 @@ async function main() {
   /* validate rendered document */
 
   try {
-    child_process.execSync(`html5validator --errors-only ${buildPaths.renderedDocPath}`);
+    child_process.execSync(`html5validator --errors-only "${buildPaths.renderedDocPath}"`);
   } catch (e) {
     console.error(e.stdout.toString());
     throw Error("Rendered document validation failed.");

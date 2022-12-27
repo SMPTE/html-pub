@@ -38,7 +38,56 @@
   <section id="sec-quick-start">
     <h2>Quick start</h2>
 
-    <p>The GitHub repository at <a>https://github.com/SMPTE/html-pub-template</a> can be used a starting point.</p>
+    <section id="sec-for-doc-editors">
+      <h3>For document editors</h3>
+
+      <ol>
+        <li>
+          <a href="https://git-scm.com/">Install the git source control system</a>
+        </li>
+        <li>
+          Install a text editor and local web server.
+        </li>
+        <li>
+          Create a git repo:
+<pre>mkdir my-git-repo
+cd my-git-repo
+git init</pre>
+        </li>
+        <li>
+          Add the HTML tooling as a submodule:
+  <pre>git submodule add https://github.com/SMPTE/html-pub.git tooling</pre>
+        </li>
+        <li>
+          Create a skeleton document:
+<pre>mkdir doc
+cp tooling/doc/snippets/skeleton.html doc/main.html</pre>
+        </li>
+        <li>
+          Add a <code>.gitignore</code> file:
+<pre data-include="snippets/.gitignore"></pre>
+       </li>
+      </ol>
+    </section>
+
+    <section id="sec-for-repo-admins">
+      <h3>For administrators</h3>
+
+      <ol>
+        <li>Follow the steps at <a href="#sec-for-doc-editors"></a>.</li>
+        <li>Add a workflow file:
+<pre>cp tooling/.github .</pre>
+        </li>
+        <li>
+          Add the build configuration file:
+<pre>
+cp tooling/.smpte-build.json .
+</pre>
+        </li>
+        <li>Add the various SMPTE boilerplate documents: <i>REAMDE.md</i>, <i>CONTRIBUTING.md</i>, <i>CONFIDENTIALITY.md</i>,
+        <i>LICENSE.md</i> and <i>PATENTS.md</i>.</li>
+      </ol>
+    </section>
 
   </section>
 
@@ -841,7 +890,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
 
       <p>At the heart of the tooling is the rendering code at <code>smpte.js</code>.</p>
 
-      <p>The rendering code runs in browser and is imported using a <code>script</code> element (see <a
+      <p>The rendering code tuns in browser and is imported using a <code>script</code> element (see <a
       href="#sec-head-element"></a>).</p>
     </section>
 
