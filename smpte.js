@@ -442,7 +442,7 @@ function insertElementsAnnex(docMetadata) {
   sec.insertBefore(intro, sec.firstChild);
 
   const h2 = document.createElement("h2");
-  h2.innerText = "Non-prose elements";
+  h2.innerText = "Additional elements";
   sec.insertBefore(h2, sec.firstChild);
 
   let counter = "a".charCodeAt();
