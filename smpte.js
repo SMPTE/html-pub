@@ -879,7 +879,7 @@ function resolveLinks(docMetadata) {
 
         const targetNumber = target.querySelector(".heading-number").innerText;
 
-        if (target.parentElement.tagName === "BODY") {
+        if (target.parentElement.tagName === "BODY" || target.parentElement.classList.contains("annex")) {
           if (target.classList.contains("annex"))
             anchor.innerText = "Annex "+ targetNumber;
           else
