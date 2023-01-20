@@ -54,7 +54,7 @@ function guessContentTypeFromExtension(filePath) {
     case ".png":
       return "image/png";
     case ".svg":
-      return "image/svg";
+      return "image/svg+xml";
     case ".css":
       return "text/css";
     case ".txt":
