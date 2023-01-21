@@ -80,11 +80,14 @@ function loadDocMetadata() {
   metadata.pubTitle = document.title;
 
   metadata.pubType = params.get("pubType") || getHeadMetadata("pubType");
-  if (["OM", "AG"].indexOf(metadata.pubType) === -1)
+  if (["OM", "AG", "ST", "RP"].indexOf(metadata.pubType) === -1)
     logEvent(`Unknown publication type: ${metadata.pubType}`);
 
   metadata.pubState = params.get("pubState") || getHeadMetadata("pubState");
   metadata.pubNumber = params.get("pubNumber") || getHeadMetadata("pubNumber");
+  metadata.pubPart = params.get("pubPart") || getHeadMetadata("pubPart");
+  metadata.pubStage = params.get("pubStage") || getHeadMetadata("pubStage");
+  metadata.pubTC = params.get("pubTC") || getHeadMetadata("pubTC");
   metadata.pubDateTime = params.get("pubDateTime") || getHeadMetadata("pubDateTime");
   metadata.effectiveDateTime = params.get("effectiveDateTime") || getHeadMetadata("effectiveDateTime");
 
@@ -95,7 +98,7 @@ function loadDocMetadata() {
 }
 
 const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{pubNumber}}</span></div>
+<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{actualPubNumber}}</span></div>
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
 <h1>{{pubTitle}}</h1>
@@ -124,7 +127,9 @@ function insertFrontMatter(docMetadata) {
 
   const longDocType = {
     "AG": "Administrative Guideline",
-    "OM": "Operations Manual"
+    "OM": "Operations Manual",
+    "ST": `${docMetadata.pubStage} Standard`,
+    "RP": `${docMetadata.pubStage} Recommended Pratice`,
   }[docMetadata.pubType];
 
   if (docMetadata.pubState == "draft")
@@ -136,6 +141,8 @@ function insertFrontMatter(docMetadata) {
 
     return docMetadata.pubDateTime;
   })();
+
+  const actualPubNumber = docMetadata.pubPart ? `${docMetadata.pubNumber}-${docMetadata.pubPart}` : docMetadata.pubNumber;
 
   let publicationState;
 
@@ -164,6 +171,7 @@ function insertFrontMatter(docMetadata) {
       publicationState: publicationState,
       smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),
       actualPubDateTime: actualPubDateTime,
+      actualPubNumber: actualPubNumber,
       ...docMetadata
     }
     );
@@ -266,6 +274,12 @@ function insertIntroduction(docMetadata) {
   }
 
   h2.innerText = "Introduction";
+
+  if (docMetadata.pubType === "ST" || docMetadata.pubType === "RP") {
+    let b = document.createElement("p");
+    b.innerHTML = "<em>This section is entirely informative and does not form an integral part of this Engineering Document.</em>";
+    sec.insertBefore(b, h2.nextSibling)
+  }
 }
 
 const SMPTE_SCOPE_ID = "sec-scope";
@@ -600,14 +614,18 @@ function insertForeword(docMetadata) {
 
   sec.classList.add("unnumbered");
 
-  authorProse = sec.innerHTML;
+  let authorProse = sec.innerHTML;
+
+  if (docMetadata.pubType == "ST" || docMetadata.pubType == "RP") {
+    authorProse = `<p>This document was prepared by Technology Committee ${docMetadata.pubTC}.</p>` + authorProse;
+  }
 
   if (docMetadata.pubType == "AG") {
     if (authorProse.trim().length > 0)
       logEvent("AGs cannot contain author-specified Foreword prose.")
     sec.innerHTML = SMPTE_AG_FOREWORD_BOILERPLATE;
   } else {
-    sec.innerHTML = fillTemplate(SMPTE_AG_FOREWORD_BOILERPLATE, {authorProse: authorProse});
+    sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse});
   }
 
 }
