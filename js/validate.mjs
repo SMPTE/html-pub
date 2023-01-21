@@ -134,6 +134,13 @@ function validateHead(head, logger) {
   validateEffectiveDateTime(head, logger);
 }
 
+function validateForeword(e, logger) {
+  if (e.id !== "sec-foreword")
+    return false;
+
+  return true;
+}
+
 function validateIntroduction(e, logger) {
   if (e.id !== "sec-introduction")
     return false;
@@ -316,6 +323,7 @@ function validateBibliography(e, logger) {
 function validateBody(body, logger) {
   const sectionDefs = [
     /* [validation function, min number, max number] */
+    [validateForeword, 0, 1],
     [validateIntroduction, 0, 1],
     [validateScope, 1, 1],
     [validateConformance, 0, 1],
