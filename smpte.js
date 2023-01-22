@@ -199,13 +199,22 @@ function insertTOC(docMetadata) {
 
       const secId = subSection.getAttribute("id")
 
-      if (!secId || ['sec-front-matter', 'sec-toc'].includes(secId))
+      if (['sec-front-matter', 'sec-toc'].includes(secId))
         continue;
 
       const heading = subSection.firstElementChild;
 
-      if (!heading)
+      if (!heading) {
+        logEvent(`Section must have a heading.`);
+        subSection.classList.add("invalid");
         continue;
+      }
+
+      if (!secId) {
+        logEvent(`Section ${heading.innerText} must have an id attribute.`);
+        subSection.classList.add("invalid");
+        continue;
+      }
 
       subSections.push(subSection);
     }
@@ -695,8 +704,14 @@ function numberTables() {
 
     for (let table of section.querySelectorAll("table")) {
 
+      if (!table.id) {
+        logEvent(`Table is missing an id`);
+        table.classList.add("invalid");
+        continue;
+      }
+
       const caption = table.querySelector("caption");
-  
+
       if (caption === null) {
         logEvent(`Table is missing a caption`);
         continue;
@@ -704,18 +719,18 @@ function numberTables() {
 
       const headingLabel = document.createElement("span");
       headingLabel.className = "heading-label";
-  
+
       const headingNumberElement = document.createElement("span");
       headingNumberElement.className = "heading-number";
       headingNumberElement.innerText = numPrefix + counter;
-      
+
       headingLabel.appendChild(document.createTextNode("Table "));
       headingLabel.appendChild(headingNumberElement);
       headingLabel.appendChild(document.createTextNode(" –⁠ "));
 
 
       caption.insertBefore(headingLabel, caption.firstChild);
-      
+
       counter++;
     }
 
