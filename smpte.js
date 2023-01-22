@@ -606,6 +606,16 @@ in its Standards Operations Manual.</p>
 <p id="copyright-text">Copyright © The Society of Motion Picture and
 Television Engineers.</p>`
 
+SMPTE_DRAFT_WARNING = `
+<div id="sec-draft-warning">
+<strong>Warning:</strong> This document is an unpublished, confidential work under development and shall not be referred
+to as a SMPTE Standard,
+Recommended Practice, or Engineering Guideline. It is distributed for review and comment; distribution does not constitute
+publication. Recipients of this document are strongly encouraged to submit, with their comments, notification of any relevant
+patent rights of which they are aware and to provide supporting documentation.
+</div>
+`
+
 function insertForeword(docMetadata) {
   let sec = document.getElementById(SMPTE_FOREWORD_ID);
 
@@ -627,6 +637,9 @@ function insertForeword(docMetadata) {
 
   if (docMetadata.pubType == "ST" || docMetadata.pubType == "RP") {
     authorProse = `<p>This document was prepared by Technology Committee ${docMetadata.pubTC}.</p>` + authorProse;
+
+    if (docMetadata.pubStage !== "PUB")
+      authorProse += SMPTE_DRAFT_WARNING;
   }
 
   if (docMetadata.pubType == "AG") {

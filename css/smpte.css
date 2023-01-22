@@ -162,10 +162,6 @@ section#sec-toc ol {
   margin: 0.25rem 0 0.25rem 0;
 }
 
-section#sec-toc li {
-
-}
-
 section#sec-toc span.heading-number {
   display: inline-block;
   width: 10rem;
@@ -290,4 +286,11 @@ pre {
 
 code {
   font-family: Consolas, Monaco, monospace;
+}
+
+/* warning */
+
+#sec-draft-warning {
+  padding: 1rem;
+  border: 2px lightblue solid;
 }
