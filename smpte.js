@@ -1011,11 +1011,22 @@ function insertSnippets() {
   );
 }
 
+function insertIconLink() {
+  const icoLink = document.createElement("link");
+
+  icoLink.type = "image/png";
+  icoLink.rel = "icon";
+  icoLink.href = resolveStaticResourcePath("smpte-icon.png");
+
+  document.head.insertBefore(icoLink, null);
+}
+
 function render() {
   let docMetadata = loadDocMetadata();
 
   insertSnippets();
 
+  insertIconLink();
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
   insertIntroduction(docMetadata);
