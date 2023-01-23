@@ -7,9 +7,16 @@
     border-radius: 14px;
     padding: 1rem;
     margin: 1rem;
+    background-color: white;
 }
 
 #event-list li {
     margin-left: 1rem;
     margin-right: 1rem;
+}
+
+/* invalid elements */
+
+.invalid-tag {
+    background-color: lightcoral;
 }

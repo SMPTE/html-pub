@@ -304,8 +304,10 @@ async function render(docPath) {
       document.getElementById("smpte-logo").src = "static/smpte-logo.png";
 
       /* refuse to render if there are page errors */
-      if (listEvents().length)
-        throw new Error(`Page has errors`);
+      if (listEvents().length) {
+        const error_msg = listEvents().map((e) => `    ${e.msg}\n`).join("")
+        throw new Error(`Page has errors:\n${error_msg}`);
+      }
     })
 
     const docHTML = await page.content();
