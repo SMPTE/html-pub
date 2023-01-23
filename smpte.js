@@ -204,15 +204,8 @@ function insertTOC(docMetadata) {
 
       const heading = subSection.firstElementChild;
 
-      if (!heading) {
-        logEvent(`Section must have a heading.`);
-        subSection.classList.add("invalid");
-        continue;
-      }
-
-      if (!secId) {
-        logEvent(`Section ${heading.innerText} must have an id attribute.`);
-        subSection.classList.add("invalid");
+      if (!heading || !secId) {
+        logEvent(`Section must have a heading and id attribute.`, subSection);
         continue;
       }
 
@@ -718,8 +711,7 @@ function numberTables() {
     for (let table of section.querySelectorAll("table")) {
 
       if (!table.id) {
-        logEvent(`Table is missing an id`);
-        table.classList.add("invalid");
+        logEvent(`Table is missing an id`, table);
         continue;
       }
 
