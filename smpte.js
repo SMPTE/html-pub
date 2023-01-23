@@ -726,7 +726,7 @@ function numberTables() {
       const caption = table.querySelector("caption");
 
       if (caption === null) {
-        logEvent(`Table is missing a caption`);
+        logEvent("Table is missing a caption", table);
         continue;
       }
 
@@ -767,7 +767,7 @@ function numberFigures() {
       const figcaption = figure.querySelector("figcaption");
   
       if (figcaption === null) {
-        logEvent(`Figure is missing a caption`);
+        logEvent("Figure is missing a caption", figure);
         continue;
       }
 
@@ -909,7 +909,7 @@ function resolveLinks(docMetadata) {
     const baseTerm = _normalizeTerm(dfn.textContent);
 
     if (baseTerm.length == 0) {
-      logEvent(`Missing term in definition`);
+      logEvent("Missing term in definition", dfn);
       continue;
     }
 
@@ -932,7 +932,7 @@ function resolveLinks(docMetadata) {
     }();
 
     if (termExists) {
-      logEvent(`Duplicate definition ${baseTerm}`);
+      logEvent("Duplicate definition", dfn);
       continue;
     }
 
@@ -940,7 +940,7 @@ function resolveLinks(docMetadata) {
       const id = baseTerm.replace(/\s/g,"-");
 
       if (id.match(/[a-zA-Z]\w*/) === null) {
-        logEvent(`Cannot auto-generate id: ${baseTerm}`);
+        logEvent("Cannot auto-generate id", dfn);
         continue;
       }
 
@@ -976,7 +976,7 @@ function resolveLinks(docMetadata) {
         const term = _normalizeTerm(anchor.textContent);
 
         if (! definitions.has(term)) {
-          logEvent(`Unresolved link: ${term}`);
+          logEvent("Unresolved link", anchor);
         } else {
           anchor.href = "#" + definitions.get(term).id;
           anchor.classList.add("dfn-ref");
@@ -997,7 +997,7 @@ function resolveLinks(docMetadata) {
       let target = document.getElementById(target_id);
 
       if (! target) {
-        logEvent(`anchor points to non-existent #${target_id}`)
+        logEvent("Anchor points to non-existent href", anchor);
         anchor.innerText = "????";
         continue
       }
@@ -1030,7 +1030,7 @@ function resolveLinks(docMetadata) {
         anchor.innerText = "Element " + target.parentElement.querySelector(".heading-number").innerText;
 
       } else {
-        logEvent(`Anchor points to ambiguous #${target_id}`)
+        logEvent("Anchor points to ambiguous href", anchor)
         anchor.innerText = "????";
       }
 
@@ -1040,7 +1040,7 @@ function resolveLinks(docMetadata) {
       
     } else {
 
-      logEvent(`Empty anchor`);
+      logEvent("Empty anchor", anchor);
 
     }
   }
@@ -1083,8 +1083,14 @@ function render() {
 
 var _events = [];
 
-function logEvent(e) {
-  _events.push(e);
+function logEvent(msg, element) {
+  if (element !== undefined) {
+    if (!element.hasAttribute("id") || !element.id) {
+      element.id = Math.floor(Math.random() * 1000000000);
+    }
+    element.classList.add("invalid-tag");
+  }
+  _events.push({msg: msg, elementId: element === undefined ? null : element.id});
 }
 
 function listEvents() {
@@ -1108,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     for (const event of listEvents()) {
       const li = document.createElement('li');
-      li.innerText = event;
+      li.innerHTML = event.msg + (event.elementId === null ? "" : ` (<a href='#${event.elementId}'>link</a>)`);
       eventList.appendChild(li);
       console.error(event);
     }
