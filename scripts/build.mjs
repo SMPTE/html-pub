@@ -305,9 +305,8 @@ async function render(docPath) {
 
       /* refuse to render if there are page errors */
       if (listEvents().length) {
-        for (let event of listEvents())
-          console.error(`  ${event.msg}\n`);
-        throw new Error(`Page has errors`);
+        const error_msg = listEvents().map((e) => `    ${e.msg}\n`).join("")
+        throw new Error(`Page has errors:\n${error_msg}`);
       }
     })
 

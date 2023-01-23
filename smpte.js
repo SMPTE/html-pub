@@ -1070,7 +1070,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const li = document.createElement('li');
       li.innerHTML = event.msg + (event.elementId === null ? "" : ` (<a href='#${event.elementId}'>link</a>)`);
       eventList.appendChild(li);
-      console.error(event);
     }
 
     document.body.appendChild(eventList);
