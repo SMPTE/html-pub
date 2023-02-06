@@ -57,7 +57,8 @@ h1 {
 
 h2 {
   margin-top: 1.5em;
-  font-size: 1.4rem;
+  margin-bottom: 0;
+  font-size: 1.75rem;
 }
 
 h2 span.label {
@@ -66,8 +67,9 @@ h2 span.label {
 
 
 h3 {
-  margin-top: 1em;
-  font-size: 1.2rem;
+  margin-top: 1.5em;
+  margin-bottom: 0;
+  font-size: 1.3rem;
 }
 
 h3 span.label {
@@ -75,7 +77,8 @@ h3 span.label {
 }
 
 h4 {
-  margin-top: 1em;
+  margin-top: 1.5em;
+  margin-bottom: 0;
   font-size: 1.2rem;
 }
 
@@ -85,13 +88,15 @@ h4 span.label {
 
 
 h5 {
-  margin-top: 1em;
-  font-size: 1.2rem;
+  margin-top: 1.5em;
+  margin-bottom: 0;
+  font-size: 1rem;
 }
 
 h6 {
-  margin-top: 1em;
-  font-size: 1.2rem;
+  margin-top: 1.5em;
+  margin-bottom: 0;
+  font-size: 1rem;
 }
 
 /* generic sections */
