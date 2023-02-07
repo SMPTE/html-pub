@@ -130,21 +130,16 @@ dt {
   font-weight: bold;
 }
 
-dd {
-  margin-bottom: 1em;
+dd + dt {
+  margin-top: 1em;
 }
 
-dd a::after {
-  content: "]";
+dt + dd {
+  margin-top: 0.25em;
 }
 
-dd a {
-  display: block;
-  font-size: 0.8rem;
-}
-
-dd a::before {
-  content: "[SOURCE: ";
+dfn {
+  font-style: normal;
 }
 
 /* note */

@@ -450,8 +450,9 @@ cp tooling/.smpte-build.json .
           constraints:
             <ul>
               <li>The <code>id</code> attribute of the <code>dl</code> element shall be equal to <code>terms-int-defs</code>.</li>
-              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol</li>
-              <li>Each <code>dd</code> element contains the matching definition</li>
+              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol.</li>
+              <li>Each <code>dd</code> element contains the matching definition. The element can contain a single <code>a</code> element
+              referencing a bibliographic entry, in which case the entry will be considered the source of the definition of the term.</li>
             </ul>
           </li>
         </ul>
@@ -466,6 +467,7 @@ cp tooling/.smpte-build.json .
     &lt;dt&gt;&lt;dfn&gt;key number&lt;/dfn&gt;&lt;/dt&gt;
     &lt;dd&gt;number that is printed with ink or exposed onto the film at the time of
     manufacture at regular intervals, typically one foot.&lt;/dd&gt;
+    &lt;dd&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;&lt;/dd&gt;
   &lt;/dl&gt;
 &lt;/section&gt;
 </pre>

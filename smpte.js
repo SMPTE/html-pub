@@ -997,6 +997,13 @@ function resolveLinks(docMetadata) {
       if (target.localName === "cite") {
         anchor.innerText = target.innerText;
 
+        /* special formatting for definitions */
+
+        if (anchor.parentElement.localName === "dd") {
+          anchor.parentNode.insertBefore(document.createTextNode("[SOURCE: "), anchor);
+          anchor.parentNode.insertBefore(document.createTextNode("]"), anchor.nextSibling);
+        }
+
       } else if (target.localName === "table") {
         anchor.innerText = "Table " + target.querySelector(".heading-number").innerText;
 
