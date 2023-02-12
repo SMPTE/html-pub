@@ -645,6 +645,24 @@ function insertForeword(docMetadata) {
 
 }
 
+function addSectionLinks(docMetadata) {
+  const sections = document.getElementsByTagName("section");
+
+  for(const section of sections) {
+    const heading = section.firstElementChild;
+
+    if (!section.hasAttribute('id') || heading === null)
+      continue;
+
+    const headingLink = document.createElement("a");
+    headingLink.className = "heading-link";
+    headingLink.href = `#${section.id}`;
+    headingLink.innerHTML = "<sup>🔗</sup>";
+
+    heading.appendChild(headingLink);
+  }
+}
+
 function numberSections(element, curHeadingNumber) {
   let headingCounter = 1;
   let annexCounter = "A".charCodeAt();
@@ -1078,6 +1096,7 @@ function render() {
   numberExamples();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
+  addSectionLinks(docMetadata);
 }
 
 var _events = [];
