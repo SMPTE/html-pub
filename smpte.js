@@ -645,19 +645,19 @@ function insertForeword(docMetadata) {
 
 }
 
-function addSectionLinks(docMetadata) {
-  const sections = document.getElementsByTagName("section");
+function addHeadingLinks(docMetadata) {
+  const headings = document.querySelectorAll("h2, h3, h4, h5, h6");
 
-  for(const section of sections) {
-    const heading = section.firstElementChild;
+  for(const heading of headings) {
+    const section = heading.parentElement;
 
-    if (!section.hasAttribute('id') || heading === null)
+    if (!section.hasAttribute('id'))
       continue;
 
     const headingLink = document.createElement("a");
     headingLink.className = "heading-link";
     headingLink.href = `#${section.id}`;
-    headingLink.innerHTML = "<sup>🔗</sup>";
+    headingLink.innerHTML = "🔗";
 
     heading.appendChild(headingLink);
   }
@@ -1107,7 +1107,7 @@ function render() {
   numberExamples();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
-  addSectionLinks(docMetadata);
+  addHeadingLinks(docMetadata);
 }
 
 var _events = [];

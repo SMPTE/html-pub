@@ -190,9 +190,30 @@ li {
 /* heading links */
 
 a.heading-link {
+  visibility: hidden;
   text-decoration: none;
   font-size: 0.5em;
-  padding-left: 1em;
+  padding-left: 0.5em;
+  position: relative;
+  bottom: 0.25em;
+}
+
+@media only screen {
+  h2:hover .heading-link {
+    visibility: visible;
+  }
+  h3:hover .heading-link {
+    visibility: visible;
+  }
+  h4:hover .heading-link {
+    visibility: visible;
+  }
+  h5:hover .heading-link {
+    visibility: visible;
+  }
+  h6:hover .heading-link {
+    visibility: visible;
+  }
 }
 
 /* table of contents */
