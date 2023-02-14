@@ -1074,11 +1074,22 @@ function insertSnippets() {
   );
 }
 
+function insertIconLink() {
+  const icoLink = document.createElement("link");
+
+  icoLink.type = "image/png";
+  icoLink.rel = "icon";
+  icoLink.href = resolveStaticResourcePath("smpte-icon.png");
+
+  document.head.insertBefore(icoLink, null);
+}
+
 function render() {
   let docMetadata = loadDocMetadata();
 
   insertSnippets();
 
+  insertIconLink();
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
   insertIntroduction(docMetadata);
@@ -1134,7 +1145,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const li = document.createElement('li');
       li.innerHTML = event.msg + (event.elementId === null ? "" : ` (<a href='#${event.elementId}'>link</a>)`);
       eventList.appendChild(li);
-      console.error(event);
     }
 
     document.body.appendChild(eventList);
