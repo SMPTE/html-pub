@@ -69,12 +69,55 @@ function validatePubType(head, logger) {
     logger.error("pubType invalid");
 }
 
-function validatePubNumer(head, logger) {
+function validatePubNumber(head, logger) {
   const e = head.querySelector("meta[itemprop = 'pubNumber']");
 
   if (e === null || ! /\d+/.test(e.getAttribute("content")))
     logger.error("pubNumber invalid");
 }
+
+function validatePubPart(head, logger) {
+  const pubType = getPubType(head, logger);
+
+  if (! smpte.ENGDOC_PUBTYPES.has(pubType.getAttribute("content")))
+    return;
+
+  const e = head.querySelector("meta[itemprop = 'pubPart']");
+
+  if (e === null || ! /\d+/.test(e.getAttribute("content")))
+    logger.error("pubPart invalid");
+}
+
+function validateTC(head, logger) {
+  const pubType = getPubType(head, logger);
+
+  if (! smpte.ENGDOC_PUBTYPES.has(pubType.getAttribute("content")))
+    return;
+
+  const e = head.querySelector("meta[itemprop = 'pubTC']");
+
+  if (e === null || e.getAttribute("content").length == 0)
+    logger.error("pubTC missing");
+}
+
+
+function validatePubStage(head, logger) {
+  const pubType = getPubType(head, logger);
+
+  if (! smpte.ENGDOC_PUBTYPES.has(pubType.getAttribute("content")))
+    return;
+
+  const e = head.querySelector("meta[itemprop = 'pubStage']");
+
+  if (e === null) {
+    logger.error("pubStage missing");
+    return;
+  }
+
+  if (! smpte.isValidPubStage(e.getAttribute("content")))
+    logger.error("pubStage invalid");
+}
+
 
 function getPubState(head, logger) {
   return head.querySelector("meta[itemprop = 'pubState']");
@@ -128,10 +171,12 @@ function validateHead(head, logger) {
     logger.error("head@itemtype is invalid");
 
   validatePubType(head, logger);
-  validatePubNumer(head, logger);
+  validatePubNumber(head, logger);
+  validatePubPart(head, logger);
   validatePubState(head, logger);
   validatePubDateTime(head, logger);
   validateEffectiveDateTime(head, logger);
+  validatePubStage(head, logger);
 }
 
 function validateForeword(e, logger) {

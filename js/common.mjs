@@ -34,3 +34,8 @@ export const VALID_PUBTYPES = new Set([AG_PUBTYPE, OM_PUBTYPE, ST_PUBTYPE, RP_PU
 
 export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE]);
 
+export const PUB_STAGES = new Set(["WD", "CD", "FCD", "DP", "PUB"]);
+
+export function isValidPubStage(pubStage) {
+   return PUB_STAGES.has(pubStage);
+}
