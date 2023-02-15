@@ -305,8 +305,9 @@ async function render(docPath) {
 
       /* refuse to render if there are page errors */
       if (listEvents().length) {
-        const error_msg = listEvents().map((e) => `    ${e.msg}\n`).join("")
-        throw new Error(`Page has errors:\n${error_msg}`);
+        for (let event of listEvents())
+          console.error(`  ${event.msg}\n`);
+        throw new Error(`Page has errors`);
       }
     })
 
@@ -455,4 +456,4 @@ async function main() {
 }
 
 
-main().catch(e => { console.error(e) });
+main().catch(e => { console.error(e); process.exitCode = 1; });

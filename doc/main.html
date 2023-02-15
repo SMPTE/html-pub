@@ -450,8 +450,13 @@ cp tooling/.smpte-build.json .
           constraints:
             <ul>
               <li>The <code>id</code> attribute of the <code>dl</code> element shall be equal to <code>terms-int-defs</code>.</li>
-              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol</li>
-              <li>Each <code>dd</code> element contains the matching definition</li>
+              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol. More than one <code>dt</code> element
+              can precede a <code>dd</code> element, in which case all the terms, abbreviations and symbols in the immediately
+              preceding <code>dt</code> elements are synomys.</li>
+              <li>Each <code>dd</code> element contains the matching definition. One or two <code>dd</code> elements can follow a
+              <code>dt</code> element. The first <code>dd</code> element immediately following the <code>dt</code> element shall be
+              a definition. The second <code>dd</code> element, if present, shall reference a bibliographic entry, in which case the
+              entry will be considered the source of the definition of the term.</li>
             </ul>
           </li>
         </ul>
@@ -466,6 +471,7 @@ cp tooling/.smpte-build.json .
     &lt;dt&gt;&lt;dfn&gt;key number&lt;/dfn&gt;&lt;/dt&gt;
     &lt;dd&gt;number that is printed with ink or exposed onto the film at the time of
     manufacture at regular intervals, typically one foot.&lt;/dd&gt;
+    &lt;dd&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;&lt;/dd&gt;
   &lt;/dl&gt;
 &lt;/section&gt;
 </pre>
@@ -915,13 +921,44 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
 
       </section>
 
+      <section id="sec-blockquote">
+        <h4>Quotes and blockquotes</h4>
+
+        <p>Prose can be quoted inline using the <code>q</code> element or as a block using the <code>blockquote</code>
+        element.</p>
+
+        <div class="example">
+<pre>
+&lt;blockquote&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat.&lt;/blockquote&gt;
+</pre>
+
+          <p>results in:</p>
+          <blockquote>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+          magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+          consequat.</blockquote>
+        </div>
+
+        <div class="example">
+<pre>This is a quote: &lt;q&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
+
+          <p>results in: </p>
+          This is a quote: <q>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+          labore et dolore magna aliqua.</q>;
+        </div>
+
+      </section>
+
     </section>
   </section>
 
   <section id="sec-tooling">
     <h2>Tooling</h2>
 
-    <section>
+    <section id="sec-tooling-overview">
       <h3>Overview</h3>
 
       <p>The SMPTE HTML publication tooling consists of several components:</p>
@@ -938,7 +975,7 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       </ul>
     </section>
 
-    <section>
+    <section id="sec-tooling-rendering">
       <h3>Rendering</h3>
 
       <p>At the heart of the tooling is the rendering code at <code>smpte.js</code>.</p>

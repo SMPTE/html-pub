@@ -26,5 +26,16 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 export const OM_PUBTYPE = "OM";
+export const AG_PUBTYPE = "AG";
+export const ST_PUBTYPE = "ST";
+export const RP_PUBTYPE = "RP";
 
-export const VALID_PUBTYPES = new Set(["AG", OM_PUBTYPE]);
+export const VALID_PUBTYPES = new Set([AG_PUBTYPE, OM_PUBTYPE, ST_PUBTYPE, RP_PUBTYPE]);
+
+export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE]);
+
+export const PUB_STAGES = new Set(["WD", "CD", "FCD", "DP", "PUB"]);
+
+export function isValidPubStage(pubStage) {
+   return PUB_STAGES.has(pubStage);
+}

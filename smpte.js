@@ -80,11 +80,14 @@ function loadDocMetadata() {
   metadata.pubTitle = document.title;
 
   metadata.pubType = params.get("pubType") || getHeadMetadata("pubType");
-  if (["OM", "AG"].indexOf(metadata.pubType) === -1)
+  if (["OM", "AG", "ST", "RP"].indexOf(metadata.pubType) === -1)
     logEvent(`Unknown publication type: ${metadata.pubType}`);
 
   metadata.pubState = params.get("pubState") || getHeadMetadata("pubState");
   metadata.pubNumber = params.get("pubNumber") || getHeadMetadata("pubNumber");
+  metadata.pubPart = params.get("pubPart") || getHeadMetadata("pubPart");
+  metadata.pubStage = params.get("pubStage") || getHeadMetadata("pubStage");
+  metadata.pubTC = params.get("pubTC") || getHeadMetadata("pubTC");
   metadata.pubDateTime = params.get("pubDateTime") || getHeadMetadata("pubDateTime");
   metadata.effectiveDateTime = params.get("effectiveDateTime") || getHeadMetadata("effectiveDateTime");
 
@@ -95,7 +98,7 @@ function loadDocMetadata() {
 }
 
 const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{pubNumber}}</span></div>
+<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{actualPubNumber}}</span></div>
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
 <h1>{{pubTitle}}</h1>
@@ -124,7 +127,9 @@ function insertFrontMatter(docMetadata) {
 
   const longDocType = {
     "AG": "Administrative Guideline",
-    "OM": "Operations Manual"
+    "OM": "Operations Manual",
+    "ST": `${docMetadata.pubStage} Standard`,
+    "RP": `${docMetadata.pubStage} Recommended Pratice`,
   }[docMetadata.pubType];
 
   if (docMetadata.pubState == "draft")
@@ -136,6 +141,8 @@ function insertFrontMatter(docMetadata) {
 
     return docMetadata.pubDateTime;
   })();
+
+  const actualPubNumber = docMetadata.pubPart ? `${docMetadata.pubNumber}-${docMetadata.pubPart}` : docMetadata.pubNumber;
 
   let publicationState;
 
@@ -164,6 +171,7 @@ function insertFrontMatter(docMetadata) {
       publicationState: publicationState,
       smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),
       actualPubDateTime: actualPubDateTime,
+      actualPubNumber: actualPubNumber,
       ...docMetadata
     }
     );
@@ -191,13 +199,15 @@ function insertTOC(docMetadata) {
 
       const secId = subSection.getAttribute("id")
 
-      if (!secId || ['sec-front-matter', 'sec-toc'].includes(secId))
+      if (['sec-front-matter', 'sec-toc'].includes(secId))
         continue;
 
       const heading = subSection.firstElementChild;
 
-      if (!heading)
+      if (!heading || !secId) {
+        logEvent(`Section must have a heading and id attribute.`, subSection);
         continue;
+      }
 
       subSections.push(subSection);
     }
@@ -266,6 +276,12 @@ function insertIntroduction(docMetadata) {
   }
 
   h2.innerText = "Introduction";
+
+  if (docMetadata.pubType === "ST" || docMetadata.pubType === "RP") {
+    let b = document.createElement("p");
+    b.innerHTML = "<em>This section is entirely informative and does not form an integral part of this Engineering Document.</em>";
+    sec.insertBefore(b, h2.nextSibling)
+  }
 }
 
 const SMPTE_SCOPE_ID = "sec-scope";
@@ -583,6 +599,16 @@ in its Standards Operations Manual.</p>
 <p id="copyright-text">Copyright © The Society of Motion Picture and
 Television Engineers.</p>`
 
+SMPTE_DRAFT_WARNING = `
+<div id="sec-draft-warning">
+<strong>Warning:</strong> This document is an unpublished, confidential work under development and shall not be referred
+to as a SMPTE Standard,
+Recommended Practice, or Engineering Guideline. It is distributed for review and comment; distribution does not constitute
+publication. Recipients of this document are strongly encouraged to submit, with their comments, notification of any relevant
+patent rights of which they are aware and to provide supporting documentation.
+</div>
+`
+
 function insertForeword(docMetadata) {
   let sec = document.getElementById(SMPTE_FOREWORD_ID);
 
@@ -600,16 +626,41 @@ function insertForeword(docMetadata) {
 
   sec.classList.add("unnumbered");
 
-  authorProse = sec.innerHTML;
+  let authorProse = sec.innerHTML;
+
+  if (docMetadata.pubType == "ST" || docMetadata.pubType == "RP") {
+    authorProse = `<p>This document was prepared by Technology Committee ${docMetadata.pubTC}.</p>` + authorProse;
+
+    if (docMetadata.pubStage !== "PUB")
+      authorProse += SMPTE_DRAFT_WARNING;
+  }
 
   if (docMetadata.pubType == "AG") {
     if (authorProse.trim().length > 0)
       logEvent("AGs cannot contain author-specified Foreword prose.")
     sec.innerHTML = SMPTE_AG_FOREWORD_BOILERPLATE;
   } else {
-    sec.innerHTML = fillTemplate(SMPTE_AG_FOREWORD_BOILERPLATE, {authorProse: authorProse});
+    sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse});
   }
 
+}
+
+function addHeadingLinks(docMetadata) {
+  const headings = document.querySelectorAll("h2, h3, h4, h5, h6");
+
+  for(const heading of headings) {
+    const section = heading.parentElement;
+
+    if (!section.hasAttribute('id'))
+      continue;
+
+    const headingLink = document.createElement("a");
+    headingLink.className = "heading-link";
+    headingLink.href = `#${section.id}`;
+    headingLink.innerHTML = "🔗";
+
+    heading.appendChild(headingLink);
+  }
 }
 
 function numberSections(element, curHeadingNumber) {
@@ -677,8 +728,13 @@ function numberTables() {
 
     for (let table of section.querySelectorAll("table")) {
 
+      if (!table.id) {
+        logEvent(`Table is missing an id`, table);
+        continue;
+      }
+
       const caption = table.querySelector("caption");
-  
+
       if (caption === null) {
         logEvent("Table is missing a caption", table);
         continue;
@@ -686,18 +742,18 @@ function numberTables() {
 
       const headingLabel = document.createElement("span");
       headingLabel.className = "heading-label";
-  
+
       const headingNumberElement = document.createElement("span");
       headingNumberElement.className = "heading-number";
       headingNumberElement.innerText = numPrefix + counter;
-      
+
       headingLabel.appendChild(document.createTextNode("Table "));
       headingLabel.appendChild(headingNumberElement);
       headingLabel.appendChild(document.createTextNode(" –⁠ "));
 
 
       caption.insertBefore(headingLabel, caption.firstChild);
-      
+
       counter++;
     }
 
@@ -959,6 +1015,13 @@ function resolveLinks(docMetadata) {
       if (target.localName === "cite") {
         anchor.innerText = target.innerText;
 
+        /* special formatting for definitions */
+
+        if (anchor.parentElement.localName === "dd") {
+          anchor.parentNode.insertBefore(document.createTextNode("[SOURCE: "), anchor);
+          anchor.parentNode.insertBefore(document.createTextNode("]"), anchor.nextSibling);
+        }
+
       } else if (target.localName === "table") {
         anchor.innerText = "Table " + target.querySelector(".heading-number").innerText;
 
@@ -1044,6 +1107,7 @@ function render() {
   numberExamples();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
+  addHeadingLinks(docMetadata);
 }
 
 var _events = [];
