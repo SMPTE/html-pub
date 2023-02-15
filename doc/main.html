@@ -450,9 +450,13 @@ cp tooling/.smpte-build.json .
           constraints:
             <ul>
               <li>The <code>id</code> attribute of the <code>dl</code> element shall be equal to <code>terms-int-defs</code>.</li>
-              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol.</li>
-              <li>Each <code>dd</code> element contains the matching definition. The element can contain a single <code>a</code> element
-              referencing a bibliographic entry, in which case the entry will be considered the source of the definition of the term.</li>
+              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol. More than one <code>dt</code> element
+              can precede a <code>dd</code> element, in which case all the terms, abbreviations and symbols in the immediately
+              preceding <code>dt</code> elements are synomys.</li>
+              <li>Each <code>dd</code> element contains the matching definition. One or two <code>dd</code> elements can follow a
+              <code>dt</code> element. The first <code>dd</code> element immediately following the <code>dt</code> element shall be
+              a definition. The second <code>dd</code> element, if present, shall reference a bibliographic entry, in which case the
+              entry will be considered the source of the definition of the term.</li>
             </ul>
           </li>
         </ul>
