@@ -710,16 +710,18 @@ function numberSections(element, curHeadingNumber) {
 
       headingLabel.appendChild(document.createTextNode("Annex "));
       headingLabel.appendChild(headingNum);
-      headingLabel.appendChild(document.createElement("br"));
+      heading.insertBefore(document.createElement("br"), heading.firstChild);
+
     } else {
       numText += headingCounter.toString();
       headingCounter++;
       headingNum.innerText = numText;
-      
+
       headingLabel.appendChild(headingNum);
       headingLabel.appendChild(document.createTextNode(" "));
+      heading.insertBefore(headingLabel, heading.firstChild);
     }
-    
+
     heading.insertBefore(headingLabel, heading.firstChild);
     numberSections(child, numText);
   }
