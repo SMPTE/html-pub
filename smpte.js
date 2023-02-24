@@ -354,6 +354,12 @@ function insertNormativeReferences(docMetadata) {
   }
 
   h2.innerText = "Normative references";
+
+  /* style URLs */
+
+  for(const u of sec.querySelectorAll("ul a")) {
+    u.parentNode.insertBefore(document.createTextNode("url:\u00a0"), u);
+  }
 }
 
 const SMPTE_TERMS_ID = "sec-terms-and-definitions";
@@ -436,6 +442,12 @@ function insertBibliography(docMetadata) {
   }
 
   h2.innerText = "Bibliography";
+
+  /* style links */
+
+  for(const u of sec.querySelectorAll("ul a")) {
+    u.parentNode.insertBefore(document.createTextNode("url:\u00a0"), u);
+  }
 }
 
 const SMPTE_ELEMENTS_ID = "sec-elements";
