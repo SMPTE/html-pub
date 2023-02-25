@@ -64,7 +64,7 @@ h2 {
 
 h2 span.heading-label {
   display: inline-block;
-  width: 4rem;
+  min-width: 4rem;
 }
 
 
@@ -129,11 +129,6 @@ section.annex > h2 {
 .annex-cat {
   font-weight: normal;
 }
-
-section.annex > h2 span.label {
-  margin-right: 0;
-}
-
 
 /* terms and definitions */
 
