@@ -35,4 +35,4 @@ async function main() {
   smpteValidate(dom.window.document, console);
 }
 
-main().catch(e => { console.error(e) });
+main().catch(e => { console.error(e); process.exitCode = 1; });
