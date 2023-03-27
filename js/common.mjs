@@ -38,7 +38,8 @@ export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
 export const PUB_STAGES = new Set(["WD", "CD", "FCD", "DP", "PUB"]);
 
 export const PUB_STATE_PUB = "pub";
-export const PUB_STATES = new Set([PUB_STATE_PUB, "draft"]);
+export const PUB_STATE_DRAFT = "draft";
+export const PUB_STATES = new Set([PUB_STATE_PUB, PUB_STATE_DRAFT]);
 
 function fatal(logger, msg) {
   logger.error(msg);
@@ -51,6 +52,10 @@ function getHeadMetadata(head, paramName) {
   if (e === null) return null;
 
   return e.getAttribute("content");
+}
+
+export function loadDocumentMetadata(doc, logger) {
+  return validateHead(doc.head, logger);
 }
 
 export function validateHead(head, logger) {
@@ -78,25 +83,34 @@ export function validateHead(head, logger) {
   if (metadata.pubState === null || !PUB_STATES.has(metadata.pubState))
     fatal(logger, "pubState invalid");
 
-  /* pubNumber */
+  /* pubNumber (optional) */
   metadata.pubNumber = getHeadMetadata(head, "pubNumber");
-  if (metadata.pubNumber === null || ! /\d+/.test(metadata.pubNumber))
+  if (metadata.pubNumber !== null && ! /\d+/.test(metadata.pubNumber)) {
+    metadata.pubNumber == null;
+    logger.error("pubNumber invalid");
+  }
     fatal(logger, "pubNumber invalid");
 
   /* pubPart (optional) */
   metadata.pubPart = getHeadMetadata(head, "pubPart");
-  if (metadata.pubPart !== null && ! /\d+/.test(metadata.pubPart))
-    fatal(logger, "pubPart invalid");
+  if (metadata.pubPart !== null && ! /\d+/.test(metadata.pubPart)) {
+    metadata.pubPart == null;
+    logger.error("pubPart invalid");
+  }
 
   /* pubDateTime (optional) */
   metadata.pubDateTime = getHeadMetadata(head, "pubDateTime");
-  if(metadata.pubDateTime !== null && ! /\d{4}-\d{2}-\d{2}/.test(metadata.pubDateTime))
-    fatal(logger, "pubDateTime invalid");
+  if(metadata.pubDateTime !== null && ! /\d{4}-\d{2}-\d{2}/.test(metadata.pubDateTime)) {
+    metadata.pubDateTime == null;
+    logger.error("pubDateTime invalid");
+  }
 
   /* effectiveDateTime (optional) */
   metadata.effectiveDateTime = getHeadMetadata(head, "effectiveDateTime");
-  if(metadata.effectiveDateTime !== null && ! /\d{4}-\d{2}-\d{2}/.test(metadata.effectiveDateTime))
-    fatal(logger, "effectiveDateTime invalid");
+  if(metadata.effectiveDateTime !== null && ! /\d{4}-\d{2}-\d{2}/.test(metadata.effectiveDateTime)) {
+    metadata.effectiveDateTime == null;
+    logger.error("effectiveDateTime invalid");
+  }
 
   /* specific to pub state */
   if (metadata.pubState === PUB_STATE_PUB) {
