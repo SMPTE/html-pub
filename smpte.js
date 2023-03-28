@@ -154,7 +154,7 @@ function insertFrontMatter(docMetadata) {
       case smpte.EG_PUBTYPE:
         if (docMetadata.pubPart !== null)
           actualPubNumber += `-<span itemprop="doc-part" id="doc-part">${docMetadata.pubPart}</span>`;
-        if (docMetadata.pubStage === smpte.PUB_STATE_PUB)
+        if (docMetadata.pubStage === smpte.PUB_STAGE_PUB)
           actualPubNumber += `:<span itemprop="doc-version" id="doc-version">${docMetadata.pubVersion}</span>`;
         break;
     }
@@ -627,6 +627,11 @@ with other standards-developing organizations, including ISO, IEC and ITU.
 SMPTE Engineering Documents are drafted in accordance with the rules given
 in its Standards Operations Manual.</p>
 
+<p>At the time of publication no notice had been received by SMPTE claiming patent
+rights essential to the implementation of this Engineering Document.
+However, attention is drawn to the possibility that some of the elements of this document may be the subject of patent rights.
+SMPTE shall not be held responsible for identifying any or all such patent rights.</p>
+
 {{authorProse}}
 
 <p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span> SMPTE</span>, 45 Hamilton Ave., White Plains NY 10601, (914) 761-1100.</p>`
@@ -663,7 +668,7 @@ function insertForeword(docMetadata) {
   if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
     authorProse = `<p>This document was prepared by Technology Committee ${docMetadata.pubTC}.</p>` + authorProse;
 
-    if (docMetadata.pubStage !== smpte.PUB_STATE_PUB)
+    if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB)
       authorProse += SMPTE_DRAFT_WARNING;
   }
 
