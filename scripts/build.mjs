@@ -291,8 +291,6 @@ async function render(docPath) {
 
     const docTitle = await page.evaluate(() => document.title);
 
-    await page.exposeFunction("getScriptPath", getScriptPath);
-
     const scriptPath = await page.evaluate(() => getScriptPath());
 
     await page.evaluate(() => {

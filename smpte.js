@@ -36,6 +36,8 @@ function getScriptPath() {
   return _SCRIPT_PATH;
 }
 
+window.getScriptPath = getScriptPath;
+
 function resolveScriptRelativePath(path) {
   return getScriptPath().split("/").slice(0, -1).concat([path]).join("/");
 }
