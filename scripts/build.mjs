@@ -291,7 +291,7 @@ async function render(docPath) {
 
     const docTitle = await page.evaluate(() => document.title);
 
-    const scriptPath = await page.evaluate(() => _SCRIPT_PATH);
+    const scriptPath = await page.evaluate(() => getScriptPath());
 
     await page.evaluate(() => {
       /* remove all scripts */
