@@ -291,7 +291,7 @@ async function render(docPath) {
 
     const docTitle = await page.evaluate(() => document.title);
 
-    const scriptPath = await page.evaluate(() => getScriptPath());
+    const scriptPath = await page.evaluate(() => smpteGetScriptPath());
 
     await page.evaluate(() => {
       /* remove all scripts */
@@ -304,8 +304,8 @@ async function render(docPath) {
       document.getElementById("smpte-logo").src = "static/smpte-logo.png";
 
       /* refuse to render if there are page errors */
-      if (listEvents().length) {
-        for (let event of listEvents())
+      if (smpteLogger.hasError()) {
+        for (let event of smpteLogger.errorList())
           console.error(`  ${event.msg}\n`);
         throw new Error(`Page has errors`);
       }

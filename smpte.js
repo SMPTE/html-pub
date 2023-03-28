@@ -1083,7 +1083,7 @@ function render() {
 
 class Logger {
   constructor() {
-    this.events_ = [];
+    this.events = [];
   }
 
   error(msg, element) {
@@ -1093,19 +1093,19 @@ class Logger {
       }
       element.classList.add("invalid-tag");
     }
-    this._events.push({msg: msg, elementId: element === undefined ? null : element.id});
+    this.events_push({msg: msg, elementId: element === undefined ? null : element.id});
   }
 
   hasError() {
-    return logger_.errorList().length > 0;
+    return this.events.length > 0;
   }
 
   errorList() {
-    return this._events;
+    return this.events;
   }
 }
 
-var logger_ = new Logger();
+const logger_ = new Logger();
 
 document.addEventListener('DOMContentLoaded', async () => {
    try {
@@ -1135,7 +1135,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 });
 
-window.getScriptPath = getScriptPath;
-window.listEvents = function() {
-  return logger_.errorList();
-}
+
+window.smpteGetScriptPath = getScriptPath;
+window.smpteLogger = logger_;
