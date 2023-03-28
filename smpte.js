@@ -36,8 +36,6 @@ function getScriptPath() {
   return _SCRIPT_PATH;
 }
 
-window.getScriptPath = getScriptPath;
-
 function resolveScriptRelativePath(path) {
   return getScriptPath().split("/").slice(0, -1).concat([path]).join("/");
 }
@@ -1109,10 +1107,6 @@ class Logger {
 
 var logger_ = new Logger();
 
-function listEvents() {
-  return logger_.errorList();
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
    try {
     asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
@@ -1140,3 +1134,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
 });
+
+window.getScriptPath = getScriptPath;
+window.listEvents = function() {
+  return logger_.errorList();
+}
