@@ -89,7 +89,6 @@ export function validateHead(head, logger) {
     metadata.pubNumber == null;
     logger.error("pubNumber invalid");
   }
-    fatal(logger, "pubNumber invalid");
 
   /* pubPart (optional) */
   metadata.pubPart = getHeadMetadata(head, "pubPart");

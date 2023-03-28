@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 import * as path from "path";
 import * as fs from "fs";
-import * as process from "process";
+import process from "process";
 import { S3Client, PutObjectCommand} from "@aws-sdk/client-s3";
 import * as puppeteer from "puppeteer";
 import * as child_process from "child_process";
