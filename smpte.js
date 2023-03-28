@@ -30,10 +30,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import { smpteValidate } from "./js/validate.mjs";
 import * as smpte from "./js/common.mjs";
 
-var _SCRIPT_PATH = (new URL(document.currentScript ? document.currentScript.src : import.meta.url)).pathname;
+const _SCRIPT_PATH = (new URL(document.currentScript ? document.currentScript.src : import.meta.url)).pathname;
+
+function getScriptPath() {
+  return _SCRIPT_PATH;
+}
 
 function resolveScriptRelativePath(path) {
-  return _SCRIPT_PATH.split("/").slice(0, -1).concat([path]).join("/");
+  return getScriptPath().split("/").slice(0, -1).concat([path]).join("/");
 }
 
 function resolveStaticResourcePath(resourceName) {
