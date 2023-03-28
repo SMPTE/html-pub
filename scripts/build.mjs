@@ -141,6 +141,8 @@ function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
 
 async function build(buildPaths, baseRef, lastEdRef) {
 
+  const generatedFiles = {};
+
   /* make sure the document directory does not contain conflicting names */
 
   if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubStaticDirName)))
@@ -171,12 +173,22 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   fs.writeFileSync(buildPaths.renderedDocPath, renderedDoc.docHTML);
 
+  generatedFiles.html = buildPaths.renderedDocName;
+
   /* mirror static directory */
 
   mirrorDirExcludeTooling(
     path.join(path.dirname(renderedDoc.scriptPath), buildPaths.pubStaticDirName),
     path.join(buildPaths.pubDirPath, buildPaths.pubStaticDirName)
     );
+
+  /* create pdf */
+
+  const pdfFileName = renderedDoc.docTitle + ".pdf";
+
+  child_process.execSync(`npx pagedjs-cli ${buildPaths.renderedDocPath} -o "${path.join(buildPaths.pubDirPath, pdfFileName)}"`);
+
+  generatedFiles.pdf = pdfFileName;
 
   /* generate base redline, if requested */
 
@@ -186,6 +198,7 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
     try {
       await generateRedline(buildPaths, baseRef, buildPaths.baseRedLineRefPath, buildPaths.baseRedlinePath);
+      generatedFiles.baseRedline = buildPaths.baseRedlineName;
     } catch (e) {
       console.warn(`Could not generate a redline: ${e}.`);
     }
@@ -200,12 +213,14 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
     try {
       await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
+      generatedFiles.pubRedline = buildPaths.pubRedlineName;
     } catch (e) {
       console.warn(`Could not generate a redline: ${e}.`);
     }
 
   }
 
+  return generatedFiles;
 }
 
 async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
@@ -226,7 +241,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
 }
 
-async function s3Upload(buildPaths, versionKey) {
+async function s3Upload(buildPaths, versionKey, generatedFiles) {
   const s3Region = process.env.AWS_S3_REGION;
   const s3Bucket = process.env.AWS_S3_BUCKET;
   const s3KeyPrefix = process.env.AWS_S3_KEY_PREFIX;
@@ -245,19 +260,28 @@ async function s3Upload(buildPaths, versionKey) {
 
     /* create links */
 
-    const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
+    if (generatedFiles !== undefined) {
 
-    const cleanURL = `${deployPrefix}${s3PubKeyPrefix}`;
-    linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`
+      const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
 
-    if (fs.existsSync(buildPaths.baseRedlinePath)) {
-      const baseRedlineURL = `${deployPrefix}${s3PubKeyPrefix}${buildPaths.baseRedlineName}`;
-      linksDocContents += `[Redline to current draft](${encodeURI(baseRedlineURL)})\n`
-    }
+      const cleanURL = `${deployPrefix}${s3PubKeyPrefix}`;
+      linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`
 
-    if (fs.existsSync(buildPaths.pubRedlinePath)) {
-      const pubRedlineURL = `${deployPrefix}${s3PubKeyPrefix}${buildPaths.pubRedlineName}`;
-      linksDocContents += `[Redline to most recent edition](${encodeURI(pubRedlineURL)})\n`
+      if ("pdf" in generatedFiles) {
+        const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
+        linksDocContents += `[Clean PDF](${encodeURI(url)})\n`
+      }
+
+      if ("baseRedline" in generatedFiles) {
+        const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
+        linksDocContents += `[Redline to current draft](${encodeURI(url)})\n`
+      }
+
+      if ("pubRedline" in generatedFiles) {
+        const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
+        linksDocContents += `[Redline to most recent edition](${encodeURI(url)})\n`
+      }
+
     }
 
   } else {
@@ -266,7 +290,8 @@ async function s3Upload(buildPaths, versionKey) {
     linksDocContents += "No links available";
   }
 
-  fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
+  if (generatedFiles !== undefined)
+    fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
 }
 
 async function render(docPath) {
@@ -429,7 +454,7 @@ async function main() {
 
   /* build document */
 
-  await build(buildPaths, baseRef, config.lastEdRef);
+  const generatedFiles = await build(buildPaths, baseRef, config.lastEdRef);
 
   /* validate rendered document */
 
@@ -449,7 +474,7 @@ async function main() {
 
   /* deploy to S3 */
 
-  s3Upload(buildPaths, branchName);
+  s3Upload(buildPaths, branchName, generatedFiles);
 
   s3Upload(buildPaths, commitHash);
 
