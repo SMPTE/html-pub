@@ -260,6 +260,7 @@ table > caption {
   font-size: 0.8rem;
   text-align: center;
   break-after: avoid;
+  break-inside: avoid;
 }
 
 /* images */
@@ -293,6 +294,7 @@ figcaption {
   font-size: 0.8rem;
   text-align: center;
   break-before: avoid;
+  break-inside: avoid;
 }
 
 figure {
