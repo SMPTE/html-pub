@@ -35,7 +35,8 @@ export const PUB_TYPES = new Set([AG_PUBTYPE, OM_PUBTYPE, ST_PUBTYPE, RP_PUBTYPE
 
 export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
 
-export const PUB_STAGES = new Set(["WD", "CD", "FCD", "DP", "PUB"]);
+export const PUB_STAGE_PUB = "PUB";
+export const PUB_STAGES = new Set(["WD", "CD", "FCD", "DP", PUB_STAGE_PUB]);
 
 export const PUB_STATE_PUB = "pub";
 export const PUB_STATE_DRAFT = "draft";
@@ -97,16 +98,23 @@ export function validateHead(head, logger) {
     logger.error("pubPart invalid");
   }
 
+  /* pubVersion (optional) */
+  metadata.pubVersion = getHeadMetadata(head, "pubVersion");
+  if (metadata.pubVersion !== null && ! /[0-9-]+/.test(metadata.pubVersion)) {
+    metadata.pubVersion == null;
+    logger.error("pubVersion invalid");
+  }
+
   /* pubDateTime (optional) */
   metadata.pubDateTime = getHeadMetadata(head, "pubDateTime");
-  if(metadata.pubDateTime !== null && ! /\d{4}-\d{2}-\d{2}/.test(metadata.pubDateTime)) {
+  if (metadata.pubDateTime !== null && ! /\d{4}(-\d{2}(-\d{2})?)?/.test(metadata.pubDateTime)) {
     metadata.pubDateTime == null;
     logger.error("pubDateTime invalid");
   }
 
   /* effectiveDateTime (optional) */
   metadata.effectiveDateTime = getHeadMetadata(head, "effectiveDateTime");
-  if(metadata.effectiveDateTime !== null && ! /\d{4}-\d{2}-\d{2}/.test(metadata.effectiveDateTime)) {
+  if (metadata.effectiveDateTime !== null && ! /\d{4}-\d{2}-\d{2}/.test(metadata.effectiveDateTime)) {
     metadata.effectiveDateTime == null;
     logger.error("effectiveDateTime invalid");
   }
@@ -127,6 +135,10 @@ export function validateHead(head, logger) {
 
   /* specific to engineering documents */
   if (ENGDOC_PUBTYPES.has(metadata.pubType)) {
+
+    /* pubVersion */
+    if (metadata.pubState === PUB_STATE_PUB && metadata.pubVersion === null)
+      fatal(logger, "pubVersion must be present for published engineering documents");
 
     /* pubStage */
     metadata.pubStage = getHeadMetadata(head, "pubStage");

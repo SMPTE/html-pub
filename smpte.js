@@ -1,5 +1,6 @@
 /*
-Copyright 2022 Pierre-Anthony Lemieux
+Copyright (c) Pierre-Anthony Lemieux
+Copyright (c) Society of Motion Picture and Television Engineers
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -71,24 +72,19 @@ function fillTemplate(template, data) {
   return template;
 }
 
-function getHeadMetadata(paramName) {
-  let e = document.querySelector("head meta[itemprop='" + paramName + "']");
-
-  if (e === null) return null;
-
-  return e.getAttribute("content");
-}
-
 function loadDocMetadata() {
-  const params = (new URL(document.location)).searchParams;
 
-  const docMetadata = smpte.loadDocumentMetadata(document, logger_);
+  const docMetadata = {...smpte.loadDocumentMetadata(document, logger_)};
 
-  return {...params,...docMetadata};
+  for (const [k, v] of (new URL(document.location)).searchParams.entries()) {
+    docMetadata[k] = v;
+  }
+
+  return docMetadata;
 }
 
 const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{actualPubNumber}}</span></div>
+<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
 <h1>{{pubTitle}}</h1>
@@ -96,7 +92,7 @@ const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="item
 <hr />`
 
 const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{pubNumber}}</span></div>
+<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{actualPubNumber}}</div>
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
 <h1>{{pubTitle}}</h1>
@@ -114,7 +110,7 @@ function insertFrontMatter(docMetadata) {
     throw "Front matter section already exists."
   }
 
-  let longDocType;
+  let longDocType = "";
 
   switch (docMetadata.pubType) {
     case smpte.AG_PUBTYPE:
@@ -124,24 +120,45 @@ function insertFrontMatter(docMetadata) {
       longDocType = "Operations Manual";
       break;
     case smpte.ST_PUBTYPE:
-      longDocType = `${docMetadata.pubStage} Standard`;
+      longDocType += "Standard";
       break;
     case smpte.RP_PUBTYPE:
-      longDocType = `${docMetadata.pubStage} Recommended Pratice`;
+      longDocType = "Recommended Practice";
       break;
     case smpte.EG_PUBTYPE:
-      longDocType = `${docMetadata.pubStage} Engineering Guideline`;
+      longDocType = "Engineering Guideline";
       break;
   }
 
+  if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB && smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType))
+    longDocType = `${docMetadata.pubStage} ${longDocType}`;
+
   let actualPubDateTime;
 
-  if (docMetadata.pubDateTime === null || docMetadata.pubState == PUB_STATE_DRAFT)
+  if (docMetadata.pubDateTime === null || docMetadata.pubState == smpte.PUB_STATE_DRAFT) {
     actualPubDateTime = new Date();
-  else
-    actualPubDateTime = docMetadata.pubDateTime;
+  } else {
+    actualPubDateTime = new Date(docMetadata.pubDateTime).toISOString().slice(0, 10);
+  }
 
-  const actualPubNumber = docMetadata.pubPart ? `${docMetadata.pubNumber}-${docMetadata.pubPart}` : docMetadata.pubNumber;
+  let actualPubNumber = "";
+  if (docMetadata.pubNumber !== null) {
+    actualPubNumber = `<span itemprop="doc-number" id="doc-number">${docMetadata.pubNumber}</span>`;
+
+    switch (docMetadata.pubType) {
+      case smpte.AG_PUBTYPE:
+      case smpte.OM_PUBTYPE:
+        break;
+      case smpte.ST_PUBTYPE:
+      case smpte.RP_PUBTYPE:
+      case smpte.EG_PUBTYPE:
+        if (docMetadata.pubPart !== null)
+          actualPubNumber += `-<span itemprop="doc-part" id="doc-part">${docMetadata.pubPart}</span>`;
+        if (docMetadata.pubStage === smpte.PUB_STATE_PUB)
+          actualPubNumber += `:<span itemprop="doc-version" id="doc-version">${docMetadata.pubVersion}</span>`;
+        break;
+    }
+  }
 
   let publicationState;
 
@@ -154,16 +171,23 @@ function insertFrontMatter(docMetadata) {
       if (docMetadata.pubType === smpte.OM_PUBTYPE)
         publicationState = "Approved by Board of Governors";
       else
-        publicationState = "Published";
+        publicationState = "Approved";
       break;
   }
+
+  let boilerplate;
+
+  if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.OM_PUBTYPE)
+    boilerplate = SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE
+  else
+    boilerplate = SMPTE_FRONT_MATTER_BOILERPLATE
 
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = SMPTE_FRONT_MATTER_ID;
 
   sec.innerHTML = fillTemplate(
-    docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.OM_PUBTYPE ? SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE : SMPTE_FRONT_MATTER_BOILERPLATE,
+    boilerplate,
     {
       longDocType: longDocType,
       publicationState: publicationState,
@@ -588,8 +612,7 @@ in its Standards Operations Manual.</p>
 interpretation of the SMPTE Standards Operations Manual. In the event of a
 conflict, the Operations Manual shall prevail.</p>
 
-<p id="copyright-text">Copyright © The Society of Motion Picture and
-Television Engineers.</p>`
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span> SMPTE</span>, 45 Hamilton Ave., White Plains NY 10601, (914) 761-1100.</p>`
 
 const SMPTE_DOC_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
 <p><a href="https://www.smpte.org">SMPTE (the Society of
@@ -606,8 +629,7 @@ in its Standards Operations Manual.</p>
 
 {{authorProse}}
 
-<p id="copyright-text">Copyright © The Society of Motion Picture and
-Television Engineers.</p>`
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span> SMPTE</span>, 45 Hamilton Ave., White Plains NY 10601, (914) 761-1100.</p>`
 
 const SMPTE_DRAFT_WARNING = `
 <div id="sec-draft-warning">
@@ -648,9 +670,9 @@ function insertForeword(docMetadata) {
   if (docMetadata.pubType == smpte.AG_PUBTYPE) {
     if (authorProse.trim().length > 0)
       logger_.error("AGs cannot contain author-specified Foreword prose.")
-    sec.innerHTML = SMPTE_AG_FOREWORD_BOILERPLATE;
+    sec.innerHTML = fillTemplate(SMPTE_AG_FOREWORD_BOILERPLATE, {copyrightYear: (new Date()).getFullYear()});
   } else {
-    sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse});
+    sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});
   }
 
 }
@@ -1079,6 +1101,14 @@ function render() {
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
   addHeadingLinks(docMetadata);
+
+  /* debug print version */
+  if (docMetadata.media === "print") {
+    let pagedJS = document.createElement("script");
+    pagedJS.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
+    pagedJS.id = "paged-js-script";
+    document.head.appendChild(pagedJS);
+  }
 }
 
 class Logger {
@@ -1093,7 +1123,7 @@ class Logger {
       }
       element.classList.add("invalid-tag");
     }
-    this.events_push({msg: msg, elementId: element === undefined ? null : element.id});
+    this.events.push({msg: msg, elementId: element === undefined ? null : element.id});
   }
 
   hasError() {
