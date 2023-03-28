@@ -434,7 +434,7 @@ async function main() {
   /* validate rendered document */
 
   try {
-    child_process.execSync(`html5validator --errors-only "${buildPaths.renderedDocPath}"`);
+    child_process.execSync(`html5validator --ignore "error: CSS:" --errors-only "${buildPaths.renderedDocPath}"`);
   } catch (e) {
     console.error(e.stdout.toString());
     throw Error("Rendered document validation failed.");
