@@ -85,16 +85,17 @@ function loadDocMetadata() {
 
 const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
 <span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
-<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
+{{revisionOf}}
 <div id="long-doc-type">{{longDocType}}</div>
+<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <h1>{{pubTitle}}</h1>
 <div id="doc-status">{{publicationState}} - {{actualPubDateTime}}</div>
 <hr />`
 
 const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
 <span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{actualPubNumber}}</div>
-<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
+<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <h1>{{pubTitle}}</h1>
 <div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
 <div id="doc-effective">Effective date: {{effectiveDateTime}}</div>
@@ -178,9 +179,15 @@ function insertFrontMatter(docMetadata) {
   let boilerplate;
 
   if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.OM_PUBTYPE)
-    boilerplate = SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE
+    boilerplate = SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE;
   else
-    boilerplate = SMPTE_FRONT_MATTER_BOILERPLATE
+    boilerplate = SMPTE_FRONT_MATTER_BOILERPLATE;
+
+
+  let revisionOf = "";
+
+  if (docMetadata.pubRevisionOf !== null)
+    revisionOf = `<div id="revision-text">Revision of <span id="revision-of">${docMetadata.pubRevisionOf}</span></div>`;
 
   sec = document.createElement("section");
   sec.className = "unnumbered";
@@ -189,6 +196,7 @@ function insertFrontMatter(docMetadata) {
   sec.innerHTML = fillTemplate(
     boilerplate,
     {
+      revisionOf: revisionOf,
       longDocType: longDocType,
       publicationState: publicationState,
       smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),

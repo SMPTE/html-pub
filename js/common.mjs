@@ -105,6 +105,9 @@ export function validateHead(head, logger) {
     logger.error("pubVersion invalid");
   }
 
+  /* pubRevisionOf (optional) */
+  metadata.pubRevisionOf = getHeadMetadata(head, "pubRevisionOf");
+
   /* pubDateTime (optional) */
   metadata.pubDateTime = getHeadMetadata(head, "pubDateTime");
   if (metadata.pubDateTime !== null && ! /\d{4}(-\d{2}(-\d{2})?)?/.test(metadata.pubDateTime)) {
