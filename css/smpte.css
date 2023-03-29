@@ -125,7 +125,29 @@ section {
   counter-reset: notes-counter;
 }
 
+/* foreword */
+
+#sec-foreword {
+  break-before: page;
+}
+
+/* scope */
+
+#sec-scope {
+  break-before: page;
+}
+
+/* bibliography */
+
+#sec-bibliography {
+  break-before: page;
+}
+
 /* annexes */
+
+section.annex {
+  break-before: page;
+}
 
 section.annex > h2 {
   text-align: left;

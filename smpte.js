@@ -120,13 +120,13 @@ function insertFrontMatter(docMetadata) {
       longDocType = "Operations Manual";
       break;
     case smpte.ST_PUBTYPE:
-      longDocType += "Standard";
+      longDocType += "SMPTE Standard";
       break;
     case smpte.RP_PUBTYPE:
-      longDocType = "Recommended Practice";
+      longDocType = "SMPTE Recommended Practice";
       break;
     case smpte.EG_PUBTYPE:
-      longDocType = "Engineering Guideline";
+      longDocType = "SMPTE Engineering Guideline";
       break;
   }
 
