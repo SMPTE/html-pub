@@ -120,8 +120,6 @@ function validateTFooter(element, logger) {
   return true;
 }
 
-
-
 function validateRepeat(elems, v, minCount, maxCount, logger) {
   let count = 0;
 
@@ -159,21 +157,6 @@ function validateOne(elems, v, logger) {
   return validateRepeat(elems, v, 1, 1, logger);
 }
 
-
-function validateBlockElement(e, logger) {
-  for (const e of e.children)
-    switch (e.localName) {
-      case HTMLParagraphElement.localName:
-        validateBlockElement(e, logger);
-        break;
-      case HTMLTableElement.localName:
-        validateTableElement(e, logger);
-        break;
-      default:
-        break;
-    }
-}
-
 function validateForeword(e, logger) {
   return e.localName === "section" && e.id === "sec-foreword";
 }
@@ -191,7 +174,7 @@ function validateConformance(e, logger) {
 }
 
 function validateReferences(e, prefix, logger) {
-  if (e.firstElementChild.tagName === "UL" && e.childElementCount === 1) {
+  if (e.childElementCount === 1 && e.firstElementChild.localName === "ul") {
     for (const li of e.firstElementChild.children) {
       if (li.tagName === "LI") {
         const cites = li.querySelectorAll("cite");
@@ -313,18 +296,21 @@ function validateElementsAnnex(e, logger) {
   if (e.localName !== "section" || e.id !== "sec-elements")
     return false;
 
-  if (e.firstElementChild.tagName === "OL" && e.childElementCount === 1) {
+  if (e.childElementCount === 1 && e.firstElementChild.localName === "ol") {
     for (const li of e.firstElementChild.children) {
       if (li.tagName === "LI") {
-        if (li.firstElementChild.tagName !== "A" || !li.firstElementChild.id || li.childElementCount !== 1 || !li.firstElementChild.title || !li.firstElementChild.href) {
+        if (li.firstElementChild.localName !== "a" || !li.firstElementChild.id || li.childElementCount !== 1 || !li.firstElementChild.title || !li.firstElementChild.href) {
           logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes.`);
+          return false;
         }
       } else {
         logger.error(`The <ol> element of the Elements Annex must contain only <li> elements`);
+        return false;
       }
     }
   } else {
     logger.error(`The Elements Annex section must contain a single <ol> element.`);
+    return false;
   }
 
   return true;

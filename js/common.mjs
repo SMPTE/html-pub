@@ -72,7 +72,7 @@ export function validateHead(head, logger) {
   /* pubTitle */
   metadata.pubTitle = head.ownerDocument.title;
   if (!metadata.pubTitle)
-    fatal("pubType invalid");
+    fatal("Title missing");
 
   /* pubType */
   metadata.pubType = getHeadMetadata(head, "pubType");
@@ -122,10 +122,34 @@ export function validateHead(head, logger) {
     logger.error("effectiveDateTime invalid");
   }
 
+  /* pubStage */
+  metadata.pubStage = getHeadMetadata(head, "pubStage");
+  if (metadata.pubStage !== null && !PUB_STAGES.has(metadata.pubStage)) {
+    metadata.pubStage = null;
+    fatal(logger, "pubStage invalid");
+  }
+
+  /* pubTC */
+  metadata.pubTC = getHeadMetadata(head, "pubTC");
+
+  /* document numbering constraints */
+  if (metadata.pubVersion !== null && metadata.pubNumber === null) {
+    metadata.pubVersion == null;
+    logger.error("pubNumber must be specified if pubVersion is specified");
+  }
+
+  if (metadata.pubPart !== null && metadata.pubNumber === null) {
+    metadata.pubPart == null;
+    logger.error("pubNumber must be specified if pubPart is specified");
+  }
+
   /* specific to pub state */
   if (metadata.pubState === PUB_STATE_PUB) {
     if(metadata.pubDateTime === null)
-      fatal(logger, "pubDateTime must be present for pub state");
+      fatal(logger, "pubDateTime must be present if the document is in pub state.");
+
+    if (metadata.pubNumber === null)
+      logger.error("pubNumber must be specified if the document is in pub state.");
   }
 
   /* specific to OM */
@@ -140,16 +164,15 @@ export function validateHead(head, logger) {
   if (ENGDOC_PUBTYPES.has(metadata.pubType)) {
 
     /* pubVersion */
-    if (metadata.pubState === PUB_STATE_PUB && metadata.pubVersion === null)
+    if (metadata.pubState === PUB_STAGE_PUB && metadata.pubVersion === null)
       fatal(logger, "pubVersion must be present for published engineering documents");
 
     /* pubStage */
-    metadata.pubStage = getHeadMetadata(head, "pubStage");
-    if (metadata.pubStage === null || !PUB_STAGES.has(metadata.pubStage))
-      fatal(logger, "pubStage invalid");
+    if (metadata.pubStage === null) {
+        fatal(logger, "pubStage must be specified for engineering documents.");
+      }
 
     /* pubTC */
-    metadata.pubTC = getHeadMetadata(head, "pubTC");
     if (metadata.pubTC === null || metadata.pubTC.length === 0)
       fatal(logger, "pubTC invalid");
   }
