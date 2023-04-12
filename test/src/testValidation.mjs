@@ -30,7 +30,6 @@ import * as process from "process";
 import * as fs from "fs";
 import * as path from "path";
 import {smpteValidate, ErrorLogger} from "../../js/validate.mjs";
-import exp from "constants";
 
 const testDirPath = "test/resources/html/validation";
 
@@ -46,6 +45,7 @@ async function _test(path) {
   try {
     smpteValidate(dom.window.document, logger);
   } catch (e) {
+    logger.error(`Exception: ${e.stack}`);
     hasThrown = true;
   }
 

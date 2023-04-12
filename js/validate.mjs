@@ -58,32 +58,136 @@ export function smpteValidate(doc, logger) {
   validateBody(doc.body, logger);
 }
 
-function validateForeword(e, logger) {
-  if (e.id !== "sec-foreword")
+function validateSequence(elems, v_seq, logger) {
+  for (const v of v_seq) {
+    const r = v(elems, logger);
+
+    if (! r) {
+      logger.error(`Expecting ${v.name}`);
+      return false;
+    }
+  }
+
+  if (elems.length !== 0) {
+    logger.error("Missing elements in the sequence.")
+    return false;
+  }
+
+  return true;
+}
+
+function validateTable(element, logger) {
+  if (element.localName !== "table")
+    return false;
+
+  return validateSequence(
+    Array.from(element.children),
+    [
+      validateCaption,
+      (e, l) => validateOptional(e, validateTHead, l),
+      (e, l) => validateOneOrMore(e, validateTBody, l),
+      (e, l) => validateOptional(e, validateTFooter, l),
+    ],
+    logger
+  )
+}
+
+function validateCaption(element, logger) {
+  if (element.localName !== "caption")
     return false;
 
   return true;
+}
+
+function validateTHead(element, logger) {
+  if (element.localName !== "thead")
+    return false;
+
+  return true;
+}
+
+function validateTBody(element, logger) {
+  if (element.localName !== "tbody")
+    return false;
+
+  return true;
+}
+
+function validateTFooter(element, logger) {
+  if (element.localName !== "tfooter")
+    return false;
+
+  return true;
+}
+
+
+
+function validateRepeat(elems, v, minCount, maxCount, logger) {
+  let count = 0;
+
+  while (elems.length > 0) {
+    const r = v(elems[0]);
+
+    if (!r)
+      break;
+
+    count++;
+    elems.shift();
+  }
+
+  if (count < minCount || count > maxCount) {
+    logger.error(`Incorrect element count`);
+    return false;
+  }
+
+  return true;
+}
+
+function validateOptional(elems, v, logger) {
+  return validateRepeat(elems, v, 0, 1, logger);
+}
+
+function validateOneOrMore(elems, v, logger) {
+  return validateRepeat(elems, v, 1, Number.MAX_SAFE_INTEGER, logger);
+}
+
+function validateZeroOrMore(elems, v, logger) {
+  return validateRepeat(elems, v, 0, Number.MAX_SAFE_INTEGER, logger);
+}
+
+function validateOne(elems, v, logger) {
+  return validateRepeat(elems, v, 1, 1, logger);
+}
+
+
+function validateBlockElement(e, logger) {
+  for (const e of e.children)
+    switch (e.localName) {
+      case HTMLParagraphElement.localName:
+        validateBlockElement(e, logger);
+        break;
+      case HTMLTableElement.localName:
+        validateTableElement(e, logger);
+        break;
+      default:
+        break;
+    }
+}
+
+function validateForeword(e, logger) {
+  return e.localName === "section" && e.id === "sec-foreword";
 }
 
 function validateIntroduction(e, logger) {
-  if (e.id !== "sec-introduction")
-    return false;
-
-  return true;
+  return e.localName === "section" && e.id === "sec-introduction";
 }
 
 function validateScope(e, logger) {
-  if (e.id !== "sec-scope")
-    return false;
-
-  return true;
+  return e.localName === "section" && e.id === "sec-scope";
 }
 
 function validateConformance(e, logger) {
-  if (e.id !== "sec-conformance")
-    return false;
-
-  return true;
+  return e.localName === "section" && e.id === "sec-conformance";
 }
 
 function validateReferences(e, prefix, logger) {
@@ -121,12 +225,12 @@ function validateNormRefs(e, logger) {
 }
 
 function validateExternalDefs(e, logger) {
-  if (e.tagName !== "UL" || e.id !== "terms-ext-defs")
+  if (e.localName !== "ul" || e.id !== "terms-ext-defs")
     return false;
 
   for (const li of e.children) {
-    if (li.tagName === "LI") {
-      if (li.childElementCount !== 1 || li.firstElementChild.tagName !== "A") {
+    if (li.localName === "li") {
+      if (li.childElementCount !== 1 || li.firstElementChild.localName !== "a") {
         logger.error(`External definitions: each <li> element must contain exactly one <a> element.`);
       }
     } else {
@@ -138,32 +242,24 @@ function validateExternalDefs(e, logger) {
 }
 
 function validateInternalDefs(e, logger) {
-  if (e.tagName !== "DL" || e.id !== "terms-int-defs")
+  if (e.localName !== "dl" || e.id !== "terms-int-defs")
     return false;
 
   return true;
 }
 
 function validateDefs(e, logger) {
-  if (e.id !== "sec-terms-and-definitions")
+  if (e.localName !== "section" || e.id !== "sec-terms-and-definitions")
     return false;
 
-  let hasExternalDefs = false;
-  let hasInternalDefs = false;
-
-  for (const child of e.children) {
-    if (validateExternalDefs(child, logger)) {
-      hasExternalDefs = true;
-      if (hasInternalDefs)
-        logger.error(`Terms and definitions: external definitions must come first.`);
-    } else if (validateInternalDefs(child, logger)) {
-      hasInternalDefs = true;
-    } else {
-      logger.error(`Terms and definitions: unknown element ${child.tagName}`);
-    }
-  }
-
-  return true;
+  return validateSequence(
+    Array.from(e.children),
+    [
+      (e, l) => validateOptional(e, validateExternalDefs, l),
+      (e, l) => validateOptional(e, validateInternalDefs, l),
+    ],
+    logger
+  );
 }
 
 
@@ -205,7 +301,7 @@ function validateClause(e, logger) {
 }
 
 function validateAnnex(e, logger) {
-  if (! e.classList.contains("annex"))
+  if (e.localName !== "section" || !e.classList.contains("annex"))
     return false;
 
   _validateClause(e, 2, logger);
@@ -214,7 +310,7 @@ function validateAnnex(e, logger) {
 }
 
 function validateElementsAnnex(e, logger) {
-  if (e.id !== "sec-elements")
+  if (e.localName !== "section" || e.id !== "sec-elements")
     return false;
 
   if (e.firstElementChild.tagName === "OL" && e.childElementCount === 1) {
@@ -245,55 +341,20 @@ function validateBibliography(e, logger) {
 
 
 function validateBody(body, logger) {
-  const sectionDefs = [
-    /* [validation function, min number, max number] */
-    [validateForeword, 0, 1],
-    [validateIntroduction, 0, 1],
-    [validateScope, 1, 1],
-    [validateConformance, 0, 1],
-    [validateNormRefs, 0, 1],
-    [validateDefs, 0, 1],
-    [validateClause, 0, Infinity],
-    [validateAnnex, 0, Infinity],
-    [validateElementsAnnex, 0, 1],
-    [validateBibliography, 0, 1],
-  ];
-
-  let index = 0;
-  let matchCount = 0;
-
-  for (const child of body.children) {
-    if (child.tagName !== "SECTION") {
-      logger.error(`Invalid element in <body>: ${child.tagName}`);
-      continue;
-    }
-
-    let sectionDef;
-
-    while (index < sectionDefs.length) {
-      sectionDef = sectionDefs.at(index);
-
-      if ((sectionDef.at(0))(child, logger)) {
-        matchCount++;
-        break;
-      }
-
-      index++;
-
-      if (matchCount < sectionDef.at(1))
-        logger.error(`Too few instances of ${sectionDef.at(0).name}`);
-
-      matchCount = 0;
-
-    }
-
-    if (index >= sectionDefs.length) {
-      logger.error(`Expected ${sectionDef.at(0).name} but found ${child.tagName} with id ${child.id}`);
-      break
-    }
-
-    if (matchCount > sectionDef.at(2))
-      logger.error(`Too few instances of ${sectionDef.at(0).name}`);
-
-  }
+  return validateSequence(
+    Array.from(body.children),
+    [
+      (e, l) => validateOptional(e, validateForeword, l),
+      (e, l) => validateOptional(e, validateIntroduction, l),
+      (e, l) => validateOne(e, validateScope, l),
+      (e, l) => validateOptional(e, validateConformance, l),
+      (e, l) => validateOptional(e, validateNormRefs, l),
+      (e, l) => validateOptional(e, validateDefs, l),
+      (e, l) => validateZeroOrMore(e, validateClause, l),
+      (e, l) => validateZeroOrMore(e, validateAnnex, l),
+      (e, l) => validateOptional(e, validateElementsAnnex, l),
+      (e, l) => validateOptional(e, validateBibliography, l),
+    ],
+    logger
+  );
 }
