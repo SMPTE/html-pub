@@ -58,20 +58,120 @@ export function smpteValidate(doc, logger) {
   validateBody(doc.body, logger);
 }
 
-function validateSequence(elems, v_seq, logger) {
-  for (const v of v_seq) {
-    const r = v(elems, logger);
+function matchSequence(v_seq) {
+  return function (elems, logger) {
+    for (const v of v_seq) {
+      const r = v(elems, logger);
 
-    if (! r) {
-      logger.error(`Expecting ${v.name}`);
+      if (! r) {
+        return false;
+      }
+    }
+
+    if (elems.length !== 0) {
       return false;
     }
-  }
 
-  if (elems.length !== 0) {
-    logger.error("Missing elements in the sequence.")
-    return false;
+    return true;
   }
+}
+
+const PHRASING_ELEMENTS = new Set([
+  "b",
+  "bdo",
+  "bdi",
+  "br",
+  "code",
+  "em",
+  "i",
+  "kbd",
+  "math",
+  "q",
+  "ruby",
+  "s",
+  "samp",
+  "span",
+  "strong",
+  "sub",
+  "sup",
+  "time",
+  "u",
+  "var",
+  "wbr",
+  "a"
+]);
+function validateGenericPhrasing(element, logger) {
+  return PHRASING_ELEMENTS.has(element.localName);
+}
+
+function matchBlocks() {
+  return matchZeroOrMore(
+    matchOneOf([
+      matchOne(validateP),
+      matchOne(validateDiv),
+      matchOne(validateUl),
+      matchOne(validateOl),
+      matchOne(validateDl),
+      matchOne(validatePre),
+      matchOne(validateFigure),
+      matchOne(validateAside),
+      matchOne(validateTable)
+    ])
+  );
+}
+
+function validateP(element, logger) {
+  if (element.localName !== "p")
+    return false;
+
+  return true;
+}
+
+function validateDiv(element, logger) {
+  if (element.localName !== "div")
+    return false;
+
+  return true;
+}
+
+function validateUl(element, logger) {
+  if (element.localName !== "ul")
+    return false;
+
+  return true;
+}
+
+function validateOl(element, logger) {
+  if (element.localName !== "ol")
+    return false;
+
+  return true;
+}
+
+function validateDl(element, logger) {
+  if (element.localName !== "dl")
+    return false;
+
+  return true;
+}
+
+function validatePre(element, logger) {
+  if (element.localName !== "pre")
+    return false;
+
+  return true;
+}
+
+function validateFigure(element, logger) {
+  if (element.localName !== "figure")
+    return false;
+
+  return true;
+}
+
+function validateAside(element, logger) {
+  if (element.localName !== "aside")
+    return false;
 
   return true;
 }
@@ -80,16 +180,13 @@ function validateTable(element, logger) {
   if (element.localName !== "table")
     return false;
 
-  return validateSequence(
-    Array.from(element.children),
+  return matchSequence(
     [
       validateCaption,
-      (e, l) => validateOptional(e, validateTHead, l),
-      (e, l) => validateOneOrMore(e, validateTBody, l),
-      (e, l) => validateOptional(e, validateTFooter, l),
-    ],
-    logger
-  )
+      matchOptional(validateTHead),
+      matchOneOrMore(validateTBody),
+      matchOptional(validateTFooter),
+    ])(Array.from(element.children), logger);
 }
 
 function validateCaption(element, logger) {
@@ -120,41 +217,92 @@ function validateTFooter(element, logger) {
   return true;
 }
 
-function validateRepeat(elems, v, minCount, maxCount, logger) {
-  let count = 0;
-
-  while (elems.length > 0) {
-    const r = v(elems[0]);
-
-    if (!r)
-      break;
-
-    count++;
-    elems.shift();
+class RepeatMatcher {
+  constructor (v, minCount, maxCount) {
+    this.v = v;
+    this.minCount = minCount;
+    this.maxCount = maxCount;
   }
 
-  if (count < minCount || count > maxCount) {
-    logger.error(`Incorrect element count`);
+  match(elements, logger) {
+    let count = 0;
+
+    while (elems.length > 0) {
+      const r = v(elems[0], null);
+
+      if (!r)
+        break;
+
+      count++;
+      elems.shift();
+    }
+
+    if (count < minCount || count > maxCount) {
+      if (logger !== null)
+        logger.error(`Incorrect element count`);
+      return false;
+    }
+
+    return true;
+  }
+}
+
+function matchRepeat(v, minCount, maxCount) {
+  return function(elems, logger) {
+    let count = 0;
+
+    while (elems.length > 0) {
+      const r = v(elems[0], null);
+
+      if (!r)
+        break;
+
+      count++;
+      elems.shift();
+    }
+
+    if (count < minCount || count > maxCount) {
+      if (logger !== null)
+        logger.error(`Incorrect element count`);
+      return false;
+    }
+
+    return true;
+  }
+}
+
+function matchOneOf(v_list) {
+  return function(elems, logger) {
+    for (const v of v_list) {
+      if (v(Array.from(elems), null))
+        return true;
+    }
     return false;
-  }
-
-  return true;
+  };
 }
 
-function validateOptional(elems, v, logger) {
-  return validateRepeat(elems, v, 0, 1, logger);
+function matchOptional(v) {
+  const f = matchRepeat(v, 0, 1);
+  f._description = `${v._description}?`
+  return f;
 }
 
-function validateOneOrMore(elems, v, logger) {
-  return validateRepeat(elems, v, 1, Number.MAX_SAFE_INTEGER, logger);
+function matchOneOrMore(v) {
+  const f = matchRepeat(v, 1, Number.MAX_SAFE_INTEGER);
+  f._description = `${v._description}+`
+  return f;
 }
 
-function validateZeroOrMore(elems, v, logger) {
-  return validateRepeat(elems, v, 0, Number.MAX_SAFE_INTEGER, logger);
+function matchZeroOrMore(v) {
+  const f = matchRepeat(v, 0, Number.MAX_SAFE_INTEGER);
+  f._description = `${v._description}*`
+  return f;
 }
 
-function validateOne(elems, v, logger) {
-  return validateRepeat(elems, v, 1, 1, logger);
+function matchOne(v) {
+  const f = matchRepeat(v, 1, 1);
+  f._description = `${v._description}`
+  return f;
 }
 
 function validateForeword(e, logger) {
@@ -235,16 +383,38 @@ function validateDefs(e, logger) {
   if (e.localName !== "section" || e.id !== "sec-terms-and-definitions")
     return false;
 
-  return validateSequence(
-    Array.from(e.children),
+  return matchSequence(
     [
-      (e, l) => validateOptional(e, validateExternalDefs, l),
-      (e, l) => validateOptional(e, validateInternalDefs, l),
-    ],
-    logger
-  );
+      matchOptional(validateExternalDefs),
+      matchOptional(validateInternalDefs),
+    ])(Array.from(e.children), logger);
 }
 
+function makeValidateHeading(lvl) {
+  return function (element, logger) {
+    return element.localName === `h${lvl}`;
+  }
+}
+
+function makeValidateClause(lvl) {
+  return function validateClause(element, logger) {
+    if (element.localName !== "section")
+      return false;
+
+    if (element.classList.contains("annex") || element.id === "sec-bibliography" || element.id === "sec-elements")
+      return false;
+
+    return matchSequence([
+      matchOne(makeValidateHeading(lvl)),
+      matchOneOf(
+        [
+          matchOneOrMore(makeValidateClause(lvl + 1)),
+          matchBlocks
+        ]
+      )
+    ])(Array.from(element.children), logger);
+  };
+}
 
 function _validateClause(e, lvl, logger) {
 
@@ -255,12 +425,12 @@ function _validateClause(e, lvl, logger) {
     const child = e.children[i];
 
     if (i == 0) {
-      if (child.tagName === `H${lvl}`)
+      if (child.localName === `h${lvl}`)
         continue;
       logger.error(`Section ${e.id} is missing a heading <h${lvl}>.`);
     }
 
-    if (child.tagName === "SECTION") {
+    if (child.localName === "section") {
       containsSection = true;
 
       _validateClause(child, lvl + 1 , logger)
@@ -275,12 +445,12 @@ function _validateClause(e, lvl, logger) {
 }
 
 function validateClause(e, logger) {
-  if (e.classList.contains("annex") || e.id === "sec-bibliography" || e.id === "sec-elements")
-    return false;
+  /*if (e.classList.contains("annex") || e.id === "sec-bibliography" || e.id === "sec-elements")
+    return false;*/
 
-  _validateClause(e, 2, logger);
+  //_validateClause(e, 2, logger);
 
-  return true;
+  return makeValidateClause(2)(e, logger);
 }
 
 function validateAnnex(e, logger) {
@@ -298,7 +468,7 @@ function validateElementsAnnex(e, logger) {
 
   if (e.childElementCount === 1 && e.firstElementChild.localName === "ol") {
     for (const li of e.firstElementChild.children) {
-      if (li.tagName === "LI") {
+      if (li.localName === "li") {
         if (li.firstElementChild.localName !== "a" || !li.firstElementChild.id || li.childElementCount !== 1 || !li.firstElementChild.title || !li.firstElementChild.href) {
           logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes.`);
           return false;
@@ -327,20 +497,22 @@ function validateBibliography(e, logger) {
 
 
 function validateBody(body, logger) {
-  return validateSequence(
-    Array.from(body.children),
+  const r = matchSequence(
     [
-      (e, l) => validateOptional(e, validateForeword, l),
-      (e, l) => validateOptional(e, validateIntroduction, l),
-      (e, l) => validateOne(e, validateScope, l),
-      (e, l) => validateOptional(e, validateConformance, l),
-      (e, l) => validateOptional(e, validateNormRefs, l),
-      (e, l) => validateOptional(e, validateDefs, l),
-      (e, l) => validateZeroOrMore(e, validateClause, l),
-      (e, l) => validateZeroOrMore(e, validateAnnex, l),
-      (e, l) => validateOptional(e, validateElementsAnnex, l),
-      (e, l) => validateOptional(e, validateBibliography, l),
-    ],
-    logger
-  );
+      matchOptional(validateForeword),
+      matchOptional(validateIntroduction),
+      matchOne(validateScope),
+      matchOptional(validateConformance),
+      matchOptional(validateNormRefs),
+      matchOptional(validateDefs),
+      matchZeroOrMore(validateClause),
+      matchZeroOrMore(validateAnnex),
+      matchOptional(validateElementsAnnex),
+      matchOptional(validateBibliography),
+    ])(Array.from(body.children), logger);
+
+  if (!r && logger !== null)
+    logger.error("Invalid body");
+
+  return r;
 }
