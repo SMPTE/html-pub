@@ -1084,10 +1084,10 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       <p>The build process looks for the following environment variables:</p>
 
       <ul>
-        <li><a><code>AWS_S3_REGION</code></a></li>
-        <li><a><code>AWS_S3_BUCKET</code></a></li>
-        <li><a><code>AWS_S3_KEY_PREFIX</code></a></li>
-        <li><a><code>CANONICAL_LINK_PREFIX</code></a></li>
+        <li><code>AWS_S3_REGION</code></li>
+        <li><code>AWS_S3_BUCKET</code></li>
+        <li><code>AWS_S3_KEY_PREFIX</code></li>
+        <li><code>CANONICAL_LINK_PREFIX</code></li>
       </ul>
 
       <p>The build process also expects the AWS environment to be set up to allow access to the bucket.</p>
@@ -1122,16 +1122,16 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
         <figcaption>GitHub workflow file.</figcaption>
       </figure>
 
-      <p>The workflow file defines the following environment variabls:</p>
+      <p>The workflow file defines the following environment variables:</p>
 
       <dl>
         <dt><code>AWS_S3_REGION</code></dt>
-        <dd>Used to set <a><code>AWS_S3_REGION</code></a>.</dd>
+        <dd>Used to set <code>AWS_S3_REGION</code>.</dd>
         <dt><code>AWS_S3_BUCKET</code></dt>
-        <dd>Used to set <a><code>AWS_S3_BUCKET</code></a>.</dd>
-        <dt><dfn><code>CANONICAL_LINK_PREFIX</code></dfn></dt>
+        <dd>Used to set <code>AWS_S3_BUCKET</code>.</dd>
+        <dt><code>CANONICAL_LINK_PREFIX</code></dt>
         <dd>If set, used to generate the links to publication artifacts that are referenced from the GitHub pull request.</dd>
-        <dt><dfn><code>AWS_ROLE</code></dfn></dt>
+        <dt><code>AWS_ROLE</code></dt>
         <dd>ARN of the AWS role used by the workflow to upload files to S3 (see <a href="#sec-aws-integration"></a>).</dd>
       </dl>
 
@@ -1139,11 +1139,11 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       is automatically added to the pull request. The links use one of the following prefixes:</p>
 
       <ul>
-        <li><code><a>CANONICAL_LINK_PREFIX</a>/<a>AWS_S3_KEY_PREFIX</a></code>, if <a><code>CANONICAL_LINK_PREFIX</code></a> is set;</li>
-        <li><code>http://<a>AWS_S3_BUCKET</a>.s3-website-<a>AWS_S3_REGION</a>.amazonaws.com/<a>AWS_S3_KEY_PREFIX</a></code>, otherwise.</li>
+        <li><code>CANONICAL_LINK_PREFIX/AWS_S3_KEY_PREFIX</code>, if <code>CANONICAL_LINK_PREFIX</code> is set;</li>
+        <li><code>http://AWS_S3_BUCKET.s3-website-AWS_S3_REGION.amazonaws.com/AWS_S3_KEY_PREFIX</code>, otherwise.</li>
       </ul>
 
-      <p>The workflow file automatically sets <a><code>AWS_S3_KEY_PREFIX</code></a> to the name of the repository.</p>
+      <p>The workflow file automatically sets <code>AWS_S3_KEY_PREFIX</code> to the name of the repository.</p>
 
     </section>
 
@@ -1153,11 +1153,11 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       <p>The tooling uploads publication artifacts to an S3 bucket according to the following parameters:</p>
 
       <dl>
-        <dt><dfn><code>AWS_S3_REGION</code></dfn></dt>
+        <dt><code>AWS_S3_REGION</code></dt>
         <dd>Region where the S3 bucket lives, e.g., <code>us-west-1</code></dd>
-        <dt><dfn><code>AWS_S3_BUCKET</code></dfn></dt>
+        <dt><code>AWS_S3_BUCKET</code></dt>
         <dd>Name of the S3 bucket, e.g., <code>html-doc-pub</code></dd>
-        <dt><dfn><code>AWS_S3_KEY_PREFIX</code></dfn></dt>
+        <dt><code>AWS_S3_KEY_PREFIX</code></dt>
         <dd>Prefix used when creating the S3 key where the document is stored, e.g., <code>draft/ag05/</code></dd>
       </dl>
 
@@ -1182,7 +1182,7 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       <figure id="figure-oidc-permissions">
         <pre data-include="snippets/oidc-permissions.json"></pre>
         <figcaption>Permissions granted to the role associated with each GitHub repository, where <code>&lt;name of
-        bucket&gt;</code> is replaced by <a><code>AWS_S3_BUCKET</code></a>.</figcaption>
+        bucket&gt;</code> is replaced by <code>AWS_S3_BUCKET</code>.</figcaption>
       </figure>
 
       <p>The bucket is made public using the policy at <a href="#figure-bucket-policy"></a>.</p>
@@ -1190,7 +1190,7 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       <figure id="figure-bucket-policy">
         <pre data-include="snippets/bucket-policy.json"></pre>
         <figcaption>Public bucket policy where <code>&lt;name of bucket&gt;</code> is replaced by
-        <a><code>AWS_S3_BUCKET</code></a></figcaption>
+        <code>AWS_S3_BUCKET</code></figcaption>
       </figure>
 
       <p>The contents of the bucket is also made available through a Cloudfront distribution, which allows the publication artifacts

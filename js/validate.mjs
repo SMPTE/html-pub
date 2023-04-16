@@ -58,60 +58,68 @@ export function smpteValidate(doc, logger) {
   validateBody(doc.body, logger);
 }
 
-
-
-const PHRASING_ELEMENTS = new Set([
-  "b",
-  "bdo",
-  "bdi",
-  "br",
-  "code",
-  "em",
-  "i",
-  "kbd",
-  "math",
-  "q",
-  "ruby",
-  "s",
-  "samp",
-  "span",
-  "strong",
-  "sub",
-  "sup",
-  "time",
-  "u",
-  "var",
-  "wbr",
-  "a"
-]);
-function validateGenericPhrasing(element, logger) {
-  return PHRASING_ELEMENTS.has(element.localName);
-}
-
-
-class ElementMatcher {
-  static match(elements, logger) {
-    if (elements.length === 0)
-      return false;
-
-    const r = this.match(elements[0], logger);
-
-    if (r)
-      elements.shift();
-
-    return r;
+class TerminalPhrasingMatcher {
+  constructor (localName) {
+    this.localName = localName;
   }
 
-  match(elements, logger) {
-    if (elements.length === 0)
+  match(element, logger) {
+    if (element.localName !== this.localName) 
       return false;
 
-    const r = this.match(elements[0], logger);
+    if (element.childElementCount > 0)
+      logger.error(`${element.outerHTML} cannot contain subelements`);
 
-    if (r)
-      elements.shift();
+    return true;
+  }
+}
 
-    return r;
+class MathMatcher {
+  static match(element, logger) {
+    if (element.localName !== "math") 
+      return false;
+
+    return true;
+  }
+}
+
+class SpanMatcher {
+  static match(element, logger) {
+    if (element.localName !== "span") 
+      return false;
+
+    return true;
+  }
+}
+
+const ALL_PHRASING_MATCHERS = [
+  new TerminalPhrasingMatcher("b"),
+  new TerminalPhrasingMatcher("bdo"),
+  new TerminalPhrasingMatcher("bdi"),
+  new TerminalPhrasingMatcher("br"),
+  new TerminalPhrasingMatcher("code"),
+  new TerminalPhrasingMatcher("dfn"),
+  new TerminalPhrasingMatcher("em"),
+  new TerminalPhrasingMatcher("i"),
+  new TerminalPhrasingMatcher("kbd"),
+  MathMatcher,
+  new TerminalPhrasingMatcher("q"),
+  /* "ruby", */
+  new TerminalPhrasingMatcher("s"),
+  new TerminalPhrasingMatcher("samp"),
+  SpanMatcher,
+  new TerminalPhrasingMatcher("strong"),
+  new TerminalPhrasingMatcher("sub"),
+  new TerminalPhrasingMatcher("sup"),
+  new TerminalPhrasingMatcher("time"),
+  new TerminalPhrasingMatcher("u"),
+  new TerminalPhrasingMatcher("var"),
+  new TerminalPhrasingMatcher("wbr"),
+  new TerminalPhrasingMatcher("a")
+];
+class PhrasingMatcher {
+  static match(element, logger) {
+    return ALL_PHRASING_MATCHERS.some(m => m.match(element, logger));
   }
 }
 
@@ -119,6 +127,11 @@ class PMatcher {
   static match(element, logger) {
     if (element.localName !== "p")
       return false;
+
+    for (const child of element.children) {
+      if (!PhrasingMatcher.match(child, logger))
+        logger.error(`Paragraph contains non-phrasing element ${child.localName}`);
+    }
 
     return true;
   }
@@ -229,31 +242,31 @@ class TableMatcher {
     if (element.localName !== "table")
       return false;
 
-    const children = element.children;
+    const children = Array.from(element.children);
 
     /* match caption */
 
-    if (children.length > 0 && CaptionMatcher.match(children[0]))
+    if (children.length > 0 && CaptionMatcher.match(children[0], logger))
       children.shift();
     else
       logger.error("Table is missing a caption element")
 
     /* match optional thead */
 
-    if (children.length > 0 && THeadMatcher.match(children[0]))
+    if (children.length > 0 && THeadMatcher.match(children[0], logger))
       children.shift();
 
     /* validate zero or more tbody */
 
     while (children.length > 0) {
-      if (!TBodyMatcher.match(children[0]))
+      if (!TBodyMatcher.match(children[0], logger))
         break;
       children.shift();
     }
 
     /* match optional tfoot */
 
-    if (children.length > 0 && TFootMatcher.match(children[0]))
+    if (children.length > 0 && TFootMatcher.match(children[0], logger))
       children.shift();
 
     /* are there unknown children */
@@ -392,12 +405,12 @@ class DefinitionsMatcher {
 
     /* validate optional additional elements */
 
-    if (children.length > 0 && ExternalDefinitionsMatcher.match(children[0]))
+    if (children.length > 0 && ExternalDefinitionsMatcher.match(children[0], logger))
       children.shift();
 
     /* validate optional bibliography */
 
-    if (children.length > 0 && InternalDefinitionsMatcher.match(children[0]))
+    if (children.length > 0 && InternalDefinitionsMatcher.match(children[0], logger))
       children.shift();
 
     /* are there unknown children */
@@ -420,6 +433,9 @@ class SectionMatcher {
     if (element.localName !== "section")
       return false;
 
+    if (element.id === null)
+      logger.error("Section element is missing an id attribute");
+
     const children = Array.from(element.children);
 
     /* check the header */
@@ -436,9 +452,9 @@ class SectionMatcher {
     const subClauseMatcher = new SectionMatcher(this.level + 1);
 
     while (children.length > 0) {
-      if (BlockMatcher.match(children[0])) {
+      if (BlockMatcher.match(children[0], logger)) {
         hasBlocks = true;
-      } else if (subClauseMatcher.match(children[0])) {
+      } else if (subClauseMatcher.match(children[0], logger)) {
         hasSubClauses = true;
       } else {
         logger.error("Unknown element in clause");
@@ -522,17 +538,17 @@ function validateBody(body, logger) {
 
   /* validate (optional) foreword */
 
-  if (elements.length > 0 && ForewordMatcher.match(elements[0]))
+  if (elements.length > 0 && ForewordMatcher.match(elements[0], logger))
     elements.shift();
 
   /* validate optional introduction */
 
-  if (elements.length > 0 && IntroductionMatcher.match(elements[0]))
+  if (elements.length > 0 && IntroductionMatcher.match(elements[0], logger))
     elements.shift();
 
   /* validate mandatory scope */
 
-  if (elements.length > 0 && ScopeMatcher.match(elements[0])) {
+  if (elements.length > 0 && ScopeMatcher.match(elements[0], logger)) {
     elements.shift();
   } else {
     logger.error("Mandatory Scope clause missing");
@@ -540,23 +556,23 @@ function validateBody(body, logger) {
 
   /* validate optional conformance */
 
-  if (elements.length > 0 && ConformanceMatcher.match(elements[0]))
+  if (elements.length > 0 && ConformanceMatcher.match(elements[0], logger))
     elements.shift();
 
   /* validate optional normative references */
 
-  if (elements.length > 0 && NormativeReferencesMatcher.match(elements[0]))
+  if (elements.length > 0 && NormativeReferencesMatcher.match(elements[0], logger))
     elements.shift();
 
   /* validate optional terms and definitions */
 
-  if (elements.length > 0 && DefinitionsMatcher.match(elements[0]))
+  if (elements.length > 0 && DefinitionsMatcher.match(elements[0], logger))
     elements.shift();
 
   /* validate zero or more clauses */
 
   while (elements.length > 0) {
-    if (!ClauseMatcher.match(elements[0]))
+    if (!ClauseMatcher.match(elements[0], logger))
       break;
     elements.shift();
   }
@@ -564,19 +580,19 @@ function validateBody(body, logger) {
   /* validate zero or more annexes */
 
   while (elements.length > 0) {
-    if (!AnnexMatcher.match(elements[0]))
+    if (!AnnexMatcher.match(elements[0], logger))
       break;
     elements.shift();
   }
 
   /* validate optional additional elements */
 
-  if (elements.length > 0 && ElementsAnnexMatcher.match(elements[0]))
+  if (elements.length > 0 && ElementsAnnexMatcher.match(elements[0], logger))
     elements.shift();
 
   /* validate optional bibliography */
 
-  if (elements.length > 0 && BibliographyMatcher.match(elements[0]))
+  if (elements.length > 0 && BibliographyMatcher.match(elements[0], logger))
     elements.shift();
 
   /* are there unknown elements */
