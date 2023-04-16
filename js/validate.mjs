@@ -58,23 +58,7 @@ export function smpteValidate(doc, logger) {
   validateBody(doc.body, logger);
 }
 
-function matchSequence(v_seq) {
-  return function (elems, logger) {
-    for (const v of v_seq) {
-      const r = v(elems, logger);
 
-      if (! r) {
-        return false;
-      }
-    }
-
-    if (elems.length !== 0) {
-      return false;
-    }
-
-    return true;
-  }
-}
 
 const PHRASING_ELEMENTS = new Set([
   "b",
@@ -104,90 +88,239 @@ function validateGenericPhrasing(element, logger) {
   return PHRASING_ELEMENTS.has(element.localName);
 }
 
-function matchBlocks() {
-  return matchZeroOrMore(
-    matchOneOf([
-      matchOne(validateP),
-      matchOne(validateDiv),
-      matchOne(validateUl),
-      matchOne(validateOl),
-      matchOne(validateDl),
-      matchOne(validatePre),
-      matchOne(validateFigure),
-      matchOne(validateAside),
-      matchOne(validateTable)
-    ])
-  );
+
+
+class SequenceMatcher {
+  constructor (v_seq) {
+    this.v_seq = v_seq;
+    this.description = this.v_seq.map(e => e.description).join(" ");
+  }
+
+  match(elems, logger) {
+    for (const v of this.v_seq) {
+      const r = v.match(elems, logger);
+
+      if (! r) {
+        if (logger !== null)
+          logger.error(`Expected ${v.description}`);
+        return false;
+      }
+    }
+
+    if (elems.length !== 0) {
+      if (logger !== null)
+        logger.error(`Sequence ${this.description} matching failed at ${elems[0].id}`);
+      return false;
+    }
+
+    return true;
+  }
 }
 
-function validateP(element, logger) {
-  if (element.localName !== "p")
+class RepeatElementMatcher {
+  constructor (v, minCount, maxCount) {
+    this.v = v;
+    this.minCount = minCount;
+    this.maxCount = maxCount;
+    this.description = `${v.name}{${minCount},${maxCount}}`;
+  }
+
+  match(elems, logger) {
+    let count = 0;
+
+    while (elems.length > 0) {
+      const r = this.v.match(elems, null);
+
+      if (!r)
+        break;
+
+      count++;
+    }
+
+    if (count < this.minCount || count > this.maxCount) {
+      if (logger !== null)
+        logger.error(`Incorrect element count`);
+      return false;
+    }
+
+    return true;
+  }
+}
+
+class OneOfMatcher {
+  constructor (m_list) {
+    this.m_list = m_list;
+  }
+
+  match(elems, logger) {
+    for (const m of this.m_list) {
+      if (m.match(Array.from(elems), null))
+        return true;
+    }
     return false;
-
-  return true;
+  }
 }
 
-function validateDiv(element, logger) {
-  if (element.localName !== "div")
-    return false;
-
-  return true;
+class OptionalElementMatcher extends RepeatElementMatcher {
+  constructor (v) {
+    super(v, 0, 1);
+  }
 }
 
-function validateUl(element, logger) {
-  if (element.localName !== "ul")
-    return false;
-
-  return true;
+class OneOrMoreElementMatcher extends RepeatElementMatcher {
+  constructor (v) {
+    super(v, 1, Number.MAX_SAFE_INTEGER);
+  }
 }
 
-function validateOl(element, logger) {
-  if (element.localName !== "ol")
-    return false;
 
-  return true;
+class ZeroOrMoreElementMatcher extends RepeatElementMatcher {
+  constructor (v) {
+    super(v, 0, Number.MAX_SAFE_INTEGER);
+  }
 }
 
-function validateDl(element, logger) {
-  if (element.localName !== "dl")
-    return false;
-
-  return true;
+class OneElementMatcher extends RepeatElementMatcher {
+  constructor (v) {
+    super(v, 1, 1);
+  }
 }
 
-function validatePre(element, logger) {
-  if (element.localName !== "pre")
-    return false;
+class ElementMatcher {
+  static match(elements, logger) {
+    if (elements.length === 0)
+      return false;
 
-  return true;
+    const r = this.matchElement(elements[0], logger);
+
+    if (r)
+      elements.shift();
+
+    return r;
+  }
+
+  match(elements, logger) {
+    if (elements.length === 0)
+      return false;
+
+    const r = this.matchElement(elements[0], logger);
+
+    if (r)
+      elements.shift();
+
+    return r;
+  }
 }
 
-function validateFigure(element, logger) {
-  if (element.localName !== "figure")
-    return false;
+class PMatcher extends ElementMatcher {
+  static matchElement(element, logger) {
+    if (element.localName !== "p")
+      return false;
 
-  return true;
+    return true;
+  }
 }
 
-function validateAside(element, logger) {
-  if (element.localName !== "aside")
-    return false;
+class DivMatcher extends ElementMatcher {
+  static matchElement(element, logger) {
+    if (element.localName !== "div")
+      return false;
 
-  return true;
+    return true;
+  }
 }
 
-function validateTable(element, logger) {
-  if (element.localName !== "table")
-    return false;
+class UlMatcher extends ElementMatcher {
+  static matchElement(element, logger) {
+    if (element.localName !== "ul")
+      return false;
 
-  return matchSequence(
-    [
-      validateCaption,
-      matchOptional(validateTHead),
-      matchOneOrMore(validateTBody),
-      matchOptional(validateTFooter),
-    ])(Array.from(element.children), logger);
+    return true;
+  }
 }
+
+class OlMatcher extends ElementMatcher {
+  static matchElement(element, logger) {
+    if (element.localName !== "ol")
+      return false;
+
+    return true;
+  }
+}
+
+class DlMatcher extends ElementMatcher {
+  static matchElement(element, logger) {
+    if (element.localName !== "dl")
+      return false;
+
+    return true;
+  }
+}
+
+class PreMatcher extends ElementMatcher {
+  static description = "pre";
+
+  static matchElement(element, logger) {
+    if (element.localName !== "pre")
+      return false;
+
+    return true;
+  }
+}
+
+class FigureMatcher extends ElementMatcher {
+  static description = "figure";
+
+  static matchElement(element, logger) {
+    if (element.localName !== "figure")
+      return false;
+
+    return true;
+  }
+}
+
+class AsideMatcher extends ElementMatcher {
+  static description = "aside";
+
+  static matchElement(element, logger) {
+    if (element.localName !== "aside")
+      return false;
+
+    return true;
+  }
+}
+
+class TableMatcher extends ElementMatcher {
+  static description = "table";
+
+  static matchElement(element, logger) {
+    if (element.localName !== "table")
+      return false;
+
+      const m = new SequenceMatcher([
+        new OneElementMatcher(validateCaption),
+        new OptionalElementMatcher(validateTHead),
+        new ZeroOrMoreElementMatcher(validateTBody),
+        new OptionalElementMatcher(validateTFooter)
+      ]);
+
+      return m.match(element.children, logger);
+  }
+}
+
+
+const BLOCK_ELEMENT_MATCHER = new OneOfMatcher([
+  PMatcher,
+  DivMatcher,
+  UlMatcher,
+  OlMatcher,
+  DlMatcher,
+  PreMatcher,
+  FigureMatcher,
+  AsideMatcher,
+  TableMatcher
+]);
+
 
 function validateCaption(element, logger) {
   if (element.localName !== "caption")
@@ -217,108 +350,37 @@ function validateTFooter(element, logger) {
   return true;
 }
 
-class RepeatMatcher {
-  constructor (v, minCount, maxCount) {
-    this.v = v;
-    this.minCount = minCount;
-    this.maxCount = maxCount;
-  }
+class ForewordMatcher extends ElementMatcher {
+  static description = "foreword section";
 
-  match(elements, logger) {
-    let count = 0;
-
-    while (elems.length > 0) {
-      const r = v(elems[0], null);
-
-      if (!r)
-        break;
-
-      count++;
-      elems.shift();
-    }
-
-    if (count < minCount || count > maxCount) {
-      if (logger !== null)
-        logger.error(`Incorrect element count`);
-      return false;
-    }
-
-    return true;
+  static matchElement(e, logger)  {
+    return e.localName === "section" && e.id === "sec-foreword";
   }
 }
 
-function matchRepeat(v, minCount, maxCount) {
-  return function(elems, logger) {
-    let count = 0;
+class IntroductionMatcher extends ElementMatcher {
+  static description = "introduction section";
 
-    while (elems.length > 0) {
-      const r = v(elems[0], null);
-
-      if (!r)
-        break;
-
-      count++;
-      elems.shift();
-    }
-
-    if (count < minCount || count > maxCount) {
-      if (logger !== null)
-        logger.error(`Incorrect element count`);
-      return false;
-    }
-
-    return true;
+  static matchElement(e, logger)  {
+    return e.localName === "section" && e.id === "sec-introduction";
   }
 }
 
-function matchOneOf(v_list) {
-  return function(elems, logger) {
-    for (const v of v_list) {
-      if (v(Array.from(elems), null))
-        return true;
-    }
-    return false;
-  };
+class ScopeMatcher extends ElementMatcher {
+  static description = "scope section";
+
+  static matchElement(e, logger)  {
+    return e.localName === "section" && e.id === "sec-scope";
+  }
 }
 
-function matchOptional(v) {
-  const f = matchRepeat(v, 0, 1);
-  f._description = `${v._description}?`
-  return f;
-}
 
-function matchOneOrMore(v) {
-  const f = matchRepeat(v, 1, Number.MAX_SAFE_INTEGER);
-  f._description = `${v._description}+`
-  return f;
-}
+class ConformanceMatcher extends ElementMatcher {
+  static description = "conformance section";
 
-function matchZeroOrMore(v) {
-  const f = matchRepeat(v, 0, Number.MAX_SAFE_INTEGER);
-  f._description = `${v._description}*`
-  return f;
-}
-
-function matchOne(v) {
-  const f = matchRepeat(v, 1, 1);
-  f._description = `${v._description}`
-  return f;
-}
-
-function validateForeword(e, logger) {
-  return e.localName === "section" && e.id === "sec-foreword";
-}
-
-function validateIntroduction(e, logger) {
-  return e.localName === "section" && e.id === "sec-introduction";
-}
-
-function validateScope(e, logger) {
-  return e.localName === "section" && e.id === "sec-scope";
-}
-
-function validateConformance(e, logger) {
-  return e.localName === "section" && e.id === "sec-conformance";
+  static matchElement(e, logger)  {
+    return e.localName === "section" && e.id === "sec-conformance";
+  }
 }
 
 function validateReferences(e, prefix, logger) {
@@ -346,170 +408,185 @@ function validateReferences(e, prefix, logger) {
   }
 }
 
-function validateNormRefs(e, logger) {
-  if (e.id !== "sec-normative-references")
-    return false;
 
-  validateReferences(e, "Normative references", logger);
+class NormativeReferencesMatcher extends ElementMatcher {
+  static description = "normative references";
 
-  return true;
+  static matchElement(e, logger)  {
+    if (e.id !== "sec-normative-references")
+      return false;
+
+    validateReferences(e, "Normative references", logger);
+
+    return true;
+  }
 }
 
-function validateExternalDefs(e, logger) {
-  if (e.localName !== "ul" || e.id !== "terms-ext-defs")
-    return false;
 
-  for (const li of e.children) {
-    if (li.localName === "li") {
-      if (li.childElementCount !== 1 || li.firstElementChild.localName !== "a") {
-        logger.error(`External definitions: each <li> element must contain exactly one <a> element.`);
+class ExternalDefinitionsMatcher extends ElementMatcher {
+  static description = "internal terms and definitions";
+
+  static matchElement(e, logger) {
+    if (e.localName !== "ul" || e.id !== "terms-ext-defs")
+      return false;
+
+    for (const li of e.children) {
+      if (li.localName === "li") {
+        if (li.childElementCount !== 1 || li.firstElementChild.localName !== "a") {
+          logger.error(`External definitions: each <li> element must contain exactly one <a> element.`);
+        }
+      } else {
+        logger.error(`External definitions: the <ul> element must contain only <li> elements.`);
       }
-    } else {
-      logger.error(`External definitions: the <ul> element must contain only <li> elements.`);
     }
-  }
 
-  return true;
-}
-
-function validateInternalDefs(e, logger) {
-  if (e.localName !== "dl" || e.id !== "terms-int-defs")
-    return false;
-
-  return true;
-}
-
-function validateDefs(e, logger) {
-  if (e.localName !== "section" || e.id !== "sec-terms-and-definitions")
-    return false;
-
-  return matchSequence(
-    [
-      matchOptional(validateExternalDefs),
-      matchOptional(validateInternalDefs),
-    ])(Array.from(e.children), logger);
-}
-
-function makeValidateHeading(lvl) {
-  return function (element, logger) {
-    return element.localName === `h${lvl}`;
+    return true;
   }
 }
 
-function makeValidateClause(lvl) {
-  return function validateClause(element, logger) {
+
+class InternalDefinitionsMatcher extends ElementMatcher {
+  static description = "internal terms and definitions";
+
+  static matchElement(e, logger) {
+    if (e.localName !== "dl" || e.id !== "terms-int-defs")
+      return false;
+
+    return true;
+  }
+}
+
+
+class DefinitionsMatcher extends ElementMatcher {
+  static description = "terms and definitions";
+
+  static matchElement(e, logger) {
+    if (e.localName !== "section" || e.id !== "sec-terms-and-definitions")
+      return false;
+
+    const m = new SequenceMatcher([
+      new OptionalElementMatcher(ExternalDefinitionsMatcher),
+      new OptionalElementMatcher(InternalDefinitionsMatcher),
+    ]);
+
+    return m;
+  }
+}
+
+class HeadingMatcher extends ElementMatcher {
+  constructor (level) {
+    super();
+    this.level = level;
+    this.description = `Heading Level ${this.level}`;
+  }
+
+  matchElement(element, logger) {
+    return element.localName === `h${this.level}`;
+  }
+}
+
+class ClauseElementMatcher extends ElementMatcher {
+  constructor (level) {
+    super();
+    this.level = level;
+  }
+
+  matchElement(element, logger) {
     if (element.localName !== "section")
       return false;
 
-    if (element.classList.contains("annex") || element.id === "sec-bibliography" || element.id === "sec-elements")
+    const m = new SequenceMatcher([
+      new HeadingMatcher(this.level),
+      new OneOfMatcher([
+        new OneOrMoreElementMatcher(new ClauseElementMatcher(this.level + 1)),
+        new ZeroOrMoreElementMatcher(BLOCK_ELEMENT_MATCHER)
+      ])
+    ]);
+
+    return m.match(Array.from(element.children), logger);
+  }
+}
+
+class ClauseMatcher  extends ElementMatcher {
+  static description = "clause";
+
+  static matchElement(e, logger) {
+    if (e.classList.contains("annex") || e.id === "sec-bibliography" || e.id === "sec-elements")
       return false;
 
-    return matchSequence([
-      matchOne(makeValidateHeading(lvl)),
-      matchOneOf(
-        [
-          matchOneOrMore(makeValidateClause(lvl + 1)),
-          matchBlocks
-        ]
-      )
-    ])(Array.from(element.children), logger);
-  };
-}
-
-function _validateClause(e, lvl, logger) {
-
-  let containsSection = false;
-  let containsNonSection = false;
-
-  for (let i = 0; i < e.childElementCount; i++) {
-    const child = e.children[i];
-
-    if (i == 0) {
-      if (child.localName === `h${lvl}`)
-        continue;
-      logger.error(`Section ${e.id} is missing a heading <h${lvl}>.`);
-    }
-
-    if (child.localName === "section") {
-      containsSection = true;
-
-      _validateClause(child, lvl + 1 , logger)
-    } else {
-      containsNonSection = true;
-    }
+    const m = new ClauseElementMatcher(2);
+    return m.matchElement(e, logger);
   }
-
-  if (containsSection && containsNonSection)
-    logger.error(`Section ${e.id} combines section and non-section content.`);
-
 }
 
-function validateClause(e, logger) {
-  /*if (e.classList.contains("annex") || e.id === "sec-bibliography" || e.id === "sec-elements")
-    return false;*/
+class AnnexMatcher extends ElementMatcher {
+  static description = "annex";
 
-  //_validateClause(e, 2, logger);
+  static matchElement(e, logger) {
+    if (e.localName !== "section" || !e.classList.contains("annex"))
+      return false;
 
-  return makeValidateClause(2)(e, logger);
+    const m = new ClauseElementMatcher(2);
+    return m.matchElement(e, logger);
+  }
 }
 
-function validateAnnex(e, logger) {
-  if (e.localName !== "section" || !e.classList.contains("annex"))
-    return false;
+class ElementsAnnexMatcher extends ElementMatcher {
+  static description = "additional elements annex";
 
-  _validateClause(e, 2, logger);
+  static matchElement(e, logger) {
+    if (e.localName !== "section" || e.id !== "sec-elements")
+      return false;
 
-  return true;
-}
-
-function validateElementsAnnex(e, logger) {
-  if (e.localName !== "section" || e.id !== "sec-elements")
-    return false;
-
-  if (e.childElementCount === 1 && e.firstElementChild.localName === "ol") {
-    for (const li of e.firstElementChild.children) {
-      if (li.localName === "li") {
-        if (li.firstElementChild.localName !== "a" || !li.firstElementChild.id || li.childElementCount !== 1 || !li.firstElementChild.title || !li.firstElementChild.href) {
-          logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes.`);
+    if (e.childElementCount === 1 && e.firstElementChild.localName === "ol") {
+      for (const li of e.firstElementChild.children) {
+        if (li.localName === "li") {
+          if (li.firstElementChild.localName !== "a" || !li.firstElementChild.id || li.childElementCount !== 1 || !li.firstElementChild.title || !li.firstElementChild.href) {
+            logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes.`);
+            return false;
+          }
+        } else {
+          logger.error(`The <ol> element of the Elements Annex must contain only <li> elements`);
           return false;
         }
-      } else {
-        logger.error(`The <ol> element of the Elements Annex must contain only <li> elements`);
-        return false;
       }
+    } else {
+      logger.error(`The Elements Annex section must contain a single <ol> element.`);
+      return false;
     }
-  } else {
-    logger.error(`The Elements Annex section must contain a single <ol> element.`);
-    return false;
+
+    return true;
   }
-
-  return true;
 }
 
-function validateBibliography(e, logger) {
-  if (e.id !== "sec-bibliography")
-    return false;
+class BibliographyMatcher extends ElementMatcher {
+  static description = "bibliography";
 
-  validateReferences(e, "Bibliography references", logger);
+  static matchElement(e, logger)  {
+    if (e.id !== "sec-bibliography")
+      return false;
 
-  return true;
+    validateReferences(e, "Bibliography references", logger);
+
+    return true;
+  }
 }
-
 
 function validateBody(body, logger) {
-  const r = matchSequence(
-    [
-      matchOptional(validateForeword),
-      matchOptional(validateIntroduction),
-      matchOne(validateScope),
-      matchOptional(validateConformance),
-      matchOptional(validateNormRefs),
-      matchOptional(validateDefs),
-      matchZeroOrMore(validateClause),
-      matchZeroOrMore(validateAnnex),
-      matchOptional(validateElementsAnnex),
-      matchOptional(validateBibliography),
-    ])(Array.from(body.children), logger);
+  const m = new SequenceMatcher([
+      new OptionalElementMatcher(ForewordMatcher),
+      new OptionalElementMatcher(IntroductionMatcher),
+      ScopeMatcher,
+      new OptionalElementMatcher(ConformanceMatcher),
+      new OptionalElementMatcher(NormativeReferencesMatcher),
+      new OptionalElementMatcher(DefinitionsMatcher),
+      new ZeroOrMoreElementMatcher(ClauseMatcher),
+      new ZeroOrMoreElementMatcher(AnnexMatcher),
+      new OptionalElementMatcher(ElementsAnnexMatcher),
+      new OptionalElementMatcher(BibliographyMatcher),
+  ]);
+
+  const r = m.match(Array.from(body.children), logger);
 
   if (!r && logger !== null)
     logger.error("Invalid body");
