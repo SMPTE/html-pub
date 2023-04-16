@@ -38,11 +38,11 @@ export class ErrorLogger {
     this.errors_.push(msg);
   }
 
-  warn(msg) {}
+  warn(msg) { }
 
-  log(msg) {}
+  log(msg) { }
 
-  info(msg) {}
+  info(msg) { }
 
   hasFailed() {
     return this.hasFailed_;
@@ -94,7 +94,7 @@ class ElementMatcher {
     if (elements.length === 0)
       return false;
 
-    const r = this.matchElement(elements[0], logger);
+    const r = this.match(elements[0], logger);
 
     if (r)
       elements.shift();
@@ -106,7 +106,7 @@ class ElementMatcher {
     if (elements.length === 0)
       return false;
 
-    const r = this.matchElement(elements[0], logger);
+    const r = this.match(elements[0], logger);
 
     if (r)
       elements.shift();
@@ -115,8 +115,8 @@ class ElementMatcher {
   }
 }
 
-class PMatcher extends ElementMatcher {
-  static matchElement(element, logger) {
+class PMatcher {
+  static match(element, logger) {
     if (element.localName !== "p")
       return false;
 
@@ -124,8 +124,8 @@ class PMatcher extends ElementMatcher {
   }
 }
 
-class DivMatcher extends ElementMatcher {
-  static matchElement(element, logger) {
+class DivMatcher {
+  static match(element, logger) {
     if (element.localName !== "div")
       return false;
 
@@ -133,8 +133,8 @@ class DivMatcher extends ElementMatcher {
   }
 }
 
-class UlMatcher extends ElementMatcher {
-  static matchElement(element, logger) {
+class UlMatcher {
+  static match(element, logger) {
     if (element.localName !== "ul")
       return false;
 
@@ -142,8 +142,8 @@ class UlMatcher extends ElementMatcher {
   }
 }
 
-class OlMatcher extends ElementMatcher {
-  static matchElement(element, logger) {
+class OlMatcher {
+  static match(element, logger) {
     if (element.localName !== "ol")
       return false;
 
@@ -151,8 +151,8 @@ class OlMatcher extends ElementMatcher {
   }
 }
 
-class DlMatcher extends ElementMatcher {
-  static matchElement(element, logger) {
+class DlMatcher {
+  static match(element, logger) {
     if (element.localName !== "dl")
       return false;
 
@@ -160,8 +160,8 @@ class DlMatcher extends ElementMatcher {
   }
 }
 
-class PreMatcher extends ElementMatcher {
-  static matchElement(element, logger) {
+class PreMatcher {
+  static match(element, logger) {
     if (element.localName !== "pre")
       return false;
 
@@ -169,8 +169,8 @@ class PreMatcher extends ElementMatcher {
   }
 }
 
-class FigureMatcher extends ElementMatcher {
-  static matchElement(element, logger) {
+class FigureMatcher {
+  static match(element, logger) {
     if (element.localName !== "figure")
       return false;
 
@@ -178,8 +178,8 @@ class FigureMatcher extends ElementMatcher {
   }
 }
 
-class AsideMatcher extends ElementMatcher {
-  static matchElement(element, logger) {
+class AsideMatcher {
+  static match(element, logger) {
     if (element.localName !== "aside")
       return false;
 
@@ -188,7 +188,7 @@ class AsideMatcher extends ElementMatcher {
 }
 
 class CaptionMatcher {
-  static matchElement(element, logger) {
+  static match(element, logger) {
     if (element.localName !== "caption")
       return false;
 
@@ -197,7 +197,7 @@ class CaptionMatcher {
 }
 
 class THeadMatcher {
-  static matchElement(element, logger) {
+  static match(element, logger) {
     if (element.localName !== "thead")
       return false;
 
@@ -206,7 +206,7 @@ class THeadMatcher {
 }
 
 class TBodyMatcher {
-  static matchElement(element, logger) {
+  static match(element, logger) {
     if (element.localName !== "tbody")
       return false;
 
@@ -215,7 +215,7 @@ class TBodyMatcher {
 }
 
 class TFootMatcher {
-  static matchElement(element, logger) {
+  static match(element, logger) {
     if (element.localName !== "tfoot")
       return false;
 
@@ -223,10 +223,9 @@ class TFootMatcher {
   }
 }
 
-class TableMatcher extends ElementMatcher {
-  static description = "table";
+class TableMatcher {
 
-  static matchElement(element, logger) {
+  static match(element, logger) {
     if (element.localName !== "table")
       return false;
 
@@ -234,27 +233,27 @@ class TableMatcher extends ElementMatcher {
 
     /* match caption */
 
-    if (children.length > 0 && CaptionMatcher.matchElement(children[0]))
+    if (children.length > 0 && CaptionMatcher.match(children[0]))
       children.shift();
     else
       logger.error("Table is missing a caption element")
 
     /* match optional thead */
 
-    if (children.length > 0 && THeadMatcher.matchElement(children[0]))
+    if (children.length > 0 && THeadMatcher.match(children[0]))
       children.shift();
 
     /* validate zero or more tbody */
 
     while (children.length > 0) {
-      if (!TBodyMatcher.matchElement(children[0]))
+      if (!TBodyMatcher.match(children[0]))
         break;
       children.shift();
     }
 
     /* match optional tfoot */
 
-    if (children.length > 0 && TFootMatcher.matchElement(children[0]))
+    if (children.length > 0 && TFootMatcher.match(children[0]))
       children.shift();
 
     /* are there unknown children */
@@ -280,43 +279,38 @@ const BLOCK_ELEMENT_MATCHER = [
   TableMatcher
 ];
 
-class BlockMatcher extends ElementMatcher {
-  static description = "block";
+class BlockMatcher {
 
-  static matchElement(element, logger) {
-    return BLOCK_ELEMENT_MATCHER.some(e => e.matchElement(element, logger));
+  static match(element, logger) {
+    return BLOCK_ELEMENT_MATCHER.some(e => e.match(element, logger));
   }
 }
 
-class ForewordMatcher extends ElementMatcher {
-  static description = "foreword section";
+class ForewordMatcher {
 
-  static matchElement(e, logger)  {
+  static match(e, logger) {
     return e.localName === "section" && e.id === "sec-foreword";
   }
 }
 
-class IntroductionMatcher extends ElementMatcher {
-  static description = "introduction section";
+class IntroductionMatcher {
 
-  static matchElement(e, logger)  {
+  static match(e, logger) {
     return e.localName === "section" && e.id === "sec-introduction";
   }
 }
 
-class ScopeMatcher extends ElementMatcher {
-  static description = "scope section";
+class ScopeMatcher {
 
-  static matchElement(e, logger)  {
+  static match(e, logger) {
     return e.localName === "section" && e.id === "sec-scope";
   }
 }
 
 
-class ConformanceMatcher extends ElementMatcher {
-  static description = "conformance section";
+class ConformanceMatcher {
 
-  static matchElement(e, logger)  {
+  static match(e, logger) {
     return e.localName === "section" && e.id === "sec-conformance";
   }
 }
@@ -328,7 +322,7 @@ function validateReferences(e, prefix, logger) {
         const cites = li.querySelectorAll("cite");
 
         if (cites.length === 1) {
-          if (! cites[0].id)
+          if (!cites[0].id)
             logger.error(`${prefix}: each <cite> element must contain an id attribute.`);
         } else {
           logger.error(`${prefix}: each <li> element must contain a single <cite> element.`);
@@ -347,10 +341,8 @@ function validateReferences(e, prefix, logger) {
 }
 
 
-class NormativeReferencesMatcher extends ElementMatcher {
-  static description = "normative references";
-
-  static matchElement(e, logger)  {
+class NormativeReferencesMatcher {
+  static match(e, logger) {
     if (e.id !== "sec-normative-references")
       return false;
 
@@ -361,10 +353,8 @@ class NormativeReferencesMatcher extends ElementMatcher {
 }
 
 
-class ExternalDefinitionsMatcher extends ElementMatcher {
-  static description = "internal terms and definitions";
-
-  static matchElement(e, logger) {
+class ExternalDefinitionsMatcher {
+  static match(e, logger) {
     if (e.localName !== "ul" || e.id !== "terms-ext-defs")
       return false;
 
@@ -383,8 +373,8 @@ class ExternalDefinitionsMatcher extends ElementMatcher {
 }
 
 
-class InternalDefinitionsMatcher extends ElementMatcher {
-  static matchElement(e, logger) {
+class InternalDefinitionsMatcher {
+  static match(e, logger) {
     if (e.localName !== "dl" || e.id !== "terms-int-defs")
       return false;
 
@@ -393,8 +383,8 @@ class InternalDefinitionsMatcher extends ElementMatcher {
 }
 
 
-class DefinitionsMatcher extends ElementMatcher {
-  static matchElement(element, logger) {
+class DefinitionsMatcher {
+  static match(element, logger) {
     if (element.localName !== "section" || element.id !== "sec-terms-and-definitions")
       return false;
 
@@ -402,12 +392,12 @@ class DefinitionsMatcher extends ElementMatcher {
 
     /* validate optional additional elements */
 
-    if (children.length > 0 && ExternalDefinitionsMatcher.matchElement(children[0]))
+    if (children.length > 0 && ExternalDefinitionsMatcher.match(children[0]))
       children.shift();
 
     /* validate optional bibliography */
 
-    if (children.length > 0 && InternalDefinitionsMatcher.matchElement(children[0]))
+    if (children.length > 0 && InternalDefinitionsMatcher.match(children[0]))
       children.shift();
 
     /* are there unknown children */
@@ -421,13 +411,12 @@ class DefinitionsMatcher extends ElementMatcher {
   }
 }
 
-class SectionMatcher extends ElementMatcher {
-  constructor (level) {
-    super();
+class SectionMatcher {
+  constructor(level) {
     this.level = level;
   }
 
-  matchElement(element, logger) {
+  match(element, logger) {
     if (element.localName !== "section")
       return false;
 
@@ -447,9 +436,9 @@ class SectionMatcher extends ElementMatcher {
     const subClauseMatcher = new SectionMatcher(this.level + 1);
 
     while (children.length > 0) {
-      if (BlockMatcher.matchElement(children[0])) {
+      if (BlockMatcher.match(children[0])) {
         hasBlocks = true;
-      } else if (subClauseMatcher.matchElement(children[0])) {
+      } else if (subClauseMatcher.match(children[0])) {
         hasSubClauses = true;
       } else {
         logger.error("Unknown element in clause");
@@ -464,34 +453,31 @@ class SectionMatcher extends ElementMatcher {
   }
 }
 
-class ClauseMatcher  extends ElementMatcher {
-  static description = "clause";
+class ClauseMatcher {
 
-  static matchElement(e, logger) {
+  static match(e, logger) {
     if (e.classList.contains("annex") || e.id === "sec-bibliography" || e.id === "sec-elements")
       return false;
 
     const m = new SectionMatcher(2);
-    return m.matchElement(e, logger);
+    return m.match(e, logger);
   }
 }
 
-class AnnexMatcher extends ElementMatcher {
-  static description = "annex";
+class AnnexMatcher {
 
-  static matchElement(e, logger) {
+  static match(e, logger) {
     if (!e.classList.contains("annex"))
       return false;
 
     const m = new SectionMatcher(2);
-    return m.matchElement(e, logger);
+    return m.match(e, logger);
   }
 }
 
-class ElementsAnnexMatcher extends ElementMatcher {
-  static description = "additional elements annex";
+class ElementsAnnexMatcher {
 
-  static matchElement(e, logger) {
+  static match(e, logger) {
     if (e.localName !== "section" || e.id !== "sec-elements")
       return false;
 
@@ -516,10 +502,9 @@ class ElementsAnnexMatcher extends ElementMatcher {
   }
 }
 
-class BibliographyMatcher extends ElementMatcher {
-  static description = "bibliography";
+class BibliographyMatcher {
 
-  static matchElement(e, logger)  {
+  static match(e, logger) {
     if (e.id !== "sec-bibliography")
       return false;
 
@@ -537,41 +522,41 @@ function validateBody(body, logger) {
 
   /* validate (optional) foreword */
 
-  if (elements.length > 0 && ForewordMatcher.matchElement(elements[0]))
+  if (elements.length > 0 && ForewordMatcher.match(elements[0]))
     elements.shift();
 
   /* validate optional introduction */
 
-  if (elements.length > 0 && IntroductionMatcher.matchElement(elements[0]))
+  if (elements.length > 0 && IntroductionMatcher.match(elements[0]))
     elements.shift();
 
   /* validate mandatory scope */
 
-  if (elements.length > 0 && ScopeMatcher.matchElement(elements[0])) {
-      elements.shift();
+  if (elements.length > 0 && ScopeMatcher.match(elements[0])) {
+    elements.shift();
   } else {
     logger.error("Mandatory Scope clause missing");
   }
 
   /* validate optional conformance */
 
-  if (elements.length > 0 && ConformanceMatcher.matchElement(elements[0]))
+  if (elements.length > 0 && ConformanceMatcher.match(elements[0]))
     elements.shift();
 
   /* validate optional normative references */
 
-  if (elements.length > 0 && NormativeReferencesMatcher.matchElement(elements[0]))
+  if (elements.length > 0 && NormativeReferencesMatcher.match(elements[0]))
     elements.shift();
 
   /* validate optional terms and definitions */
 
-  if (elements.length > 0 && DefinitionsMatcher.matchElement(elements[0]))
+  if (elements.length > 0 && DefinitionsMatcher.match(elements[0]))
     elements.shift();
 
   /* validate zero or more clauses */
 
   while (elements.length > 0) {
-    if (! ClauseMatcher.matchElement(elements[0]))
+    if (!ClauseMatcher.match(elements[0]))
       break;
     elements.shift();
   }
@@ -579,19 +564,19 @@ function validateBody(body, logger) {
   /* validate zero or more annexes */
 
   while (elements.length > 0) {
-    if (! AnnexMatcher.matchElement(elements[0]))
+    if (!AnnexMatcher.match(elements[0]))
       break;
     elements.shift();
   }
 
   /* validate optional additional elements */
 
-  if (elements.length > 0 && ElementsAnnexMatcher.matchElement(elements[0]))
+  if (elements.length > 0 && ElementsAnnexMatcher.match(elements[0]))
     elements.shift();
 
   /* validate optional bibliography */
 
-  if (elements.length > 0 && BibliographyMatcher.matchElement(elements[0]))
+  if (elements.length > 0 && BibliographyMatcher.match(elements[0]))
     elements.shift();
 
   /* are there unknown elements */
