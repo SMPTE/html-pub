@@ -89,103 +89,6 @@ function validateGenericPhrasing(element, logger) {
 }
 
 
-
-class SequenceMatcher {
-  constructor (v_seq) {
-    this.v_seq = v_seq;
-    this.description = this.v_seq.map(e => e.description).join(" ");
-  }
-
-  match(elems, logger) {
-    for (const v of this.v_seq) {
-      const r = v.match(elems, logger);
-
-      if (! r) {
-        if (logger !== null)
-          logger.error(`Expected ${v.description}`);
-        return false;
-      }
-    }
-
-    if (elems.length !== 0) {
-      if (logger !== null)
-        logger.error(`Sequence ${this.description} matching failed at ${elems[0].id}`);
-      return false;
-    }
-
-    return true;
-  }
-}
-
-class RepeatElementMatcher {
-  constructor (v, minCount, maxCount) {
-    this.v = v;
-    this.minCount = minCount;
-    this.maxCount = maxCount;
-    this.description = `${v.name}{${minCount},${maxCount}}`;
-  }
-
-  match(elems, logger) {
-    let count = 0;
-
-    while (elems.length > 0) {
-      const r = this.v.match(elems, null);
-
-      if (!r)
-        break;
-
-      count++;
-    }
-
-    if (count < this.minCount || count > this.maxCount) {
-      if (logger !== null)
-        logger.error(`Incorrect element count`);
-      return false;
-    }
-
-    return true;
-  }
-}
-
-class OneOfMatcher {
-  constructor (m_list) {
-    this.m_list = m_list;
-  }
-
-  match(elems, logger) {
-    for (const m of this.m_list) {
-      if (m.match(Array.from(elems), null))
-        return true;
-    }
-    return false;
-  }
-}
-
-class OptionalElementMatcher extends RepeatElementMatcher {
-  constructor (v) {
-    super(v, 0, 1);
-  }
-}
-
-class OneOrMoreElementMatcher extends RepeatElementMatcher {
-  constructor (v) {
-    super(v, 1, Number.MAX_SAFE_INTEGER);
-  }
-}
-
-
-class ZeroOrMoreElementMatcher extends RepeatElementMatcher {
-  constructor (v) {
-    super(v, 0, Number.MAX_SAFE_INTEGER);
-  }
-}
-
-class OneElementMatcher extends RepeatElementMatcher {
-  constructor (v) {
-    super(v, 1, 1);
-  }
-}
-
 class ElementMatcher {
   static match(elements, logger) {
     if (elements.length === 0)
@@ -258,8 +161,6 @@ class DlMatcher extends ElementMatcher {
 }
 
 class PreMatcher extends ElementMatcher {
-  static description = "pre";
-
   static matchElement(element, logger) {
     if (element.localName !== "pre")
       return false;
@@ -269,8 +170,6 @@ class PreMatcher extends ElementMatcher {
 }
 
 class FigureMatcher extends ElementMatcher {
-  static description = "figure";
-
   static matchElement(element, logger) {
     if (element.localName !== "figure")
       return false;
@@ -280,10 +179,44 @@ class FigureMatcher extends ElementMatcher {
 }
 
 class AsideMatcher extends ElementMatcher {
-  static description = "aside";
-
   static matchElement(element, logger) {
     if (element.localName !== "aside")
+      return false;
+
+    return true;
+  }
+}
+
+class CaptionMatcher {
+  static matchElement(element, logger) {
+    if (element.localName !== "caption")
+      return false;
+
+    return true;
+  }
+}
+
+class THeadMatcher {
+  static matchElement(element, logger) {
+    if (element.localName !== "thead")
+      return false;
+
+    return true;
+  }
+}
+
+class TBodyMatcher {
+  static matchElement(element, logger) {
+    if (element.localName !== "tbody")
+      return false;
+
+    return true;
+  }
+}
+
+class TFootMatcher {
+  static matchElement(element, logger) {
+    if (element.localName !== "tfoot")
       return false;
 
     return true;
@@ -297,19 +230,45 @@ class TableMatcher extends ElementMatcher {
     if (element.localName !== "table")
       return false;
 
-      const m = new SequenceMatcher([
-        new OneElementMatcher(validateCaption),
-        new OptionalElementMatcher(validateTHead),
-        new ZeroOrMoreElementMatcher(validateTBody),
-        new OptionalElementMatcher(validateTFooter)
-      ]);
+    const children = element.children;
 
-      return m.match(element.children, logger);
+    /* match caption */
+
+    if (children.length > 0 && CaptionMatcher.matchElement(children[0]))
+      children.shift();
+    else
+      logger.error("Table is missing a caption element")
+
+    /* match optional thead */
+
+    if (children.length > 0 && THeadMatcher.matchElement(children[0]))
+      children.shift();
+
+    /* validate zero or more tbody */
+
+    while (children.length > 0) {
+      if (!TBodyMatcher.matchElement(children[0]))
+        break;
+      children.shift();
+    }
+
+    /* match optional tfoot */
+
+    if (children.length > 0 && TFootMatcher.matchElement(children[0]))
+      children.shift();
+
+    /* are there unknown children */
+
+    if (children.length > 0) {
+      const unknownchildren = children.map(e => e.id || e.localName).join(" ");
+      logger.error(`Table contains out of order or unknown children: ${unknownchildren}`)
+    }
+
+    return true;
   }
 }
 
-
-const BLOCK_ELEMENT_MATCHER = new OneOfMatcher([
+const BLOCK_ELEMENT_MATCHER = [
   PMatcher,
   DivMatcher,
   UlMatcher,
@@ -319,35 +278,14 @@ const BLOCK_ELEMENT_MATCHER = new OneOfMatcher([
   FigureMatcher,
   AsideMatcher,
   TableMatcher
-]);
+];
 
+class BlockMatcher extends ElementMatcher {
+  static description = "block";
 
-function validateCaption(element, logger) {
-  if (element.localName !== "caption")
-    return false;
-
-  return true;
-}
-
-function validateTHead(element, logger) {
-  if (element.localName !== "thead")
-    return false;
-
-  return true;
-}
-
-function validateTBody(element, logger) {
-  if (element.localName !== "tbody")
-    return false;
-
-  return true;
-}
-
-function validateTFooter(element, logger) {
-  if (element.localName !== "tfooter")
-    return false;
-
-  return true;
+  static matchElement(element, logger) {
+    return BLOCK_ELEMENT_MATCHER.some(e => e.matchElement(element, logger));
+  }
 }
 
 class ForewordMatcher extends ElementMatcher {
@@ -446,8 +384,6 @@ class ExternalDefinitionsMatcher extends ElementMatcher {
 
 
 class InternalDefinitionsMatcher extends ElementMatcher {
-  static description = "internal terms and definitions";
-
   static matchElement(e, logger) {
     if (e.localName !== "dl" || e.id !== "terms-int-defs")
       return false;
@@ -458,34 +394,34 @@ class InternalDefinitionsMatcher extends ElementMatcher {
 
 
 class DefinitionsMatcher extends ElementMatcher {
-  static description = "terms and definitions";
-
-  static matchElement(e, logger) {
-    if (e.localName !== "section" || e.id !== "sec-terms-and-definitions")
+  static matchElement(element, logger) {
+    if (element.localName !== "section" || element.id !== "sec-terms-and-definitions")
       return false;
 
-    const m = new SequenceMatcher([
-      new OptionalElementMatcher(ExternalDefinitionsMatcher),
-      new OptionalElementMatcher(InternalDefinitionsMatcher),
-    ]);
+    const children = Array.from(element.children);
 
-    return m;
+    /* validate optional additional elements */
+
+    if (children.length > 0 && ExternalDefinitionsMatcher.matchElement(children[0]))
+      children.shift();
+
+    /* validate optional bibliography */
+
+    if (children.length > 0 && InternalDefinitionsMatcher.matchElement(children[0]))
+      children.shift();
+
+    /* are there unknown children */
+
+    if (children.length > 0) {
+      const unknownchildren = children.map(e => e.id || e.localName).join(" ");
+      logger.error(`Terms and definition clause contains out of order or unknown children: ${unknownchildren}`)
+    }
+
+    return true;
   }
 }
 
-class HeadingMatcher extends ElementMatcher {
-  constructor (level) {
-    super();
-    this.level = level;
-    this.description = `Heading Level ${this.level}`;
-  }
-
-  matchElement(element, logger) {
-    return element.localName === `h${this.level}`;
-  }
-}
-
-class ClauseElementMatcher extends ElementMatcher {
+class SectionMatcher extends ElementMatcher {
   constructor (level) {
     super();
     this.level = level;
@@ -495,15 +431,36 @@ class ClauseElementMatcher extends ElementMatcher {
     if (element.localName !== "section")
       return false;
 
-    const m = new SequenceMatcher([
-      new HeadingMatcher(this.level),
-      new OneOfMatcher([
-        new OneOrMoreElementMatcher(new ClauseElementMatcher(this.level + 1)),
-        new ZeroOrMoreElementMatcher(BLOCK_ELEMENT_MATCHER)
-      ])
-    ]);
+    const children = Array.from(element.children);
 
-    return m.match(Array.from(element.children), logger);
+    /* check the header */
+
+    if (children.length > 0 && children[0].localName === `h${this.level}`) {
+      children.shift();
+    } else {
+      logger.error("Clause is missing a heading");
+    }
+
+    let hasSubClauses = false;
+    let hasBlocks = false;
+
+    const subClauseMatcher = new SectionMatcher(this.level + 1);
+
+    while (children.length > 0) {
+      if (BlockMatcher.matchElement(children[0])) {
+        hasBlocks = true;
+      } else if (subClauseMatcher.matchElement(children[0])) {
+        hasSubClauses = true;
+      } else {
+        logger.error("Unknown element in clause");
+      }
+      children.shift();
+    }
+
+    if (hasSubClauses && hasBlocks)
+      logger.error("Clause contains both sub-clauses and text");
+
+    return true;
   }
 }
 
@@ -514,7 +471,7 @@ class ClauseMatcher  extends ElementMatcher {
     if (e.classList.contains("annex") || e.id === "sec-bibliography" || e.id === "sec-elements")
       return false;
 
-    const m = new ClauseElementMatcher(2);
+    const m = new SectionMatcher(2);
     return m.matchElement(e, logger);
   }
 }
@@ -523,10 +480,10 @@ class AnnexMatcher extends ElementMatcher {
   static description = "annex";
 
   static matchElement(e, logger) {
-    if (e.localName !== "section" || !e.classList.contains("annex"))
+    if (!e.classList.contains("annex"))
       return false;
 
-    const m = new ClauseElementMatcher(2);
+    const m = new SectionMatcher(2);
     return m.matchElement(e, logger);
   }
 }
@@ -573,23 +530,76 @@ class BibliographyMatcher extends ElementMatcher {
 }
 
 function validateBody(body, logger) {
-  const m = new SequenceMatcher([
-      new OptionalElementMatcher(ForewordMatcher),
-      new OptionalElementMatcher(IntroductionMatcher),
-      ScopeMatcher,
-      new OptionalElementMatcher(ConformanceMatcher),
-      new OptionalElementMatcher(NormativeReferencesMatcher),
-      new OptionalElementMatcher(DefinitionsMatcher),
-      new ZeroOrMoreElementMatcher(ClauseMatcher),
-      new ZeroOrMoreElementMatcher(AnnexMatcher),
-      new OptionalElementMatcher(ElementsAnnexMatcher),
-      new OptionalElementMatcher(BibliographyMatcher),
-  ]);
+  if (body.localName !== "body")
+    return false;
 
-  const r = m.match(Array.from(body.children), logger);
+  const elements = Array.from(body.children);
 
-  if (!r && logger !== null)
-    logger.error("Invalid body");
+  /* validate (optional) foreword */
 
-  return r;
+  if (elements.length > 0 && ForewordMatcher.matchElement(elements[0]))
+    elements.shift();
+
+  /* validate optional introduction */
+
+  if (elements.length > 0 && IntroductionMatcher.matchElement(elements[0]))
+    elements.shift();
+
+  /* validate mandatory scope */
+
+  if (elements.length > 0 && ScopeMatcher.matchElement(elements[0])) {
+      elements.shift();
+  } else {
+    logger.error("Mandatory Scope clause missing");
+  }
+
+  /* validate optional conformance */
+
+  if (elements.length > 0 && ConformanceMatcher.matchElement(elements[0]))
+    elements.shift();
+
+  /* validate optional normative references */
+
+  if (elements.length > 0 && NormativeReferencesMatcher.matchElement(elements[0]))
+    elements.shift();
+
+  /* validate optional terms and definitions */
+
+  if (elements.length > 0 && DefinitionsMatcher.matchElement(elements[0]))
+    elements.shift();
+
+  /* validate zero or more clauses */
+
+  while (elements.length > 0) {
+    if (! ClauseMatcher.matchElement(elements[0]))
+      break;
+    elements.shift();
+  }
+
+  /* validate zero or more annexes */
+
+  while (elements.length > 0) {
+    if (! AnnexMatcher.matchElement(elements[0]))
+      break;
+    elements.shift();
+  }
+
+  /* validate optional additional elements */
+
+  if (elements.length > 0 && ElementsAnnexMatcher.matchElement(elements[0]))
+    elements.shift();
+
+  /* validate optional bibliography */
+
+  if (elements.length > 0 && BibliographyMatcher.matchElement(elements[0]))
+    elements.shift();
+
+  /* are there unknown elements */
+
+  if (elements.length > 0) {
+    const unknownElements = elements.map(e => e.id || e.localName).join(" ");
+    logger.error(`Body section contains out of order or unknown elements: ${unknownElements}`)
+  }
+
+  return true;
 }
