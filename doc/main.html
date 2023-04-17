@@ -66,6 +66,10 @@ cp tooling/doc/snippets/skeleton.html doc/main.html</pre>
           Add a <code>.gitignore</code> file:
 <pre data-include="snippets/.gitignore"></pre>
        </li>
+       <li>
+          Add the pre-commit hook specified at <a href="#sec-tooling-git-hooks"></a> by following the instructions at
+          <a>https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks</a>.
+       </li>
       </ol>
     </section>
 
@@ -1196,6 +1200,19 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       <p>The contents of the bucket is also made available through a Cloudfront distribution, which allows the publication artifacts
         to be made available through a custom domain name and TLS (currently <code>https://doc.smpte-doc.org/</code>).</p>
     </section>
+
+    <section id="sec-tooling-git-hooks">
+      <h3>Git commit hooks</h3>
+
+      <p>It is advisable to install the git commit hook listed at <a href="#figure-pre-commit-hook"></a>. It detects errors before a
+      document can be committed.</p>
+
+      <figure id="figure-pre-commit-hook">
+        <pre data-include="snippets/pre-commit"></pre>
+        <figcaption>Pre-commit hook that validates the main element.</figcaption>
+      </figure>
+    </section>
+
   </section>
 
   <section id="sec-elements">
