@@ -1153,7 +1153,7 @@ const logger_ = new Logger();
 document.addEventListener('DOMContentLoaded', async () => {
    try {
     asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
-    smpteValidate(window.document.cloneNode(true), logger_);
+    smpteValidate(window.document, logger_);
     render();
   } catch (e) {
     logger_.error(e);

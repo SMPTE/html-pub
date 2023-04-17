@@ -74,6 +74,23 @@ class TerminalPhrasingMatcher {
   }
 }
 
+class PhrasingMatcher {
+  constructor(localName) {
+    this.localName = localName;
+  }
+
+  match(element, logger) {
+    if (element.localName !== this.localName)
+      return false;
+
+      for (const child of element.children) {
+        if (!AnyPhrasingMatcher.match(child, logger))
+          logger.error(`Element can only contain phrasing elements`, element);
+      }
+    return true;
+  }
+}
+
 class MathMatcher {
   static match(element, logger) {
     if (element.localName !== "math")
@@ -83,46 +100,33 @@ class MathMatcher {
   }
 }
 
-class SpanMatcher {
-  static match(element, logger) {
-    if (element.localName !== "span")
-      return false;
-
-    for (const child of element.children) {
-      if (!PhrasingMatcher.match(child, logger))
-        logger.error(`Span can only contain phrasing elements`, element);
-    }
-
-    return true;
-  }
-}
 
 const ALL_PHRASING_MATCHERS = [
-  new TerminalPhrasingMatcher("b"),
-  new TerminalPhrasingMatcher("bdo"),
-  new TerminalPhrasingMatcher("bdi"),
+  new PhrasingMatcher("b"),
+  new PhrasingMatcher("bdo"),
+  new PhrasingMatcher("bdi"),
   new TerminalPhrasingMatcher("br"),
   new TerminalPhrasingMatcher("code"),
   new TerminalPhrasingMatcher("dfn"),
-  new TerminalPhrasingMatcher("em"),
-  new TerminalPhrasingMatcher("i"),
+  new PhrasingMatcher("em"),
+  new PhrasingMatcher("i"),
   new TerminalPhrasingMatcher("kbd"),
   MathMatcher,
   new TerminalPhrasingMatcher("q"),
   /* "ruby", */
-  new TerminalPhrasingMatcher("s"),
+  new PhrasingMatcher("s"),
   new TerminalPhrasingMatcher("samp"),
-  SpanMatcher,
+  new PhrasingMatcher("span"),
   new TerminalPhrasingMatcher("strong"),
-  new TerminalPhrasingMatcher("sub"),
-  new TerminalPhrasingMatcher("sup"),
+  new PhrasingMatcher("sub"),
+  new PhrasingMatcher("sup"),
   new TerminalPhrasingMatcher("time"),
-  new TerminalPhrasingMatcher("u"),
+  new PhrasingMatcher("u"),
   new TerminalPhrasingMatcher("var"),
   new TerminalPhrasingMatcher("wbr"),
   new TerminalPhrasingMatcher("a")
 ];
-class PhrasingMatcher {
+class AnyPhrasingMatcher {
   static match(element, logger) {
     return ALL_PHRASING_MATCHERS.some(m => m.match(element, logger));
   }
@@ -140,7 +144,7 @@ class PMatcher {
       return false;
 
     for (const child of element.children) {
-      if (!PhrasingMatcher.match(child, logger))
+      if (!AnyPhrasingMatcher.match(child, logger))
         logger.error(`Paragraph contains non-phrasing element`, child);
     }
 
@@ -182,7 +186,7 @@ class DtMatcher {
       return false;
 
     for (const child of element.children) {
-      if (!PhrasingMatcher.match(child, logger))
+      if (!AnyPhrasingMatcher.match(child, logger))
         logger.error(`Dt contains non-phrasing element`, child);
     }
 
@@ -196,7 +200,7 @@ class DefinitionMatcher {
       return false;
 
     for (const child of element.children) {
-      if (!PhrasingMatcher.match(child, logger))
+      if (!AnyPhrasingMatcher.match(child, logger))
         logger.error(`Dd contains non-phrasing element`, child);
     }
 
