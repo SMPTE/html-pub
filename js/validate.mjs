@@ -33,16 +33,16 @@ export class ErrorLogger {
     this.errors_ = [];
   }
 
-  error(msg) {
+  error(msg, element) {
     this.hasFailed_ = true;
-    this.errors_.push(msg);
+    this.errors_.push({ "message": msg, "element": element === undefined ? null : element });
   }
 
-  warn(msg) { }
+  warn(msg, element) { }
 
-  log(msg) { }
+  log(msg, element) { }
 
-  info(msg) { }
+  info(msg, element) { }
 
   hasFailed() {
     return this.hasFailed_;
@@ -68,7 +68,7 @@ class TerminalPhrasingMatcher {
       return false;
 
     if (element.childElementCount > 0)
-      logger.error(`${element.outerHTML} cannot contain subelements`);
+      logger.error(`Element cannot contain children element`, element);
 
     return true;
   }
@@ -90,7 +90,7 @@ class SpanMatcher {
 
     for (const child of element.children) {
       if (!PhrasingMatcher.match(child, logger))
-        logger.error(`Span ${child.outerHTML} cannot contain non-phrasing elements`);
+        logger.error(`Span can only contain phrasing elements`, element);
     }
 
     return true;
@@ -141,7 +141,7 @@ class PMatcher {
 
     for (const child of element.children) {
       if (!PhrasingMatcher.match(child, logger))
-        logger.error(`Paragraph contains non-phrasing element ${child.localName}`);
+        logger.error(`Paragraph contains non-phrasing element`, child);
     }
 
     return true;
@@ -155,7 +155,7 @@ class DivMatcher {
 
     for (const child of element.children) {
       if (!FlowMatcher.match(child, logger))
-        logger.error(`Div contains non-flow element ${child.outerHTML}`);
+        logger.error(`Div contains non-flow element`, child);
     }
 
     return true;
@@ -169,7 +169,7 @@ class LiMatcher {
 
     for (const child of element.children) {
       if (!FlowMatcher.match(child, logger))
-        logger.error(`LI contains non-flow element ${child.outerHTML}`);
+        logger.error(`Li contains non-flow element`, child);
     }
 
     return true;
@@ -183,7 +183,7 @@ class DtMatcher {
 
     for (const child of element.children) {
       if (!PhrasingMatcher.match(child, logger))
-        logger.error(`Dt contains non-phrasing element ${child.outerHTML}`);
+        logger.error(`Dt contains non-phrasing element`, child);
     }
 
     return true;
@@ -197,7 +197,7 @@ class DefinitionMatcher {
 
     for (const child of element.children) {
       if (!PhrasingMatcher.match(child, logger))
-        logger.error(`Dd contains non-phrasing element ${child.outerHTML}`);
+        logger.error(`Dd contains non-phrasing element`, child);
     }
 
     return true;
@@ -212,7 +212,7 @@ class DefinitionSourceMatcher {
     const aMatcher = new TerminalPhrasingMatcher("a");
 
     if (element.childElementCount !== 1 || !aMatcher.match(element.firstElementChild, logger))
-      logger.error(`Definition source must contain a single <a> element`);
+      logger.error(`Definition source must contain a single <a> element`, element);
 
     return true;
   }
@@ -226,7 +226,7 @@ class UlMatcher {
 
     for (const child of element.children) {
       if (!LiMatcher.match(child, logger))
-        logger.error(`UL element contains non-LI element ${child.outerHTML}`);
+        logger.error(`UL element contains non-LI element`, child);
     }
 
     return true;
@@ -240,7 +240,7 @@ class OlMatcher {
 
     for (const child of element.children) {
       if (!LiMatcher.match(child, logger))
-        logger.error(`OL element contains non-LI element ${child.outerHTML}`);
+        logger.error(`OL element contains non-LI element`, child);
     }
 
     return true;
@@ -282,7 +282,7 @@ class DlMatcher {
 
 
       if (ddCount === 0 || ddCount > 2 || dtCount === 0)
-        logger.error(`Each definition must consist of one or more dt elements followed by one or two dd elements`);
+        logger.error(`A definition must consist of one or more dt elements followed by one or two dd elements`, element);
 
     }
 
@@ -296,7 +296,7 @@ class PreMatcher {
       return false;
 
     if (element.childElementCount !== 0)
-      logger.error(`Pre element must contain only text`);
+      logger.error(`Pre element must contain only text`, element);
 
     return true;
   }
@@ -362,7 +362,7 @@ class BlockQuoteMatcher {
       return false;
 
     if (element.childElementCount !== 0)
-      logger.error(`Pre element must contain only text`);
+      logger.error(`Pre element must contain only text`, element);
 
     return true;
   }
@@ -381,7 +381,7 @@ class TableMatcher {
     if (children.length > 0 && CaptionMatcher.match(children[0], logger))
       children.shift();
     else
-      logger.error("Table is missing a caption element")
+      logger.error("Table is missing a caption element", element)
 
     /* match optional thead */
 
@@ -405,7 +405,7 @@ class TableMatcher {
 
     if (children.length > 0) {
       const unknownchildren = children.map(e => e.id || e.localName).join(" ");
-      logger.error(`Table contains out of order or unknown children: ${unknownchildren}`)
+      logger.error(`Table contains out of order or unknown children: ${unknownchildren}`, element)
     }
 
     return true;
@@ -473,32 +473,32 @@ class ReferenceMatcher {
         aCount++;
       } else if (child.localName === "cite") {
         if (child.id === null)
-          logger.error(`Cite element ${child.outerHTML} is missing an id attribute`);
+          logger.error(`All cite element must have an id attribute`, child);
         citeCount++;
       }
     }
 
     if (aCount > 1)
-      logger.error(`Reference element must contain at most one link`);
+      logger.error(`Reference element must contain at most one link`, element);
 
     if (citeCount !== 1)
-      logger.error(`Reference element must contain exactly one cite element`);
+      logger.error(`Reference element must contain exactly one cite element`, element);
 
     return true;
   }
 }
 
-function validateReferences(e, prefix, logger) {
-  const ulElement = Array.from(e.children);
+function validateReferences(sectionElement, logger) {
+  const children = Array.from(sectionElement.children);
 
-  if (ulElement.length !== 1 || ulElement[0].localName !== "ul") {
-    logger.error(`References must contain a single <ul> element.`);
+  if (sectionElement.childElementCount !== 1 || sectionElement.firstElementChild.localName !== "ul") {
+    logger.error(`References must contain a single ul element`, sectionElement);
     return;
   }
 
-  for (const reference of ulElement[0].children) {
-    if (!ReferenceMatcher.match(reference, logger)) {
-      logger.error(`LI element contains a non-li element: ${reference.outerHTML}`);
+  for (const liElement of sectionElement.firstElementChild.children) {
+    if (!ReferenceMatcher.match(liElement, logger)) {
+      logger.error(`Ul element contains a non-Li element: ${liElement.outerHTML}`, sectionElement.firstElementChild);
       continue;
     }
 
@@ -526,10 +526,10 @@ class ExternalDefinitionsMatcher {
     for (const li of e.children) {
       if (li.localName === "li") {
         if (li.childElementCount !== 1 || li.firstElementChild.localName !== "a") {
-          logger.error(`External definitions: each <li> element must contain exactly one <a> element.`);
+          logger.error(`Each <li> element must contain exactly one <a> element`, e);
         }
       } else {
-        logger.error(`External definitions: the <ul> element must contain only <li> elements.`);
+        logger.error(`The <ul> element must contain only <li> elements`, e);
       }
     }
 
@@ -569,7 +569,7 @@ class DefinitionsMatcher {
 
     if (children.length > 0) {
       const unknownchildren = children.map(e => e.id || e.localName).join(" ");
-      logger.error(`Terms and definition clause contains out of order or unknown children: ${unknownchildren}`)
+      logger.error(`Terms and definition clause contains out of order or unknown children: ${unknownchildren}`, element)
     }
 
     return true;
@@ -586,7 +586,7 @@ class SectionMatcher {
       return false;
 
     if (element.id === null)
-      logger.error("Section element is missing an id attribute");
+      logger.error("Section element is missing an id attribute", element);
 
     const children = Array.from(element.children);
 
@@ -595,7 +595,7 @@ class SectionMatcher {
     if (children.length > 0 && children[0].localName === `h${this.level}`) {
       children.shift();
     } else {
-      logger.error("Clause is missing a heading");
+      logger.error("Section is missing a heading", element);
     }
 
     let hasSubClauses = false;
@@ -609,13 +609,13 @@ class SectionMatcher {
       } else if (subClauseMatcher.match(children[0], logger)) {
         hasSubClauses = true;
       } else {
-        logger.error("Unknown element in clause");
+        logger.error("Unknown element in clause", element);
       }
       children.shift();
     }
 
     if (hasSubClauses && hasBlocks)
-      logger.error("Clause contains both sub-clauses and text");
+      logger.error("Clause contains both sub-clauses and text", element);
 
     return true;
   }
@@ -649,22 +649,23 @@ class ElementsAnnexMatcher {
     if (e.localName !== "section" || e.id !== "sec-elements")
       return false;
 
-    if (e.childElementCount === 1 && e.firstElementChild.localName === "ol") {
-      for (const li of e.firstElementChild.children) {
-        if (li.localName === "li") {
-          if (li.firstElementChild.localName !== "a" || !li.firstElementChild.id || li.childElementCount !== 1 || !li.firstElementChild.title || !li.firstElementChild.href) {
-            logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes.`);
-            return false;
-          }
-        } else {
-          logger.error(`The <ol> element of the Elements Annex must contain only <li> elements`);
-          return false;
-        }
-      }
-    } else {
+    if (e.childElementCount !== 1 || e.firstElementChild.localName !== "ol") {
       logger.error(`The Elements Annex section must contain a single <ol> element.`);
-      return false;
+      return true;
     }
+
+    for (const child of e.firstElementChild.children) {
+      if (child.localName !== "li") {
+        logger.error(`The <ol> element of the Elements Annex must contain only <li> elements`, e);
+        continue;
+      }
+
+      if (child.firstElementChild.localName !== "a" || !child.firstElementChild.id || child.childElementCount !== 1 || !child.firstElementChild.title || !child.firstElementChild.href) {
+        logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes`, child);
+      }
+
+    }
+
 
     return true;
   }
@@ -703,7 +704,7 @@ function validateBody(body, logger) {
   if (elements.length > 0 && ScopeMatcher.match(elements[0], logger)) {
     elements.shift();
   } else {
-    logger.error("Mandatory Scope clause missing");
+    logger.error("Mandatory Scope clause missing", elements[0]);
   }
 
   /* validate optional conformance */
@@ -751,7 +752,7 @@ function validateBody(body, logger) {
 
   if (elements.length > 0) {
     const unknownElements = elements.map(e => e.id || e.localName).join(" ");
-    logger.error(`Body section contains out of order or unknown elements: ${unknownElements}`)
+    logger.error(`Body section contains out of order or unknown elements: ${unknownElements}`, body)
   }
 
   return true;
