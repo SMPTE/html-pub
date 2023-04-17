@@ -59,12 +59,12 @@ export function smpteValidate(doc, logger) {
 }
 
 class TerminalPhrasingMatcher {
-  constructor (localName) {
+  constructor(localName) {
     this.localName = localName;
   }
 
   match(element, logger) {
-    if (element.localName !== this.localName) 
+    if (element.localName !== this.localName)
       return false;
 
     if (element.childElementCount > 0)
@@ -76,7 +76,7 @@ class TerminalPhrasingMatcher {
 
 class MathMatcher {
   static match(element, logger) {
-    if (element.localName !== "math") 
+    if (element.localName !== "math")
       return false;
 
     return true;
@@ -85,8 +85,13 @@ class MathMatcher {
 
 class SpanMatcher {
   static match(element, logger) {
-    if (element.localName !== "span") 
+    if (element.localName !== "span")
       return false;
+
+    for (const child of element.children) {
+      if (!PhrasingMatcher.match(child, logger))
+        logger.error(`Span ${child.outerHTML} cannot contain non-phrasing elements`);
+    }
 
     return true;
   }
@@ -123,6 +128,12 @@ class PhrasingMatcher {
   }
 }
 
+class FlowMatcher {
+  static match(element, logger) {
+    return ALL_BLOCK_MATCHERS.some(m => m.match(element, logger)) || ALL_PHRASING_MATCHERS.some(m => m.match(element, logger));
+  }
+}
+
 class PMatcher {
   static match(element, logger) {
     if (element.localName !== "p")
@@ -142,14 +153,81 @@ class DivMatcher {
     if (element.localName !== "div")
       return false;
 
+    for (const child of element.children) {
+      if (!FlowMatcher.match(child, logger))
+        logger.error(`Div contains non-flow element ${child.outerHTML}`);
+    }
+
     return true;
   }
 }
+
+class LiMatcher {
+  static match(element, logger) {
+    if (element.localName !== "li")
+      return false;
+
+    for (const child of element.children) {
+      if (!FlowMatcher.match(child, logger))
+        logger.error(`LI contains non-flow element ${child.outerHTML}`);
+    }
+
+    return true;
+  }
+}
+
+class DtMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dt")
+      return false;
+
+    for (const child of element.children) {
+      if (!PhrasingMatcher.match(child, logger))
+        logger.error(`Dt contains non-phrasing element ${child.outerHTML}`);
+    }
+
+    return true;
+  }
+}
+
+class DefinitionMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd")
+      return false;
+
+    for (const child of element.children) {
+      if (!PhrasingMatcher.match(child, logger))
+        logger.error(`Dd contains non-phrasing element ${child.outerHTML}`);
+    }
+
+    return true;
+  }
+}
+
+class DefinitionSourceMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd")
+      return false;
+
+    const aMatcher = new TerminalPhrasingMatcher("a");
+
+    if (element.childElementCount !== 1 || !aMatcher.match(element.firstElementChild, logger))
+      logger.error(`Definition source must contain a single <a> element`);
+
+    return true;
+  }
+}
+
 
 class UlMatcher {
   static match(element, logger) {
     if (element.localName !== "ul")
       return false;
+
+    for (const child of element.children) {
+      if (!LiMatcher.match(child, logger))
+        logger.error(`UL element contains non-LI element ${child.outerHTML}`);
+    }
 
     return true;
   }
@@ -160,6 +238,11 @@ class OlMatcher {
     if (element.localName !== "ol")
       return false;
 
+    for (const child of element.children) {
+      if (!LiMatcher.match(child, logger))
+        logger.error(`OL element contains non-LI element ${child.outerHTML}`);
+    }
+
     return true;
   }
 }
@@ -169,6 +252,40 @@ class DlMatcher {
     if (element.localName !== "dl")
       return false;
 
+    const children = Array.from(element.children);
+
+    while (children.length > 0) {
+
+      let dtCount = 0;
+
+      /* look for dt elements */
+      while (children.length > 0) {
+        if (!DtMatcher.match(children[0], logger))
+          break;
+        children.shift();
+        dtCount++;
+      }
+
+      let ddCount = 0;
+
+      /* look for definition */
+      if (children.length > 0 && DefinitionMatcher.match(children[0], logger)) {
+        children.shift();
+        ddCount++;
+      }
+
+      /* look for definition source */
+      if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
+        children.shift();
+        ddCount++;
+      }
+
+
+      if (ddCount === 0 || ddCount > 2 || dtCount === 0)
+        logger.error(`Each definition must consist of one or more dt elements followed by one or two dd elements`);
+
+    }
+
     return true;
   }
 }
@@ -177,6 +294,9 @@ class PreMatcher {
   static match(element, logger) {
     if (element.localName !== "pre")
       return false;
+
+    if (element.childElementCount !== 0)
+      logger.error(`Pre element must contain only text`);
 
     return true;
   }
@@ -236,6 +356,18 @@ class TFootMatcher {
   }
 }
 
+class BlockQuoteMatcher {
+  static match(element, logger) {
+    if (element.localName !== "blockquote")
+      return false;
+
+    if (element.childElementCount !== 0)
+      logger.error(`Pre element must contain only text`);
+
+    return true;
+  }
+}
+
 class TableMatcher {
 
   static match(element, logger) {
@@ -280,7 +412,7 @@ class TableMatcher {
   }
 }
 
-const BLOCK_ELEMENT_MATCHER = [
+const ALL_BLOCK_MATCHERS = [
   PMatcher,
   DivMatcher,
   UlMatcher,
@@ -289,15 +421,16 @@ const BLOCK_ELEMENT_MATCHER = [
   PreMatcher,
   FigureMatcher,
   AsideMatcher,
-  TableMatcher
+  TableMatcher,
+  BlockQuoteMatcher
 ];
 
 class BlockMatcher {
-
   static match(element, logger) {
-    return BLOCK_ELEMENT_MATCHER.some(e => e.match(element, logger));
+    return ALL_BLOCK_MATCHERS.some(e => e.match(element, logger));
   }
 }
+
 
 class ForewordMatcher {
 
@@ -322,34 +455,53 @@ class ScopeMatcher {
 
 
 class ConformanceMatcher {
-
   static match(e, logger) {
     return e.localName === "section" && e.id === "sec-conformance";
   }
 }
 
-function validateReferences(e, prefix, logger) {
-  if (e.childElementCount === 1 && e.firstElementChild.localName === "ul") {
-    for (const li of e.firstElementChild.children) {
-      if (li.tagName === "LI") {
-        const cites = li.querySelectorAll("cite");
+class ReferenceMatcher {
+  static match(element, logger) {
+    if (element.localName !== "li")
+      return false;
 
-        if (cites.length === 1) {
-          if (!cites[0].id)
-            logger.error(`${prefix}: each <cite> element must contain an id attribute.`);
-        } else {
-          logger.error(`${prefix}: each <li> element must contain a single <cite> element.`);
-        }
+    let aCount = 0;
+    let citeCount = 0;
 
-        if (li.querySelectorAll("a").length > 1) {
-          logger.error(`${prefix}: each <li> element must contain at most one <a> element.`);
-        }
-      } else {
-        logger.error(`${prefix}: the <ul> element must contain only <li> elements.`);
+    for (const child of element.children) {
+      if (child.localName === "a") {
+        aCount++;
+      } else if (child.localName === "cite") {
+        if (child.id === null)
+          logger.error(`Cite element ${child.outerHTML} is missing an id attribute`);
+        citeCount++;
       }
     }
-  } else {
-    logger.error(`${prefix} section must contain a single <ul> element.`);
+
+    if (aCount > 1)
+      logger.error(`Reference element must contain at most one link`);
+
+    if (citeCount !== 1)
+      logger.error(`Reference element must contain exactly one cite element`);
+
+    return true;
+  }
+}
+
+function validateReferences(e, prefix, logger) {
+  const ulElement = Array.from(e.children);
+
+  if (ulElement.length !== 1 || ulElement[0].localName !== "ul") {
+    logger.error(`References must contain a single <ul> element.`);
+    return;
+  }
+
+  for (const reference of ulElement[0].children) {
+    if (!ReferenceMatcher.match(reference, logger)) {
+      logger.error(`LI element contains a non-li element: ${reference.outerHTML}`);
+      continue;
+    }
+
   }
 }
 
