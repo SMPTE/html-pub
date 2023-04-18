@@ -93,7 +93,6 @@ h4 {
   margin-bottom: 0;
   font-size: 1rem;
   font-weight: bold;
-  break-after: avoid;
 }
 
 h4 span.heading-label {
@@ -105,7 +104,6 @@ h5 {
   margin-top: 1.5em;
   margin-bottom: 0;
   font-size: 1rem;
-  break-after: avoid;
 }
 
 h5 span.heading-label {
@@ -117,7 +115,6 @@ h6 {
   margin-top: 1.5em;
   margin-bottom: 0;
   font-size: 1rem;
-  break-after: avoid;
 }
 
 h6 span.heading-label {
@@ -375,8 +372,6 @@ pre {
   line-height: 1.4;
 
   white-space: pre-wrap;
-
-  line-break: loose;
 }
 
 code {
