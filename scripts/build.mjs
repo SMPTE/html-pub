@@ -329,7 +329,7 @@ async function render(docPath) {
       document.getElementById("smpte-logo").src = "static/smpte-logo.png";
 
       /* refuse to render if there are page errors */
-      const errorList = smpteLogger !== undefined ? smpteLogger.errorList() : listEvents();
+      const errorList = smpteLogger !== undefined ? smpteLogger.errorList() : listEvents(); /* for compatibility */
       if (errorList.length > 0) {
         for (let event of errorList)
           console.error(`  ${event.msg}\n`);
