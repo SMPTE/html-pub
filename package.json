@@ -9,7 +9,7 @@
     "@aws-sdk/client-s3": "^3.224.0",
     "jsdom": "^20.0.3",
     "npx": "^10.2.2",
-    "pagedjs-cli": "^0.3.3",
+    "pagedjs-cli": "^0.3.4",
     "puppeteer": "^19.3.0"
   }
 }
