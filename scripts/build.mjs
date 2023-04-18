@@ -316,7 +316,7 @@ async function render(docPath) {
 
     const docTitle = await page.evaluate(() => document.title);
 
-    const scriptPath = await page.evaluate(() => _SCRIPT_PATH /* for compatibility */ || smpteGetScriptPath());
+    const scriptPath = await page.evaluate(() => typeof _SCRIPT_PATH !== "undefined" ? _SCRIPT_PATH /* for compatibility */ : smpteGetScriptPath());
 
     await page.evaluate(() => {
       /* remove all scripts */
@@ -329,7 +329,7 @@ async function render(docPath) {
       document.getElementById("smpte-logo").src = "static/smpte-logo.png";
 
       /* refuse to render if there are page errors */
-      const errorList = smpteLogger !== undefined ? smpteLogger.errorList() : listEvents(); /* for compatibility */
+      const errorList = typeof smpteLogger !== "undefined" ? smpteLogger.errorList() : listEvents(); /* for compatibility */
       if (errorList.length > 0) {
         for (let event of errorList)
           console.error(`  ${event.msg}\n`);
