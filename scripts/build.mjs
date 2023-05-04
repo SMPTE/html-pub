@@ -244,7 +244,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 async function generatePubLinks(buildPaths, pubLinks) {
   let linksDocContents = "# Review links\n";
 
-  if (s3Links) {
+  if (pubLinks) {
     if ("clean" in pubLinks)
       linksDocContents += `[Clean](${encodeURI(pubLinks.clean)})\n`;
 
