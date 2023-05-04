@@ -332,7 +332,7 @@ async function render(docPath) {
 
     await page.goto(pageURL);
 
-    const docTitle = await page.evaluate(() => document.getElementById("docDesignator").innerText + " " + document.title);
+    const docTitle = await page.evaluate(() => document.getElementById("doc-designator").innerText + " " + document.title);
 
     const scriptPath = await page.evaluate(() => typeof _SCRIPT_PATH !== "undefined" ? _SCRIPT_PATH /* for compatibility */ : smpteGetScriptPath());
 
