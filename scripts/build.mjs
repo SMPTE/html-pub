@@ -256,33 +256,51 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
 
     console.log(`Uploading to bucket ${s3Bucket} at key ${s3PubKeyPrefix}`);
 
-    s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
-
-    /* create links */
+    /* create links files */
 
     if (generatedFiles !== undefined) {
 
       const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
 
       const cleanURL = `${deployPrefix}${s3PubKeyPrefix}`;
-      linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`
+      linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`;
+      let htmlLinks = `<a href="${encodeURI(cleanURL)}">Clean</a>\n`;
 
       if ("pdf" in generatedFiles) {
         const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
-        linksDocContents += `[Clean PDF](${encodeURI(url)})\n`
+        linksDocContents += `[Clean PDF](${encodeURI(url)})\n`;
+        htmlLinks += `<a href="${encodeURI(url)}">Clean PDF</a>\n`;
       }
 
       if ("baseRedline" in generatedFiles) {
         const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
-        linksDocContents += `[Redline to current draft](${encodeURI(url)})\n`
+        linksDocContents += `[Redline to current draft](${encodeURI(url)})\n`;
+        htmlLinks += `<a href="${encodeURI(url)}">Redline to current draft</a>\n`;
       }
 
       if ("pubRedline" in generatedFiles) {
         const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
-        linksDocContents += `[Redline to most recent edition](${encodeURI(url)})\n`
+        linksDocContents += `[Redline to most recent edition](${encodeURI(url)})\n`;
+        htmlLinks += `<a href="${encodeURI(url)}">Redline to most recent edition</a>\n`;
       }
 
+      fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta http-equiv="x-ua-compatible" content="ie=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Publication artifacts</title>
+          <link rel="icon" href="data:,">
+        </head>
+        <body>
+          ${htmlLinks}
+        </body>
+      </html>`);
+
     }
+
+    s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
 
   } else {
     console.warn("Skipping AWS upload. One of the following environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX.");
@@ -314,7 +332,7 @@ async function render(docPath) {
 
     await page.goto(pageURL);
 
-    const docTitle = await page.evaluate(() => document.title);
+    const docTitle = await page.evaluate(() => document.getElementById("docDesignator").innerText + " " + document.title);
 
     const scriptPath = await page.evaluate(() => typeof _SCRIPT_PATH !== "undefined" ? _SCRIPT_PATH /* for compatibility */ : smpteGetScriptPath());
 
@@ -372,7 +390,9 @@ class BuildPaths {
     this.refDirPath = path.join(this.buildDirPath, "ref");
     this.renderedRefDocPath = path.join(this.buildDirPath, "ref.html");
 
-    this.pubLinksPath = path.join(this.buildDirPath, "pr-links.md")
+    this.pubLinksPath = path.join(this.buildDirPath, "pr-links.md");
+
+    this.pubArtifactsPath = path.join(this.pubDirPath, "pub-artifacts.html");
 
     this.pubRedlineName = "pub-rl.html";
     this.pubRedlinePath = path.join(this.pubDirPath, this.pubRedlineName);
