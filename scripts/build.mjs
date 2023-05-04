@@ -264,24 +264,24 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
 
       const cleanURL = `${deployPrefix}${s3PubKeyPrefix}`;
       linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`;
-      let htmlLinks = `<a href="${encodeURI(cleanURL)}">Clean</a>\n`;
+      let htmlLinks = `<p><a href="${encodeURI(cleanURL)}">Clean</a></p>`;
 
       if ("pdf" in generatedFiles) {
         const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
         linksDocContents += `[Clean PDF](${encodeURI(url)})\n`;
-        htmlLinks += `<a href="${encodeURI(url)}">Clean PDF</a>\n`;
+        htmlLinks += `<p><a href="${encodeURI(url)}">Clean PDF</a></p>`;
       }
 
       if ("baseRedline" in generatedFiles) {
         const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
         linksDocContents += `[Redline to current draft](${encodeURI(url)})\n`;
-        htmlLinks += `<a href="${encodeURI(url)}">Redline to current draft</a>\n`;
+        htmlLinks += `<p><a href="${encodeURI(url)}">Redline to current draft</a></p>`;
       }
 
       if ("pubRedline" in generatedFiles) {
         const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
         linksDocContents += `[Redline to most recent edition](${encodeURI(url)})\n`;
-        htmlLinks += `<a href="${encodeURI(url)}">Redline to most recent edition</a>\n`;
+        htmlLinks += `<p><a href="${encodeURI(url)}">Redline to most recent edition</a></p>`;
       }
 
       fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
