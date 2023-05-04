@@ -241,14 +241,39 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
 }
 
+async function generatePubLinks(buildPaths, pubLinks) {
+  let linksDocContents = "# Review links\n";
+
+  if (s3Links) {
+    if ("clean" in pubLinks)
+      linksDocContents += `[Clean](${encodeURI(pubLinks.clean)})\n`;
+
+    if ("pdf" in pubLinks)
+      linksDocContents += `[Clean PDF](${encodeURI(pubLinks.pdf)})\n`;
+
+    if ("baseRedline" in pubLinks)
+      linksDocContents += `[Redline to current draft](${encodeURI(pubLinks.baseRedline)})\n`;
+
+    if ("pubRedline" in pubLinks)
+      linksDocContents += `[Redline to most recent edition](${encodeURI(pubLinks.pubRedline)})\n`;
+
+  } else {
+    linksDocContents += "No links available";
+  }
+
+  fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
+}
+
 async function s3Upload(buildPaths, versionKey, generatedFiles) {
   const s3Region = process.env.AWS_S3_REGION;
   const s3Bucket = process.env.AWS_S3_BUCKET;
   const s3KeyPrefix = process.env.AWS_S3_KEY_PREFIX;
 
-  let linksDocContents = "# Review links\n";
+  let pubLinks = null;
 
   if (s3Region && s3Bucket && s3KeyPrefix) {
+
+    pubLinks = {};
 
     const s3Client = new S3Client({ region: s3Region });
 
@@ -262,26 +287,22 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
 
       const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
 
-      const cleanURL = `${deployPrefix}${s3PubKeyPrefix}`;
-      linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`;
-      let htmlLinks = `<p><a href="${encodeURI(cleanURL)}">Clean</a></p>`;
+      pubLinks.clean = `${deployPrefix}${s3PubKeyPrefix}`;
+      let htmlLinks = `<p><a href="${encodeURI(generatedFiles.html)}">Clean</a></p>`;
 
       if ("pdf" in generatedFiles) {
-        const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
-        linksDocContents += `[Clean PDF](${encodeURI(url)})\n`;
-        htmlLinks += `<p><a href="${encodeURI(url)}">Clean PDF</a></p>`;
+        pubLinks.pdf = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
+        htmlLinks += `<p><a href="${encodeURI(generatedFiles.pdf)}">Clean PDF</a></p>`;
       }
 
       if ("baseRedline" in generatedFiles) {
-        const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
-        linksDocContents += `[Redline to current draft](${encodeURI(url)})\n`;
-        htmlLinks += `<p><a href="${encodeURI(url)}">Redline to current draft</a></p>`;
+        pubLinks.baseRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
+        htmlLinks += `<p><a href="${encodeURI(generatedFiles.baseRedline)}">Redline to current draft</a></p>`;
       }
 
       if ("pubRedline" in generatedFiles) {
-        const url = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
-        linksDocContents += `[Redline to most recent edition](${encodeURI(url)})\n`;
-        htmlLinks += `<p><a href="${encodeURI(url)}">Redline to most recent edition</a></p>`;
+        pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
+        htmlLinks += `<p><a href="${encodeURI(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>`;
       }
 
       fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
@@ -305,11 +326,9 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
   } else {
     console.warn("Skipping AWS upload. One of the following environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX.");
 
-    linksDocContents += "No links available";
   }
 
-  if (generatedFiles !== undefined)
-    fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
+  return pubLinks;
 }
 
 async function render(docPath) {
@@ -497,7 +516,10 @@ async function main() {
 
   s3Upload(buildPaths, branchName, generatedFiles);
 
-  s3Upload(buildPaths, commitHash);
+  const pubLinks = await s3Upload(buildPaths, commitHash, generatedFiles);
+
+  if (pubLinks)
+    generatePubLinks(buildPaths, pubLinks);
 
 }
 
