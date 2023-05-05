@@ -30,7 +30,7 @@ jobs:
         run: echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
 
       - name: Check out all branches with the exception of the current branch
-        run: CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD); for i in `git branch -a | grep remote | grep -v HEAD | grep -v ${CUR_BRANCH}`; do git branch --track ${i#remotes/origin/} $i; done
+        run: CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD); for i in `git branch -a | grep remote | grep -v "remotes/pull" | grep -v HEAD | grep -v ${CUR_BRANCH}`; do git branch --track ${i#remotes/origin/} $i; done
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
