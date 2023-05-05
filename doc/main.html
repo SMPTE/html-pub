@@ -5,11 +5,10 @@
   <meta charset="utf-8" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="../smpte.js"></script>
+  <script type="module" src="../smpte.js"></script>
   <meta itemprop="pubType" content="AG" />
-  <meta itemprop="pubNumber" content="99" />
-  <meta itemprop="pubState" content="draft" />
-  <meta itemprop="pubDateTime" content="20XX-XX-XX" />
+  <!--   <meta itemprop="pubNumber" content="99" /> --> 
+ <meta itemprop="pubState" content="draft" />
   <title>Editing HTML documents</title>
 </head>
 
@@ -66,6 +65,10 @@ cp tooling/doc/snippets/skeleton.html doc/main.html</pre>
         <li>
           Add a <code>.gitignore</code> file:
 <pre data-include="snippets/.gitignore"></pre>
+       </li>
+       <li>
+          Add the pre-commit hook specified at <a href="#sec-tooling-git-hooks"></a> by following the instructions at
+          <a>https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks</a>.
        </li>
       </ol>
     </section>
@@ -144,51 +147,87 @@ cp tooling/.smpte-build.json .
           <li><code>&lt;meta http-equiv=&quot;x-ua-compatible&quot; content=&quot;ie=edge&quot; /&gt;</code>;</li>
           <li><code>&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot; /&gt;</code></li>
           <li>a <code>script</code> element whose <code>src</code> attribute links to the <code>smpte.js</code> module in the
-          <code>tooling</code> directory;</li>
-          <li>a <code>meta</code> element that conforms to <a href="#sec-pubType"></a>;</li>
-          <li>a <code>meta</code> element that conforms to <a href="#sec-pubNumber"></a>;</li>
-          <li>a <code>meta</code> element that conforms to <a href="#sec-pubState"></a>;</li>
-          <li>a <code>meta</code> element that conforms to <a href="#sec-effectiveDateTime"></a>, if and only if <code>pubType
-          </code> is <code>OM</code>;</li>
-          <li>a <code>meta</code> element that conforms to <a href="#sec-pubDateTime"></a>, if <code>pubState</code> is
-          <code>pub</code>;</li>
+          <code>tooling</code> directory.</li>
         </ul>
 
         <p>The <code>title</code> element shall be equal to the title of the document, without any document number.</p>
 
-        <p>The <code>head</code> element may contain the following:</p>
+        <p>In addition to the <code>title</code> element, the <code>head</code> element contains SMPTE publication metadata in
+        the form of <code>meta</code> elements as specified below.</p>
 
-        <ul>
-          <li>Additional <code>script</code> elements.</li>
-        </ul>
+        <p>The <code>head</code> element may contain additional <code>script</code> elements that import JavaScript libraries for
+        document layout, e.g. <a href="https://www.mathjax.org/">MathJax</a></p>
+
+          <div class="example">
+<pre>&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=es6&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; id=&quot;MathJax-script&quot;
+  async src=&quot;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js&quot;&gt;
+&lt;/script&gt;</pre>
+          </div>
 
       </section>
 
       <section id="sec-pubType">
         <h4>pubType</h4>
 
-        <p>The element shall have an <code>itemprop</code> attribute equal to <code>pubType</code>.</p>
+        <p>The <code>head</code> element shall contain exactly one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubType</code>.</p>
 
         <p>The element shall have a <code>content</code> attribute equal to one of the following values:</p>
-
         <ul>
           <li><code>AG</code>, if the document is an Administrative Guideline;</li>
-          <li><code>OM</code>, if the document is an Operations Manual.</li>
+          <li><code>OM</code>, if the document is an Operations Manual;</li>
+          <li><code>ST</code>, if the document is a Standard;</li>
+          <li><code>RP</code>, if the document is a Recommended Practice; or</li>
+          <li><code>EG</code>, if the document is an Engineering Guideline.</li>
         </ul>
+
       </section>
 
       <section id="sec-pubNumber">
         <h4>pubNumber</h4>
 
-        <p>The element shall have an <code>itemprop</code> attribute equal to <code>pubNumber</code>.</p>
+        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubNumber</code>.</p>
 
-        <p>The element shall have a <code>content</code> attribute equal to the document number.</p>
+        <p>The element shall be present if:</p>
+        <ul>
+          <li><code>pubState</code> is <code>pub</code>; or</li>
+          <li><code>pubPart</code> is specified; or</li>
+          <li><code>pubVersion</code> is specified.</li>
+        </ul>
+
+        <p>The <code>content</code> attribute of the element shall be equal to the document number, which is a sequence of
+        digits.</p>
+      </section>
+
+      <section id="sec-pubPart">
+        <h4>pubPart</h4>
+
+        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubPart</code>.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to the document part number, which is a sequence of
+        digits.</p>
+      </section>
+
+      <section id="sec-pubVersion">
+        <h4>pubPart</h4>
+
+        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubVersion</code>.</p>
+
+        <p>The element shall be present if the document is an Engineering Document and the <code>pubStage</code> is
+        <code>PUB</code>.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to the document version.</p>
       </section>
 
       <section id="sec-pubState">
         <h4>pubState</h4>
 
-        <p>The element shall have an <code>itemprop</code> attribute equal to <code>pubState</code>.</p>
+        <p>The <code>head</code> element shall contain one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubState</code>.</p>
 
         <p>The element shall have a <code>content</code> attribute equal to one of the following values:</p>
 
@@ -198,10 +237,54 @@ cp tooling/.smpte-build.json .
         </ul>
       </section>
 
+      <section id="sec-pubStage">
+        <h4>pubStage</h4>
+
+        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubStage</code>.</p>
+
+        <p>The element shall be present if the document is an Engineering Document.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to one of the following values:</p>
+
+        <ul>
+          <li><code>WD</code>, if the document is a Working Draft;</li>
+          <li><code>CD</code>, if the document is a Committee Draft;</li>
+          <li><code>FCD</code>, if the document is a Final Committee Draft;</li>
+          <li><code>DP</code>, if the document is a Draft Publication; or</li>
+          <li><code>PUB</code>, if the document is a Published.</li>
+        </ul>
+      </section>
+
+      <section id="sec-pubRevisionOf">
+        <h4>pubRevisionOf</h4>
+
+        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubRevisionOf</code>.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to the identifier of the document that the document
+        revises.</p>
+      </section>
+
+      <section id="sec-pubTC">
+        <h4>pubTC</h4>
+
+        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubTC</code>.</p>
+
+        <p>The element shall be present if the document is an Engineering Document.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to the identifier of the TC responsible for the
+        document.</p>
+      </section>
+
       <section id="sec-pubDateTime">
         <h4>pubDateTime</h4>
 
-        <p>The element shall have an <code>itemprop</code> attribute equal to <code>pubDateTime</code>.</p>
+        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubDateTime</code>.</p>
+
+        <p>The element shall be present if <code>pubState</code> is <code>pub</code>.</p>
 
         <p>The element shall have a <code>content</code> attribute that conforms to the pattern <code>YYYY-MM-DD</code>, where
         <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day of the publication date of the
@@ -211,7 +294,11 @@ cp tooling/.smpte-build.json .
       <section id="sec-effectiveDateTime">
         <h4>effectiveDateTime</h4>
 
-        <p>The element shall have an <code>itemprop</code> attribute equal to <code>effectiveDateTime</code>.</p>
+        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>effectiveDateTime</code>.</p>
+
+        <p>The element shall be present if the document is an Operations Manual and the <code>pubState</code> is
+        <code>pub</code>.</p>
 
         <p>The element shall have a <code>content</code> attribute that conforms to the pattern <code>YYYY-MM-DD</code>, where
         <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day that the document becomes effective.</p>
@@ -220,15 +307,7 @@ cp tooling/.smpte-build.json .
       <section id="sec-additional-script-elements">
         <h4>Additional <code>script</code> elements</h4>
 
-        <p>Addition <code>script</code> elements can be used to import JavaScript libraries to assist with document layout, e.g. <a
-        href="https://www.mathjax.org/">MathJax</a></p>
 
-        <div class="example">
-<pre>&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=es6&quot;&gt;&lt;/script&gt;
-&lt;script type=&quot;text/javascript&quot; id=&quot;MathJax-script&quot;
-  async src=&quot;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js&quot;&gt;
-&lt;/script&gt;</pre>
-        </div>
       </section>
     </section>
 
@@ -783,8 +862,10 @@ cp tooling/.smpte-build.json .
           <li>one <code>caption</code> element as the first child of the <code>table</code> element</li>
           <li>one <code>thead</code> element, containing one <code>tr</code> element, with <code>th</code> element(s) as needed for
           each column header</li>
-          <li>one <code>tbody</code> element, with <code>tr</code> element(s) as needed for each row</li>
+          <li>one or more <code>tbody</code> element, with <code>tr</code> element(s) as needed for each row</li>
         </ul>
+
+        <p class="note">Page breaks are avoided within a <code>tbody</code> element.</p>
 
         <div class="example">
 <pre>
@@ -1007,10 +1088,10 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       <p>The build process looks for the following environment variables:</p>
 
       <ul>
-        <li><a><code>AWS_S3_REGION</code></a></li>
-        <li><a><code>AWS_S3_BUCKET</code></a></li>
-        <li><a><code>AWS_S3_KEY_PREFIX</code></a></li>
-        <li><a><code>CANONICAL_LINK_PREFIX</code></a></li>
+        <li><code>AWS_S3_REGION</code></li>
+        <li><code>AWS_S3_BUCKET</code></li>
+        <li><code>AWS_S3_KEY_PREFIX</code></li>
+        <li><code>CANONICAL_LINK_PREFIX</code></li>
       </ul>
 
       <p>The build process also expects the AWS environment to be set up to allow access to the bucket.</p>
@@ -1045,16 +1126,16 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
         <figcaption>GitHub workflow file.</figcaption>
       </figure>
 
-      <p>The workflow file defines the following environment variabls:</p>
+      <p>The workflow file defines the following environment variables:</p>
 
       <dl>
         <dt><code>AWS_S3_REGION</code></dt>
-        <dd>Used to set <a><code>AWS_S3_REGION</code></a>.</dd>
+        <dd>Used to set <code>AWS_S3_REGION</code>.</dd>
         <dt><code>AWS_S3_BUCKET</code></dt>
-        <dd>Used to set <a><code>AWS_S3_BUCKET</code></a>.</dd>
-        <dt><dfn><code>CANONICAL_LINK_PREFIX</code></dfn></dt>
+        <dd>Used to set <code>AWS_S3_BUCKET</code>.</dd>
+        <dt><code>CANONICAL_LINK_PREFIX</code></dt>
         <dd>If set, used to generate the links to publication artifacts that are referenced from the GitHub pull request.</dd>
-        <dt><dfn><code>AWS_ROLE</code></dfn></dt>
+        <dt><code>AWS_ROLE</code></dt>
         <dd>ARN of the AWS role used by the workflow to upload files to S3 (see <a href="#sec-aws-integration"></a>).</dd>
       </dl>
 
@@ -1062,11 +1143,11 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       is automatically added to the pull request. The links use one of the following prefixes:</p>
 
       <ul>
-        <li><code><a>CANONICAL_LINK_PREFIX</a>/<a>AWS_S3_KEY_PREFIX</a></code>, if <a><code>CANONICAL_LINK_PREFIX</code></a> is set;</li>
-        <li><code>http://<a>AWS_S3_BUCKET</a>.s3-website-<a>AWS_S3_REGION</a>.amazonaws.com/<a>AWS_S3_KEY_PREFIX</a></code>, otherwise.</li>
+        <li><code>CANONICAL_LINK_PREFIX/AWS_S3_KEY_PREFIX</code>, if <code>CANONICAL_LINK_PREFIX</code> is set;</li>
+        <li><code>http://AWS_S3_BUCKET.s3-website-AWS_S3_REGION.amazonaws.com/AWS_S3_KEY_PREFIX</code>, otherwise.</li>
       </ul>
 
-      <p>The workflow file automatically sets <a><code>AWS_S3_KEY_PREFIX</code></a> to the name of the repository.</p>
+      <p>The workflow file automatically sets <code>AWS_S3_KEY_PREFIX</code> to the name of the repository.</p>
 
     </section>
 
@@ -1076,11 +1157,11 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       <p>The tooling uploads publication artifacts to an S3 bucket according to the following parameters:</p>
 
       <dl>
-        <dt><dfn><code>AWS_S3_REGION</code></dfn></dt>
+        <dt><code>AWS_S3_REGION</code></dt>
         <dd>Region where the S3 bucket lives, e.g., <code>us-west-1</code></dd>
-        <dt><dfn><code>AWS_S3_BUCKET</code></dfn></dt>
+        <dt><code>AWS_S3_BUCKET</code></dt>
         <dd>Name of the S3 bucket, e.g., <code>html-doc-pub</code></dd>
-        <dt><dfn><code>AWS_S3_KEY_PREFIX</code></dfn></dt>
+        <dt><code>AWS_S3_KEY_PREFIX</code></dt>
         <dd>Prefix used when creating the S3 key where the document is stored, e.g., <code>draft/ag05/</code></dd>
       </dl>
 
@@ -1105,7 +1186,7 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       <figure id="figure-oidc-permissions">
         <pre data-include="snippets/oidc-permissions.json"></pre>
         <figcaption>Permissions granted to the role associated with each GitHub repository, where <code>&lt;name of
-        bucket&gt;</code> is replaced by <a><code>AWS_S3_BUCKET</code></a>.</figcaption>
+        bucket&gt;</code> is replaced by <code>AWS_S3_BUCKET</code>.</figcaption>
       </figure>
 
       <p>The bucket is made public using the policy at <a href="#figure-bucket-policy"></a>.</p>
@@ -1113,12 +1194,25 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
       <figure id="figure-bucket-policy">
         <pre data-include="snippets/bucket-policy.json"></pre>
         <figcaption>Public bucket policy where <code>&lt;name of bucket&gt;</code> is replaced by
-        <a><code>AWS_S3_BUCKET</code></a></figcaption>
+        <code>AWS_S3_BUCKET</code></figcaption>
       </figure>
 
       <p>The contents of the bucket is also made available through a Cloudfront distribution, which allows the publication artifacts
         to be made available through a custom domain name and TLS (currently <code>https://doc.smpte-doc.org/</code>).</p>
     </section>
+
+    <section id="sec-tooling-git-hooks">
+      <h3>Git commit hooks</h3>
+
+      <p>It is advisable to install the git commit hook listed at <a href="#figure-pre-commit-hook"></a>. It detects errors before a
+      document can be committed.</p>
+
+      <figure id="figure-pre-commit-hook">
+        <pre data-include="snippets/pre-commit"></pre>
+        <figcaption>Pre-commit hook that validates the main element.</figcaption>
+      </figure>
+    </section>
+
   </section>
 
   <section id="sec-elements">

@@ -1,5 +1,6 @@
 /*
-Copyright 2022 Pierre-Anthony Lemieux
+Copyright (c) Pierre-Anthony Lemieux
+Copyright (c) Society of Motion Picture and Television Engineers
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -27,10 +28,17 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-_SCRIPT_PATH = (new URL(document.currentScript.src)).pathname;
+import { smpteValidate } from "./js/validate.mjs";
+import * as smpte from "./js/common.mjs";
+
+const _SCRIPT_PATH = (new URL(document.currentScript ? document.currentScript.src : import.meta.url)).pathname;
+
+function getScriptPath() {
+  return _SCRIPT_PATH;
+}
 
 function resolveScriptRelativePath(path) {
-  return _SCRIPT_PATH.split("/").slice(0, -1).concat([path]).join("/");
+  return getScriptPath().split("/").slice(0, -1).concat([path]).join("/");
 }
 
 function resolveStaticResourcePath(resourceName) {
@@ -64,51 +72,30 @@ function fillTemplate(template, data) {
   return template;
 }
 
-function getHeadMetadata(paramName) {
-  let e = document.querySelector("head meta[itemprop='" + paramName + "']");
-
-  if (e === null) return null;
-
-  return e.getAttribute("content");
-}
-
 function loadDocMetadata() {
-  let metadata = {};
 
-  let params = (new URL(document.location)).searchParams;
+  const docMetadata = {...smpte.loadDocumentMetadata(document, logger_)};
 
-  metadata.pubTitle = document.title;
+  for (const [k, v] of (new URL(document.location)).searchParams.entries()) {
+    docMetadata[k] = v;
+  }
 
-  metadata.pubType = params.get("pubType") || getHeadMetadata("pubType");
-  if (["OM", "AG", "ST", "RP"].indexOf(metadata.pubType) === -1)
-    logEvent(`Unknown publication type: ${metadata.pubType}`);
-
-  metadata.pubState = params.get("pubState") || getHeadMetadata("pubState");
-  metadata.pubNumber = params.get("pubNumber") || getHeadMetadata("pubNumber");
-  metadata.pubPart = params.get("pubPart") || getHeadMetadata("pubPart");
-  metadata.pubStage = params.get("pubStage") || getHeadMetadata("pubStage");
-  metadata.pubTC = params.get("pubTC") || getHeadMetadata("pubTC");
-  metadata.pubDateTime = params.get("pubDateTime") || getHeadMetadata("pubDateTime");
-  metadata.effectiveDateTime = params.get("effectiveDateTime") || getHeadMetadata("effectiveDateTime");
-
-  if (["pub", "draft"].indexOf(metadata.pubState) === -1)
-    logEvent(`Unknown publication status: ${metadata.pubState}`);
-
-  return metadata;
+  return docMetadata;
 }
 
 const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{actualPubNumber}}</span></div>
-<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
+<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
+{{revisionOf}}
 <div id="long-doc-type">{{longDocType}}</div>
+<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <h1>{{pubTitle}}</h1>
 <div id="doc-status">{{publicationState}} - {{actualPubDateTime}}</div>
 <hr />`
 
 const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-<span itemprop="publisher">SMPTE</span> <span id="doc-type">{{pubType}}</span> <span id="doc-number">{{pubNumber}}</span></div>
-<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
+<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{actualPubNumber}}</div>
 <div id="long-doc-type">{{longDocType}}</div>
+<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <h1>{{pubTitle}}</h1>
 <div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
 <div id="doc-effective">Effective date: {{effectiveDateTime}}</div>
@@ -118,55 +105,98 @@ const SMPTE_FRONT_MATTER_ID = "sec-front-matter";
 
 function insertFrontMatter(docMetadata) {
 
-
   let sec = document.getElementById(SMPTE_FRONT_MATTER_ID);
 
   if (sec !== null) {
     throw "Front matter section already exists."
   }
 
-  const longDocType = {
-    "AG": "Administrative Guideline",
-    "OM": "Operations Manual",
-    "ST": `${docMetadata.pubStage} Standard`,
-    "RP": `${docMetadata.pubStage} Recommended Pratice`,
-  }[docMetadata.pubType];
+  let longDocType = "";
 
-  if (docMetadata.pubState == "draft")
-    asyncAddStylesheet(resolveScriptRelativePath("css/smpte-draft.css"));
+  switch (docMetadata.pubType) {
+    case smpte.AG_PUBTYPE:
+      longDocType = "Administrative Guideline";
+      break;
+    case smpte.OM_PUBTYPE:
+      longDocType = "Operations Manual";
+      break;
+    case smpte.ST_PUBTYPE:
+      longDocType += "SMPTE Standard";
+      break;
+    case smpte.RP_PUBTYPE:
+      longDocType = "SMPTE Recommended Practice";
+      break;
+    case smpte.EG_PUBTYPE:
+      longDocType = "SMPTE Engineering Guideline";
+      break;
+  }
 
-  const actualPubDateTime = (() => {
-    if (docMetadata.pubDateTime === null || docMetadata.pubState == "draft")
-      return new Date();
+  if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB && smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType))
+    longDocType = `${docMetadata.pubStage} ${longDocType}`;
 
-    return docMetadata.pubDateTime;
-  })();
+  let actualPubDateTime;
 
-  const actualPubNumber = docMetadata.pubPart ? `${docMetadata.pubNumber}-${docMetadata.pubPart}` : docMetadata.pubNumber;
+  if (docMetadata.pubDateTime === null || docMetadata.pubState == smpte.PUB_STATE_DRAFT) {
+    actualPubDateTime = new Date();
+  } else {
+    actualPubDateTime = new Date(docMetadata.pubDateTime).toISOString().slice(0, 10);
+  }
+
+  let actualPubNumber = "";
+  if (docMetadata.pubNumber !== null) {
+    actualPubNumber = `<span itemprop="doc-number" id="doc-number">${docMetadata.pubNumber}</span>`;
+
+    switch (docMetadata.pubType) {
+      case smpte.AG_PUBTYPE:
+      case smpte.OM_PUBTYPE:
+        break;
+      case smpte.ST_PUBTYPE:
+      case smpte.RP_PUBTYPE:
+      case smpte.EG_PUBTYPE:
+        if (docMetadata.pubPart !== null)
+          actualPubNumber += `-<span itemprop="doc-part" id="doc-part">${docMetadata.pubPart}</span>`;
+        if (docMetadata.pubStage === smpte.PUB_STAGE_PUB)
+          actualPubNumber += `:<span itemprop="doc-version" id="doc-version">${docMetadata.pubVersion}</span>`;
+        break;
+    }
+  }
 
   let publicationState;
 
   switch (docMetadata.pubState) {
-    case "draft":
+    case smpte.PUB_STATE_DRAFT:
+      asyncAddStylesheet(resolveScriptRelativePath("css/smpte-draft.css"));
       publicationState = "Draft";
       break;
-    case "pub":
-      if (docMetadata.pubType === "OM")
+    case smpte.PUB_STATE_PUB:
+      if (docMetadata.pubType === smpte.OM_PUBTYPE)
         publicationState = "Approved by Board of Governors";
       else
-        publicationState = "Published";
-      break
-    default:
-      publicationState = "XXX";
+        publicationState = "Approved";
+      break;
   }
+
+  let boilerplate;
+
+  if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.OM_PUBTYPE)
+    boilerplate = SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE;
+  else
+    boilerplate = SMPTE_FRONT_MATTER_BOILERPLATE;
+
+
+  let revisionOf = "";
+
+  if (docMetadata.pubRevisionOf !== null)
+    revisionOf = `<div id="revision-text">Revision of <span id="revision-of">${docMetadata.pubRevisionOf}</span></div>`;
 
   sec = document.createElement("section");
   sec.className = "unnumbered";
   sec.id = SMPTE_FRONT_MATTER_ID;
 
   sec.innerHTML = fillTemplate(
-    docMetadata.pubState === "pub" && docMetadata.pubType === "OM" ? SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE : SMPTE_FRONT_MATTER_BOILERPLATE,
+    boilerplate,
     {
+      revisionOf: revisionOf,
       longDocType: longDocType,
       publicationState: publicationState,
       smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),
@@ -205,7 +235,7 @@ function insertTOC(docMetadata) {
       const heading = subSection.firstElementChild;
 
       if (!heading || !secId) {
-        logEvent(`Section must have a heading and id attribute.`, subSection);
+        logger_.error(`Section must have a heading and id attribute.`, subSection);
         continue;
       }
 
@@ -271,13 +301,13 @@ function insertIntroduction(docMetadata) {
   } else if (h2.length == 1) {
     h2 = h2[0];
   } else {
-    logEvent("Introduction section has multiple headings.");
+    logger_.error("Introduction section has multiple headings.");
     return;
   }
 
   h2.innerText = "Introduction";
 
-  if (docMetadata.pubType === "ST" || docMetadata.pubType === "RP") {
+  if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
     let b = document.createElement("p");
     b.innerHTML = "<em>This section is entirely informative and does not form an integral part of this Engineering Document.</em>";
     sec.insertBefore(b, h2.nextSibling)
@@ -290,7 +320,7 @@ function insertScope(docMetadata) {
   const sec = document.getElementById(SMPTE_SCOPE_ID);
 
   if (sec === null) {
-    logEvent("Missing required scope section.");
+    logger_.error("Missing required scope section.");
     return;
   }
 
@@ -302,7 +332,7 @@ function insertScope(docMetadata) {
   } else if (h2.length == 1) {
     h2 = h2[0];
   } else {
-    logEvent("Scope section has multiple headings.");
+    logger_.error("Scope section has multiple headings.");
     return;
   }
 
@@ -315,9 +345,9 @@ const SMPTE_NORM_REFS_ID = "sec-normative-references";
 function insertNormativeReferences(docMetadata) {
   let sec = document.getElementById(SMPTE_NORM_REFS_ID);
 
-  if (docMetadata.pubType == "OM") {
+  if (docMetadata.pubType == smpte.OM_PUBTYPE) {
     if (sec !== null)
-      logEvent("OM must not contain normative references.");
+      logger_.error("OM must not contain normative references.");
     return;
   }
 
@@ -349,7 +379,7 @@ function insertNormativeReferences(docMetadata) {
   } else if (h2.length == 1) {
     h2 = h2[0];
   } else {
-    logEvent("Normative reference section has multiple headings.");
+    logger_.error("Normative reference section has multiple headings.");
     return;
   }
 
@@ -367,9 +397,9 @@ const SMPTE_TERMS_ID = "sec-terms-and-definitions";
 function insertTermsAndDefinitions(docMetadata) {
   let sec = document.getElementById(SMPTE_TERMS_ID);
 
-  if (docMetadata.pubType == "OM") {
+  if (docMetadata.pubType == smpte.OM_PUBTYPE) {
     if (sec !== null)
-      logEvent("OM must not contain terms and definitions.");
+      logger_.error("OM must not contain terms and definitions.");
     return;
   }
 
@@ -410,7 +440,7 @@ function insertTermsAndDefinitions(docMetadata) {
   } else if (h2.length == 1) {
     h2 = h2[0];
   } else {
-    logEvent("Terms and definitions section has multiple headings.");
+    logger_.error("Terms and definitions section has multiple headings.");
     return;
   }
 
@@ -424,7 +454,7 @@ function insertBibliography(docMetadata) {
     return;
 
   if (sec.childElementCount === 0) {
-    logEvent(`No informational references listed, Bibliography section must be removed`)
+    logger_.error(`No informational references listed, Bibliography section must be removed`)
   }
 
   sec.classList.add("unnumbered");
@@ -437,7 +467,7 @@ function insertBibliography(docMetadata) {
   } else if (h2.length == 1) {
     h2 = h2[0];
   } else {
-    logEvent("Bibliography section has multiple headings.");
+    logger_.error("Bibliography section has multiple headings.");
     return;
   }
 
@@ -459,7 +489,7 @@ function insertElementsAnnex(docMetadata) {
     return;
 
   if (sec.children.length !== 1 || sec.firstElementChild.tagName !== "OL") {
-    logEvent(`Elements section must contain a single <ol> element.`);
+    logger_.error(`Elements section must contain a single <ol> element.`);
     return;
   }
 
@@ -493,7 +523,7 @@ function insertElementsAnnex(docMetadata) {
     if (e.title) {
       e.parentElement.insertBefore(document.createTextNode(" " + e.title + " "), e);
     } else {
-      logEvent("All links listed in the Elements Annex must have a title attribute.")
+      logger_.error("All links listed in the Elements Annex must have a title attribute.")
     }
 
   }
@@ -505,9 +535,9 @@ function insertConformance(docMetadata) {
 
   let sec = document.getElementById(SMPTE_CONFORMANCE_ID);
 
-  if (docMetadata.pubType == "OM") {
+  if (docMetadata.pubType == smpte.OM_PUBTYPE) {
     if (sec !== null)
-      logEvent("OM must not contain a Conformance section.");
+      logger_.error("OM must not contain a Conformance section.");
     return;
   }
 
@@ -520,7 +550,7 @@ function insertConformance(docMetadata) {
 
   let implConformance = "";
 
-  if (docMetadata.pubType !== "AG") {
+  if (docMetadata.pubType !== smpte.AG_PUBTYPE) {
 
     if (sec.innerText.trim().length === 0) {
 
@@ -536,7 +566,7 @@ function insertConformance(docMetadata) {
     }
 
   } else if (sec.innerText.trim().length !== 0) {
-    logEvent("Conformance section not used in AGs.");
+    logger_.error("Conformance section not used in AGs.");
   }
 
   sec.innerHTML = `
@@ -545,7 +575,7 @@ function insertConformance(docMetadata) {
    conformance language keywords: "shall", "should", or "may". Informative text is text that is potentially
     helpful to the user, but not indispensable, and can be removed, changed, or added editorially without
      affecting interoperability. Informative text does not contain any conformance keywords. </p>
-     
+
   <p>All text in this document is, by default, normative, except: the Introduction, any section explicitly
   labeled as "Informative" or individual paragraphs that start with "Note:" </p>
 
@@ -573,7 +603,7 @@ ${implConformance}
 
 const SMPTE_FOREWORD_ID = "sec-foreword";
 
-SMPTE_AG_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
+const SMPTE_AG_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
 <p><a href="https://www.smpte.org">SMPTE (the Society of
 Motion Picture and Television Engineers)</a> is an
 internationally-recognized standards developing organization. Headquartered
@@ -590,10 +620,9 @@ in its Standards Operations Manual.</p>
 interpretation of the SMPTE Standards Operations Manual. In the event of a
 conflict, the Operations Manual shall prevail.</p>
 
-<p id="copyright-text">Copyright © The Society of Motion Picture and
-Television Engineers.</p>`
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span> SMPTE</span>, 45 Hamilton Ave., White Plains NY 10601, (914) 761-1100.</p>`
 
-SMPTE_DOC_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
+const SMPTE_DOC_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
 <p><a href="https://www.smpte.org">SMPTE (the Society of
 Motion Picture and Television Engineers)</a> is an
 internationally-recognized standards developing organization. Headquartered
@@ -606,12 +635,16 @@ with other standards-developing organizations, including ISO, IEC and ITU.
 SMPTE Engineering Documents are drafted in accordance with the rules given
 in its Standards Operations Manual.</p>
 
+<p>At the time of publication no notice had been received by SMPTE claiming patent
+rights essential to the implementation of this Engineering Document.
+However, attention is drawn to the possibility that some of the elements of this document may be the subject of patent rights.
+SMPTE shall not be held responsible for identifying any or all such patent rights.</p>
+
 {{authorProse}}
 
-<p id="copyright-text">Copyright © The Society of Motion Picture and
-Television Engineers.</p>`
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span> SMPTE</span>, 45 Hamilton Ave., White Plains NY 10601, (914) 761-1100.</p>`
 
-SMPTE_DRAFT_WARNING = `
+const SMPTE_DRAFT_WARNING = `
 <div id="sec-draft-warning">
 <strong>Warning:</strong> This document is an unpublished, confidential work under development and shall not be referred
 to as a SMPTE Standard,
@@ -624,13 +657,13 @@ patent rights of which they are aware and to provide supporting documentation.
 function insertForeword(docMetadata) {
   let sec = document.getElementById(SMPTE_FOREWORD_ID);
 
-  if (docMetadata.pubType == "OM") {
+  if (docMetadata.pubType == smpte.OM_PUBTYPE) {
     if (sec !== null)
-      logEvent("OM must not contain a Foreword section.");
+      logger_.error("OM must not contain a Foreword section.");
     return;
   }
 
-  if (sec === null && docMetadata.pubType != "OM") {
+  if (sec === null && docMetadata.pubType != smpte.OM_PUBTYPE) {
     sec = document.createElement("section");
     sec.id = SMPTE_FOREWORD_ID;
     document.body.insertBefore(sec, document.getElementById(SMPTE_FRONT_MATTER_ID).nextSibling);
@@ -640,19 +673,19 @@ function insertForeword(docMetadata) {
 
   let authorProse = sec.innerHTML;
 
-  if (docMetadata.pubType == "ST" || docMetadata.pubType == "RP") {
+  if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
     authorProse = `<p>This document was prepared by Technology Committee ${docMetadata.pubTC}.</p>` + authorProse;
 
-    if (docMetadata.pubStage !== "PUB")
+    if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB)
       authorProse += SMPTE_DRAFT_WARNING;
   }
 
-  if (docMetadata.pubType == "AG") {
+  if (docMetadata.pubType == smpte.AG_PUBTYPE) {
     if (authorProse.trim().length > 0)
-      logEvent("AGs cannot contain author-specified Foreword prose.")
-    sec.innerHTML = SMPTE_AG_FOREWORD_BOILERPLATE;
+      logger_.error("AGs cannot contain author-specified Foreword prose.")
+    sec.innerHTML = fillTemplate(SMPTE_AG_FOREWORD_BOILERPLATE, {copyrightYear: (new Date()).getFullYear()});
   } else {
-    sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse});
+    sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});
   }
 
 }
@@ -703,7 +736,7 @@ function numberSections(element, curHeadingNumber) {
 
     const headingLabel = document.createElement("span");
     headingLabel.className = "heading-label";
-    
+
     if (child.classList.contains("annex")) {
       numText = String.fromCharCode(annexCounter++);
       headingNum.innerText = numText;
@@ -743,14 +776,14 @@ function numberTables() {
     for (let table of section.querySelectorAll("table")) {
 
       if (!table.id) {
-        logEvent(`Table is missing an id`, table);
+        logger_.error(`Table is missing an id`, table);
         continue;
       }
 
       const caption = table.querySelector("caption");
 
       if (caption === null) {
-        logEvent("Table is missing a caption", table);
+        logger_.error("Table is missing a caption", table);
         continue;
       }
 
@@ -789,26 +822,26 @@ function numberFigures() {
     for (let figure of section.querySelectorAll("figure")) {
 
       const figcaption = figure.querySelector("figcaption");
-  
+
       if (figcaption === null) {
-        logEvent("Figure is missing a caption", figure);
+        logger_.error("Figure is missing a caption", figure);
         continue;
       }
 
       const headingLabel = document.createElement("span");
       headingLabel.className = "heading-label";
-  
+
       const headingNumberElement = document.createElement("span");
       headingNumberElement.className = "heading-number";
       headingNumberElement.innerText = numPrefix + counter;
-      
+
       headingLabel.appendChild(document.createTextNode("Figure "));
       headingLabel.appendChild(headingNumberElement);
       headingLabel.appendChild(document.createTextNode(" –⁠ "));
 
 
       figcaption.insertBefore(headingLabel, figcaption.firstChild);
-      
+
       counter++;
     }
 
@@ -841,47 +874,6 @@ function numberNotes() {
 
     } else if (notes.length === 1) {
       notes[0].insertBefore(document.createTextNode(`NOTE — `), notes[0].firstChild);
-    }
-
-  }
-}
-
-function numberElements() {
-  let counter = 1;
-
-  for (let e of document.querySelectorAll("#sec-elements li")) {
-
-    let numPrefix = "";
-
-    if (section.classList.contains("annex")) {
-      counter = 1;
-      numPrefix = section.querySelector(".heading-number").innerText + ".";
-    }
-
-    for (let figure of section.querySelectorAll("figure")) {
-
-      const figcaption = figure.querySelector("figcaption");
-  
-      if (figcaption === null) {
-        logEvent(`Figure is missing a caption`);
-        continue;
-      }
-
-      const headingLabel = document.createElement("span");
-      headingLabel.className = "heading-label";
-  
-      const headingNumberElement = document.createElement("span");
-      headingNumberElement.className = "heading-number";
-      headingNumberElement.innerText = numPrefix + counter;
-      
-      headingLabel.appendChild(document.createTextNode("Figure "));
-      headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" –⁠ "));
-
-
-      figcaption.insertBefore(headingLabel, figcaption.firstChild);
-      
-      counter++;
     }
 
   }
@@ -933,7 +925,7 @@ function resolveLinks(docMetadata) {
     const baseTerm = _normalizeTerm(dfn.textContent);
 
     if (baseTerm.length == 0) {
-      logEvent("Missing term in definition", dfn);
+      logger_.error("Missing term in definition", dfn);
       continue;
     }
 
@@ -956,7 +948,7 @@ function resolveLinks(docMetadata) {
     }();
 
     if (termExists) {
-      logEvent("Duplicate definition", dfn);
+      logger_.error("Duplicate definition", dfn);
       continue;
     }
 
@@ -964,7 +956,7 @@ function resolveLinks(docMetadata) {
       const id = baseTerm.replace(/\s/g,"-");
 
       if (id.match(/[a-zA-Z]\w*/) === null) {
-        logEvent("Cannot auto-generate id", dfn);
+        logger_.error("Cannot auto-generate id", dfn);
         continue;
       }
 
@@ -1000,7 +992,7 @@ function resolveLinks(docMetadata) {
         const term = _normalizeTerm(anchor.textContent);
 
         if (! definitions.has(term)) {
-          logEvent("Unresolved link", anchor);
+          logger_.error("Unresolved link", anchor);
         } else {
           anchor.href = "#" + definitions.get(term).id;
           anchor.classList.add("dfn-ref");
@@ -1021,7 +1013,7 @@ function resolveLinks(docMetadata) {
       let target = document.getElementById(target_id);
 
       if (! target) {
-        logEvent("Anchor points to non-existent href", anchor);
+        logger_.error("Anchor points to non-existent href", anchor);
         anchor.innerText = "????";
         continue
       }
@@ -1041,7 +1033,7 @@ function resolveLinks(docMetadata) {
 
       } else if (target.localName === "figure") {
         anchor.innerText = "Figure " + target.querySelector(".heading-number").innerText
-        
+
       } else if (target.localName === "section") {
 
         const targetNumber = target.querySelector(".heading-number").innerText;
@@ -1061,17 +1053,17 @@ function resolveLinks(docMetadata) {
         anchor.innerText = "Element " + target.parentElement.querySelector(".heading-number").innerText;
 
       } else {
-        logEvent("Anchor points to ambiguous href", anchor)
+        logger_.error("Anchor points to ambiguous href", anchor)
         anchor.innerText = "????";
       }
 
     } else if (contents !== "") {
 
       /* nothing to do */
-      
+
     } else {
 
-      logEvent("Empty anchor", anchor);
+      logger_.error("Empty anchor", anchor);
 
     }
   }
@@ -1122,40 +1114,59 @@ function render() {
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
   addHeadingLinks(docMetadata);
-}
 
-var _events = [];
-
-function logEvent(msg, element) {
-  if (element !== undefined) {
-    if (!element.hasAttribute("id") || !element.id) {
-      element.id = Math.floor(Math.random() * 1000000000);
-    }
-    element.classList.add("invalid-tag");
+  /* debug print version */
+  if (docMetadata.media === "print") {
+    let pagedJS = document.createElement("script");
+    pagedJS.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
+    pagedJS.id = "paged-js-script";
+    document.head.appendChild(pagedJS);
   }
-  _events.push({msg: msg, elementId: element === undefined ? null : element.id});
 }
 
-function listEvents() {
-  return _events;
+class Logger {
+  constructor() {
+    this.events = [];
+  }
+
+  error(msg, element) {
+    if (element !== undefined) {
+      if (!element.hasAttribute("id") || !element.id) {
+        element.id = Math.floor(Math.random() * 1000000000);
+      }
+      element.classList.add("invalid-tag");
+    }
+    this.events.push({msg: msg, elementId: element === undefined ? null : element.id});
+  }
+
+  hasError() {
+    return this.events.length > 0;
+  }
+
+  errorList() {
+    return this.events;
+  }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  try {
+const logger_ = new Logger();
+
+document.addEventListener('DOMContentLoaded', async () => {
+   try {
     asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
+    smpteValidate(window.document, logger_);
     render();
   } catch (e) {
-    logEvent(e);
+    logger_.error(e);
   }
 
-  if (listEvents().length > 0) {
+  if (logger_.hasError()) {
 
     asyncAddStylesheet(resolveScriptRelativePath("css/smpte-errors.css"));
 
     const eventList = document.createElement('ol');
     eventList.id = "event-list";
 
-    for (const event of listEvents()) {
+    for (const event of logger_.errorList()) {
       const li = document.createElement('li');
       li.innerHTML = event.msg + (event.elementId === null ? "" : ` (<a href='#${event.elementId}'>link</a>)`);
       eventList.appendChild(li);
@@ -1166,3 +1177,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
+
+window.smpteGetScriptPath = getScriptPath;
+window.smpteLogger = logger_;

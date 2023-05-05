@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 import * as path from "path";
 import * as fs from "fs";
-import * as process from "process";
+import process from "process";
 import { S3Client, PutObjectCommand} from "@aws-sdk/client-s3";
 import * as puppeteer from "puppeteer";
 import * as child_process from "child_process";
@@ -141,6 +141,8 @@ function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
 
 async function build(buildPaths, baseRef, lastEdRef) {
 
+  const generatedFiles = {};
+
   /* make sure the document directory does not contain conflicting names */
 
   if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubStaticDirName)))
@@ -171,12 +173,22 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   fs.writeFileSync(buildPaths.renderedDocPath, renderedDoc.docHTML);
 
+  generatedFiles.html = buildPaths.renderedDocName;
+
   /* mirror static directory */
 
   mirrorDirExcludeTooling(
     path.join(path.dirname(renderedDoc.scriptPath), buildPaths.pubStaticDirName),
     path.join(buildPaths.pubDirPath, buildPaths.pubStaticDirName)
     );
+
+  /* create pdf */
+
+  const pdfFileName = renderedDoc.docTitle + ".pdf";
+
+  child_process.execSync(`npx pagedjs-cli ${buildPaths.renderedDocPath} -o "${path.join(buildPaths.pubDirPath, pdfFileName)}"`);
+
+  generatedFiles.pdf = pdfFileName;
 
   /* generate base redline, if requested */
 
@@ -186,6 +198,7 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
     try {
       await generateRedline(buildPaths, baseRef, buildPaths.baseRedLineRefPath, buildPaths.baseRedlinePath);
+      generatedFiles.baseRedline = buildPaths.baseRedlineName;
     } catch (e) {
       console.warn(`Could not generate a redline: ${e}.`);
     }
@@ -200,12 +213,14 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
     try {
       await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
+      generatedFiles.pubRedline = buildPaths.pubRedlineName;
     } catch (e) {
       console.warn(`Could not generate a redline: ${e}.`);
     }
 
   }
 
+  return generatedFiles;
 }
 
 async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
@@ -226,14 +241,39 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
 }
 
-async function s3Upload(buildPaths, versionKey) {
+async function generatePubLinks(buildPaths, pubLinks) {
+  let linksDocContents = "# Review links\n";
+
+  if (pubLinks) {
+    if ("clean" in pubLinks)
+      linksDocContents += `[Clean](${encodeURI(pubLinks.clean)})\n`;
+
+    if ("pdf" in pubLinks)
+      linksDocContents += `[Clean PDF](${encodeURI(pubLinks.pdf)})\n`;
+
+    if ("baseRedline" in pubLinks)
+      linksDocContents += `[Redline to current draft](${encodeURI(pubLinks.baseRedline)})\n`;
+
+    if ("pubRedline" in pubLinks)
+      linksDocContents += `[Redline to most recent edition](${encodeURI(pubLinks.pubRedline)})\n`;
+
+  } else {
+    linksDocContents += "No links available";
+  }
+
+  fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
+}
+
+async function s3Upload(buildPaths, versionKey, generatedFiles) {
   const s3Region = process.env.AWS_S3_REGION;
   const s3Bucket = process.env.AWS_S3_BUCKET;
   const s3KeyPrefix = process.env.AWS_S3_KEY_PREFIX;
 
-  let linksDocContents = "# Review links\n";
+  let pubLinks = null;
 
   if (s3Region && s3Bucket && s3KeyPrefix) {
+
+    pubLinks = {};
 
     const s3Client = new S3Client({ region: s3Region });
 
@@ -241,32 +281,54 @@ async function s3Upload(buildPaths, versionKey) {
 
     console.log(`Uploading to bucket ${s3Bucket} at key ${s3PubKeyPrefix}`);
 
+    /* create links files */
+
+    if (generatedFiles !== undefined) {
+
+      const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
+
+      pubLinks.clean = `${deployPrefix}${s3PubKeyPrefix}`;
+      let htmlLinks = `<p><a href="${encodeURI(generatedFiles.html)}">Clean</a></p>`;
+
+      if ("pdf" in generatedFiles) {
+        pubLinks.pdf = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
+        htmlLinks += `<p><a href="${encodeURI(generatedFiles.pdf)}">Clean PDF</a></p>`;
+      }
+
+      if ("baseRedline" in generatedFiles) {
+        pubLinks.baseRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
+        htmlLinks += `<p><a href="${encodeURI(generatedFiles.baseRedline)}">Redline to current draft</a></p>`;
+      }
+
+      if ("pubRedline" in generatedFiles) {
+        pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
+        htmlLinks += `<p><a href="${encodeURI(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>`;
+      }
+
+      fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta http-equiv="x-ua-compatible" content="ie=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Publication artifacts</title>
+          <link rel="icon" href="data:,">
+        </head>
+        <body>
+          ${htmlLinks}
+        </body>
+      </html>`);
+
+    }
+
     s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
-
-    /* create links */
-
-    const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
-
-    const cleanURL = `${deployPrefix}${s3PubKeyPrefix}`;
-    linksDocContents += `[Clean](${encodeURI(cleanURL)})\n`
-
-    if (fs.existsSync(buildPaths.baseRedlinePath)) {
-      const baseRedlineURL = `${deployPrefix}${s3PubKeyPrefix}${buildPaths.baseRedlineName}`;
-      linksDocContents += `[Redline to current draft](${encodeURI(baseRedlineURL)})\n`
-    }
-
-    if (fs.existsSync(buildPaths.pubRedlinePath)) {
-      const pubRedlineURL = `${deployPrefix}${s3PubKeyPrefix}${buildPaths.pubRedlineName}`;
-      linksDocContents += `[Redline to most recent edition](${encodeURI(pubRedlineURL)})\n`
-    }
 
   } else {
     console.warn("Skipping AWS upload. One of the following environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX.");
 
-    linksDocContents += "No links available";
   }
 
-  fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
+  return pubLinks;
 }
 
 async function render(docPath) {
@@ -289,9 +351,9 @@ async function render(docPath) {
 
     await page.goto(pageURL);
 
-    const docTitle = await page.evaluate(() => document.title);
+    const docTitle = await page.evaluate(() => document.getElementById("doc-designator").innerText + " " + document.title);
 
-    const scriptPath = await page.evaluate(() => _SCRIPT_PATH);
+    const scriptPath = await page.evaluate(() => typeof _SCRIPT_PATH !== "undefined" ? _SCRIPT_PATH /* for compatibility */ : smpteGetScriptPath());
 
     await page.evaluate(() => {
       /* remove all scripts */
@@ -304,8 +366,9 @@ async function render(docPath) {
       document.getElementById("smpte-logo").src = "static/smpte-logo.png";
 
       /* refuse to render if there are page errors */
-      if (listEvents().length) {
-        for (let event of listEvents())
+      const errorList = typeof smpteLogger !== "undefined" ? smpteLogger.errorList() : listEvents(); /* for compatibility */
+      if (errorList.length > 0) {
+        for (let event of errorList)
           console.error(`  ${event.msg}\n`);
         throw new Error(`Page has errors`);
       }
@@ -346,7 +409,9 @@ class BuildPaths {
     this.refDirPath = path.join(this.buildDirPath, "ref");
     this.renderedRefDocPath = path.join(this.buildDirPath, "ref.html");
 
-    this.pubLinksPath = path.join(this.buildDirPath, "pr-links.md")
+    this.pubLinksPath = path.join(this.buildDirPath, "pr-links.md");
+
+    this.pubArtifactsPath = path.join(this.pubDirPath, "pub-artifacts.html");
 
     this.pubRedlineName = "pub-rl.html";
     this.pubRedlinePath = path.join(this.pubDirPath, this.pubRedlineName);
@@ -429,12 +494,12 @@ async function main() {
 
   /* build document */
 
-  await build(buildPaths, baseRef, config.lastEdRef);
+  const generatedFiles = await build(buildPaths, baseRef, config.lastEdRef);
 
   /* validate rendered document */
 
   try {
-    child_process.execSync(`html5validator --errors-only "${buildPaths.renderedDocPath}"`);
+    child_process.execSync(`html5validator --ignore "error: CSS:" --errors-only "${buildPaths.renderedDocPath}"`);
   } catch (e) {
     console.error(e.stdout.toString());
     throw Error("Rendered document validation failed.");
@@ -449,9 +514,12 @@ async function main() {
 
   /* deploy to S3 */
 
-  s3Upload(buildPaths, branchName);
+  s3Upload(buildPaths, branchName, generatedFiles);
 
-  s3Upload(buildPaths, commitHash);
+  const pubLinks = await s3Upload(buildPaths, commitHash, generatedFiles);
+
+  if (pubLinks)
+    generatePubLinks(buildPaths, pubLinks);
 
 }
 

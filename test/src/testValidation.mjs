@@ -40,18 +40,26 @@ async function _test(path) {
 
   const logger = new ErrorLogger();
 
-  smpteValidate(dom.window.document, logger);
+  let hasThrown = false;
 
-  const hasPassed = (expectation === "valid") ? !logger.hasFailed() : logger.hasFailed();
+  try {
+    smpteValidate(dom.window.document, logger);
+  } catch (e) {
+    logger.error(`Exception: ${e.stack}`);
+    hasThrown = true;
+  }
 
-  if (hasPassed) {
+  const hasPassed = !logger.hasFailed() && !hasThrown;
+
+  if ((expectation === "valid" && hasPassed) || (expectation !== "valid" && !hasPassed)) {
     console.log(`${path} passed.`);
-  } else {
-    console.log(`**** ${path} failed.`);
-    logger.errorList().map(msg => console.log(`    ${msg}`))
-  } 
+    return true;
+  }
 
-  return hasPassed;
+  console.log(`**** ${path} failed.`);
+  logger.errorList().map(msg => console.log(`    ${msg}`))
+
+  return false;
 }
 
 const testResults = await Promise.all(fs.readdirSync(testDirPath).map(n => _test(path.join(testDirPath, n))));

@@ -26,7 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 import * as jsdom from "jsdom"
-import * as process from "process";
+import process from "process";
 import * as fs from "fs";
 import {smpteValidate} from "../js/validate.mjs";
 
@@ -35,4 +35,4 @@ async function main() {
   smpteValidate(dom.window.document, console);
 }
 
-main().catch(e => { console.error(e) });
+main().catch(e => { console.error(e); process.exitCode = 1; });
