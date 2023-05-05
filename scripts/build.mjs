@@ -514,9 +514,9 @@ async function main() {
 
   /* deploy to S3 */
 
-  s3Upload(buildPaths, branchName, generatedFiles);
+  const pubLinks = await s3Upload(buildPaths, branchName, generatedFiles);
 
-  const pubLinks = await s3Upload(buildPaths, commitHash, generatedFiles);
+  s3Upload(buildPaths, commitHash, generatedFiles);
 
   if (pubLinks)
     generatePubLinks(buildPaths, pubLinks);
