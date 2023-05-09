@@ -18,7 +18,7 @@ runs:
 
     - name: Confirm that the right workflow is active
       shell: bash
-      run: cmp ${GITHUB_ACTION_PATH}/../.github/workflows/main.yml ${GITHUB_ACTION_PATH}/../../.github/workflows/main.yml
+      run: cmp ${GITHUB_ACTION_PATH}/../.github/workflows/main.yml .github/workflows/main.yml
 
     - name: Install vnu
       shell: bash
