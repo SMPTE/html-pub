@@ -258,6 +258,9 @@ async function generatePubLinks(buildPaths, pubLinks) {
     if ("pubRedline" in pubLinks)
       linksDocContents += `[Redline to most recent edition](${encodeURI(pubLinks.pubRedline)})\n`;
 
+    if ("zip" in pubLinks)
+      linksDocContents += `[ZIP package](${encodeURI(pubLinks.zip)})\n`;
+
   } else {
     linksDocContents += "No links available";
   }
@@ -307,6 +310,11 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
   if ("pubRedline" in generatedFiles) {
     pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
     htmlLinks += `<p><a href="${encodeURI(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>`;
+  }
+
+  if ("zip" in generatedFiles) {
+    pubLinks.zip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.zip}`;
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.zip)}">Zip file</a></p>`;
   }
 
   fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
