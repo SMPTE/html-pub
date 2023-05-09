@@ -15,6 +15,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+
+    - name: Confirm that the right workflow is active
+      shell: bash
+      run: cmp ${GITHUB_ACTION_PATH}/../.github/workflows/main.yml ${GITHUB_ACTION_PATH}/../../.github/workflows/main.yml
+
     - name: Install vnu
       shell: bash
       run: sudo pip install html5validator==0.4.2
