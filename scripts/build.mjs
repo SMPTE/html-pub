@@ -370,14 +370,14 @@ async function makeZip(buildPaths, generatedFiles, docMetadata) {
   if (docMetadata.pubType)
     comps.push(docMetadata.pubType);
 
-  if (docMetadata.pubStage)
-    comps.push(docMetadata.pubStage);
-
   if (docMetadata.pubNumber)
     comps.push(docMetadata.pubNumber);
 
   if (docMetadata.pubPart)
     comps.push(docMetadata.pubPart);
+
+  if (docMetadata.pubStage)
+    comps.push(docMetadata.pubStage);
 
   comps.push(new Date().toISOString().slice(0, 10));
 
