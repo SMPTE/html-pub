@@ -266,19 +266,23 @@ section#sec-toc span.heading-number {
 table {
   font-size: 0.8rem;
   border-collapse: collapse;
-  margin-left: auto;
-  margin-right: auto;
+  margin: auto;
+  break-inside: avoid;
 }
 
-table, th, td {
+th, td {
   border: 1px solid black;
   padding: 5px;
 }
 
-thead th {
+th {
   background-color: lightgrey;
   font-weight: bold;
   text-align: center;
+}
+
+tr th {
+  text-align: left;
 }
 
 table > caption {
@@ -288,6 +292,10 @@ table > caption {
   font-size: 0.8rem;
   text-align: center;
   break-after: avoid;
+  break-inside: avoid;
+}
+
+tbody, tr, thead, th {
   break-inside: avoid;
 }
 
