@@ -355,7 +355,7 @@ async function makeZip(buildPaths, generatedFiles, docMetadata) {
     zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.pdf));
 
   if ("pubRedline" in generatedFiles)
-    zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.pubRedline), "redline.html");
+    zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.pubRedline));
 
   /* create zip filename */
 
