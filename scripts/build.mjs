@@ -33,6 +33,7 @@ import * as puppeteer from "puppeteer";
 import * as child_process from "child_process";
 import { argv } from "process";
 import * as jsdom from "jsdom";
+import AdmZip from "adm-zip";
 
 import { smpteValidate, ErrorLogger } from "../js/validate.mjs";
 
@@ -257,6 +258,9 @@ async function generatePubLinks(buildPaths, pubLinks) {
     if ("pubRedline" in pubLinks)
       linksDocContents += `[Redline to most recent edition](${encodeURI(pubLinks.pubRedline)})\n`;
 
+    if ("zip" in pubLinks)
+      linksDocContents += `[ZIP package](${encodeURI(pubLinks.zip)})\n`;
+
   } else {
     linksDocContents += "No links available";
   }
@@ -269,66 +273,124 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
   const s3Bucket = process.env.AWS_S3_BUCKET;
   const s3KeyPrefix = process.env.AWS_S3_KEY_PREFIX;
 
-  let pubLinks = null;
-
-  if (s3Region && s3Bucket && s3KeyPrefix) {
-
-    pubLinks = {};
-
-    const s3Client = new S3Client({ region: s3Region });
-
-    const s3PubKeyPrefix = s3KeyPrefix + versionKey + "/";
-
-    console.log(`Uploading to bucket ${s3Bucket} at key ${s3PubKeyPrefix}`);
-
-    /* create links files */
-
-    if (generatedFiles !== undefined) {
-
-      const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
-
-      pubLinks.clean = `${deployPrefix}${s3PubKeyPrefix}`;
-      let htmlLinks = `<p><a href="${encodeURI(generatedFiles.html)}">Clean</a></p>`;
-
-      if ("pdf" in generatedFiles) {
-        pubLinks.pdf = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
-        htmlLinks += `<p><a href="${encodeURI(generatedFiles.pdf)}">Clean PDF</a></p>`;
-      }
-
-      if ("baseRedline" in generatedFiles) {
-        pubLinks.baseRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
-        htmlLinks += `<p><a href="${encodeURI(generatedFiles.baseRedline)}">Redline to current draft</a></p>`;
-      }
-
-      if ("pubRedline" in generatedFiles) {
-        pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
-        htmlLinks += `<p><a href="${encodeURI(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>`;
-      }
-
-      fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="utf-8" />
-          <meta http-equiv="x-ua-compatible" content="ie=edge" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Publication artifacts</title>
-          <link rel="icon" href="data:,">
-        </head>
-        <body>
-          ${htmlLinks}
-        </body>
-      </html>`);
-
-    }
-
-    s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
-
-  } else {
+  if (!(s3Region && s3Bucket && s3KeyPrefix)) {
     console.warn("Skipping AWS upload. One of the following environment variables is not set: AWS_S3_REGION, AWS_S3_BUCKET, AWS_S3_KEY_PREFIX.");
-
+    return null;
   }
 
+  const pubLinks = {};
+
+  const s3Client = new S3Client({ region: s3Region });
+
+  const s3PubKeyPrefix = s3KeyPrefix + versionKey + "/";
+
+  console.log(`Uploading to bucket ${s3Bucket} at key ${s3PubKeyPrefix}`);
+
+  /* create publication links, links file and zip file */
+
+  const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
+
+  let htmlLinks;
+
+  if ("html" in generatedFiles) {
+    pubLinks.clean = `${deployPrefix}${s3PubKeyPrefix}`;
+    htmlLinks = `<p><a href="${encodeURI(generatedFiles.html)}">Clean</a></p>`;
+  }
+
+  if ("pdf" in generatedFiles) {
+    pubLinks.pdf = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pdf)}">Clean PDF</a></p>`;
+  }
+
+  if ("baseRedline" in generatedFiles) {
+    pubLinks.baseRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.baseRedline)}">Redline to current draft</a></p>`;
+  }
+
+  if ("pubRedline" in generatedFiles) {
+    pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>`;
+  }
+
+  if ("zip" in generatedFiles) {
+    pubLinks.zip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.zip}`;
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.zip)}">Zip file</a></p>`;
+  }
+
+  fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="x-ua-compatible" content="ie=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Publication artifacts</title>
+      <link rel="icon" href="data:,">
+    </head>
+    <body>
+      ${htmlLinks}
+    </body>
+  </html>`);
+
+  s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
+
   return pubLinks;
+}
+
+async function makeZip(buildPaths, generatedFiles, docMetadata) {
+  var zip = new AdmZip();
+
+  if (fs.existsSync(buildPaths.pubElementsPath))
+    zip.addLocalFolder(buildPaths.pubElementsPath, buildPaths.pubElementsDirName);
+
+  if (fs.existsSync(buildPaths.pubStaticPath))
+    zip.addLocalFolder(buildPaths.pubStaticPath, buildPaths.pubStaticDirName);
+
+  if (fs.existsSync(buildPaths.pubMediaPath))
+    zip.addLocalFolder(buildPaths.pubMediaPath, buildPaths.pubMediaDirName);
+
+  if ("html" in generatedFiles)
+    zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.html));
+
+  if ("pdf" in generatedFiles)
+    zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.pdf));
+
+  if ("baseRedline" in generatedFiles)
+    zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.baseRedline));
+
+  if ("pubRedline" in generatedFiles)
+    zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.pubRedline));
+
+  /* create zip filename */
+
+  const comps = [];
+
+  if (docMetadata.pubTC)
+    comps.push(docMetadata.pubTC);
+
+  if (docMetadata.pubType)
+    comps.push(docMetadata.pubType);
+
+  if (docMetadata.pubNumber)
+    comps.push(docMetadata.pubNumber);
+
+  if (docMetadata.pubPart)
+    comps.push(docMetadata.pubPart);
+
+  if (docMetadata.pubStage)
+    comps.push(docMetadata.pubStage);
+
+  comps.push(new Date().toISOString().slice(0, 10));
+
+  if (docMetadata.pubState)
+    comps.push(docMetadata.pubState);
+
+  const zipFn = comps.join("-").toLowerCase() + ".zip";
+
+  /* write zip file */
+
+  zip.writeZip(path.join(buildPaths.pubDirPath, zipFn));
+
+  return zipFn;
 }
 
 async function render(docPath) {
@@ -400,6 +462,8 @@ class BuildPaths {
     this.buildDirPath = "build";
 
     this.pubStaticDirName = "static";
+    this.pubMediaDirName = "media";
+    this.pubElementsDirName = "elements";
 
     this.pubDirPath = path.join(this.buildDirPath, "pub");
 
@@ -412,6 +476,10 @@ class BuildPaths {
     this.pubLinksPath = path.join(this.buildDirPath, "pr-links.md");
 
     this.pubArtifactsPath = path.join(this.pubDirPath, "pub-artifacts.html");
+
+    this.pubMediaPath = path.join(this.pubDirPath,  this.pubMediaDirName);
+    this.pubStaticPath = path.join(this.pubDirPath, this.pubStaticDirName);
+    this.pubElementsPath = path.join(this.pubDirPath, this.pubElementsDirName);
 
     this.pubRedlineName = "pub-rl.html";
     this.pubRedlinePath = path.join(this.pubDirPath, this.pubRedlineName);
@@ -487,7 +555,7 @@ async function main() {
 
   const dom = new jsdom.JSDOM(fs.readFileSync(buildPaths.docPath));
 
-  smpteValidate(dom.window.document, logger);
+  const docMetadata = smpteValidate(dom.window.document, logger);
 
   if (logger.hasFailed())
     throw Error(`SMPTE schema validation failed:\n${logger.errorList().join("\n")}`);
@@ -504,6 +572,10 @@ async function main() {
     console.error(e.stdout.toString());
     throw Error("Rendered document validation failed.");
   }
+
+  /* generate zip file */
+
+  generatedFiles.zip = await makeZip(buildPaths, generatedFiles, docMetadata)
 
   /* skip deployment if validating only */
 

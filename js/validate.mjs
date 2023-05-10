@@ -56,6 +56,7 @@ export class ErrorLogger {
 export function smpteValidate(doc, logger) {
   const docMetadata = smpte.validateHead(doc.head, logger);
   validateBody(doc.body, logger);
+  return docMetadata;
 }
 
 class TerminalPhrasingMatcher {
