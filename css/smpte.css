@@ -337,6 +337,23 @@ figure {
   margin-top: 2em;
 }
 
+/* equations */
+
+div.equation {
+  display: table;
+  width: 100%;
+}
+
+div.equation > math {
+  width: 90%;
+  text-align: center;
+}
+
+div.equation > .heading-label {
+  display: table-cell;
+  text-align: right;
+}
+
 /* references */
 
 #sec-bibliography ul, #sec-normative-references ul {

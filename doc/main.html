@@ -1033,6 +1033,46 @@ do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/q&gt;</pre>
 
       </section>
 
+      <section id="sec-equations">
+        <h4>Equations</h4>
+
+        <p>Mathematical equations are specified using the HTML <code>math</code> element.</p>
+
+        <p>Unless specified otherwise, equations are inline.</p>
+
+        <div class="example">
+          <pre>
+One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;msup&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;&lt;mo&gt;+&lt;/mo&gt;
+&lt;mi&gt;b&lt;/mi&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;/mrow&gt;&lt;/math&gt; to find the position.
+</pre>
+          <p>results in:</p>
+          <p>One needs to evaluate <math><mrow><mi>y</mi><mo>=</mo><mi>a</mi><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo>
+          <mi>b</mi><mi>x</mi><mo>+</mo><mi>c</mi></mrow></math> to find the position.</p>
+        </div>
+
+
+        <p>Block equations are specified by wrapping a single <code>math</code> element whose <code>display</code> attribute is
+        <code>"block"</code> in a <code>div</code> element whose class is<code>equation</code>. Block equations are numbered and can
+        be referenced: see, for example, <a href="#eq-1"></a>.</p>
+
+        <div class="example">
+          <pre>
+&lt;div class=&quot;equation&quot; id=&quot;eq-1&quot;&gt;
+&lt;math display="block"&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;msup&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;&lt;mo&gt;+&lt;/mo&gt;
+&lt;mi&gt;b&lt;/mi&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;/mrow&gt;&lt;/math&gt;
+&lt;/div&gt;
+</pre>
+          <p>results in:</p>
+          <div class="equation" id="eq-1">
+          <math display="block"><mrow><mi>y</mi><mo>=</mo><mi>a</mi><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo>
+          <mi>b</mi><mi>x</mi><mo>+</mo><mi>c</mi></mrow></math>
+          </div>
+        </div>
+
+        <p class="note">Tools such as <a>https://temml.org/</a> can be used to convert from Latex to MathML.</p>
+
+      </section>
+
     </section>
   </section>
 

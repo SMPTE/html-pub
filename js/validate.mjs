@@ -153,6 +153,21 @@ class PMatcher {
   }
 }
 
+class EqDivMatcher {
+  static match(element, logger) {
+    if (element.localName !== "div" || element.className !== "equation")
+      return false;
+
+    if (element.childElementCount !== 1 || element.firstElementChild.localName !== "math")
+      logger.error(`Equation div must contain a single math element`, element);
+
+    if (element.id === null)
+      logger.error("Equation div is missing an id attribute", element);
+
+    return true;
+  }
+}
+
 class DivMatcher {
   static match(element, logger) {
     if (element.localName !== "div")
@@ -419,6 +434,7 @@ class TableMatcher {
 
 const ALL_BLOCK_MATCHERS = [
   PMatcher,
+  EqDivMatcher,
   DivMatcher,
   UlMatcher,
   OlMatcher,
