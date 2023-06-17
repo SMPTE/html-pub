@@ -848,7 +848,7 @@ function numberFigures() {
   }
 }
 
-function numberEquations() {
+function numberFormulae() {
   let counter = 1;
 
   for (let section of document.querySelectorAll("body > section")) {
@@ -860,7 +860,7 @@ function numberEquations() {
       numPrefix = section.querySelector(".heading-number").innerText + ".";
     }
 
-    for (let equation of section.querySelectorAll("div[class=equation]")) {
+    for (let formula of section.querySelectorAll("div[class=formula]")) {
 
       const eqLabel = document.createElement("span");
       eqLabel.className = "heading-label";
@@ -871,7 +871,7 @@ function numberEquations() {
 
       eqLabel.appendChild(headingNumberElement);
 
-      equation.appendChild(eqLabel);
+      formula.appendChild(eqLabel);
 
       counter++;
     }
@@ -1065,7 +1065,7 @@ function resolveLinks(docMetadata) {
       } else if (target.localName === "figure") {
         anchor.innerText = "Figure " + target.querySelector(".heading-number").innerText
 
-      } else if (target.localName === "div" && target.className === "equation") {
+      } else if (target.localName === "div" && target.className === "formula") {
         anchor.innerText = "Formula " + target.querySelector(".heading-number").innerText
 
       } else if (target.localName === "section") {
@@ -1143,7 +1143,7 @@ function render() {
   numberSections(document.body, "");
   numberTables();
   numberFigures();
-  numberEquations();
+  numberFormulae();
   numberNotes();
   numberExamples();
   resolveLinks(docMetadata);
