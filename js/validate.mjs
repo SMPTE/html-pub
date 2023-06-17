@@ -155,14 +155,14 @@ class PMatcher {
 
 class EqDivMatcher {
   static match(element, logger) {
-    if (element.localName !== "div" || element.className !== "equation")
+    if (element.localName !== "div" || element.className !== "formula")
       return false;
 
     if (element.childElementCount !== 1 || element.firstElementChild.localName !== "math")
-      logger.error(`Equation div must contain a single math element`, element);
+      logger.error(`Formula div must contain a single math element`, element);
 
     if (element.id === null)
-      logger.error("Equation div is missing an id attribute", element);
+      logger.error("Formula div is missing an id attribute", element);
 
     return true;
   }
