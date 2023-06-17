@@ -385,10 +385,12 @@ pre {
 
 code {
   font-family: Consolas, Monaco, monospace;
+  padding: 0.1rem;
+}
 
+code:hover {
   background-color: #ededed;
   border-radius: 0.2rem;
-  padding: 0.1rem;
 }
 
 /* warning */
