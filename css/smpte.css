@@ -311,18 +311,6 @@ figure > img {
 
 /* figures */
 
-figure.equation > figcaption {
-  float:right;
-  font-size: 0.9rem;
-  font-weight: normal;
-  margin:0;
-}
-
-figure.equation {
-  margin:0;
-  text-align: center;
-}
-
 figcaption {
   margin-top: 1em;
   margin-bottom: 2em;
@@ -335,6 +323,23 @@ figcaption {
 
 figure {
   margin-top: 2em;
+}
+
+/* formulae */
+
+div.formula {
+  display: table;
+  width: 100%;
+}
+
+div.formula > math {
+  width: 90%;
+  text-align: center;
+}
+
+div.formula > .heading-label {
+  display: table-cell;
+  text-align: right;
 }
 
 /* references */

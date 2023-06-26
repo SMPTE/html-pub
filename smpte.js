@@ -848,6 +848,37 @@ function numberFigures() {
   }
 }
 
+function numberFormulae() {
+  let counter = 1;
+
+  for (let section of document.querySelectorAll("body > section")) {
+
+    let numPrefix = "";
+
+    if (section.classList.contains("annex")) {
+      counter = 1;
+      numPrefix = section.querySelector(".heading-number").innerText + ".";
+    }
+
+    for (let formula of section.querySelectorAll("div[class=formula]")) {
+
+      const eqLabel = document.createElement("span");
+      eqLabel.className = "heading-label";
+
+      const headingNumberElement = document.createElement("span");
+      headingNumberElement.className = "heading-number";
+      headingNumberElement.innerText = "(" + numPrefix + counter + ")";
+
+      eqLabel.appendChild(headingNumberElement);
+
+      formula.appendChild(eqLabel);
+
+      counter++;
+    }
+
+  }
+}
+
 function numberNotes() {
 
   for (let section of document.querySelectorAll("section")) {
@@ -1034,6 +1065,9 @@ function resolveLinks(docMetadata) {
       } else if (target.localName === "figure") {
         anchor.innerText = "Figure " + target.querySelector(".heading-number").innerText
 
+      } else if (target.localName === "div" && target.className === "formula") {
+        anchor.innerText = "Formula " + target.querySelector(".heading-number").innerText
+
       } else if (target.localName === "section") {
 
         const targetNumber = target.querySelector(".heading-number").innerText;
@@ -1109,6 +1143,7 @@ function render() {
   numberSections(document.body, "");
   numberTables();
   numberFigures();
+  numberFormulae();
   numberNotes();
   numberExamples();
   resolveLinks(docMetadata);
