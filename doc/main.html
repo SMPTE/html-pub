@@ -1074,18 +1074,15 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
 
       <section id="sec-special-characters">
         <h4>Special Characters</h4>
-        <p>Special characters and/or character sets from languages other than base latin should be represented as thier base HTML code value. 
+        <p>Special characters and/or character sets from languages other than base latin should be represented as thier actual unicode character, not at their HTML entity. 
         </p>
           <div class="example">
             <pre>
-The following is the Japanese Hiragana letter A (unicode U+3041): &quot;&amp;#x3042;&quot;
+To render the Japanese Hiragana letter A (unicode U+3041), use “あ” rather than &quot;&amp;#x3042;&quot;
 </pre>
-            <p>results in:</p>
-            The following is the Japanese Hiragana letter A (unicode U+3041): "&#x3042;" U+3041;  “あ”
-          </div>
-        
     
       </section>
+      
 
     </section>
   
