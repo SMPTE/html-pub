@@ -24,6 +24,11 @@ runs:
       shell: bash
       run: sudo pip install html5validator==0.4.2
 
+    - name: Install langauge pack
+      shell: bash
+      run: sudo apt-get install language-pack-ja
+      run: sudo apt-get install japan*
+
     - name: Install node dependencies
       shell: bash
       run: npm install ${GITHUB_ACTION_PATH}/..
