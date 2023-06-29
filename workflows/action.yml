@@ -27,7 +27,6 @@ runs:
     - name: Install langauge pack
       shell: bash
       run: sudo apt-get install language-pack-ja
-      run: sudo apt-get install japan*
 
     - name: Install node dependencies
       shell: bash
