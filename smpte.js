@@ -756,6 +756,9 @@ function numberSections(element, curHeadingNumber) {
     }
 
     heading.insertBefore(headingLabel, heading.firstChild);
+    if (child.dataset.informative === "true") {
+      heading.appendChild(document.createTextNode(" (Informative)"))
+    } 
     numberSections(child, numText);
   }
 
