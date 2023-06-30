@@ -267,7 +267,6 @@ table {
   font-size: 0.8rem;
   border-collapse: collapse;
   margin: auto;
-  break-inside: avoid;
   min-width: 40%;
 }
 
@@ -299,7 +298,7 @@ table > caption {
   break-inside: avoid;
 }
 
-tbody, tr, thead, th {
+tr, thead {
   break-inside: avoid;
 }
 
