@@ -287,7 +287,7 @@
         <p>The <code>body</code> element shall consist of an ordered sequence of <code>section</code> elements, as specified at <a
         href="#tab-body-structure"></a>.</p>
 
-        <table id="tab-body-structure">
+        <table id="tab-body-structure" class="col-2-center">
           <caption>Ordered sequence of <code>section</code> elements comprising the <code>body</code> element.</caption>
           <thead>
             <tr>
@@ -886,6 +886,11 @@
         <div class="example">
 <code>&lt;a href=&quot;#tab-sample-tabledata&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#tab-sample-tabledata"></a>.
         </div>
+
+        <p> 
+          For more examples of various table layouts and optional cell/column text alignment, see <a href="#sec-table-examples"></a>
+        </p>
+
       </section>
 
       <section id="sec-snippets-element">
@@ -1226,6 +1231,350 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
         <pre data-include="snippets/pre-commit"></pre>
         <figcaption>Pre-commit hook that validates the main element.</figcaption>
       </figure>
+    </section>
+
+  </section>
+
+  <section class="annex" id="sec-table-examples">
+    <h2>Table Examples</h2>
+    <section id="sec-table-alignment">
+      <h3>Alignment</h3>
+
+      <section id="sec-table-alignment-default">
+        <h4>Default Alignment</h4>
+        <p>
+          By default, table headers within <code>thead</code> are set to <code>text-align: center;</code>, and cells within the body <code>tbody</code> are set to <code>text-align: left;</code>, as the below example shows.
+        </p>
+
+        <pre data-include="snippets/tab-sample-tabledata-defaultalign.txt"></pre>
+        <p>is rendered as</p>
+        <table id="tab-sample-tabledata-defaultalign">
+          <caption>Default Alignment Table Sample</caption>
+          <thead>
+            <tr>
+              <th>Sample Number</th>
+              <th>Sample Name</th>
+              <th>Sample Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0001</td>
+              <td>Name 01</td>
+              <td><code>Code 1</code></td>
+            </tr>
+            <tr>
+              <td>0002</td>
+              <td>Name 02</td>
+              <td><code>Code 2</code></td>
+            </tr>
+            <tr>
+              <td>0003</td>
+              <td>Name 03</td>
+              <td><code>Code 3</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+      </section>
+      
+      <section id="sec-table-alignment-column">
+        <h4>Column Alignment</h4>
+
+        <p>
+          To change the alignment of an entire column, a class such as <code>col-3-center</code> may be added to the <code>table</code> denoting which column to center align, as the below example shows. 
+        </p>
+
+        <pre data-include="snippets/tab-sample-tabledata-colcenter.txt"></pre>
+        
+        <p>is rendered as</p>
+
+        <table id="tab-sample-tabledata-colcenter" class="col-3-center">
+          <caption><code>col-x-center</code> Table Sample</caption>
+          <thead>
+            <tr>
+              <th>Sample Number</th>
+              <th>Sample Name</th>
+              <th>Sample Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0001</td>
+              <td>Name 01</td>
+              <td><code>Code 1</code></td>
+            </tr>
+            <tr>
+              <td>0002</td>
+              <td>Name 02</td>
+              <td><code>Code 2</code></td>
+            </tr>
+            <tr>
+              <td>0003</td>
+              <td>Name 03</td>
+              <td><code>Code 3</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="note">
+          Classes are available to center align columns 1-8 (as <code>col-x-center</code>), and mutliple classes to <code>table</code> may be added to align more columns as needed.
+        </p>
+        <p class="note">
+          Tables over 8 columns wide should not be used and instead split into multiple smaller tables.
+        </p>
+      </section>
+
+      <section id="sec-table-alignment-cell">
+        <h4>Cell Alignment</h4>
+
+        <p>
+          To change the alignment of a individual cell, the class <code>center-cell</code> may be added to each <code>td</code> as needed, as the below example shows. 
+        </p>
+
+        <pre data-include="snippets/tab-sample-tabledata-centercell.txt"></pre>
+        
+        <p>is rendered as</p>
+
+        <table id="tab-sample-tabledata-centercell">
+          <caption><code>center-cell</code> Table Sample</caption>
+          <thead>
+            <tr>
+              <th>Sample Number</th>
+              <th>Sample Name</th>
+              <th>Sample Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0001</td>
+              <td>Name 01</td>
+              <td><code>Code 1</code></td>
+            </tr>
+            <tr>
+              <td class="center-cell">centered 0002</td>
+              <td>Name 02</td>
+              <td><code>Code 2</code></td>
+            </tr>
+            <tr>
+              <td>0003</td>
+              <td>Name 03</td>
+              <td><code>Code 3</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="note">
+          The <code>center-cell</code> class may be added to as many <code>td</code> as needed.
+        </p>
+     
+        <p>
+          Vertical cell alignment is not available at this time, and the default is set to top. 
+        </p>
+      </section>
+    </section>
+
+    <section id="sec-table-multiheader">
+      <h3>Multiple Headers</h3>
+      <p>
+        To insert additional header(s), use <code>th</code> in place of <code>td</code> within the <code>tr</code> of <code>tbody</code> that will contain the additional header, as the below example shows. 
+      </p>
+      <div class="example">
+        <pre data-include="snippets/tab-sample-tabledata-multiheader.txt"></pre>
+          
+        <p>is rendered as</p>
+
+        <table id="tab-sample-tabledata-multiheader">
+          <caption>Multiple Header Table Sample</caption>
+          <thead>
+            <tr>
+              <th>Sample Number</th>
+              <th>Sample Name</th>
+              <th>Sample Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0001</td>
+              <td>Name 01</td>
+              <td><code>Code 1</code></td>
+            </tr>
+            <tr>
+              <td>0002</td>
+              <td>Name 02</td>
+              <td><code>Code 2</code></td>
+            </tr>
+            <tr>
+              <th>Sample Number 2</th>
+              <th>Sample Name 2</th>
+              <th>Sample Code 2</th>
+            </tr>
+            <tr>
+              <td>0003</td>
+              <td>Name 03</td>
+              <td><code>Code 3</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="sec-table-cellspan">
+      <h3>Cell Spanning</h3>
+      
+      <section id="sec-table-colspan">
+        <h4><code>colspan</code></h4>
+      
+        <p>
+          <code>colspan</code> is supported as needed, as the below example shows.
+        </p>
+
+        <pre data-include="snippets/tab-sample-tabledata-colspan.txt"></pre>
+          
+        <p>is rendered as</p>
+
+        <table id="tab-sample-tabledata-colspan">
+          <caption><code>colspan</code> Table Sample</caption>
+          <thead>
+            <tr>
+              <th>Sample Number</th>
+              <th>Sample Name</th>
+              <th>Sample Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0001</td>
+              <td>Name 01</td>
+              <td><code>Code 1</code></td>
+            </tr>
+            <tr>
+              <td>0002</td>
+              <td>Name 02</td>
+              <td><code>Code 2</code></td>
+            </tr>
+            <tr>
+              <td colspan="3">next section</td>
+            </tr>
+            <tr>
+              <td>0003</td>
+              <td>Name 03</td>
+              <td><code>Code 3</code></td>
+            </tr>
+          </tbody>
+        </table>
+      
+        <p class="note">
+          See <a>https://html.com/tables/rowspan-colspan/</a> for additional information. 
+        </p>
+
+      </section>
+      <section id="sec-table-rowspan">
+        <h4><code>rowspan</code></h4>
+
+        <p>
+          <code>rowspan</code> is supported as needed, as the below example shows.
+        </p>
+
+        <pre data-include="snippets/tab-sample-tabledata-rowspan.txt"></pre>
+          
+        <p>is rendered as</p>
+
+        <table id="tab-sample-tabledata-rowspan">
+          <caption><code>rowspan</code> Table Sample</caption>
+          <thead>
+            <tr>
+              <th>Sample Number</th>
+              <th>Sample Name</th>
+              <th>Sample Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="2">0001</td>
+              <td>Name 01</td>
+              <td><code>Code 1</code></td>
+            </tr>
+            <tr>
+              <td>Name 02</td>
+              <td><code>Code 2</code></td>
+            </tr>
+            <tr>
+              <td>0002</td>
+              <td>Name 03</td>
+              <td><code>Code 3</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="note">
+          See <a>https://html.com/tables/rowspan-colspan/</a> for additional information. 
+        </p>
+      </section>
+    </section>
+    <section id="sec-table-complex-example">
+      <h3>Complex Example</h3>
+      
+      <p>
+        All the various options above are available to be combined as needed to create complex tables, as the below example shows. 
+      </p>
+
+      <pre data-include="snippets/tab-sample-tabledata-complex.txt"></pre>
+        
+      <p>is rendered as</p>
+
+      <table id="tab-sample-tabledata-complex" class="col-3-center col-4-center">
+        <caption>Complex Table Sample</caption>
+        <thead>
+          <tr>
+            <th>Sample Number</th>
+            <th>Sample Name</th>
+            <th>Sample Code</th>
+            <th>Sample Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2">0001</td>
+            <td>Name 01</td>
+            <td><code>Code 1</code></td>
+            <td>Data 01</td>
+          </tr>
+          <tr>
+            <td>Name 02</td>
+            <td class="center-cell"><code>Code 2</code></td>
+            <td>Data 01</td>
+          </tr>
+          <tr>
+            <td>0003</td>
+            <td>Name 03</td>
+            <td><code>Code 3</code></td>
+            <td>Data 01</td>
+          </tr>
+          <tr>
+            <th>Sample Number 2</th>
+            <th>Sample Name 2</th>
+            <th>Sample Code 2</th>
+            <th>Sample Data 2</th>
+          </tr>
+          <tr>
+            <td>0004</td>
+            <td>Name 04</td>
+            <td><code>Code 5</code></td>
+            <td>Data 05</td>
+          </tr>
+          <tr>
+            <td colspan="3" class="center-cell">section of data</td>
+            <td class="center-cell">Data 05.5</td>
+          </tr>
+          <tr>
+            <td>0005</td>
+            <td>Name 05</td>
+            <td><code>Code 5</code></td>
+            <td>Data 06</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
   </section>
