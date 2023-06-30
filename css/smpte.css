@@ -292,35 +292,35 @@ td.center-cell {
   text-align: center;
 }
 
-table.col-1-center td:nth-child(1) {
+table.col-1-center tr td:nth-child(1) {
   text-align: center;
 }
 
-table.col-2-center td:nth-child(2) {
+table.col-2-center tr td:nth-child(2) {
   text-align: center;
 }
 
-table.col-3-center td:nth-child(3) {
+table.col-3-center tr td:nth-child(3) {
   text-align: center;
 }
 
-table.col-4-center td:nth-child(4) {
+table.col-4-center tr td:nth-child(4) {
   text-align: center;
 }
 
-table.col-5-center td:nth-child(5) {
+table.col-5-center tr td:nth-child(5) {
   text-align: center;
 }
 
-table.col-6-center td:nth-child(6) {
+table.col-6-center tr td:nth-child(6) {
   text-align: center;
 }
 
-table.col-7-center td:nth-child(7) {
+table.col-7-center tr td:nth-child(7) {
   text-align: center;
 }
 
-table.col-8-center td:nth-child(8) {
+table.col-8-center tr td:nth-child(8) {
   text-align: center;
 }
 
