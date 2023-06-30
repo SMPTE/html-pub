@@ -37,50 +37,27 @@
   <section id="sec-quick-start">
     <h2>Quick start</h2>
 
-    <section id="sec-for-doc-editors">
-      <h3>For document editors</h3>
-
-      <ol>
-        <li>
-          <a href="https://git-scm.com/">Install the git source control system</a>
-        </li>
-        <li>
-          Install a text editor and local web server. Visual Studio Code (<a>https://code.visualstudio.com/</a>) combined with the
-          <code>ms-vscode.live-server</code> extension
-          (<a>https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server</a>) is one option.
-        </li>
-        <li>
-          Clone the HTML publication template:
+    <ol>
+      <li>
+        <a href="https://git-scm.com/">Install the git source control system</a>
+      </li>
+      <li>
+        Install a text editor and local web server. Visual Studio Code (<a>https://code.visualstudio.com/</a>) combined with the
+        <code>ms-vscode.live-server</code> extension
+        (<a>https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server</a>) is one option.
+      </li>
+      <li>
+        Clone the HTML publication template:
 <pre>git clone --recurse-submodules https://github.com/SMPTE/html-pub-template.git</pre>
-        </li>
-        <li>
-          (Advanced) Add the pre-commit hook specified at <a href="#sec-tooling-git-hooks"></a> by following the instructions at
-          <a>https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks</a>.
-        </li>
-        <li>
-          Start editing the main prose element at <code>html-pub-template/doc/main.html</code>.
-        </li>
-      </ol>
-    </section>
-
-    <section id="sec-for-repo-admins">
-      <h3>For administrators</h3>
-
-      <ol>
-        <li>Follow the steps at <a href="#sec-for-doc-editors"></a>.</li>
-        <li>Add a workflow file:
-<pre>cp tooling/.github .</pre>
-        </li>
-        <li>
-          Add the build configuration file:
-<pre>
-cp tooling/.smpte-build.json .
-</pre>
-        </li>
-        <li>Add the various SMPTE boilerplate documents: <i>REAMDE.md</i>, <i>CONTRIBUTING.md</i>, <i>CONFIDENTIALITY.md</i>,
-        <i>LICENSE.md</i> and <i>PATENTS.md</i>.</li>
-      </ol>
-    </section>
+      </li>
+      <li>
+        (Advanced) Add the pre-commit hook specified at <a href="#sec-tooling-git-hooks"></a> by following the instructions at
+        <a>https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks</a>.
+      </li>
+      <li>
+        Start editing the main prose element at <code>html-pub-template/doc/main.html</code>.
+      </li>
+    </ol>
 
   </section>
 
