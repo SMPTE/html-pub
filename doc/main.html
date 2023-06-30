@@ -1239,11 +1239,13 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
     <h2>Table Examples</h2>
     <section id="sec-table-alignment">
       <h3>Alignment</h3>
-      <p>
-        By default, table headers within <code>thead</code> are set to <code>text-align: center;</code>, and cells within the body <code>tbody</code> are set to <code>text-align: left;</code>, as the below example shows.
-      </p>
 
-      <div class="example">
+      <section id="sec-table-alignment-default">
+        <h4>Default Alignment</h4>
+        <p>
+          By default, table headers within <code>thead</code> are set to <code>text-align: center;</code>, and cells within the body <code>tbody</code> are set to <code>text-align: left;</code>, as the below example shows.
+        </p>
+
         <pre data-include="snippets/tab-sample-tabledata-defaultalign.txt"></pre>
         <p>is rendered as</p>
         <table id="tab-sample-tabledata-defaultalign">
@@ -1273,13 +1275,16 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
             </tr>
           </tbody>
         </table>
-      </div>
 
-      <p>
-        To change the alignment of an entire column, a class such as <code>col-3-center</code> may be added to the <code>table</code> denoting which column to center align, as the below example shows. 
-      </p>
+      </section>
+      
+      <section id="sec-table-alignment-default">
+        <h4>Column Alignment</h4>
 
-      <div class="example">
+        <p>
+          To change the alignment of an entire column, a class such as <code>col-3-center</code> may be added to the <code>table</code> denoting which column to center align, as the below example shows. 
+        </p>
+
         <pre data-include="snippets/tab-sample-tabledata-colcenter.txt"></pre>
         
         <p>is rendered as</p>
@@ -1318,13 +1323,15 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
         <p class="note">
           Tables over 8 columns wide should not be used and instead split into multiple smaller tables.
         </p>
-      </div>
+      </section>
 
-      <p>
-        To change the alignment of a individual cell, the class <code>center-cell</code> may be added to each <code>td</code> as needed, as the below example shows. 
-      </p>
+      <section id="sec-table-alignment-cell">
+        <h4>Cell Alignment</h4>
 
-      <div class="example">
+        <p>
+          To change the alignment of a individual cell, the class <code>center-cell</code> may be added to each <code>td</code> as needed, as the below example shows. 
+        </p>
+
         <pre data-include="snippets/tab-sample-tabledata-centercell.txt"></pre>
         
         <p>is rendered as</p>
@@ -1360,10 +1367,11 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
         <p class="note">
           The <code>center-cell</code> class may be added to as many <code>td</code> as needed.
         </p>
-      </div>
-      <p>
-        Vertical cell alignment is not available at this time, and the default is set to top. 
-      </p>
+     
+        <p>
+          Vertical cell alignment is not available at this time, and the default is set to top. 
+        </p>
+      </section>
     </section>
 
     <section id="sec-table-multiheader">
@@ -1411,13 +1419,16 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
       </div>
     </section>
 
-    <section id="sec-table-colspan-rowspan">
-      <h3><code>colspan</code> and <code>rowspan</code></h3>
-      <p>
-        <code>colspan</code> and <code>rowspan</code> is supported as needed, as the below examples show.
-      </p>
+    <section id="sec-table-cellspan">
+      <h3>Cell Spanning</h3>
+      
+      <section id="sec-table-colspan">
+        <h4><code>colspan</code></h4>
+      
+        <p>
+          <code>colspan</code> is supported as needed, as the below example shows.
+        </p>
 
-      <div class="example">
         <pre data-include="snippets/tab-sample-tabledata-colspan.txt"></pre>
           
         <p>is rendered as</p>
@@ -1452,9 +1463,19 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
             </tr>
           </tbody>
         </table>
-      </div>
+      
+        <p class="note">
+          See <a>https://html.com/tables/rowspan-colspan/</a> for additional information. 
+        </p>
 
-      <div class="example">
+      </section>
+      <section id="sec-table-rowspan">
+        <h4><code>rowspan</code></h4>
+
+        <p>
+          <code>rowspan</code> is supported as needed, as the below example shows.
+        </p>
+
         <pre data-include="snippets/tab-sample-tabledata-rowspan.txt"></pre>
           
         <p>is rendered as</p>
@@ -1485,76 +1506,75 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
             </tr>
           </tbody>
         </table>
-      </div>
 
-      <p class="note">
-        See <a>https://html.com/tables/rowspan-colspan/</a> for additional information. 
-      </p>
-
+        <p class="note">
+          See <a>https://html.com/tables/rowspan-colspan/</a> for additional information. 
+        </p>
+      </section>
     </section>
     <section id="sec-table-complex-example">
       <h3>Complex Example</h3>
+      
       <p>
         All the various options above are available to be combined as needed to create complex tables, as the below example shows. 
       </p>
-      <div class="example">
-        <pre data-include="snippets/tab-sample-tabledata-complex.txt"></pre>
-          
-        <p>is rendered as</p>
 
-        <table id="tab-sample-tabledata-complex" class="col-3-center col-4-center">
-          <caption>Complex Table Sample</caption>
-          <thead>
-            <tr>
-              <th>Sample Number</th>
-              <th>Sample Name</th>
-              <th>Sample Code</th>
-              <th>Sample Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td rowspan="2">0001</td>
-              <td>Name 01</td>
-              <td><code>Code 1</code></td>
-              <td>Data 01</td>
-            </tr>
-            <tr>
-              <td>Name 02</td>
-              <td class="center-cell"><code>Code 2</code></td>
-              <td>Data 01</td>
-            </tr>
-            <tr>
-              <td>0003</td>
-              <td>Name 03</td>
-              <td><code>Code 3</code></td>
-              <td>Data 01</td>
-            </tr>
-            <tr>
-              <th>Sample Number 2</th>
-              <th>Sample Name 2</th>
-              <th>Sample Code 2</th>
-              <th>Sample Data 2</th>
-            </tr>
-            <tr>
-              <td>0004</td>
-              <td>Name 04</td>
-              <td><code>Code 5</code></td>
-              <td>Data 05</td>
-            </tr>
-            <tr>
-              <td colspan="3" class="center-cell">section of data</td>
-              <td class="center-cell">Data 05.5</td>
-            </tr>
-            <tr>
-              <td>0005</td>
-              <td>Name 05</td>
-              <td><code>Code 5</code></td>
-              <td>Data 06</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <pre data-include="snippets/tab-sample-tabledata-complex.txt"></pre>
+        
+      <p>is rendered as</p>
+
+      <table id="tab-sample-tabledata-complex" class="col-3-center col-4-center">
+        <caption>Complex Table Sample</caption>
+        <thead>
+          <tr>
+            <th>Sample Number</th>
+            <th>Sample Name</th>
+            <th>Sample Code</th>
+            <th>Sample Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2">0001</td>
+            <td>Name 01</td>
+            <td><code>Code 1</code></td>
+            <td>Data 01</td>
+          </tr>
+          <tr>
+            <td>Name 02</td>
+            <td class="center-cell"><code>Code 2</code></td>
+            <td>Data 01</td>
+          </tr>
+          <tr>
+            <td>0003</td>
+            <td>Name 03</td>
+            <td><code>Code 3</code></td>
+            <td>Data 01</td>
+          </tr>
+          <tr>
+            <th>Sample Number 2</th>
+            <th>Sample Name 2</th>
+            <th>Sample Code 2</th>
+            <th>Sample Data 2</th>
+          </tr>
+          <tr>
+            <td>0004</td>
+            <td>Name 04</td>
+            <td><code>Code 5</code></td>
+            <td>Data 05</td>
+          </tr>
+          <tr>
+            <td colspan="3" class="center-cell">section of data</td>
+            <td class="center-cell">Data 05.5</td>
+          </tr>
+          <tr>
+            <td>0005</td>
+            <td>Name 05</td>
+            <td><code>Code 5</code></td>
+            <td>Data 06</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
   </section>
