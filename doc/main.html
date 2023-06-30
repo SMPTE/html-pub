@@ -1267,38 +1267,8 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
       </p>
 
       <div class="example">
-        <pre>
-&lt;table id="tab-sample-tabledata-defaultalign"&gt;
-  &lt;caption&gt;Default Alignment Table Sample&lt;/caption&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Sample Number&lt;/th&gt;
-      &lt;th&gt;Sample Name&lt;/th&gt;
-      &lt;th&gt;Sample Code&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0001&lt;/td&gt;
-      &lt;td&gt;Name 01&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 1&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0002&lt;/td&gt;
-      &lt;td&gt;Name 02&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 2&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0003&lt;/td&gt;
-      &lt;td&gt;Name 03&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 3&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-</pre>
-        
+        <pre data-include="snippets/tab-sample-tabledata-defaultalign.txt"></pre>
         <p>is rendered as</p>
-
         <table id="tab-sample-tabledata-defaultalign">
           <caption>Default Alignment Table Sample</caption>
           <thead>
@@ -1333,35 +1303,7 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
       </p>
 
       <div class="example">
-        <pre>
-&lt;table id="tab-sample-tabledata-colcenter" class="col-3-center"&gt;
-  &lt;caption&gt;&lt;code&gt;col-x-center&lt;/code&gt; Table Sample&lt;/caption&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Sample Number&lt;/th&gt;
-      &lt;th&gt;Sample Name&lt;/th&gt;
-      &lt;th&gt;Sample Code&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0001&lt;/td&gt;
-      &lt;td&gt;Name 01&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 1&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0002&lt;/td&gt;
-      &lt;td&gt;Name 02&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 2&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0003&lt;/td&gt;
-      &lt;td&gt;Name 03&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 3&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-</pre>
+        <pre data-include="snippets/tab-sample-tabledata-colcenter.txt"></pre>
         
         <p>is rendered as</p>
 
@@ -1406,35 +1348,7 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
       </p>
 
       <div class="example">
-        <pre>
-&lt;table id="tab-sample-tabledata-centercell"&gt;
-  &lt;caption&gt;&lt;code&gt;center-cell&lt;/code&gt; Table Sample&lt;/caption&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Sample Number&lt;/th&gt;
-      &lt;th&gt;Sample Name&lt;/th&gt;
-      &lt;th&gt;Sample Code&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0001&lt;/td&gt;
-      &lt;td&gt;Name 01&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 1&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td class="center-cell"&gt;centered 0002&lt;/td&gt;
-      &lt;td&gt;Name 02&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 2&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0003&lt;/td&gt;
-      &lt;td&gt;Name 03&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 3&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-</pre>
+        <pre data-include="snippets/tab-sample-tabledata-centercell.txt"></pre>
         
         <p>is rendered as</p>
 
@@ -1481,40 +1395,7 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
         To insert additional header(s), use <code>th</code> in place of <code>td</code> within the <code>tr</code> of <code>tbody</code> that will contain the additional header, as the below example shows. 
       </p>
       <div class="example">
-        <pre>
-&lt;table id="tab-sample-tabledata-multiheader"&gt;
-  &lt;caption&gt;Multiple Header Table Sample&lt;/caption&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Sample Number&lt;/th&gt;
-      &lt;th&gt;Sample Name&lt;/th&gt;
-      &lt;th&gt;Sample Code&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0001&lt;/td&gt;
-      &lt;td&gt;Name 01&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 1&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0002&lt;/td&gt;
-      &lt;td&gt;Name 02&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 2&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Sample Number 2&lt;/th&gt;
-      &lt;th&gt;Sample Name 2&lt;/th&gt;
-      &lt;th&gt;Sample Code 2&lt;/th&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0003&lt;/td&gt;
-      &lt;td&gt;Name 03&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 3&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-</pre>
+        <pre data-include="snippets/tab-sample-tabledata-multiheader.txt"></pre>
           
         <p>is rendered as</p>
 
@@ -1560,38 +1441,7 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
       </p>
 
       <div class="example">
-        <pre>
-&lt;table id="tab-sample-tabledata-colspan"&gt;
-  &lt;caption&gt;&lt;code&gt;colspan&lt;/code&gt; Table Sample&lt;/caption&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Sample Number&lt;/th&gt;
-      &lt;th&gt;Sample Name&lt;/th&gt;
-      &lt;th&gt;Sample Code&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0001&lt;/td&gt;
-      &lt;td&gt;Name 01&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 1&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0002&lt;/td&gt;
-      &lt;td&gt;Name 02&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 2&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td colspan="3"&gt;next section&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0003&lt;/td&gt;
-      &lt;td&gt;Name 03&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 3&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-</pre>
+        <pre data-include="snippets/tab-sample-tabledata-colspan.txt"></pre>
           
         <p>is rendered as</p>
 
@@ -1628,38 +1478,7 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
       </div>
 
       <div class="example">
-        <pre>
-&lt;table id="tab-sample-tabledata-rowspan"&gt;
-  &lt;caption&gt;&lt;code&gt;rowspan&lt;/code&gt; Table Sample&lt;/caption&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Sample Number&lt;/th&gt;
-      &lt;th&gt;Sample Name&lt;/th&gt;
-      &lt;th&gt;Sample Code&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0001&lt;/td&gt;
-      &lt;td&gt;Name 01&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 1&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0002&lt;/td&gt;
-      &lt;td&gt;Name 02&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 2&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td colspan="3"&gt;next section&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0003&lt;/td&gt;
-      &lt;td&gt;Name 03&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 3&lt;/code&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-</pre>
+        <pre data-include="snippets/tab-sample-tabledata-rowspan.txt"></pre>
           
         <p>is rendered as</p>
 
@@ -1702,60 +1521,7 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
         All the various options above are available to be combined as needed to create complex tables, as the below example shows. 
       </p>
       <div class="example">
-        <pre>
-&lt;table id="tab-sample-tabledata-complex" class="col-3-center col-4-center"&gt;
-  &lt;caption&gt;Complex Table Sample&lt;/caption&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Sample Number&lt;/th&gt;
-      &lt;th&gt;Sample Name&lt;/th&gt;
-      &lt;th&gt;Sample Code&lt;/th&gt;
-      &lt;th&gt;Sample Data&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td rowspan="2"&gt;0001&lt;/td&gt;
-      &lt;td&gt;Name 01&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 1&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;Data 01&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Name 02&lt;/td&gt;
-      &lt;td class="center-cell"&gt;&lt;code&gt;Code 2&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;Data 01&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0003&lt;/td&gt;
-      &lt;td&gt;Name 03&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 3&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;Data 01&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Sample Number 2&lt;/th&gt;
-      &lt;th&gt;Sample Name 2&lt;/th&gt;
-      &lt;th&gt;Sample Code 2&lt;/th&gt;
-      &lt;th&gt;Sample Data 2&lt;/th&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0004&lt;/td&gt;
-      &lt;td&gt;Name 04&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 5&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;Data 05&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td colspan="3" class="center-cell"&gt;section of data&lt;/td&gt;
-      &lt;td class="center-cell"&gt;Data 05.5&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0005&lt;/td&gt;
-      &lt;td&gt;Name 05&lt;/td&gt;
-      &lt;td&gt;&lt;code&gt;Code 5&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;Data 06&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-</pre>
+        <pre data-include="snippets/tab-sample-tabledata-complex.txt"></pre>
           
         <p>is rendered as</p>
 
