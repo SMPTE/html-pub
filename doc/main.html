@@ -45,31 +45,21 @@
           <a href="https://git-scm.com/">Install the git source control system</a>
         </li>
         <li>
-          Install a text editor and local web server.
+          Install a text editor and local web server. Visual Studio Code (<a>https://code.visualstudio.com/</a>) combined with the
+          <code>ms-vscode.live-server</code> extension
+          (<a>https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server</a>) is one option.
         </li>
         <li>
-          Create a git repo:
-<pre>mkdir my-git-repo
-cd my-git-repo
-git init</pre>
+          Clone the HTML publication template:
+<pre>git clone --recurse-submodules https://github.com/SMPTE/html-pub-template.git</pre>
         </li>
         <li>
-          Add the HTML tooling as a submodule:
-  <pre>git submodule add https://github.com/SMPTE/html-pub.git tooling</pre>
-        </li>
-        <li>
-          Create a skeleton document:
-<pre>mkdir doc
-cp tooling/doc/snippets/skeleton.html doc/main.html</pre>
-        </li>
-        <li>
-          Add a <code>.gitignore</code> file:
-<pre data-include="snippets/.gitignore"></pre>
-       </li>
-       <li>
-          Add the pre-commit hook specified at <a href="#sec-tooling-git-hooks"></a> by following the instructions at
+          (Advanced) Add the pre-commit hook specified at <a href="#sec-tooling-git-hooks"></a> by following the instructions at
           <a>https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks</a>.
-       </li>
+        </li>
+        <li>
+          Start editing the main prose element at <code>html-pub-template/doc/main.html</code>.
+        </li>
       </ol>
     </section>
 
