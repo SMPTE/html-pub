@@ -1051,6 +1051,34 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
     
       </section>
       
+      <section id="sec-code-element-usage">
+        <h4><code>code</code> HTML Element Usage</h4>
+        <p>
+          The <code>code</code> HTML element should be used inline to wrap the following in body text and headers:
+        </p>
+        <ul>
+          <li>script names (i.e. <code>smpte.js</code>)</li>
+          <li>element names (i.e. <code>head</code>)</li>
+          <li>namespaces (i.e. <code>http://www.smpte-ra.org/schemas/428-7/2014/DCST</code>)</li>
+          <li>elements with attributes/values pairs or values (i.e. <code>&lt;meta charset=&quot;utf-8&quot; /&gt;</code> or <code>&lt;a&gt;term&lt;/a&gt;</code></li>
+          <li>attributes/values pairs (i.e. <code>charset=&quot;utf-8&quot;</code>)</li>
+          <li>element or attribute values (i.e. <code>true</code> or <code>00:00:04:ZeroE</code>)</li>
+          <li>string value patterns (i.e. <code>YYYY-MM-DD</code>)</li>
+        </ul>
+
+        <p class="note">
+          As seen above, namespaces should be wrapped with <code>code</code> and should not include an <code>a</code> element, as they are not meant to be links. 
+        </p>
+
+        <div class="example">
+          <pre>
+This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&gt;code&lt;/code&gt; HTML element. 
+</pre>
+          <p>results in:</p>
+          <p>This is an <code>element</code> that is rendered with the <code>code</code> HTML element.</p>
+        </div>
+    
+      </section>
 
     </section>
   
