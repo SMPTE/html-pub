@@ -608,11 +608,17 @@
 
         <p>Each <code>a</code> element shall have:</p>
         <ul>
-          <li>an <code>id</code> attribute whose value is prefixed with <code>element-</code>;</li>
+          <li>an <code>id</code> attribute whose value is prefixed with <code>element-</code>, and value itterated, starting with <code>a</code> ;</li>
           <li>a <code>title</code> attribute that provides a short description of the element;</li>
-          <li>a <code>href</code> attribute that links to the element itself, typically in the <code>doc/elements</code>
-          directory.</li>
+          <li>a <code>href</code> attribute that links to the element itself</li>
         </ul>
+
+        <p>
+          For elements managed within the main document repo, they shall be placed in the <code>doc/elements</code> directory. For externally managed element(s) within a SMPTE element repo(s), see <a>https://github.com/SMPTE/github-operating-manual</a> for more details for matching the <code>id</code> value to the repo name, and general info about element repos and their requirements. 
+        </p>
+        <p class="note">
+          It is advised to only referenced element repos managed by SMPTE to fullfil license requirements. If an element has been created outside of SMPTE, it should be considered as a bibliographic reference instead. 
+        </p>
 
         <div class="example">
 <pre>&lt;section id=&quot;sec-elements&quot;&gt;
