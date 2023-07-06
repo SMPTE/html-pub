@@ -24,6 +24,10 @@ runs:
       shell: bash
       run: sudo pip install html5validator==0.4.2
 
+    - name: Update apt-get
+      shell: bash
+      run: sudo apt-get update
+
     - name: Install language-pack-ja
       shell: bash
       run: sudo apt-get install language-pack-ja
