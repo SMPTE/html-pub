@@ -135,7 +135,7 @@
       </section>
 
       <section id="sec-pubType">
-        <h4>pubType</h4>
+        <h4><code>pubType</code></h4>
 
         <p>The <code>head</code> element shall contain exactly one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubType</code>.</p>
@@ -152,7 +152,7 @@
       </section>
 
       <section id="sec-pubNumber">
-        <h4>pubNumber</h4>
+        <h4><code>pubNumber</code></h4>
 
         <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubNumber</code>.</p>
@@ -169,7 +169,7 @@
       </section>
 
       <section id="sec-pubPart">
-        <h4>pubPart</h4>
+        <h4><code>pubPart</code></h4>
 
         <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubPart</code>.</p>
@@ -179,7 +179,7 @@
       </section>
 
       <section id="sec-pubVersion">
-        <h4>pubVersion</h4>
+        <h4><code>pubVersion</code></h4>
 
         <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubVersion</code>.</p>
@@ -191,7 +191,7 @@
       </section>
 
       <section id="sec-pubState">
-        <h4>pubState</h4>
+        <h4><code>pubState</code></h4>
 
         <p>The <code>head</code> element shall contain one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubState</code>.</p>
@@ -202,10 +202,15 @@
           <li><code>draft</code>, if the document is a draft.</li>
           <li><code>pub</code>, if the document is published.</li>
         </ul>
-      </section>
 
+        <p>
+          For further explanation of determining the value of the document's <code>pubState</code>, see <a href="#sec-document-status-workflow"></a>
+        </p>
+
+      </section>
+   
       <section id="sec-pubStage">
-        <h4>pubStage</h4>
+        <h4><code>pubStage</code></h4>
 
         <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubStage</code>.</p>
@@ -221,10 +226,15 @@
           <li><code>DP</code>, if the document is a Draft Publication; or</li>
           <li><code>PUB</code>, if the document is a Published.</li>
         </ul>
+
+        <p>
+          For further explanation of determining the value of the document's <code>pubStage</code>, see <a href="#sec-document-status-workflow"></a>
+        </p>
+
       </section>
 
       <section id="sec-pubRevisionOf">
-        <h4>pubRevisionOf</h4>
+        <h4><code>pubRevisionOf</code></h4>
 
         <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubRevisionOf</code>.</p>
@@ -234,7 +244,7 @@
       </section>
 
       <section id="sec-pubTC">
-        <h4>pubTC</h4>
+        <h4><code>pubTC</code></h4>
 
         <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubTC</code>.</p>
@@ -246,7 +256,7 @@
       </section>
 
       <section id="sec-pubDateTime">
-        <h4>pubDateTime</h4>
+        <h4><code>pubDateTime</code></h4>
 
         <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubDateTime</code>.</p>
@@ -259,7 +269,7 @@
       </section>
 
       <section id="sec-effectiveDateTime">
-        <h4>effectiveDateTime</h4>
+        <h4><code>effectiveDateTime</code></h4>
 
         <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>effectiveDateTime</code>.</p>
@@ -1132,6 +1142,10 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
       <div class="example">
   <pre data-include="../.smpte-build.json"></pre>
       </div>
+
+      <p>
+        For further explanation of determining the value of <code>latestEditionTag</code>, see <a href="#sec-document-status-workflow"></a>
+      </p>
     </section>
 
     <section id="sec-gh-integration">
@@ -1232,6 +1246,97 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
         <figcaption>Pre-commit hook that validates the main element.</figcaption>
       </figure>
     </section>
+
+  </section>
+
+
+  <section class="annex" id="sec-document-status-workflow">
+    <h2>Document Status Workflow</h2>
+    
+    <section id="sec-document-mapping-status">
+      <h3>Mapping <code>pubState</code> and <code>pubStage</code> to Document Status</h3>
+      <p>
+        <a href="#tab-document-mapping-status"></a> maps the required values of <code>content</code> for <code>pubState</code> and <code>pubStage</code> during the various stages of document development. 
+      </p>
+      <p class="note">
+        See <a href="#bib-smpte-ag-07"></a> for more info regarding document process flowcharts and mapping these status points. 
+      </p>
+      <table id="tab-document-mapping-status" class="col-2-center col-3-center">
+        <caption>Mapping <code>pubState</code> and <code>pubStage</code> to Document Status</caption>
+        <thead>
+          <tr>
+            <th>Document Status</th>
+            <th><code>pubState</code> <code>content</code> value</th>
+            <th><code>pubStage</code> <code>content</code> value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Undergoing intial draft or revision in DG/SG/WG</td>
+            <td><code>WD</code></td>
+            <td><code>draft</code></td>
+          </tr>
+          <tr>
+            <td>Undergoing pre-FCD review (or) undergoing comment resolution from pre-FCD review (or) undergoing comment resolution from PCD period</td>
+            <td><code>CD</code></td>
+            <td><code>draft</code></td>
+          </tr>
+          <tr>
+            <td>Pre-FCD review complete (or) ready for FCD ballot (or) undergoing FCD ballot (or) ready for PCD (or) currently in PCD period</td>
+            <td><code>CD</code></td>
+            <td><code>pub</code></td>
+          </tr>
+          <tr>
+            <td>FCD ballot complete, undergoing comment resolution</td>
+            <td><code>FCD</code></td>
+            <td><code>draft</code></td>
+          </tr>
+          <tr>
+            <td>FCD ballot comment resolution complete (or) undergoing pre-DP review (or) ready for DP ballot (or) undergoing DP ballot </td>
+            <td><code>FCD</code></td>
+            <td><code>pub</code></td>
+          </tr>
+          <tr>
+            <td>FCD ballot complete with no comments (or) ready for ST Audit (or) undergoing ST audit</td>
+            <td><code>DP</code></td>
+            <td><code>pub</code></td>
+          </tr>
+          <tr>
+            <td>ST audit complete (or) waiting for publication</td>
+            <td><code>PUB</code></td>
+            <td><code>draft</code></td>
+          </tr>
+          <tr>
+            <td>Published</td>
+            <td><code>PUB</code></td>
+            <td><code>pub</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </section>
+
+    <section id="sec-document-github-releases">
+      <h3>GitHub Releases</h3>
+      <p>
+        Whenever the status of the document dictates as per <a href="#tab-document-mapping-status"></a>, that a merged commit to the main branch that updates the document to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>, a release shall be created in the GitHub repo. 
+      </p>
+      <p>
+        The GitHub release shall be named <code>rYYYY-pubState</code>, with a tag assigned to the release that matches the release name. If creating a CD, itterate the <code>pubState</code>, starting with <code>1</code>. 
+      </p>
+      <p class="example">
+        <code>r2023-fcd</code> or <code>r2023-cd2</code>
+      </p>
+      <p class="note">
+        The itteration of CD is to account for multiple possible PCD periods. 
+      </p>
+      <p>
+        When creating the next update on the repo, update <code>latestEditionTag</code> in the <code>.smpte-build.json</code> file to the value equal to the tag name of this latest release. This will trigger the tooling to create a link for <code>Redline to most recent edition</code> during any PRs and merges to the main branch. 
+      </p>
+
+
+    </section>
+
 
   </section>
 
@@ -1592,6 +1697,9 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
       <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
       <li><cite id="bib-smpte-ag-16">SMPTE AG-16</cite>, Standards Style Guide.
       <a>https://www.smpte.org/about/policies-and-governance</a></li>
+      <li><cite id="bib-smpte-ag-07">SMPTE AG-07</cite>, Document Flowcharts
+        .
+        <a>https://www.smpte.org/about/policies-and-governance</a></li>
     </ul>
   </section>
 
