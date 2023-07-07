@@ -24,13 +24,12 @@ runs:
       shell: bash
       run: sudo pip install html5validator==0.4.2
 
-    - name: Install language-pack-ja
+    - name: Install CJK fonts
       shell: bash
-      run: sudo apt-get install language-pack-ja
-
-    - name: Install language-pack-ja
-      shell: bash
-      run: sudo apt-get install japan*
+      run: |
+        sudo apt-get install fonts-noto-cjk
+        sudo apt-get install fonts-indic
+        sudo apt-get install fonts-noto
 
     - name: Install node dependencies
       shell: bash
