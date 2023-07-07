@@ -1345,9 +1345,9 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
     </section>
 
     <section id="sec-sample-workflow">
-      <h3>Sample Workflow</h3>
+      <h3>Sample Workflow </h3>
       <p>
-        <a href="#tab-sample-workflow"></a> shows a sample workflow would be the steps for an <code>ST</code> document going through the standard editing of a revision and balloting process. 
+        <a href="#tab-sample-workflow"></a> shows a sample workflow would be the steps for an Engineering Document going through the an initial draft or revision and the balloting process. 
       </p>
       <table id="tab-sample-workflow">
         <caption>Sample workflow</caption>
@@ -1359,38 +1359,158 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
         </thead>
         <tbody>
           <tr>
-            <td>Project is approved, DG starts drafting the document revision</td>
+            <td>(1) - Project is approved</td>
+            <td>
+              <ol>
+                <li>If document is an intial draft, skip to Workflow Step (2)</li>
+                <li>If document is a revision, skip to Workflow Step (3)</li>
+              </ol>
+            </td>
+          </tr>
+          <tr>
+            <td>(2) - Project is a document initial draft</td>
+            <td>
+              <ol>
+                <li>Follow the steps in <a href="#sec-quick-start"></a> to create repo.</li>
+                <li>A new branch is created from <code>Main</code> called <code>r2023-inititial-draft</code>.</li>
+                <li>Template document is updated in <code>r2023-inititial-draft</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and to <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code>.</li>
+                <li>Document editor creates initial version of the document.</li>
+                <li>A PR is created named <code>2023 Initial Draft</code> from the <code>r2023-inititial-draft</code> branch on GitHub. </li>
+                <li>Skip to Workflow Step (4)</li>
+                </li>
+              </ol>
+            </td>
+          </tr>
+          <tr>
+            <td>(3) - Project is a document revision</td>
             <td>
               <ol>
                 <li>A new branch is created from <code>Main</code> called <code>r2023-revision</code>.</li>
-                <li>Document is updated in <code>r2023-revision</code> to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and to <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code>.</li>
-                <li>A PR is created on GitHub with the changes in <code>r2023-revision</code>, comments are made, and document is updated via more commits.</li>
+                <li>Document is updated in <code>r2023-revision</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and to <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code>.</li>
+                <li>Document editor makes initial changes to the document.</li>
+                <li>A PR is created named <code>2023 Revision</code> from the <code>r2023-revision</code> branch on GitHub. The tooling with create a redline against the most recent edition of the document.</li>
+              </ol>
+            </td>
+          </tr>
+          <tr>
+            <td>(4) - DG meeting(s) held regarding drafting of the document</td>
+            <td>
+              <ol>
+                <li>Comments are received, either by reflector or during meeting(s).</li>
+                <li>Comments and suggested changes are added to issue tracker.</li>
+                <li>Document is updated via more commits in the current PR, closing comments.</li>
+              </ol>
+            </td>
+          </tr>
+          <tr>
+            <td>(5) - DG is complete with drafting the document</td>
+            <td>
+              <ol>
                 <li>PR is approved by document editor and DG chair. PR is merged to <code>Main</code>.</li>
+                <li>The tooling creates the zip needed for TC 2-week preFCD review, with redlines against lastest edition and/or last draft (if applicable)</li>
               </ol>
-                  
+            </td>
+          </tr>
+          
+          <tr>
+            <td>(6) - TC 2-week preFCD review occurs</td>
+            <td>
+              <ol>
+                <li>A new branch is created from <code>Main</code> called <code>r2023-cd1</code>.</li>
+                <li>Document is updated in <code>r2023-cd1</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and <code>&lt;meta itemprop="pubStage" content="CD" /&gt;</code>.</li>
+                <li>A PR is created named <code>r2023 CD1</code> from the <code>r2023-cd1</code> branch on GitHub.</li>
+                <li>If no comments received, skip to Workflow Step (8)</li>
+                <li>If comments are received, continue to Workflow Step (7)</li>
+              </ol>
             </td>
           </tr>
           <tr>
-            <td>DG has completed drafting, and sends to TC for 2-week preFCD review</td>
+            <td>(7) Comments received on pre-FCD ballot review </td>
             <td>
               <ol>
-                <li>A new branch is created from <code>Main</code> called <code>r2023-revision-cd1</code>.</li>
-                <li>Document is updated to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and <code>&lt;meta itemprop="pubStage" content="CD" /&gt;</code>.</li>
-                <li>PR is created on GitHub with the changes. The ZIP file that is generated by the tooling is sent to the TC for review.</li>
+                <li>Document is updated in PR from Workflow Step (6) as needed per comments received.</li>
+                <li>A redline from last draft is created by the tooling as required to resolve comments.</li>
               </ol>
             </td>
           </tr>
           <tr>
-            <td>TC completes 2-week preFCD review, document is ready for ballot</td>
+            <td>(8) Document is ready for FCD ballot</td>
             <td>
               <ol>
-                <li>Document is updated in PR from last step to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-06-15" /&gt;</code> (assumed date of review completion).</li>
-                <li></li>
+                <li>Document is updated in PR from Workflow Step (6) to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-06-15" /&gt;</code> (assumed date of review completion).</li>
+                <li>PR is merged to <code>Main</code>.</li>
+                <li>A release is created targeted at <code>Main</code> named <code>r2023-cd1</code> with a tag of the same name.</li>
+                <li>The ZIP file that is generated by the tooling in <code>Main</code> with required redlines is sent to the TC for FCD ballot.</li>
               </ol>
-               
-              
             </td>
           </tr>
+          <tr>
+            <td>(9) TC conducts FCD ballot</td>
+            <td>
+              <ol>
+                <li>If no comments received, skip to Workflow Step (12)</li>
+                <li>If comments are received, continue to Workflow Step (10)</li>
+              </ol>
+            </td>
+          </tr>
+          <tr>
+            <td>(10) FCD ballot comment resolution</td>
+            <td>
+              <ol>
+                <li>A new branch is created from <code>Main</code> called <code>r2023-revision-fcd-comment-res</code>.</li>
+                <li>Document is updated in <code>r2023-revision-fcd-comment-res</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and <code>&lt;meta itemprop="pubStage" content="FCD" /&gt;</code>.</li>
+                <li>PR is created on GitHub with the changes in <code>r2023-revision-fcd-comment-res</code> as needed to resolve comments. The tooling creates redline for review against the last edition (release <code>r2023-cd1</code>).</li>
+                <Li>Additional commits are added to the PR as need to resolve comments.</Li>
+                <li>Comment resolution ends, document is updated to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-09-15" /&gt;</code> (assumed date of  completion).</li>
+                <li>PR is approved by document editor and DG chair. PR is merged to <code>Main</code>.</li>
+                <li>A release is created targeted at <code>Main</code> named <code>r2023-fcd</code> with a tag of the same name.</li>
+                <li>The ZIP file that is generated by the tooling in <code>Main</code> is sent to the TC for pre-DP review.</li>
+              </ol>
+            </td>
+          </tr>          
+          <tr>
+            <td>(11) TC conducts DP ballot</td>
+            <td>
+              <ol>
+                <li>DP ballot passes, continue to Workflow Step (12)</li>
+              </ol>
+            </td>
+          </tr>
+          <tr>
+            <td>(12) Document is now DP</td>
+            <td>
+              <ol>
+                <li>A new branch is created from <code>Main</code> called <code>r2023-dp</code>.</li>
+                <li>Document is updated in <code>r2023-dp</code> branch to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>, <code>&lt;meta itemprop="pubStage" content="DP" /&gt;</code>, and <code>&lt;meta itemprop="pubDateTime" content="2023-10-15" /&gt;</code> (assumed date of  completion).</li>
+                <li>PR is created on GitHub with the changes as per needed to resolve comments. The tooling creates redline for review against the last edition (release <code>r2023-cd1</code>).</li>
+                <li>PR is approved by document editor and DG chair. PR is merged to <code>Main</code>.</li>
+                <li>A release is created targeted at <code>Main</code> named <code>r2023-dp</code> with a tag of the same name.</li>
+                <li>The ZIP file that is generated by the tooling in <code>Main</code> is sent to ST for ST audit.</li>
+              </ol>
+            </td>
+          </tr>
+          <tr>
+            <td>(13) ST conducts ST audit</td>
+            <td>
+              <ol>
+                <li>ST audit passes, continue to Workflow Step (14)</li>
+              </ol>
+            </td>
+          </tr>
+          <tr>
+            <td>(14) Document is ready for publication</td>
+            <td>
+              <ol>
+                <li>A new branch is created from <code>Main</code> called <code>r2023-pub</code>.</li>
+                <li>Document is updated in <code>r2023-pub</code> branch to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>, <code>&lt;meta itemprop="pubStage" content="pub" /&gt;</code>, and <code>&lt;meta itemprop="pubDateTime" content="2023-11-15" /&gt;</code> (assumed date of  completion).</li>
+                <li>PR is created on GitHub from <code>r2023-pub</code></li>
+                <li>PR is approved by document editor and DG chair. PR is merged to <code>Main</code>.</li>
+                <li>A release is created targeted at <code>Main</code> named <code>r2023-pub</code> with a tag of the same name.</li>
+                <li>The document is now published. Addtional steps may be required by SMPTE HO (TBD).</li>
+              </ol>
+            </td>
+          </tr>
+
         </tbody>
       </table>
 
