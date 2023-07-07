@@ -1697,6 +1697,9 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
       <p>
         <a href="#tab-sample-workflow"></a> shows a sample workflow would be the steps for an Engineering Document going through the an initial draft or revision and the balloting process. 
       </p>
+      <p class="note">
+        Generally, any changes to a document shall never be made directly on the <code>Main</code> branch, which often doesn't allow the tooling to create needed redlines. Changes (regardless of the nature of the change) shall always be made on a new branch and managed via a PR (Pull Request), and then merged to <code>Main</code> after approval, as noted below at the various stages. 
+      </p>
       <table id="tab-sample-workflow" class="col-1-center">
         <caption>Sample workflow</caption>
         <thead>
