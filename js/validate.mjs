@@ -619,7 +619,7 @@ class SectionMatcher {
       logger.error("Section is missing a heading", element);
     }
 
-    let hasSubClauses = false;
+    let subClauseCount = 0;
     let hasBlocks = false;
 
     const subClauseMatcher = new SectionMatcher(this.level + 1);
@@ -628,15 +628,17 @@ class SectionMatcher {
       if (BlockMatcher.match(children[0], logger)) {
         hasBlocks = true;
       } else if (subClauseMatcher.match(children[0], logger)) {
-        hasSubClauses = true;
+        subClauseCount++;
       } else {
         logger.error("Unknown element in clause", element);
       }
       children.shift();
     }
 
-    if (hasSubClauses && hasBlocks)
+    if (subClauseCount > 0 && hasBlocks)
       logger.error("Clause contains both sub-clauses and text", element);
+    else if (subClauseCount === 1)
+      logger.error("Clause contains a single sub-clause", element);
 
     return true;
   }
