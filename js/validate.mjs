@@ -555,8 +555,8 @@ class ExternalDefinitionsMatcher {
 
 
 class InternalDefinitionsMatcher {
-  static match(e, logger) {
-    if (e.localName !== "dl" || e.id !== "terms-int-defs")
+  static match(element, logger) {
+    if (element.localName !== "dl" || element.id !== "terms-int-defs")
       return false;
 
     const children = Array.from(element.children);
