@@ -210,7 +210,7 @@ class DtMatcher {
   }
 }
 
-class DefinitionMatcher {
+class DdMatcher {
   static match(element, logger) {
     if (element.localName !== "dd")
       return false;
@@ -289,20 +289,15 @@ class DlMatcher {
       let ddCount = 0;
 
       /* look for definition */
-      if (children.length > 0 && DefinitionMatcher.match(children[0], logger)) {
+      while (children.length > 0) {
+        if (!DdMatcher.match(children[0], logger))
+          break;
         children.shift();
         ddCount++;
       }
 
-      /* look for definition source */
-      if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
-        children.shift();
-        ddCount++;
-      }
-
-
-      if (ddCount === 0 || ddCount > 2 || dtCount === 0)
-        logger.error(`A definition must consist of one or more dt elements followed by one or two dd elements`, element);
+      if (ddCount === 0 || dtCount === 0)
+        logger.error(`A definition must consist of one or more dt elements followed by one or more dd elements`, element);
 
     }
 
@@ -563,6 +558,39 @@ class InternalDefinitionsMatcher {
   static match(e, logger) {
     if (e.localName !== "dl" || e.id !== "terms-int-defs")
       return false;
+
+    const children = Array.from(element.children);
+
+    while (children.length > 0) {
+
+      let dtCount = 0;
+
+      /* look for dt elements */
+      while (children.length > 0) {
+        if (!DtMatcher.match(children[0], logger))
+          break;
+        children.shift();
+        dtCount++;
+      }
+
+      let ddCount = 0;
+
+      /* look for definition */
+      if (children.length > 0 && DdMatcher.match(children[0], logger)) {
+        children.shift();
+        ddCount++;
+      }
+
+      /* look for definition source */
+      if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
+        children.shift();
+        ddCount++;
+      }
+
+      if (ddCount === 0 || ddCount > 2 || dtCount === 0)
+        logger.error(`A definition must consist of one or more dt elements followed by one or two dd elements`, element);
+
+    }
 
     return true;
   }
