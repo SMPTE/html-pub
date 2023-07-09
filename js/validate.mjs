@@ -103,6 +103,7 @@ class MathMatcher {
 
 
 const ALL_PHRASING_MATCHERS = [
+  new TerminalPhrasingMatcher("abbr"),
   new PhrasingMatcher("b"),
   new PhrasingMatcher("bdo"),
   new PhrasingMatcher("bdi"),
