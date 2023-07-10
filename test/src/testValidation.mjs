@@ -57,7 +57,7 @@ async function _test(path) {
   }
 
   console.log(`**** ${path} failed.`);
-  logger.errorList().map(msg => console.log(`    ${msg}`))
+  logger.errorList().map(msg => console.log(`    ${msg.message}`))
 
   return false;
 }
