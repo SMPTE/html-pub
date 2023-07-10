@@ -1671,7 +1671,7 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
         Whenever the state of the document changes to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> on the <code>main</code> branch, then a release shall be created in the GitHub repo. 
       </p>
       <p>
-        The GitHub release shall be named <code>rYYYY-pubState</code>, with a tag assigned to the release that matches the release name. If creating a CD, itterate the <code>pubState</code>, starting with <code>1</code>. 
+        Both the GitHub release and git tab shall be named <code>"r" YYYY "-" pubStage *DIGIT</code>. The <code>DIGIT</code> starts at <code>1</code> and increases each time the document visits the same document stage. 
       </p>
       <p class="example">
         <code>r2023-fcd</code> or <code>r2023-cd2</code>
