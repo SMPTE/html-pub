@@ -772,8 +772,19 @@
   &lt;dd&gt;&quot;as specified in&quot;&lt;/dd&gt;
   &lt;dd&gt;&quot;details as given in&quot;&lt;/dd&gt;
   &lt;dd&gt;&quot;in accordance with&quot;&lt;/dd&gt;
-&lt;/dl&gt;
-</pre>
+&lt;/dl&gt;</pre>
+
+          <p>is rendered as:</p>
+          <dl>
+            <dt>imperative forms<dt>
+            <dd>"see"</dd>
+            <dt>non-imperative forms</dt>
+            <dd>"according to"</dd>
+            <dd>"as defined in"</dd>
+            <dd>"as specified in"</dd>
+            <dd>"details as given in"</dd>
+            <dd>"in accordance with"</dd>
+          </dl>
         </div>
 
       </section>
@@ -1069,6 +1080,34 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
     
       </section>
       
+      <section id="sec-code-element-usage">
+        <h4>Inline code fragments</h4>
+        <p>
+          Inline code fragments  should be wrapped in a <code>code</code> element. A code fragment is  text that is intended to be used verbatim in computer code, including command line code, including:
+        </p>
+        <ul>
+          <li>script names (i.e. <code>smpte.js</code>)</li>
+          <li>element names (i.e. <code>head</code>)</li>
+          <li>namespaces (i.e. <code>http://www.smpte-ra.org/schemas/428-7/2014/DCST</code>)</li>
+          <li>short code snippets, e.g. <code>&lt;meta charset=&quot;utf-8&quot; /&gt;</code> or <code>int i = 3;</code></li>
+     
+          <li>literal values, e.g., <code>true</code> or <code>00:00:04:ZeroE</code></li>
+          <li>regular expressions or match pattern, e.g., <code>YYYY-MM-DD</code></li>
+        </ul>
+
+        <p class="note">
+          Namespaces are wrapped with a <code>code</code> element and not with an <code>a</code> element since they do not necessarily resolve to a resource. 
+        </p>
+
+        <div class="example">
+          <pre>
+This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&gt;code&lt;/code&gt; HTML element. 
+</pre>
+          <p>results in:</p>
+          <p>This is an <code>element</code> that is rendered with the <code>code</code> HTML element.</p>
+        </div>
+    
+      </section>
 
     </section>
   
