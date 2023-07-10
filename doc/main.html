@@ -608,13 +608,14 @@
 
         <p>Each <code>a</code> element shall have:</p>
         <ul>
-          <li>an <code>id</code> attribute whose value is prefixed with <code>element-</code>, and value itterated, starting with <code>a</code> ;</li>
+          <li>an <code>id</code> attribute whose value is prefixed with <code>element-</code>;</li>
           <li>a <code>title</code> attribute that provides a short description of the element;</li>
           <li>a <code>href</code> attribute that links to the element itself</li>
         </ul>
 
         <p>
-          For elements managed within the main document repo, they shall be placed in the <code>doc/elements</code> directory. For externally managed element(s) within a SMPTE element repo(s), see <a>https://github.com/SMPTE/github-operating-manual</a> for more details for matching the <code>id</code> value to the repo name, and general info about element repos and their requirements. 
+          For elements managed within the main document repo, they shall be placed in the <code>doc/elements</code> directory. For externally managed element(s) within a SMPTE element repo(s), see <a href="#bib-smpte-gh-om"></a> for more details.
+        </p>
         </p>
         <p class="note">
           It is advised to only referenced element repos managed by SMPTE to fullfil license requirements. If an element has been created outside of SMPTE, it should be considered as a bibliographic reference instead. 
@@ -624,7 +625,7 @@
 <pre>&lt;section id=&quot;sec-elements&quot;&gt;
   &lt;ol&gt;
     &lt;li&gt;
-      &lt;a id=&quot;element-a&quot; title=&quot;Description of the elemnent&quot; href=&quot;./elements/form.docx&quot;&gt;&lt;/a&gt;
+      &lt;a id=&quot;element-sample-text&quot; title=&quot;Description of the elemnent&quot; href=&quot;./elements/form.docx&quot;&gt;&lt;/a&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
 &lt;/section&gt;</pre>
@@ -696,11 +697,10 @@
       <section id="sec-elements-linking">
         <h4>Citing non-prose elements</h4>
 
-        <p>When citing an non-prose element of the document, an <code>a</code> element with its <code>href</code> attribute
-        referencing a <code>a</code> element from the <a>additional elements section</a> shall be used.</p>
+        <p>When citing an non-prose element of the document, an <code>a</code> element with its <code>href</code> referencing an <code>a</code> element from the <a>additional elements section</a> shall be used. The text of the link will be automatically set to the letter of the element in element list.</p>
 
         <div class="example">
-<code>&lt;a href=&quot;#element-a&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#element-a"></a>.
+<code>&lt;a href=&quot;#element-sample-text&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#element-sample-text"></a>.
         </div>
 
       </section>
@@ -1630,7 +1630,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
   <section id="sec-elements">
     <ol>
-      <li><a id="element-a" title="Sample text element" href="./elements/sample.txt"></a></li>
+      <li><a id="element-sample-text" title="Sample text element" href="./elements/sample.txt"></a></li>
     </ol>
   </section>
 
@@ -1641,6 +1641,8 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
       <li><cite id="bib-smpte-ag-16">SMPTE AG-16</cite>, Standards Style Guide.
       <a>https://www.smpte.org/about/policies-and-governance</a></li>
+      <li><cite id="bib-smpte-gh-om">SMPTE GitHub Operating Manual</cite>
+        <a>https://github.com/SMPTE/github-operating-manual</a></li>
     </ul>
   </section>
 
