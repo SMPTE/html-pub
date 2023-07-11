@@ -187,7 +187,7 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   const pdfFileName = renderedDoc.docTitle + ".pdf";
 
-  child_process.execSync(`npx pagedjs-cli ${buildPaths.renderedDocPath} -o "${path.join(buildPaths.pubDirPath, pdfFileName)}"`);
+  child_process.execSync(`npm exec -c 'pagedjs-cli ${buildPaths.renderedDocPath} -o "${path.join(buildPaths.pubDirPath, pdfFileName)}"'`);
 
   generatedFiles.pdf = pdfFileName;
 
