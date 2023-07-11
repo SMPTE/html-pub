@@ -1,0 +1,41 @@
+<ol>
+  <li>First list item
+    <ol type="a">
+      <li>First sub item
+        <ol type="i">
+          <li>First sub item's 1st item with small roman numerals</li>
+          <li>First sub item's 2nd item with small roman numerals</li>
+        </ol>
+      </li>
+      <li>Second sub item
+        <ol type="i" start="3">
+          <li>Second sub item's 1st item with small roman numerals, starting with "iii" to continue numbers</li>
+          <li>Second sub item's 2nd item with small roman numerals</li>
+        </ol>
+      </li>
+    </ol>
+  </li>
+  <li>Second list item</li>
+  <li>Third list item</li>
+  <li>Forth list item
+    <ol type="a">
+      <li>Forth list item's sub item
+        <ul>
+          <li>1st bullet under sub item
+            <ul>
+              <li>1st sub bullet</li>
+            </ul>
+          </li>
+          <li>2nd bullet under sub item</li>
+        </ul>
+      </li>
+      <li>Forth list item's sub item</li>
+    </ol>
+  </li>
+  <li>Fifth list item
+    <ul>
+      <li>1st bullet sub item</li>
+      <li>2nd bullet sub item</li>
+    </ul>
+  </li>
+</ol>
