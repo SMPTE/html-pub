@@ -983,14 +983,15 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       <section id="sec-note-class">
         <h4>Notes</h4>
 
-        <p>Notes can be inserted by using <code>p</code> or <code>div</code> element whose <code>class</code> attribute is equal to
-        <code>note</code>.</p>
+        <p>A note is inserted by using a <code>p</code> or <code>div</code> element whose <code>class</code> attribute is equal to
+        <code>note</code>. The element element can also have an <code>id</code> attribute, in which case the value of the
+        <code>id</code> attribute shall start with the string <code>note-</code>.</p>
 
-        <p>Notes will automatically be formatted, e.g. prepended with the text <i>NOTE</i>, and numbered.</p>
+        <p>Notes will automatically be formatted and numbered.</p>
 
         <div class="example">
 <pre>
-&lt;p class=&quot;note&quot;&gt;
+&lt;p id="note-example-ref" class=&quot;note&quot;&gt;
   The license portion of Annex A is verbatim the BSD-3-Clause license
   available at &lt;a&gt;https://spdx.org/licenses/BSD-3-Clause.html&lt;/a&gt;.
 &lt;/p&gt;
@@ -998,8 +999,14 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
 
           <p>is rendered as</p>
 
-          <p class="note">The license portion of Annex A is verbatim the BSD-3-Clause license available at
+          <p id="note-example-ref"  class="note">The license portion of Annex A is verbatim the BSD-3-Clause license available at
           <a>https://spdx.org/licenses/BSD-3-Clause.html</a>.</p>
+        </div>
+
+        <p>A note can also be cited by referencing the value of the <code>id</code> attribute.</p>
+
+        <div class="example">
+          <code>&lt;a href=&quot;#note-example-ref&quot;&gt;&lt;/a&gt;</code> results in <a href="#note-example-ref"></a>.
         </div>
 
       </section>
@@ -1007,19 +1014,26 @@ STABLEREV = 4(DIGIT) [2(DIGIT)]
       <section id="sec-example-class">
         <h4>Examples</h4>
 
-        <p>Examples can be inserted by using <code>div</code> element whose <code>class</code> attribute is equal to
-        <code>example</code>.</p>
+        <p>An example is inserted by using a <code>p</code> or <code>div</code> element whose <code>class</code> attribute is equal
+        to <code>example</code>. The element can also have an <code>id</code> attribute, in which case the value of the
+        <code>id</code> attribute shall start with the string <code>ex-</code>.</p>
 
-        <p>Notes will automatically be formatted, e.g. prepended with the text <i>EXAMPLE</i>, and numbered.</p>
+        <p>Notes will automatically be formatted and numbered.</p>
 
         <div class="example">
 <pre>
-&lt;p class=&quot;example&quot;&gt;The number &lt;i&gt;0.0003&lt;/i&gt; can be written 
-&lt;i&gt;3 × 10−4&lt;/i&gt; but is never written &lt;i&gt;3e−4&lt;/i&gt;.&lt;/p&gt;
+&lt;div id="ex-example-ref" class=&quot;example&quot;&gt;The number &lt;i&gt;0.0003&lt;/i&gt; can be written 
+&lt;i&gt;3 × 10−4&lt;/i&gt; but is never written &lt;i&gt;3e−4&lt;/i&gt;.&lt;/div&gt;
 </pre>
 
           <p>results in:</p>
-          <div class="example">The number 0.0003 can be written 3×10−4 but is never written 3e−4.</div>
+          <div id="ex-example-ref" class="example">The number 0.0003 can be written 3×10−4 but is never written 3e−4.</div>
+        </div>
+
+        <p>An example can also be cited by referencing the value of the <code>id</code> attribute.</p>
+
+        <div class="example">
+          <code>&lt;a href=&quot;#ex-example-ref&quot;&gt;&lt;/a&gt;</code> results in <a href="#ex-example-ref"></a>.
         </div>
 
       </section>
