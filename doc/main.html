@@ -793,12 +793,14 @@
         <h4>Lists</h4>
 
         <p>A list can be inserted using either an <code>ol</code> or <code>ul</code> element. The <code>ul</code> (unordered list) element should be used when the order of listed items is not meaniful or important. The <code>ol</code> (ordered list) element should be only used when the order of listed items is meaningful and/or important to the list and/or document.</p>
-
-        <p>An <code>ol</code> or <code>ul</code> element must contain:</p>
+        
+        <p>
+          General guidelines for lists:
+        </p>
         <ul>
-          <li>one or more <code>li</code> element</li> 
-          <li>(OR)</li>
-          <li>one or more nested <code>ol</code> or <code>ul</code> element</li>
+          <li>An <code>ol</code> or <code>ul</code> element shall contain one (1) or more <code>li</code> element(s). </li>
+          <li>A <code>li</code> element may contain one (1) or more nested <code>ol</code> or <code>ul</code> element(s).</li>
+          <li>An <code>ol</code> element should not be nested within an <code>ul</code> element. </li>
         </ul>
 
         <div class="example">
@@ -1769,7 +1771,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       <h3>List Nesting</h3>
 
       <p>
-        Both <code>ol</code> and <code>ul</code> list may be nexted as many times within a <code>li</code> element as needed to achieve the required results. See below for various examples. 
+        Both <code>ol</code> and <code>ul</code> elements may be nexted as many times within a <code>li</code> element as needed to achieve the required results. See below for various examples. 
       </p>
 
       <div class="example">
@@ -1779,7 +1781,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <pre>
 &lt;ol&gt;
   &lt;li&gt;First list item
-    &lt;ol&gt;
+    &lt;ol type="a"&gt;
       &lt;li&gt;First sub item&lt;/li&gt;
       &lt;li&gt;Second sub item&lt;/li&gt;
     &lt;/ol&gt;
@@ -1790,13 +1792,18 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <p>is rendered as:</p>
         <ol>
           <li>First list item
-            <ol>
+            <ol type="a">
               <li>First sub item</li>
               <li>Second sub item</li>
             </ol>
           </li>
           <li>Second list item</li>
         </ol>
+        <p class="note">
+          When nesting <code>ol</code> style lists, different <code>type</code> attributes should be used to ensure readablity, as this is not achieved automatically.
+        </p>
+
+
       </div>
 
       <div class="example">
@@ -1862,15 +1869,13 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       </p>
 
       <div class="example">
-        <p>
-          Nesting <code>ul</code> in <code>ol</code>:
-        </p> 
+        
         <pre data-include="snippets/list-sample-complex.txt"></pre>
         
         <p>is rendered as:</p>
         <ol>
           <li>First list item
-            <ul>
+            <ol type="a">
               <li>First sub item
                 <ol type="i">
                   <li>First sub item's 1st item with small roman numerals</li>
@@ -1883,25 +1888,31 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
                   <li>Second sub item's 2nd item with small roman numerals</li>
                 </ol>
               </li>
-            </ul>
+            </ol>
           </li>
           <li>Second list item</li>
           <li>Third list item</li>
           <li>Forth list item
             <ol type="a">
-              <li>Forth list item's a sub item
+              <li>Forth list item's sub item
                 <ul>
                   <li>1st bullet under sub item
                     <ul>
                       <li>1st sub bullet</li>
                     </ul>
                   </li>
+                  <li>2nd bullet under sub item</li>
                 </ul>
               </li>
-              <li>Forth list item's b sub item</li>
+              <li>Forth list item's sub item</li>
             </ol>
           </li>
-          <li>Fifth list item</li>
+          <li>Fifth list item
+            <ul>
+              <li>1st bullet sub item</li>
+              <li>2nd bullet sub item</li>
+            </ul>
+          </li>
         </ol>
       </div>
 

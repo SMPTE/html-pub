@@ -1,6 +1,6 @@
 <ol>
   <li>First list item
-    <ul>
+    <ol type="a">
       <li>First sub item
         <ol type="i">
           <li>First sub item's 1st item with small roman numerals</li>
@@ -13,23 +13,29 @@
           <li>Second sub item's 2nd item with small roman numerals</li>
         </ol>
       </li>
-    </ul>
+    </ol>
   </li>
   <li>Second list item</li>
   <li>Third list item</li>
   <li>Forth list item
     <ol type="a">
-      <li>Forth list item's a sub item
+      <li>Forth list item's sub item
         <ul>
           <li>1st bullet under sub item
             <ul>
               <li>1st sub bullet</li>
             </ul>
           </li>
+          <li>2nd bullet under sub item</li>
         </ul>
       </li>
-      <li>Forth list item's b sub item</li>
+      <li>Forth list item's sub item</li>
     </ol>
   </li>
-  <li>Fifth list item</li>
+  <li>Fifth list item
+    <ul>
+      <li>1st bullet sub item</li>
+      <li>2nd bullet sub item</li>
+    </ul>
+  </li>
 </ol>
