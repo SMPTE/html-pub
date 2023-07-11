@@ -620,15 +620,26 @@
         <ul>
           <li>an <code>id</code> attribute whose value is prefixed with <code>element-</code>;</li>
           <li>a <code>title</code> attribute that provides a short description of the element;</li>
-          <li>a <code>href</code> attribute that links to the element itself, typically in the <code>doc/elements</code>
-          directory.</li>
+          <li>a <code>href</code> attribute that links to the element, as detailed below.</li>
         </ul>
+
+        <p>
+          Each additional element shall be managed in one of the following ways:
+        </p>
+        <ul>
+          <li>as a file in the doc/elements directory, in which case the link to the element shall be relative path to the file, e.g. <code>.elements/element.txt</code></li>
+          <li>in a separate SMPTE repository, in which case the link to the element shall be a versioned link to the repo, e.g. <code>https://github.com/SMPTE/html-pub/tree/631ed7a0312fa183c356a7b742129ce46f92736f</code></li>
+        </ul>
+
+        <p class="note">
+          Non-SMPTE repositories and SMPTE repositories that are not an integral part of the document shall be cited using a bibliographic reference. 
+        </p>
 
         <div class="example">
 <pre>&lt;section id=&quot;sec-elements&quot;&gt;
   &lt;ol&gt;
     &lt;li&gt;
-      &lt;a id=&quot;element-a&quot; title=&quot;Description of the elemnent&quot; href=&quot;./elements/form.docx&quot;&gt;&lt;/a&gt;
+      &lt;a id=&quot;element-sample-text&quot; title=&quot;Description of the elemnent&quot; href=&quot;./elements/form.docx&quot;&gt;&lt;/a&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
 &lt;/section&gt;</pre>
@@ -700,11 +711,10 @@
       <section id="sec-elements-linking">
         <h4>Citing non-prose elements</h4>
 
-        <p>When citing an non-prose element of the document, an <code>a</code> element with its <code>href</code> attribute
-        referencing a <code>a</code> element from the <a>additional elements section</a> shall be used.</p>
+        <p>When citing an non-prose element of the document, an <code>a</code> element with its <code>href</code> referencing an <code>a</code> element from the <a>additional elements section</a> shall be used. The text of the link will be automatically set to the letter of the element in element list.</p>
 
         <div class="example">
-<code>&lt;a href=&quot;#element-a&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#element-a"></a>.
+<code>&lt;a href=&quot;#element-sample-text&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#element-sample-text"></a>.
         </div>
 
       </section>
@@ -2241,7 +2251,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
   <section id="sec-elements">
     <ol>
-      <li><a id="element-a" title="Sample text element" href="./elements/sample.txt"></a></li>
+      <li><a id="element-sample-text" title="Sample text element" href="./elements/sample.txt"></a></li>
     </ol>
   </section>
 
@@ -2252,10 +2262,8 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
       <li><cite id="bib-smpte-ag-16">SMPTE AG-16</cite>, Standards Style Guide.
       <a>https://www.smpte.org/about/policies-and-governance</a></li>
-      <li><cite id="bib-smpte-gh-om">SMPTE GitHub Operating Manual</cite>,
-        <a>https://github.com/SMPTE/github-operating-manual</a>
-      </li>
-        
+      <li><cite id="bib-smpte-gh-om">SMPTE GitHub Operating Manual</cite>
+        <a>https://github.com/SMPTE/github-operating-manual</a></li>
     </ul>
   </section>
 
