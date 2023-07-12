@@ -900,14 +900,21 @@ function numberNotes() {
 
     _findNotes(section);
 
-    if (notes.length > 1) {
-      let counter = 1;
-      for (let note of notes) {
-        note.insertBefore(document.createTextNode(`NOTE ${counter++} — `), note.firstChild);
-      }
+    let counter = 1;
+    for (let note of notes) {
+      const headingLabel = document.createElement("span");
+      headingLabel.className = "heading-label";
 
-    } else if (notes.length === 1) {
-      notes[0].insertBefore(document.createTextNode(`NOTE — `), notes[0].firstChild);
+      const headingNumberElement = document.createElement("span");
+      headingNumberElement.className = "heading-number";
+      if (notes.length !== 1)
+        headingNumberElement.innerText = counter++;
+
+      headingLabel.appendChild(document.createTextNode("NOTE "));
+      headingLabel.appendChild(headingNumberElement);
+      headingLabel.appendChild(document.createTextNode(" —⁠ "));
+
+      note.insertBefore(headingLabel, note.firstChild);
     }
 
   }
@@ -931,13 +938,21 @@ function numberExamples() {
 
     _findExamples(section);
 
-    if (examples.length > 1) {
-      let counter = 1;
-      for (let example of examples)
-        example.insertBefore(document.createTextNode(`EXAMPLE ${counter++} — `), example.firstChild);
+    let counter = 1;
+    for (let example of examples) {
+      const headingLabel = document.createElement("span");
+      headingLabel.className = "heading-label";
 
-    } else if (examples.length === 1) {
-      examples[0].insertBefore(document.createTextNode(`EXAMPLE — `), examples[0].firstChild);
+      const headingNumberElement = document.createElement("span");
+      headingNumberElement.className = "heading-number";
+      if (examples.length !== 1)
+        headingNumberElement.innerText = counter++;
+
+      headingLabel.appendChild(document.createTextNode("EXAMPLE "));
+      headingLabel.appendChild(headingNumberElement);
+      headingLabel.appendChild(document.createTextNode(" —⁠ "));
+
+      example.insertBefore(headingLabel, example.firstChild);
     }
 
   }
@@ -945,6 +960,19 @@ function numberExamples() {
 
 function _normalizeTerm(term) {
   return term.trim().toLowerCase().replace(/\s+/g," ");
+}
+
+function _getSectionReference(target) {
+  const targetNumber = target.querySelector(".heading-number").innerText;
+
+  if (target.parentElement.tagName === "BODY" || target.parentElement.classList.contains("annex")) {
+    if (target.classList.contains("annex"))
+      return "Annex "+ targetNumber;
+    else
+      return "Clause "+ targetNumber;
+  }
+
+  return targetNumber;
 }
 
 function resolveLinks(docMetadata) {
@@ -1071,18 +1099,33 @@ function resolveLinks(docMetadata) {
       } else if (target.localName === "div" && target.className === "formula") {
         anchor.innerText = "Formula " + target.querySelector(".heading-number").innerText
 
+      } else if (target.className === "note") {
+        let parentSection = target.closest("section");
+
+        if (parentSection) {
+          let t = _getSectionReference(parentSection) + ", Note";
+          let n = target.querySelector(".heading-number").innerText;
+          if (n.length > 0) {
+            t += " " + n;
+          }
+          anchor.innerText = t;
+        }
+
+      } else if (target.className === "example") {
+        let parentSection = target.closest("section");
+
+        if (parentSection) {
+          let t = _getSectionReference(parentSection) + ", Example";
+          let n = target.querySelector(".heading-number").innerText;
+          if (n.length > 0) {
+            t += " " + n;
+          }
+          anchor.innerText = t;
+        }
+
       } else if (target.localName === "section") {
 
-        const targetNumber = target.querySelector(".heading-number").innerText;
-
-        if (target.parentElement.tagName === "BODY" || target.parentElement.classList.contains("annex")) {
-          if (target.classList.contains("annex"))
-            anchor.innerText = "Annex "+ targetNumber;
-          else
-            anchor.innerText = "Clause "+ targetNumber;
-        } else {
-          anchor.innerText = targetNumber;
-        }
+        anchor.innerText = _getSectionReference(target);
 
       } else if (target.parentElement.parentElement.parentElement.id === "sec-elements") {
         /* element */
