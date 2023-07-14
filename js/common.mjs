@@ -36,7 +36,18 @@ export const PUB_TYPES = new Set([AG_PUBTYPE, OM_PUBTYPE, ST_PUBTYPE, RP_PUBTYPE
 export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
 
 export const PUB_STAGE_PUB = "PUB";
-export const PUB_STAGES = new Set(["WD", "CD", "FCD", "DP", PUB_STAGE_PUB]);
+export const PUB_STAGE_DP = "DP";
+export const PUB_STAGE_FCD = "FCD";
+export const PUB_STAGE_CD = "CD";
+export const PUB_STAGE_WD = "WD";
+export const PUB_STAGES = new Set([PUB_STAGE_WD, PUB_STAGE_CD, PUB_STAGE_FCD, PUB_STAGE_DP, PUB_STAGE_PUB]);
+export const LONG_PUB_STAGE = new Map([
+  [PUB_STAGE_DP, "Draft Publication"],
+  [PUB_STAGE_FCD, "Final Committee Draft"],
+  [PUB_STAGE_CD, "Committee Draft"],
+  [PUB_STAGE_WD, "Working Draft"],
+  [PUB_STAGE_PUB, "Publication"]
+])
 
 export const PUB_STATE_PUB = "pub";
 export const PUB_STATE_DRAFT = "draft";
