@@ -32,6 +32,13 @@ export const RP_PUBTYPE = "RP";
 export const EG_PUBTYPE = "EG";
 
 export const PUB_TYPES = new Set([AG_PUBTYPE, OM_PUBTYPE, ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
+export const LONG_PUB_TYPE = new Map([
+  [AG_PUBTYPE, "Administrative Guideline"],
+  [OM_PUBTYPE, "Operations Manual"],
+  [ST_PUBTYPE, "SMPTE Standard"],
+  [RP_PUBTYPE, "SMPTE Recommended Practice"],
+  [EG_PUBTYPE, "SMPTE Engineering Guideline"]
+])
 
 export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
 
@@ -116,6 +123,19 @@ export function validateHead(head, logger) {
     logger.error("pubVersion invalid");
   }
 
+  /* pubConfidential (optional) */
+  metadata.pubConfidential = getHeadMetadata(head, "pubConfidential");
+  if (metadata.pubConfidential !== null) {
+    if (/no/.test(metadata.pubConfidential))
+      metadata.pubConfidential = false;
+    else if (/yes/.test(metadata.pubConfidential))
+      metadata.pubConfidential = true;
+    else {
+      metadata.pubConfidential = true;
+      logger.error("pubConfidential invalid");
+    }
+  }
+
   /* pubRevisionOf (optional) */
   metadata.pubRevisionOf = getHeadMetadata(head, "pubRevisionOf");
 
@@ -175,7 +195,7 @@ export function validateHead(head, logger) {
   if (ENGDOC_PUBTYPES.has(metadata.pubType)) {
 
     /* pubVersion */
-    if (metadata.pubState === PUB_STAGE_PUB && metadata.pubVersion === null)
+    if (metadata.pubStage === PUB_STAGE_PUB && metadata.pubVersion === null)
       fatal(logger, "pubVersion must be present for published engineering documents");
 
     /* pubStage */
@@ -186,6 +206,12 @@ export function validateHead(head, logger) {
     /* pubTC */
     if (metadata.pubTC === null || metadata.pubTC.length === 0)
       fatal(logger, "pubTC invalid");
+
+    /* pubConfidential */
+    if (metadata.pubConfidential === null)
+      metadata.pubConfidential = true;
+    else if (!metadata.pubConfidential && !(metadata.pubStage === PUB_STAGE_PUB || metadata.pubStage === PUB_STAGE_CD))
+      fatal(logger, "Only Committee Drafts and Publications can be non-confidential");
   }
 
   return metadata;

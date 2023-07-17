@@ -113,30 +113,13 @@ function insertFrontMatter(docMetadata) {
     throw "Front matter section already exists."
   }
 
-  let longDocType = "";
-
-  switch (docMetadata.pubType) {
-    case smpte.AG_PUBTYPE:
-      longDocType = "Administrative Guideline";
-      break;
-    case smpte.OM_PUBTYPE:
-      longDocType = "Operations Manual";
-      break;
-    case smpte.ST_PUBTYPE:
-      longDocType += "SMPTE Standard";
-      break;
-    case smpte.RP_PUBTYPE:
-      longDocType = "SMPTE Recommended Practice";
-      break;
-    case smpte.EG_PUBTYPE:
-      longDocType = "SMPTE Engineering Guideline";
-      break;
-  }
+  let longDocType = smpte.LONG_PUB_TYPE.get(docMetadata.pubType);
 
   let longPubStage = "";
-
-  if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB && smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType))
-    longPubStage = `<div id="long-pub-stage">${smpte.LONG_PUB_STAGE.get(docMetadata.pubStage)}</div>`;
+  if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB && smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
+    let confidential = docMetadata.pubConfidential ? "CONFIDENTIAL " : "";
+    longPubStage = `<div id="long-pub-stage">${confidential}${smpte.LONG_PUB_STAGE.get(docMetadata.pubStage)}</div>`;
+  }
 
   let actualPubDateTime;
 
