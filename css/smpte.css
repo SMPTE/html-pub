@@ -278,7 +278,7 @@ table {
   font-size: 0.8rem;
   border-collapse: collapse;
   margin: auto;
-  break-inside: avoid;
+  min-width: 40%;
 }
 
 th, td {
@@ -289,11 +289,50 @@ th, td {
 th {
   background-color: lightgrey;
   font-weight: bold;
+}
+
+thead {
   text-align: center;
 }
 
-tr th {
+tbody {
   text-align: left;
+}
+
+td.center-cell {
+  text-align: center;
+}
+
+table.col-1-center tr td:nth-child(1) {
+  text-align: center;
+}
+
+table.col-2-center tr td:nth-child(2) {
+  text-align: center;
+}
+
+table.col-3-center tr td:nth-child(3) {
+  text-align: center;
+}
+
+table.col-4-center tr td:nth-child(4) {
+  text-align: center;
+}
+
+table.col-5-center tr td:nth-child(5) {
+  text-align: center;
+}
+
+table.col-6-center tr td:nth-child(6) {
+  text-align: center;
+}
+
+table.col-7-center tr td:nth-child(7) {
+  text-align: center;
+}
+
+table.col-8-center tr td:nth-child(8) {
+  text-align: center;
 }
 
 table > caption {
@@ -306,7 +345,7 @@ table > caption {
   break-inside: avoid;
 }
 
-tbody, tr, thead, th {
+tr, thead {
   break-inside: avoid;
 }
 

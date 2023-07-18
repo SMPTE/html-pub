@@ -4,16 +4,27 @@
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script type="module" src="../tooling/smpte.js"></script>
+    <meta itemprop="test" content="valid" />
     <meta itemprop="pubType" content="AG" />
-    <meta itemprop="pubNumber" content="XX" />
+    <meta itemprop="pubNumber" content="99" />
     <meta itemprop="pubState" content="draft" />
-    <meta itemprop="pubDateTime" content="20XX-XX-XX" />
     <title>Title of the document</title>
   </head>
   <body>
     <section id="sec-scope">
-      <p>This is the scope of the document.<p>
+      <p>This is the scope of the document.</p>
+    </section>
+    <section id="sec-a">
+      <h2>A</h2>
+      <ol>
+        <li>First list item
+          <ol type="a">
+            <li>First sub item</li>
+            <li>Second sub item</li>
+          </ol>
+        </li>
+        <li>Second list item</li>
+      </ol>
     </section>
   </body>
 </html>

@@ -1,0 +1,27 @@
+<table id="tab-sample-tabledata-centercell">
+  <caption><code>center-cell</code> Table Sample</caption>
+  <thead>
+    <tr>
+      <th>Sample Number</th>
+      <th>Sample Name</th>
+      <th>Sample Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0001</td>
+      <td>Name 01</td>
+      <td><code>Code 1</code></td>
+    </tr>
+    <tr>
+      <td class="center-cell">centered 0002</td>
+      <td>Name 02</td>
+      <td><code>Code 2</code></td>
+    </tr>
+    <tr>
+      <td>0003</td>
+      <td>Name 03</td>
+      <td><code>Code 3</code></td>
+    </tr>
+  </tbody>
+</table>

@@ -24,6 +24,13 @@ runs:
       shell: bash
       run: sudo pip install html5validator==0.4.2
 
+    - name: Install CJK fonts
+      shell: bash
+      run: |
+        sudo apt-get install fonts-noto-cjk
+        sudo apt-get install fonts-indic
+        sudo apt-get install fonts-noto
+
     - name: Install node dependencies
       shell: bash
       run: npm install ${GITHUB_ACTION_PATH}/..
