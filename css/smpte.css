@@ -163,11 +163,22 @@ section.annex > h2 {
   font-weight: normal;
 }
 
+/* definition lists */
+
+dl {
+  margin-left: 1em;
+}
+
 /* terms and definitions */
 
 #sec-terms-and-definitions dd {
   margin-left: 0;
 }
+
+#sec-terms-and-definitions dl {
+  margin-left: 0;
+}
+
 
 dt {
   font-weight: bold;
