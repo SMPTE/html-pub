@@ -476,6 +476,10 @@ code:hover {
     string-set: doc-copyright content(text);
   }
 
+  #sec-elements a {
+    display: none;
+  }
+
   @page:first {
     @top-right {
       content: "";
