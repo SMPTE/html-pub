@@ -507,6 +507,16 @@ function insertElementsAnnex(docMetadata) {
 
   for(const e of sec.querySelectorAll("li > a")) {
 
+    if (! e.title) {
+      logger_.error("All links listed in the Elements Annex must have a title attribute.");
+      continue;
+    }
+
+    if (! e.getAttribute("href")) {
+      logger_.error("All links listed in the Elements Annex must have an href attribute.");
+      continue;
+    }
+
     const headingNum = document.createElement("span");
     headingNum.className = "heading-number";
     headingNum.innerText = String.fromCharCode(counter++);
@@ -518,13 +528,23 @@ function insertElementsAnnex(docMetadata) {
 
     e.parentElement.insertBefore(headingLabel, e);
 
-    e.innerText = "(link)";
+    const isAbsoluteLink = e.getAttribute("href").startsWith("http");
 
-    if (e.title) {
-      e.parentElement.insertBefore(document.createTextNode(" " + e.title + " "), e);
+    if (isAbsoluteLink) {
+      e.innerText = e.getAttribute("href");
     } else {
-      logger_.error("All links listed in the Elements Annex must have a title attribute.")
+      e.innerText = e.getAttribute("href").split('\\').pop().split('/').pop();
     }
+
+    e.parentElement.insertBefore(
+      document.createTextNode(` ${e.title} (${isAbsoluteLink ? "url:" : "file:"} `),
+      e
+    );
+
+    e.parentElement.insertBefore(
+      document.createTextNode(")"),
+      null
+    );
 
   }
 }

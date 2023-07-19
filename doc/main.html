@@ -627,13 +627,18 @@
           Each additional element shall be managed in one of the following ways:
         </p>
         <ul>
-          <li>as a file in the doc/elements directory, in which case the link to the element shall be relative path to the file, e.g. <code>.elements/element.txt</code></li>
-          <li>in a separate SMPTE repository, in which case the link to the element shall be a versioned link to the repo, e.g. <code>https://github.com/SMPTE/html-pub/tree/631ed7a0312fa183c356a7b742129ce46f92736f</code></li>
+          <li>as a file in the <code>doc/elements</code> directory, in which case the
+          <code>href</code> attribute shall be relative path to the file, e.g.
+          <code>elements/element.txt</code> (<a href="#element-sample-text"></a>); or</li>
+
+          <li>in a separate SMPTE repository, in which case the
+          <code>href</code> attribute shall be the absolute URL to a version of the repo, e.g.
+          <code>https://github.com/SMPTE/html-pub/tree/631ed7a0312fa183c356a7b742129ce46f92736f</code> (<a
+          href="#element-url"></a>).</li>
         </ul>
 
-        <p class="note">
-          Non-SMPTE repositories and SMPTE repositories that are not an integral part of the document shall be cited using a bibliographic reference. 
-        </p>
+        <p>Non-SMPTE repositories and SMPTE repositories that are not an integral part of the document shall be cited using a
+        bibliographic reference.</p>
 
         <div class="example">
 <pre>&lt;section id=&quot;sec-elements&quot;&gt;
@@ -2251,7 +2256,9 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
   <section id="sec-elements">
     <ol>
-      <li><a id="element-sample-text" title="Sample text element" href="./elements/sample.txt"></a></li>
+      <li><a id="element-sample-text" title="Sample text element" href="elements/sample.txt"></a></li>
+      <li><a id="element-url" title="Sample URL element"
+      href="https://github.com/SMPTE/html-pub/tree/631ed7a0312fa183c356a7b742129ce46f92736f"></a></li>
     </ol>
   </section>
 

@@ -476,6 +476,11 @@ code:hover {
     string-set: doc-copyright content(text);
   }
 
+  #sec-elements a {
+    color: currentColor;
+    text-decoration: none;
+  }
+
   @page:first {
     @top-right {
       content: "";
