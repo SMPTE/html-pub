@@ -477,7 +477,8 @@ code:hover {
   }
 
   #sec-elements a {
-    display: none;
+    color: currentColor;
+    text-decoration: none;
   }
 
   @page:first {
