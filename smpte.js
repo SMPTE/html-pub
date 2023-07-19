@@ -518,10 +518,17 @@ function insertElementsAnnex(docMetadata) {
 
     e.parentElement.insertBefore(headingLabel, e);
 
-    e.innerText = "(link)";
+    e.innerText = "[link]";
+
+    let linkText;
+    
+    if (e.getAttribute("href").startsWith("http"))
+      linkText = `url: ${e.getAttribute("href")}`;
+    else
+      linkText = `filename: ${e.getAttribute("href").split('\\').pop().split('/').pop()}`;
 
     if (e.title) {
-      e.parentElement.insertBefore(document.createTextNode(" " + e.title + " "), e);
+      e.parentElement.insertBefore(document.createTextNode(` ${e.title} (${linkText}) `), e);
     } else {
       logger_.error("All links listed in the Elements Annex must have a title attribute.")
     }
