@@ -154,6 +154,18 @@ class PMatcher {
   }
 }
 
+class InformativeNoteMatcher {
+  static match(element, logger) {
+    if (!element.classList.contains("note"))
+      return false;
+
+    if (!PMatcher.match(element, logger) && !DivMatcher.match(element, logger))
+      logger.error(`Informative note must be a p or div`, element);
+
+    return true;
+  }
+}
+
 class EqDivMatcher {
   static match(element, logger) {
     if (element.localName !== "div" || element.className !== "formula")
@@ -219,6 +231,25 @@ class DdMatcher {
     for (const child of element.children) {
       if (!AnyPhrasingMatcher.match(child, logger))
         logger.error(`Dd contains non-phrasing element`, child);
+    }
+
+    return true;
+  }
+}
+
+class InternalDefinitionDdMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd")
+      return false;
+
+    for (const child of element.children) {
+      if (AnyPhrasingMatcher.match(child, logger))
+        continue;
+
+      if (InformativeNoteMatcher.match(child, logger))
+        continue;
+
+      logger.error(`Definition contains an element other than an informative note or non-phrasing element`, child);
     }
 
     return true;
@@ -577,7 +608,7 @@ class InternalDefinitionsMatcher {
       let ddCount = 0;
 
       /* look for definition */
-      if (children.length > 0 && DdMatcher.match(children[0], logger)) {
+      if (children.length > 0 && InternalDefinitionDdMatcher.match(children[0], logger)) {
         children.shift();
         ddCount++;
       }
