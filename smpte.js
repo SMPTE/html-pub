@@ -86,16 +86,18 @@ function loadDocMetadata() {
 const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
 <span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
 {{revisionOf}}
-<div id="long-doc-type">{{longDocType}}</div>
+{{longPubStage}}
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
+<div id="long-doc-type">{{longDocType}}</div>
 <h1>{{pubTitle}}</h1>
 <div id="doc-status">{{publicationState}} - {{actualPubDateTime}}</div>
-<hr />`
+<hr />
+{{draftWarning}}`
 
 const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
 <span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{actualPubNumber}}</div>
-<div id="long-doc-type">{{longDocType}}</div>
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
+<div id="long-doc-type">{{longDocType}}</div>
 <h1>{{pubTitle}}</h1>
 <div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
 <div id="doc-effective">Effective date: {{effectiveDateTime}}</div>
@@ -111,28 +113,13 @@ function insertFrontMatter(docMetadata) {
     throw "Front matter section already exists."
   }
 
-  let longDocType = "";
+  let longDocType = smpte.LONG_PUB_TYPE.get(docMetadata.pubType);
 
-  switch (docMetadata.pubType) {
-    case smpte.AG_PUBTYPE:
-      longDocType = "Administrative Guideline";
-      break;
-    case smpte.OM_PUBTYPE:
-      longDocType = "Operations Manual";
-      break;
-    case smpte.ST_PUBTYPE:
-      longDocType += "SMPTE Standard";
-      break;
-    case smpte.RP_PUBTYPE:
-      longDocType = "SMPTE Recommended Practice";
-      break;
-    case smpte.EG_PUBTYPE:
-      longDocType = "SMPTE Engineering Guideline";
-      break;
+  let longPubStage = "";
+  if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB && smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
+    let confidential = docMetadata.pubConfidential ? "CONFIDENTIAL " : "";
+    longPubStage = `<div id="long-pub-stage">${confidential}${smpte.LONG_PUB_STAGE.get(docMetadata.pubStage)}</div>`;
   }
-
-  if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB && smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType))
-    longDocType = `${docMetadata.pubStage} ${longDocType}`;
 
   let actualPubDateTime;
 
@@ -176,6 +163,8 @@ function insertFrontMatter(docMetadata) {
       break;
   }
 
+  const draftWarning = docMetadata.pubStage === smpte.PUB_STAGE_PUB ? "" : SMPTE_DRAFT_WARNING;
+
   let boilerplate;
 
   if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.OM_PUBTYPE)
@@ -198,6 +187,8 @@ function insertFrontMatter(docMetadata) {
     {
       revisionOf: revisionOf,
       longDocType: longDocType,
+      longPubStage: longPubStage,
+      draftWarning: draftWarning,
       publicationState: publicationState,
       smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),
       actualPubDateTime: actualPubDateTime,
@@ -640,7 +631,7 @@ in its Standards Operations Manual.</p>
 interpretation of the SMPTE Standards Operations Manual. In the event of a
 conflict, the Operations Manual shall prevail.</p>
 
-<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span> SMPTE</span>, 45 Hamilton Ave., White Plains NY 10601, (914) 761-1100.</p>`
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>, Society of Motion Picture and Television Engineers</span>. All rights reserved. No part of this material may be reproduced, by any means whatsoever, without the prior written permission of the Society of Motion Picture and Television Engineers.</p>`
 
 const SMPTE_DOC_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
 <p><a href="https://www.smpte.org">SMPTE (the Society of
@@ -662,11 +653,11 @@ SMPTE shall not be held responsible for identifying any or all such patent right
 
 {{authorProse}}
 
-<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span> SMPTE</span>, 45 Hamilton Ave., White Plains NY 10601, (914) 761-1100.</p>`
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>, Society of Motion Picture and Television Engineers</span>. All rights reserved. No part of this material may be reproduced, by any means whatsoever, without the prior written permission of the Society of Motion Picture and Television Engineers.</p>`
 
 const SMPTE_DRAFT_WARNING = `
 <div id="sec-draft-warning">
-<strong>Warning:</strong> This document is an unpublished, confidential work under development and shall not be referred
+<strong>Warning:</strong> This document is an unpublished work under development and shall not be referred
 to as a SMPTE Standard,
 Recommended Practice, or Engineering Guideline. It is distributed for review and comment; distribution does not constitute
 publication. Recipients of this document are strongly encouraged to submit, with their comments, notification of any relevant
@@ -695,9 +686,6 @@ function insertForeword(docMetadata) {
 
   if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
     authorProse = `<p>This document was prepared by Technology Committee ${docMetadata.pubTC}.</p>` + authorProse;
-
-    if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB)
-      authorProse += SMPTE_DRAFT_WARNING;
   }
 
   if (docMetadata.pubType == smpte.AG_PUBTYPE) {

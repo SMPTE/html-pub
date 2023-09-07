@@ -32,11 +32,29 @@ export const RP_PUBTYPE = "RP";
 export const EG_PUBTYPE = "EG";
 
 export const PUB_TYPES = new Set([AG_PUBTYPE, OM_PUBTYPE, ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
+export const LONG_PUB_TYPE = new Map([
+  [AG_PUBTYPE, "Administrative Guideline"],
+  [OM_PUBTYPE, "Operations Manual"],
+  [ST_PUBTYPE, "SMPTE Standard"],
+  [RP_PUBTYPE, "SMPTE Recommended Practice"],
+  [EG_PUBTYPE, "SMPTE Engineering Guideline"]
+])
 
 export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
 
 export const PUB_STAGE_PUB = "PUB";
-export const PUB_STAGES = new Set(["WD", "CD", "FCD", "DP", PUB_STAGE_PUB]);
+export const PUB_STAGE_DP = "DP";
+export const PUB_STAGE_FCD = "FCD";
+export const PUB_STAGE_CD = "CD";
+export const PUB_STAGE_WD = "WD";
+export const PUB_STAGES = new Set([PUB_STAGE_WD, PUB_STAGE_CD, PUB_STAGE_FCD, PUB_STAGE_DP, PUB_STAGE_PUB]);
+export const LONG_PUB_STAGE = new Map([
+  [PUB_STAGE_DP, "Draft Publication"],
+  [PUB_STAGE_FCD, "Final Committee Draft"],
+  [PUB_STAGE_CD, "Committee Draft"],
+  [PUB_STAGE_WD, "Working Draft"],
+  [PUB_STAGE_PUB, "Publication"]
+])
 
 export const PUB_STATE_PUB = "pub";
 export const PUB_STATE_DRAFT = "draft";
@@ -105,6 +123,19 @@ export function validateHead(head, logger) {
     logger.error("pubVersion invalid");
   }
 
+  /* pubConfidential (optional) */
+  metadata.pubConfidential = getHeadMetadata(head, "pubConfidential");
+  if (metadata.pubConfidential !== null) {
+    if (/no/.test(metadata.pubConfidential))
+      metadata.pubConfidential = false;
+    else if (/yes/.test(metadata.pubConfidential))
+      metadata.pubConfidential = true;
+    else {
+      metadata.pubConfidential = true;
+      logger.error("pubConfidential invalid");
+    }
+  }
+
   /* pubRevisionOf (optional) */
   metadata.pubRevisionOf = getHeadMetadata(head, "pubRevisionOf");
 
@@ -164,7 +195,7 @@ export function validateHead(head, logger) {
   if (ENGDOC_PUBTYPES.has(metadata.pubType)) {
 
     /* pubVersion */
-    if (metadata.pubState === PUB_STAGE_PUB && metadata.pubVersion === null)
+    if (metadata.pubStage === PUB_STAGE_PUB && metadata.pubVersion === null)
       fatal(logger, "pubVersion must be present for published engineering documents");
 
     /* pubStage */
@@ -175,6 +206,12 @@ export function validateHead(head, logger) {
     /* pubTC */
     if (metadata.pubTC === null || metadata.pubTC.length === 0)
       fatal(logger, "pubTC invalid");
+
+    /* pubConfidential */
+    if (metadata.pubConfidential === null)
+      metadata.pubConfidential = true;
+    else if (!metadata.pubConfidential && !(metadata.pubStage === PUB_STAGE_PUB || metadata.pubStage === PUB_STAGE_CD))
+      fatal(logger, "Only Committee Drafts and Publications can be non-confidential");
   }
 
   return metadata;
