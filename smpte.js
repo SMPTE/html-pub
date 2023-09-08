@@ -83,9 +83,11 @@ function loadDocMetadata() {
   return docMetadata;
 }
 
-const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
+const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-number-block">
+<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
 <span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
 {{revisionOf}}
+</div>
 {{longPubStage}}
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>

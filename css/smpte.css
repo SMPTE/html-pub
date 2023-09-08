@@ -19,6 +19,9 @@ h1 {
   text-align: right;
   text-transform: uppercase;
   font-weight: bold;
+}
+
+#doc-number-block {
   margin-bottom: 2rem;
 }
 
@@ -39,6 +42,7 @@ h1 {
   text-transform: uppercase;
   font-weight: bold;
   color: red;
+  margin-bottom: 1rem;
 }
 
 #doc-status {
