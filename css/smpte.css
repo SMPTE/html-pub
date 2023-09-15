@@ -21,6 +21,10 @@ h1 {
   font-weight: bold;
 }
 
+#doc-number-block {
+  margin-bottom: 2rem;
+}
+
 #revision-text {
   font-size: 1rem;
   text-align: right;
@@ -31,25 +35,19 @@ h1 {
   font-size: 1.3rem;
   text-transform: uppercase;
   font-weight: bold;
-  margin-top: 2rem;
 }
 
+#long-pub-stage {
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: red;
+  margin-bottom: 1rem;
+}
 
 #doc-status {
   font-size: 1rem;
-  font-weight: bold;
-  font-style: italic;
   text-transform: capitalize;
-}
-
-#doc-dates {
-  font-size: 0.8rem;
-  font-style: italic;
-}
-
-#doc-sponsor {
-  font-size: 0.8rem;
-  font-style: italic;
 }
 
 #smpte-logo {
@@ -451,8 +449,10 @@ code:hover {
 /* warning */
 
 #sec-draft-warning {
+  margin-top: 2rem;
   padding: 1rem;
   border: 2px lightblue solid;
+  text-align: justify;
 }
 
 /* print media */
@@ -476,6 +476,10 @@ code:hover {
     string-set: doc-copyright content(text);
   }
 
+  #long-pub-stage {
+    string-set: doc-pub-stage content(text);
+  }
+
   #sec-elements a {
     color: currentColor;
     text-decoration: none;
@@ -483,6 +487,10 @@ code:hover {
 
   @page:first {
     @top-right {
+      content: "";
+    }
+
+    @top-left {
       content: "";
     }
   }
@@ -493,6 +501,15 @@ code:hover {
       width: 20rem;
       font-size: 10px;
       font-weight: bold;
+    }
+
+    @top-left {
+      content: string(doc-pub-stage);
+      width: 20rem;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: red;
     }
 
     @bottom-left {

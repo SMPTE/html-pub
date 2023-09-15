@@ -255,6 +255,31 @@
         document.</p>
       </section>
 
+      <section id="sec-pubConfidential">
+        <h4><code>pubConfidential</code></h4>
+
+        <p>The <code>head</code> element shall contain zero or one
+        <code>meta</code> element with an <code>itemprop</code> attribute equal
+        to <code>pubConfidential</code>.</p>
+
+        <p>If present, the element shall have a <code>content</code> attribute
+        equal to one of the following values:</p>
+
+        <dl>
+          <dt><code>yes</code></dt>
+          <dd>The Engineering Document is SMPTE confidential.</dd>
+          <dt><code>no</code></dt>
+          <dd>The Engineering Document is not SMPTE confidential.</dd>
+        </dl>
+
+        <p>The element shall not be present unless the document is an
+        Engineering Document.</p>
+
+        <p>Unless specified otherwise, an Engineering Document that is not at
+        publication stage is confidential.</p>
+      </section>
+
+
       <section id="sec-pubDateTime">
         <h4><code>pubDateTime</code></h4>
 
