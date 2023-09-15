@@ -194,6 +194,10 @@ dfn {
   font-style: normal;
 }
 
+dd.term-source {
+  font-size: 0.8rem;
+}
+
 /* quotes */
 
 q {

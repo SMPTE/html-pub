@@ -891,13 +891,45 @@ function numberFormulae() {
 
 function numberNotes() {
 
-  for (let section of document.querySelectorAll("section")) {
+  const terms = document.getElementById("terms-int-defs");
+
+  /* handle notes to entries */
+  if (terms) {
+    let counter = 1;
+
+    for (const child of terms.children) {
+      if (child.localName === "dt") {
+        counter = 1;
+        continue;
+      }
+
+      if (child.localName !== "dd" || !child.classList.contains("note")) {
+        continue;
+      }
+
+      const headingLabel = document.createElement("span");
+      headingLabel.className = "heading-label";
+
+      const headingNumberElement = document.createElement("span");
+      headingNumberElement.className = "heading-number";
+      headingNumberElement.innerText = counter++;
+
+      headingLabel.appendChild(document.createTextNode("Note to entry "));
+      headingLabel.appendChild(headingNumberElement);
+      headingLabel.appendChild(document.createTextNode(": "));
+
+      child.insertBefore(headingLabel, child.firstChild);
+    }
+  }
+
+  /* handle other notes */
+  for (const section of document.querySelectorAll("section:not(#sec-terms-and-definitions)")) {
 
     let notes = [];
 
     function _findNotes(e) {
       for (const child of e.children) {
-        if (child.tagName === "SECTION")
+        if (child.localName === "section")
           continue;
         if (child.classList.contains("note"))
           notes.push(child);
@@ -1093,6 +1125,7 @@ function resolveLinks(docMetadata) {
         /* special formatting for definitions */
 
         if (anchor.parentElement.localName === "dd") {
+          anchor.parentElement.classList.add("term-source");
           anchor.parentNode.insertBefore(document.createTextNode("[SOURCE: "), anchor);
           anchor.parentNode.insertBefore(document.createTextNode("]"), anchor.nextSibling);
         }
