@@ -531,10 +531,10 @@
           constraints:
             <ul>
               <li>The <code>id</code> attribute of the <code>dl</code> element shall be equal to <code>terms-int-defs</code>.</li>
-              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol. More than one <code>dt</code> element
-              can precede the first <code>dd</code> element, in which case all the terms, abbreviations and symbols in the immediately
+              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol. Zero or more additional <code>dt</code> elements
+              can follow the first <code>dt</code> element, in which case all the terms, abbreviations and symbols in the immediately
               preceding <code>dt</code> elements are synomys.</li>
-              <li>The first <code>dd</code> element immediately following the last <code>dt</code> element shall be
+              <li>The first <code>dd</code> element immediately following the last <code>dt</code> element, if present, shall be
               a definition.</li>
               <li>The next <code>dd</code> element, if present, shall contain a single reference to a bibliographic entry,
               in which case the entry is the source of the definition of the term.</li>
