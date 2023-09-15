@@ -914,9 +914,9 @@ function numberNotes() {
       headingNumberElement.className = "heading-number";
       headingNumberElement.innerText = counter++;
 
-      headingLabel.appendChild(document.createTextNode("Note to entry "));
+      headingLabel.appendChild(document.createTextNode("Note "));
       headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(": "));
+      headingLabel.appendChild(document.createTextNode(" to entry: "));
 
       child.insertBefore(headingLabel, child.firstChild);
     }
