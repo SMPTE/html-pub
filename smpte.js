@@ -1054,24 +1054,24 @@ function resolveLinks(docMetadata) {
         anchor.href = anchor.textContent;
         anchor.classList.add("ext-ref");
 
-      } else {
+      } else if (contents === "") {
 
+        anchor.innerText = "?????";
+        logger_.error(`An anchor must either reference a definition (non-empty contents) or link to a resource (non-empty href attribute).`, anchor);
+
+      } else {
         /* process definitions */
 
         const term = _normalizeTerm(anchor.textContent);
 
         if (! definitions.has(term)) {
-          logger_.error("Unresolved link", anchor);
+          logger_.error(`No definition for ${term} was provided`, anchor);
         } else {
           anchor.href = "#" + definitions.get(term).id;
           anchor.classList.add("dfn-ref");
         }
 
       }
-
-    } else if (specifiedHref.match(/^[a-z]+:/)) {
-
-      /* absolute URLs */
 
     } else if (specifiedHref[0] == "#") {
 
@@ -1143,14 +1143,6 @@ function resolveLinks(docMetadata) {
         logger_.error("Anchor points to ambiguous href", anchor)
         anchor.innerText = "????";
       }
-
-    } else if (contents !== "") {
-
-      /* nothing to do */
-
-    } else {
-
-      logger_.error("Empty anchor", anchor);
 
     }
   }
