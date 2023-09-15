@@ -532,12 +532,15 @@
             <ul>
               <li>The <code>id</code> attribute of the <code>dl</code> element shall be equal to <code>terms-int-defs</code>.</li>
               <li>Each <code>dt</code> element contains a single term, abbreviation or symbol. More than one <code>dt</code> element
-              can precede a <code>dd</code> element, in which case all the terms, abbreviations and symbols in the immediately
+              can precede the first <code>dd</code> element, in which case all the terms, abbreviations and symbols in the immediately
               preceding <code>dt</code> elements are synomys.</li>
-              <li>Each <code>dd</code> element contains the matching definition. One or two <code>dd</code> elements can follow a
-              <code>dt</code> element. The first <code>dd</code> element immediately following the <code>dt</code> element shall be
-              a definition. The second <code>dd</code> element, if present, shall reference a bibliographic entry, in which case the
-              entry will be considered the source of the definition of the term.</li>
+              <li>The first <code>dd</code> element immediately following the last <code>dt</code> element shall be
+              a definition.</li>
+              <li>The next <code>dd</code> element, if present, shall contain a single reference to a bibliographic entry,
+              in which case the entry is the source of the definition of the term.</li>
+              <li>The remaining <code>dd</code> elements, if present,
+              shall have a <code>class</code> attribute that contains the value <code>note</code>, in which case the
+              elements are notes to the entry.</li>
             </ul>
           </li>
         </ul>
@@ -553,6 +556,7 @@
     &lt;dd&gt;number that is printed with ink or exposed onto the film at the time of
     manufacture at regular intervals, typically one foot.&lt;/dd&gt;
     &lt;dd&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;&lt;/dd&gt;
+    &lt;dd class="note"&gt;Key number shall not be confused with key frame.&lt;/dd&gt;
   &lt;/dl&gt;
 &lt;/section&gt;
 </pre>
