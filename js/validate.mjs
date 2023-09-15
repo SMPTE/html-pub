@@ -588,8 +588,10 @@ class InternalDefinitionsMatcher {
         ddCount++;
       }
 
-      if (ddCount === 0 || ddCount > 2 || dtCount === 0)
+      if (ddCount === 0 || ddCount > 2 || dtCount === 0) {
         logger.error(`A definition must consist of one or more dt elements followed by one or two dd elements`, element);
+        break;
+      }
 
     }
 
