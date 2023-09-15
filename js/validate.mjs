@@ -604,30 +604,22 @@ class InternalDefinitionsMatcher {
       }
 
       if (count === 0) {
-        logger.error(`Each definition must start with one or more dt elements`, element);
+        logger.error(`Invalid definition`, element);
         break;
       }
 
       /* look for definition */
-      count = 0;
 
       if (children.length > 0 &&
              DefinitionMatcher.match(children[0], logger) &&
              !DefinitionSourceMatcher.match(children[0], logger)) {
         children.shift();
-        count++;
       }
 
       /* look for definition source */      
 
       if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
         children.shift();
-        count++;
-      }
-
-      if (count == 0) {
-        logger.error(`Each definition must have exactly at least of one a definition text or a source, but not more than one of each.`, element);
-        break;
       }
 
       /* look for notes to entry */
