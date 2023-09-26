@@ -616,7 +616,7 @@ class InternalDefinitionsMatcher {
         children.shift();
       }
 
-      /* look for definition source */      
+      /* look for definition source */
 
       if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
         children.shift();
@@ -628,11 +628,6 @@ class InternalDefinitionsMatcher {
       while (children.length > 0 && DefinitionNoteMatcher.match(children[0], logger)) {
         children.shift();
         count++;
-      }
-
-      if (count > 1) {
-        logger.error(`Each definition must have at most dd element that is a note`, element);
-        break;
       }
 
     }

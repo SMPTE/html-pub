@@ -123,12 +123,6 @@ h6 span.heading-label {
   width: 4rem;
 }
 
-/* generic sections */
-
-section {
-  counter-reset: notes-counter;
-}
-
 /* foreword */
 
 #sec-foreword {
