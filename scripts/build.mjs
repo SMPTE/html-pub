@@ -221,6 +221,11 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   }
 
+  /* add media and elements */
+
+  generatedFiles.media = renderedDoc.media;
+  generatedFiles.elements = renderedDoc.elements;
+
   return generatedFiles;
 }
 
@@ -393,7 +398,7 @@ async function makeZip(buildPaths, generatedFiles, docMetadata) {
   return zipFn;
 }
 
-async function makeManifest(buildPaths, generatedFiles, docMetadata, docMediaAndElements) {
+async function makeManifest(buildPaths, generatedFiles, docMetadata) {
   if (docMetadata.pubDateTime === null || docMetadata.pubStage === null)
     return;
 
@@ -403,11 +408,11 @@ async function makeManifest(buildPaths, generatedFiles, docMetadata, docMediaAnd
     main: []
   };
 
-  if (docMediaAndElements.elements.length > 0)
-    manifest.elements = docMediaAndElements.elements;
+  if (generatedFiles.elements.length > 0)
+    manifest.elements = generatedFiles.elements;
 
-  if (docMediaAndElements.media.length > 0)
-    manifest.media = docMediaAndElements.media;
+  if (generatedFiles.media.length > 0)
+    manifest.media = generatedFiles.media;
 
   if ("pdf" in generatedFiles)
     manifest.main.push({
@@ -470,12 +475,52 @@ async function render(docPath) {
       }
     })
 
+    const mediaAndElements = await page.evaluate(() => {
+      const mediaAndElements = {
+        elements: [],
+        media: []
+      };
+
+      /* add elements */
+
+      for (const element of document.querySelectorAll("section#sec-elements ol li a")) {
+        const href = element.getAttribute("href");
+        if (! href.startsWith("http"))
+          mediaAndElements.elements.push({
+            title: element.title,
+            file: { path: href }
+          });
+      }
+
+      /* add images */
+
+      for (const img of document.querySelectorAll("img")) {
+        const src = img.getAttribute("src");
+        if (! src.startsWith("http"))
+          mediaAndElements.media.push({ path: src });
+      }
+
+      return mediaAndElements;
+    })
+
     const docHTML = await page.content();
 
+    /* add media types to media and elements */
+
+    for (const element of mediaAndElements.elements) {
+      element.file.mediaType = guessContentTypeFromExtension(element.file.path);
+    }
+
+    for (const media of mediaAndElements.media) {
+      media.mediaType = guessContentTypeFromExtension(media.path);
+    }
+
     return {
-      "docHTML": docHTML,
-      "docTitle": docTitle,
-      "scriptPath": decodeURI(scriptPath)
+      docHTML: docHTML,
+      docTitle: docTitle,
+      scriptPath: decodeURI(scriptPath),
+      media: mediaAndElements.media,
+      elements: mediaAndElements.elements
     };
 
   } finally {
@@ -484,42 +529,6 @@ async function render(docPath) {
 
   }
 
-}
-
-function gatherMediaAndElements(document) {
-  const mediaAndElements = {
-    elements: [],
-    media: []
-  };
-
-  /* add elements */
-
-  for (const element of document.querySelectorAll("section#sec-elements ol li a")) {
-    if (element.href.startsWith("http"))
-      continue;
-
-    mediaAndElements.elements.push({
-      title: element.title,
-      file: {
-        mediaType: guessContentTypeFromExtension(element.href),
-        path: element.href
-      }
-    });
-  }
-
-  /* add images */
-
-  for (const img of document.querySelectorAll("figure img")) {
-    if (img.src.startsWith("http"))
-      continue;
-
-    mediaAndElements.media.push({
-      mediaType: guessContentTypeFromExtension(img.src),
-      path: img.src
-    });
-  }
-
-  return mediaAndElements; 
 }
 
 class BuildPaths {
@@ -630,8 +639,6 @@ async function main() {
 
   const docMetadata = smpteValidate(dom.window.document, logger);
 
-  const docMediaAndElements = gatherMediaAndElements(dom.window.document);
-
   if (logger.hasFailed())
     throw Error(`SMPTE schema validation failed:\n${logger.errorList().join("\n")}`);
 
@@ -650,7 +657,7 @@ async function main() {
 
   /* create manifest */
 
-  await makeManifest(buildPaths, generatedFiles, docMetadata, docMediaAndElements);
+  await makeManifest(buildPaths, generatedFiles, docMetadata);
 
   /* generate zip file */
 
