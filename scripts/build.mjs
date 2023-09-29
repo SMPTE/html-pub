@@ -348,6 +348,9 @@ async function makeZip(buildPaths, generatedFiles, docMetadata) {
   if (fs.existsSync(buildPaths.pubMediaPath))
     zip.addLocalFolder(buildPaths.pubMediaPath, buildPaths.pubMediaDirName);
 
+  if (fs.existsSync(buildPaths.manifestDocPath))
+    zip.addLocalFile(buildPaths.manifestDocPath);
+
   if ("html" in generatedFiles)
     zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.html));
 
@@ -388,6 +391,40 @@ async function makeZip(buildPaths, generatedFiles, docMetadata) {
   zip.writeZip(path.join(buildPaths.pubDirPath, zipFn));
 
   return zipFn;
+}
+
+async function makeManifest(buildPaths, generatedFiles, docMetadata, docMediaAndElements) {
+  if (docMetadata.pubDateTime === null || docMetadata.pubStage === null)
+    return;
+
+  const manifest = {
+    approved: docMetadata.pubDateTime,
+    stage: docMetadata.pubStage.toLowerCase(),
+    main: []
+  };
+
+  if (docMediaAndElements.elements.length > 0)
+    manifest.elements = docMediaAndElements.elements;
+
+  if (docMediaAndElements.media.length > 0)
+    manifest.media = docMediaAndElements.media;
+
+  if ("pdf" in generatedFiles)
+    manifest.main.push({
+      mediaType: "application/pdf",
+      path: generatedFiles.pdf
+    });
+
+  if ("html" in generatedFiles)
+    manifest.main.push({
+      mediaType: "text/html",
+      path: generatedFiles.html
+    });
+
+  fs.writeFileSync(
+    buildPaths.manifestDocPath,
+    JSON.stringify(manifest, null, "  ")
+  );
 }
 
 async function render(docPath) {
@@ -449,6 +486,42 @@ async function render(docPath) {
 
 }
 
+function gatherMediaAndElements(document) {
+  const mediaAndElements = {
+    elements: [],
+    media: []
+  };
+
+  /* add elements */
+
+  for (const element of document.querySelectorAll("section#sec-elements ol li a")) {
+    if (element.href.startsWith("http"))
+      continue;
+
+    mediaAndElements.elements.push({
+      title: element.title,
+      file: {
+        mediaType: guessContentTypeFromExtension(element.href),
+        path: element.href
+      }
+    });
+  }
+
+  /* add images */
+
+  for (const img of document.querySelectorAll("figure img")) {
+    if (img.src.startsWith("http"))
+      continue;
+
+    mediaAndElements.media.push({
+      mediaType: guessContentTypeFromExtension(img.src),
+      path: img.src
+    });
+  }
+
+  return mediaAndElements; 
+}
+
 class BuildPaths {
   constructor() {
 
@@ -466,6 +539,9 @@ class BuildPaths {
 
     this.renderedDocName = "index.html";
     this.renderedDocPath = path.join(this.pubDirPath, this.renderedDocName);
+
+    this.manifestDocName = "manifest.json";
+    this.manifestDocPath = path.join(this.pubDirPath, this.manifestDocName);
 
     this.refDirPath = path.join(this.buildDirPath, "ref");
     this.renderedRefDocPath = path.join(this.buildDirPath, "ref.html");
@@ -554,6 +630,8 @@ async function main() {
 
   const docMetadata = smpteValidate(dom.window.document, logger);
 
+  const docMediaAndElements = gatherMediaAndElements(dom.window.document);
+
   if (logger.hasFailed())
     throw Error(`SMPTE schema validation failed:\n${logger.errorList().join("\n")}`);
 
@@ -570,9 +648,13 @@ async function main() {
     throw Error("Rendered document validation failed.");
   }
 
+  /* create manifest */
+
+  await makeManifest(buildPaths, generatedFiles, docMetadata, docMediaAndElements);
+
   /* generate zip file */
 
-  generatedFiles.zip = await makeZip(buildPaths, generatedFiles, docMetadata)
+  generatedFiles.zip = await makeZip(buildPaths, generatedFiles, docMetadata);
 
   /* skip deployment if validating only */
 
