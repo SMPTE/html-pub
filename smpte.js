@@ -31,18 +31,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import { smpteValidate } from "./js/validate.mjs";
 import * as smpte from "./js/common.mjs";
 
-const _SCRIPT_PATH = (new URL(document.currentScript ? document.currentScript.src : import.meta.url)).pathname;
+const _SCRIPT_PATH = function () {
+  const scripts = document.head.getElementsByTagName("script");
 
-function getScriptPath() {
-  return _SCRIPT_PATH;
-}
+  for (const script of scripts) {
+    const src = script.getAttribute("src");
+    if (src !== null && src.indexOf("smpte.js") > -1)
+      return src.split("/").slice(0, -1).join("/");
+  }
+
+  return null;
+}();
 
 function resolveScriptRelativePath(path) {
-  return getScriptPath().split("/").slice(0, -1).concat([path]).join("/");
+  return `${_SCRIPT_PATH}/${path}`;
 }
 
 function resolveStaticResourcePath(resourceName) {
-  return resolveScriptRelativePath(`static/${resourceName}`);
+  const relPath = `static/${resourceName}`;
+  return window.smpteIsBuilding ? relPath : resolveScriptRelativePath(relPath);
 }
 
 function asyncFetchLocal(url) {
@@ -1259,5 +1266,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-window.smpteGetScriptPath = getScriptPath;
 window.smpteLogger = logger_;

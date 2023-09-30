@@ -33,9 +33,16 @@ import * as puppeteer from "puppeteer";
 import * as child_process from "child_process";
 import { argv } from "process";
 import * as jsdom from "jsdom";
+import { fileURLToPath } from 'url';
 import AdmZip from "adm-zip";
 
 import { smpteValidate, ErrorLogger } from "../js/validate.mjs";
+
+/**
+ * Determine the location of the build script
+ */
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * build.js (validate | build | deploy)
@@ -179,7 +186,7 @@ async function build(buildPaths, baseRef, lastEdRef) {
   /* mirror static directory */
 
   mirrorDirExcludeTooling(
-    path.join(path.dirname(renderedDoc.scriptPath), buildPaths.pubStaticDirName),
+    path.join(__dirname, "../static"),
     path.join(buildPaths.pubDirPath, buildPaths.pubStaticDirName)
     );
 
@@ -243,7 +250,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
   fs.writeFileSync(refPath, r.docHTML);
 
-  child_process.execSync(`perl "${path.dirname(r.scriptPath)}/lib/htmldiff/htmldiff.pl" "${refPath}" "${buildPaths.renderedDocPath}" "${rlPath}"`);
+  child_process.execSync(`perl '${path.join(__dirname, "../lib/htmldiff/htmldiff.pl")}' "${refPath}" "${buildPaths.renderedDocPath}" "${rlPath}"`);
 
 }
 
@@ -450,11 +457,13 @@ async function render(docPath) {
 
     console.log(`Rendering the document at ${pageURL}`)
 
+    await page.evaluateOnNewDocument(() => {
+      window.smpteIsBuilding = true;
+    })
+
     await page.goto(pageURL);
 
     const docTitle = await page.evaluate(() => document.getElementById("doc-designator").innerText + " " + document.title);
-
-    const scriptPath = await page.evaluate(() => typeof _SCRIPT_PATH !== "undefined" ? _SCRIPT_PATH /* for compatibility */ : smpteGetScriptPath());
 
     await page.evaluate(() => {
       /* remove all scripts */
@@ -500,6 +509,14 @@ async function render(docPath) {
           mediaAndElements.media.push({ path: src });
       }
 
+      /* add icon */
+
+      for (const ico of document.querySelectorAll('link[rel="icon"]')) {
+        const src = ico.getAttribute("href");
+        if (! src.startsWith("http"))
+          mediaAndElements.media.push({ path: src });
+      }
+
       return mediaAndElements;
     })
 
@@ -518,7 +535,6 @@ async function render(docPath) {
     return {
       docHTML: docHTML,
       docTitle: docTitle,
-      scriptPath: decodeURI(scriptPath),
       media: mediaAndElements.media,
       elements: mediaAndElements.elements
     };
