@@ -151,35 +151,6 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   const generatedFiles = {};
 
-  /* make sure the document directory does not contain conflicting names */
-
-  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubStaticDirName)))
-    throw Error(`The document directory cannot contain an entry named ${buildPaths.pubStaticDirName}`);
-
-  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubRedlineName)))
-    throw Error(`The document directory cannot contain an entry named ${buildPaths.pubRedlineName}`);
-
-  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.baseRedlineName)))
-    throw Error(`The document directory cannot contain an entry named ${buildPaths.baseRedlineName}`);
-
-  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.renderedDocName)))
-    throw Error(`The document directory cannot contain an entry named ${buildPaths.renderedDocName}`);
-
-  /* create the build directory if it does not already exists */
-
-  fs.mkdirSync(buildPaths.buildDirPath, {"recursive" : true});
-
-  /* populate the publication directory */
-
-  fs.rmSync(buildPaths.pubDirPath, { recursive: true, force: true });
-
-  mirrorDirExcludeTooling(buildPaths.docDirPath, buildPaths.pubDirPath);
-
-  mirrorDirExcludeTooling(
-    path.join(__dirname, "../static"),
-    path.join(buildPaths.pubDirPath, buildPaths.pubStaticDirName)
-    );
-
   /* render the document */
 
   const renderedDoc = await render(path.join(buildPaths.docDirPath, buildPaths.docName));
@@ -225,11 +196,6 @@ async function build(buildPaths, baseRef, lastEdRef) {
     }
 
   }
-
-  /* add media and elements */
-
-  generatedFiles.media = renderedDoc.media;
-  generatedFiles.elements = renderedDoc.elements;
 
   return generatedFiles;
 }
@@ -377,7 +343,7 @@ async function makeReviewZip(buildPaths, generatedFiles, docMetadata) {
 
   /* write zip file */
 
-  zip.writeZip(path.join(buildPaths.pubDirPath, zipFn));
+  zip.writeZip(path.join(buildPaths.buildDirPath, zipFn));
 
   return zipFn;
 }
@@ -415,7 +381,7 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
 
   /* create zip file name */
 
-  const zipFn = `${manifest.approved.replace("-", " ")}-${manifest.stage}`
+  const zipFn = `${manifest.approved.replaceAll("-", "")}-${manifest.stage}.zip`
 
   const zipPath = path.join(buildPaths.buildDirPath, zipFn);
 
@@ -498,59 +464,11 @@ async function render(docPath) {
       }
     })
 
-    const mediaAndElements = await page.evaluate(() => {
-      const mediaAndElements = {
-        elements: [],
-        media: []
-      };
-
-      /* add elements */
-
-      for (const element of document.querySelectorAll("section#sec-elements ol li a")) {
-        const href = element.getAttribute("href");
-        if (! href.startsWith("http"))
-          mediaAndElements.elements.push({
-            title: element.title,
-            file: { path: href }
-          });
-      }
-
-      /* add images */
-
-      for (const img of document.querySelectorAll("img")) {
-        const src = img.getAttribute("src");
-        if (! src.startsWith("http"))
-          mediaAndElements.media.push({ path: src });
-      }
-
-      /* add icon */
-
-      for (const ico of document.querySelectorAll('link[rel="icon"]')) {
-        const src = ico.getAttribute("href");
-        if (! src.startsWith("http"))
-          mediaAndElements.media.push({ path: src });
-      }
-
-      return mediaAndElements;
-    })
-
     const docHTML = await page.content();
-
-    /* add media types to media and elements */
-
-    for (const element of mediaAndElements.elements) {
-      element.file.mediaType = guessContentTypeFromExtension(element.file.path);
-    }
-
-    for (const media of mediaAndElements.media) {
-      media.mediaType = guessContentTypeFromExtension(media.path);
-    }
 
     return {
       docHTML: docHTML,
-      docTitle: docTitle,
-      media: mediaAndElements.media,
-      elements: mediaAndElements.elements
+      docTitle: docTitle
     };
 
   } finally {
@@ -670,9 +588,74 @@ async function main() {
   if (logger.hasFailed())
     throw Error(`SMPTE schema validation failed:\n${logger.errorList().join("\n")}`);
 
+   /* collect elements */
+
+   const generatedFiles = {
+    elements: [],
+    media: []
+   };
+
+   for (const element of dom.window.document.querySelectorAll("section#sec-elements ol li a")) {
+    const href = element.getAttribute("href");
+    if (! href.startsWith("http"))
+      generatedFiles.elements.push({
+        title: element.title,
+        file: {
+          path: href,
+          mediaType: guessContentTypeFromExtension(href)
+        }
+      });
+  }
+
+  /* add images */
+
+  for (const img of dom.window.document.querySelectorAll("img")) {
+    const src = img.getAttribute("src");
+    if (! src.startsWith("http"))
+      generatedFiles.media.push({
+        path: src,
+        mediaType: guessContentTypeFromExtension(src)
+      });
+  }
+
+  /* add static assets */
+
+  generatedFiles.media.push({
+    path: "static/smpte-logo.png",
+    mediaType: "application/png"
+  });
+
+  generatedFiles.media.push({
+    path: "static/smpte-icon.png",
+    mediaType: "application/png"
+  });
+
+  /* create the build directory if it does not already exists */
+
+  fs.mkdirSync(buildPaths.buildDirPath, {"recursive" : true});
+
+  /* populate the publication directory */
+
+  fs.rmSync(buildPaths.pubDirPath, { recursive: true, force: true });
+
+  mirrorDirExcludeTooling(
+    path.join(buildPaths.docDirPath, buildPaths.pubMediaDirName),
+    buildPaths.pubMediaPath
+  );
+
+  mirrorDirExcludeTooling(
+    path.join(buildPaths.docDirPath, buildPaths.pubElementsDirName),
+    buildPaths.pubElementsPath
+  );
+
+  mirrorDirExcludeTooling(
+    path.join(__dirname, "../static"),
+    buildPaths.pubStaticPath
+    );
+
   /* render document */
 
-  const generatedFiles = await build(buildPaths, baseRef, config.lastEdRef);
+  Object.assign(generatedFiles, await build(buildPaths, baseRef, config.lastEdRef));
 
   /* validate rendered document */
 
