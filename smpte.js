@@ -31,6 +31,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import { smpteValidate } from "./js/validate.mjs";
 import * as smpte from "./js/common.mjs";
 
+
+class Logger {
+  constructor() {
+    this.events = [];
+  }
+
+  error(msg, element) {
+    if (element !== undefined) {
+      if (!element.hasAttribute("id") || !element.id) {
+        element.id = Math.floor(Math.random() * 1000000000);
+      }
+      element.classList.add("invalid-tag");
+    }
+    this.events.push({msg: msg, elementId: element === undefined ? null : element.id});
+  }
+
+  hasError() {
+    return this.events.length > 0;
+  }
+
+  errorList() {
+    return this.events;
+  }
+}
+
+const logger_ = new Logger();
+
 const _SCRIPT_PATH = function () {
   const scripts = document.head.getElementsByTagName("script");
 
@@ -40,16 +67,12 @@ const _SCRIPT_PATH = function () {
       return src.split("/").slice(0, -1).join("/");
   }
 
+  logger_.error("Could not determine location of SMPTE document script");
   return null;
 }();
 
 function resolveScriptRelativePath(path) {
   return `${_SCRIPT_PATH}/${path}`;
-}
-
-function resolveStaticResourcePath(resourceName) {
-  const relPath = `static/${resourceName}`;
-  return window.smpteIsBuilding ? relPath : resolveScriptRelativePath(relPath);
 }
 
 function asyncFetchLocal(url) {
@@ -199,7 +222,7 @@ function insertFrontMatter(docMetadata) {
       longPubStage: longPubStage,
       draftWarning: draftWarning,
       publicationState: publicationState,
-      smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),
+      smpteLogoURL: resolveScriptRelativePath("static/smpte-logo.png"),
       actualPubDateTime: actualPubDateTime,
       actualPubNumber: actualPubNumber,
       ...docMetadata
@@ -508,12 +531,14 @@ function insertElementsAnnex(docMetadata) {
   for(const e of sec.querySelectorAll("li > a")) {
 
     if (! e.title) {
-      logger_.error("All links listed in the Elements Annex must have a title attribute.");
+      logger_.error("All links listed in the Elements Annex must have a title attribute.", e);
       continue;
     }
 
-    if (! e.getAttribute("href")) {
-      logger_.error("All links listed in the Elements Annex must have an href attribute.");
+    const href = e.getAttribute("href");
+
+    if (! href) {
+      logger_.error("All links listed in the Elements Annex must have an href attribute.", e);
       continue;
     }
 
@@ -528,12 +553,12 @@ function insertElementsAnnex(docMetadata) {
 
     e.parentElement.insertBefore(headingLabel, e);
 
-    const isAbsoluteLink = e.getAttribute("href").startsWith("http");
+    const isAbsoluteLink = href.startsWith("http");
 
     if (isAbsoluteLink) {
-      e.innerText = e.getAttribute("href");
+      e.innerText = href;
     } else {
-      e.innerText = e.getAttribute("href").split('\\').pop().split('/').pop();
+      e.innerText = href.split('\\').pop().split('/').pop();
     }
 
     e.parentElement.insertBefore(
@@ -1171,7 +1196,7 @@ function insertIconLink() {
 
   icoLink.type = "image/png";
   icoLink.rel = "icon";
-  icoLink.href = resolveStaticResourcePath("smpte-icon.png");
+  icoLink.href = resolveScriptRelativePath("static/smpte-icon.png");
 
   document.head.insertBefore(icoLink, null);
 }
@@ -1210,32 +1235,6 @@ function render() {
     document.head.appendChild(pagedJS);
   }
 }
-
-class Logger {
-  constructor() {
-    this.events = [];
-  }
-
-  error(msg, element) {
-    if (element !== undefined) {
-      if (!element.hasAttribute("id") || !element.id) {
-        element.id = Math.floor(Math.random() * 1000000000);
-      }
-      element.classList.add("invalid-tag");
-    }
-    this.events.push({msg: msg, elementId: element === undefined ? null : element.id});
-  }
-
-  hasError() {
-    return this.events.length > 0;
-  }
-
-  errorList() {
-    return this.events;
-  }
-}
-
-const logger_ = new Logger();
 
 document.addEventListener('DOMContentLoaded', async () => {
    try {
