@@ -234,14 +234,16 @@ async function generatePubLinks(buildPaths, pubLinks) {
     if ("pubRedline" in pubLinks)
       linksDocContents += `[Redline to most recent edition](${encodeURI(pubLinks.pubRedline)})\n`;
 
-    if ("zip" in pubLinks)
-      linksDocContents += `[ZIP package](${encodeURI(pubLinks.zip)})\n`;
+    if ("reviewZip" in pubLinks)
+      linksDocContents += `[ZIP package](${encodeURI(pubLinks.reviewZip)})\n`;
 
   } else {
     linksDocContents += "No links available";
   }
 
   fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
+
+  return buildPaths.pubLinksPath;
 }
 
 async function s3Upload(buildPaths, versionKey, generatedFiles) {
@@ -282,8 +284,12 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
     pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
   }
 
-  if ("zip" in generatedFiles) {
-    pubLinks.zip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.zip}`;
+  if ("reviewZip" in generatedFiles) {
+    pubLinks.reviewZip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.reviewZip}`;
+  }
+
+  if ("libraryZip" in generatedFiles) {
+    pubLinks.libraryZip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.libraryZip}`;
   }
 
   s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
@@ -343,9 +349,53 @@ async function makeReviewZip(buildPaths, generatedFiles, docMetadata) {
 
   /* write zip file */
 
-  zip.writeZip(path.join(buildPaths.buildDirPath, zipFn));
+  zip.writeZip(path.join(buildPaths.pubDirPath, zipFn));
 
   return zipFn;
+}
+
+async function makePubArtifacts(buildPaths, generatedFiles, docMetadata) {
+  let htmlLinks;
+
+  if ("html" in generatedFiles) {
+    htmlLinks = `<p><a href="${encodeURI(generatedFiles.html)}">Clean</a></p>\n`;
+  }
+
+  if ("pdf" in generatedFiles) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pdf)}">Clean PDF</a></p>\n`;
+  }
+
+  if ("baseRedline" in generatedFiles) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.baseRedline)}">Redline to current draft</a></p>\n`;
+  }
+
+  if ("pubRedline" in generatedFiles) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>\n`;
+  }
+
+  if (generatedFiles.reviewZip !== undefined) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.reviewZip)}">Review zip file</a></p>\n`;
+  }
+
+  if (generatedFiles.libraryZip !== undefined) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.libraryZip)}">Library zip file</a></p>\n`;
+  }
+
+  fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="x-ua-compatible" content="ie=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Publication artifacts</title>
+      <link rel="icon" href="data:,">
+    </head>
+    <body>
+      ${htmlLinks}
+    </body>
+  </html>`);
+
+  return buildPaths.pubArtifactsPath;
 }
 
 async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
@@ -378,12 +428,6 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
       mediaType: "text/html",
       path: generatedFiles.html
     });
-
-  /* create zip file name */
-
-  const zipFn = `${manifest.approved.replaceAll("-", "")}-${manifest.stage}.zip`
-
-  const zipPath = path.join(buildPaths.buildDirPath, zipFn);
 
   /* create zip file */
 
@@ -418,9 +462,15 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
     entry.header.time = manifest.approved;
   }
 
+  /* create zip file */
+
+  const zipFn = `${manifest.approved.replaceAll("-", "")}-${manifest.stage}.zip`
+
+  const zipPath = path.join(buildPaths.pubDirPath, zipFn);
+
   zip.writeZip(zipPath);
 
-  return zipPath;
+  return zipFn;
 }
 
 async function render(docPath) {
@@ -503,7 +553,11 @@ class BuildPaths {
     this.refDirPath = path.join(this.buildDirPath, "ref");
     this.renderedRefDocPath = path.join(this.buildDirPath, "ref.html");
 
-    this.pubLinksPath = path.join(this.buildDirPath, "pr-links.md");
+    this.pubLinksName = "pr-links.md";
+    this.pubLinksPath = path.join(this.buildDirPath, this.pubLinksName);
+
+    this.pubArtifactsName = "pub-artifacts.html";
+    this.pubArtifactsPath = path.join(this.pubDirPath, this.pubArtifactsName);
 
     this.pubMediaPath = path.join(this.pubDirPath,  this.pubMediaDirName);
     this.pubStaticPath = path.join(this.pubDirPath, this.pubStaticDirName);
@@ -516,6 +570,9 @@ class BuildPaths {
     this.baseRedlineName = "base-rl.html";
     this.baseRedlinePath = path.join(this.pubDirPath, this.baseRedlineName);
     this.baseRedLineRefPath = path.join(this.buildDirPath, this.baseRedlineName);
+
+    this.varsName = "vars.txt";
+    this.varsPath = path.join(this.buildDirPath, this.varsName);
   }
 
 }
@@ -666,29 +723,47 @@ async function main() {
     throw Error("Rendered document validation failed.");
   }
 
+  /* keep track of exported variables */
+
+  let exportedVars = "";
+
   /* generate the document library zip file */
 
-  generatedFiles.librayZip = await makeLibraryZip(buildPaths, generatedFiles, docMetadata);
+  generatedFiles.libraryZip = await makeLibraryZip(buildPaths, generatedFiles, docMetadata);
+  if (generatedFiles.libraryZip !== null)
+    exportedVars += `LIBRARY_ZIP=${path.join(buildPaths.pubDirPath, generatedFiles.libraryZip)}\n`;
 
   /* generate the review zip file */
 
   generatedFiles.reviewZip = await makeReviewZip(buildPaths, generatedFiles, docMetadata);
+  if (generatedFiles.reviewZip !== null)
+    exportedVars += `REVIEW_ZIP=${path.join(buildPaths.pubDirPath, generatedFiles.reviewZip)}\n`;
+
+  /* generate the publication artifacts links page */
+
+  generatedFiles.pubArtifacts = await makePubArtifacts(buildPaths, generatedFiles, docMetadata);
 
   /* skip deployment if validating only */
 
   if (buildPhase === "validate") {
+
     console.warn("Skipping deploy to S3.");
-    return;
+
+  } else {
+    /* deploy to S3 */
+
+    const pubLinks = await s3Upload(buildPaths, branchName, generatedFiles);
+
+    await s3Upload(buildPaths, commitHash, generatedFiles);
+
+    if (pubLinks) {
+      const pubLinksPath = await generatePubLinks(buildPaths, pubLinks);
+      if (pubLinksPath !== null)
+        exportedVars += `PUB_LINKS=${pubLinksPath}\n`;
+    }
   }
 
-  /* deploy to S3 */
-
-  const pubLinks = await s3Upload(buildPaths, branchName, generatedFiles);
-
-  await s3Upload(buildPaths, commitHash, generatedFiles);
-
-  if (pubLinks)
-    await generatePubLinks(buildPaths, pubLinks);
+  fs.writeFileSync(buildPaths.varsPath, exportedVars, {encoding:"utf-8"});
 
 }
 
