@@ -662,7 +662,7 @@ async function main() {
     const href = element.getAttribute("href");
     if (! href.startsWith("http"))
       generatedFiles.elements.push({
-        title: element.title,
+        title: element.title.replace(/\s+/g, " "),
         file: {
           path: href,
           mediaType: guessContentTypeFromExtension(href)
