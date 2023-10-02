@@ -61,12 +61,18 @@ function guessContentTypeFromExtension(filePath) {
       return "text/html";
     case ".png":
       return "image/png";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
     case ".svg":
       return "image/svg+xml";
     case ".css":
       return "text/css";
     case ".txt":
       return "text/plain";
+    case ".xml":
+    case ".xsd":
+      return "text/xml";
     default:
       return "application/octet-stream";
   }
@@ -679,12 +685,12 @@ async function main() {
 
   generatedFiles.media.push({
     path: "static/smpte-logo.png",
-    mediaType: "application/png"
+    mediaType: "image/png"
   });
 
   generatedFiles.media.push({
     path: "static/smpte-icon.png",
-    mediaType: "application/png"
+    mediaType: "image/png"
   });
 
   /* create the build directory if it does not already exists */
