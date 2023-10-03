@@ -1124,7 +1124,7 @@ function resolveLinks(docMetadata) {
 
         /* special formatting for definitions */
 
-        if (anchor.parentElement.localName === "dd") {
+        if (anchor.parentElement.localName === "dd" && anchor.parentElement.childElementCount === 1) {
           anchor.parentElement.classList.add("term-source");
           anchor.parentNode.insertBefore(document.createTextNode("[SOURCE: "), anchor);
           anchor.parentNode.insertBefore(document.createTextNode("]"), anchor.nextSibling);
