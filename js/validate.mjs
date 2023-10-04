@@ -225,15 +225,46 @@ class DdMatcher {
   }
 }
 
+class DefinitionMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd" || element.classList.contains("note"))
+      return false;
+
+    for (const child of element.children) {
+      if (!AnyPhrasingMatcher.match(child, logger)) {
+        logger.error(`Definition contains non-phrasing element`, child);
+      }
+    }
+
+    return true;
+  }
+}
+
 class DefinitionSourceMatcher {
   static match(element, logger) {
-    if (element.localName !== "dd")
+    if (element.localName !== "dd" || element.classList.contains("note"))
       return false;
 
     const aMatcher = new TerminalPhrasingMatcher("a");
 
-    if (element.childElementCount !== 1 || !aMatcher.match(element.firstElementChild, logger))
-      logger.error(`Definition source must contain a single <a> element`, element);
+    if (element.childElementCount !== 1 || !aMatcher.match(element.firstElementChild, logger)) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+class DefinitionNoteMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd" || !element.classList.contains("note"))
+      return false;
+
+    for (const child of element.children) {
+      if (!AnyPhrasingMatcher.match(child, logger)) {
+        logger.error(`Note to entry contains non-phrasing element`, child);
+      }
+    }
 
     return true;
   }
@@ -564,33 +595,39 @@ class InternalDefinitionsMatcher {
 
     while (children.length > 0) {
 
-      let dtCount = 0;
-
       /* look for dt elements */
-      while (children.length > 0) {
-        if (!DtMatcher.match(children[0], logger))
-          break;
+      let count = 0;
+
+      while (children.length > 0 && DtMatcher.match(children[0], logger)) {
         children.shift();
-        dtCount++;
+        count++;
       }
 
-      let ddCount = 0;
+      if (count === 0) {
+        logger.error(`Invalid definition`, element);
+        break;
+      }
 
       /* look for definition */
-      if (children.length > 0 && DdMatcher.match(children[0], logger)) {
+
+      if (children.length > 0 &&
+             DefinitionMatcher.match(children[0], logger) &&
+             !DefinitionSourceMatcher.match(children[0], logger)) {
         children.shift();
-        ddCount++;
       }
 
       /* look for definition source */
+
       if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
         children.shift();
-        ddCount++;
       }
 
-      if (ddCount === 0 || ddCount > 2 || dtCount === 0) {
-        logger.error(`A definition must consist of one or more dt elements followed by one or two dd elements`, element);
-        break;
+      /* look for notes to entry */
+      count = 0;
+
+      while (children.length > 0 && DefinitionNoteMatcher.match(children[0], logger)) {
+        children.shift();
+        count++;
       }
 
     }
