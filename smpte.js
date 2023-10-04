@@ -121,7 +121,7 @@ const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-number-block">
 {{longPubStage}}
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
-<h1>{{pubTitle}}</h1>
+<h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}} - {{actualPubDateTime}}</div>
 <hr />
 {{draftWarning}}`
@@ -130,7 +130,7 @@ const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscop
 <span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{actualPubNumber}}</div>
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
-<h1>{{pubTitle}}</h1>
+<h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
 <div id="doc-effective">Effective date: {{effectiveDateTime}}</div>
 <hr />`
@@ -204,6 +204,12 @@ function insertFrontMatter(docMetadata) {
   else
     boilerplate = SMPTE_FRONT_MATTER_BOILERPLATE;
 
+  let fullTitle;
+
+  if (docMetadata.pubSuiteTitle !== null)
+    fullTitle = `${docMetadata.pubSuiteTitle} — ${docMetadata.pubTitle}`;
+  else
+    fullTitle = docMetadata.pubTitle;
 
   let revisionOf = "";
 
@@ -220,6 +226,7 @@ function insertFrontMatter(docMetadata) {
       revisionOf: revisionOf,
       longDocType: longDocType,
       longPubStage: longPubStage,
+      fullTitle: fullTitle,
       draftWarning: draftWarning,
       publicationState: publicationState,
       smpteLogoURL: resolveScriptRelativePath("static/smpte-logo.png"),

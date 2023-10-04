@@ -153,7 +153,8 @@ function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
   }
 }
 
-async function build(buildPaths, baseRef, lastEdRef) {
+
+async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
 
   const generatedFiles = {};
 
@@ -167,11 +168,15 @@ async function build(buildPaths, baseRef, lastEdRef) {
 
   /* create pdf */
 
-  const pdfFileName = renderedDoc.docTitle + ".pdf";
+  generatedFiles.pdf = `SMPTE ${docMetadata.pubType} ${docMetadata.pubNumber}`;
 
-  child_process.execSync(`npm exec -c 'pagedjs-cli ${buildPaths.renderedDocPath} -o "${path.join(buildPaths.pubDirPath, pdfFileName)}"'`);
+  if (docMetadata.pubPart !== null) {
+    generatedFiles.pdf += `-${docMetadata.pubPart} ${docMetadata.pubSuiteTitle} - `
+  }
 
-  generatedFiles.pdf = pdfFileName;
+  generatedFiles.pdf += `${docMetadata.pubTitle}.pdf`;
+
+  child_process.execSync(`npm exec -c 'pagedjs-cli ${buildPaths.renderedDocPath} -o "${path.join(buildPaths.pubDirPath, generatedFiles.pdf)}"'`);
 
   /* generate base redline, if requested */
 
@@ -499,8 +504,6 @@ async function render(docPath) {
 
     await page.goto(pageURL);
 
-    const docTitle = await page.evaluate(() => document.getElementById("doc-designator").innerText + " " + document.title);
-
     await page.evaluate(() => {
       /* remove all scripts */
       const elements = document.getElementsByTagName('script');
@@ -523,8 +526,7 @@ async function render(docPath) {
     const docHTML = await page.content();
 
     return {
-      docHTML: docHTML,
-      docTitle: docTitle
+      docHTML: docHTML
     };
 
   } finally {
@@ -718,7 +720,7 @@ async function main() {
 
   /* render document */
 
-  Object.assign(generatedFiles, await build(buildPaths, baseRef, config.lastEdRef));
+  Object.assign(generatedFiles, await build(buildPaths, baseRef, config.lastEdRef, docMetadata));
 
   /* validate rendered document */
 
