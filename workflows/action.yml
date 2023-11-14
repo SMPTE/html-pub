@@ -66,7 +66,7 @@ runs:
       if: github.event_name == 'release'
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: |
         gh release upload "$GITHUB_REF_NAME" ${{ steps.build.outputs.LIBRARY_ZIP }}
         gh release upload "$GITHUB_REF_NAME" ${{ steps.build.outputs.REVIEW_ZIP }}
