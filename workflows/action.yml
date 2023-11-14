@@ -64,6 +64,7 @@ runs:
 
     - name: Upload artifacts to the release
       if: github.event_name == 'release'
+      shell: bash
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
