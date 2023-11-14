@@ -1,6 +1,10 @@
 name: Build SMPTE document
 
-on: [push, pull_request, release]
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
 
 env:
   AWS_REGION: us-east-1
