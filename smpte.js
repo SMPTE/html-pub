@@ -928,41 +928,81 @@ function numberFormulae() {
   }
 }
 
+function numberNotesToEntry(internalTermsSection) {
+  let counter = 1;
+
+  for (const child of internalTermsSection.children) {
+    if (child.localName === "dt") {
+      counter = 1;
+      continue;
+    }
+
+    if (child.localName !== "dd" || !child.classList.contains("note")) {
+      continue;
+    }
+
+    const headingLabel = document.createElement("span");
+    headingLabel.className = "heading-label";
+
+    const headingNumberElement = document.createElement("span");
+    headingNumberElement.className = "heading-number";
+    headingNumberElement.innerText = counter++;
+
+    headingLabel.appendChild(document.createTextNode("Note "));
+    headingLabel.appendChild(headingNumberElement);
+    headingLabel.appendChild(document.createTextNode(" to entry: "));
+
+    child.insertBefore(headingLabel, child.firstChild);
+  }
+}
+
+function numberSectionNotes(section) {
+  let notes = [];
+
+  function _findNotes(e) {
+    for (const child of e.children) {
+      if (child.localName === "section")
+        numberSectionNotes(child);
+      else if (child.classList.contains("note"))
+        notes.push(child);
+      else
+        _findNotes(child);
+    }
+  }
+
+  _findNotes(section);
+
+  let counter = 1;
+  for (let note of notes) {
+    const headingLabel = document.createElement("span");
+    headingLabel.className = "heading-label";
+
+    const headingNumberElement = document.createElement("span");
+    headingNumberElement.className = "heading-number";
+    if (notes.length !== 1)
+      headingNumberElement.innerText = counter++;
+
+    headingLabel.appendChild(document.createTextNode("NOTE "));
+    headingLabel.appendChild(headingNumberElement);
+    headingLabel.appendChild(document.createTextNode(" —⁠ "));
+
+    note.insertBefore(headingLabel, note.firstChild);
+  }
+}
+
 function numberNotes() {
+  for (const element of document.body.children) {
+    if (element.localName !== "section")
+      continue;
 
-  for (let section of document.querySelectorAll("section")) {
+    if (element.id === "sec-terms-and-definitions") {
+      const terms = document.getElementById("terms-int-defs");
 
-    let notes = [];
-
-    function _findNotes(e) {
-      for (const child of e.children) {
-        if (child.tagName === "SECTION")
-          continue;
-        if (child.classList.contains("note"))
-          notes.push(child);
-          _findNotes(child);
-      }
+      if (terms !== null)
+        numberNotesToEntry(terms);
+    } else {
+      numberSectionNotes(element);
     }
-
-    _findNotes(section);
-
-    let counter = 1;
-    for (let note of notes) {
-      const headingLabel = document.createElement("span");
-      headingLabel.className = "heading-label";
-
-      const headingNumberElement = document.createElement("span");
-      headingNumberElement.className = "heading-number";
-      if (notes.length !== 1)
-        headingNumberElement.innerText = counter++;
-
-      headingLabel.appendChild(document.createTextNode("NOTE "));
-      headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" —⁠ "));
-
-      note.insertBefore(headingLabel, note.firstChild);
-    }
-
   }
 }
 
@@ -1129,13 +1169,6 @@ function resolveLinks(docMetadata) {
       if (target.localName === "cite") {
         anchor.innerText = target.innerText;
 
-        /* special formatting for definitions */
-
-        if (anchor.parentElement.localName === "dd") {
-          anchor.parentNode.insertBefore(document.createTextNode("[SOURCE: "), anchor);
-          anchor.parentNode.insertBefore(document.createTextNode("]"), anchor.nextSibling);
-        }
-
       } else if (target.localName === "table") {
         anchor.innerText = "Table " + target.querySelector(".heading-number").innerText;
 
@@ -1198,6 +1231,25 @@ function insertSnippets() {
   );
 }
 
+function formatTermsAndDefinitions(docMetadata) {
+  const section = document.getElementById("terms-int-defs");
+
+  if (section === null)
+    return;
+
+  for (const element of section.children) {
+    if (element.localName === "dd" &&
+        element.childNodes.length === 1 &&
+        element.firstChild.nodeType === Node.ELEMENT_NODE &&
+        element.firstChild.localName === "a") {
+      const anchor = element.firstChild;
+      element.classList.add("term-source");
+      element.insertBefore(document.createTextNode("[SOURCE: "), anchor);
+      element.insertBefore(document.createTextNode("]"), anchor.nextSibling);
+    }
+  }
+}
+
 function insertIconLink() {
   const icoLink = document.createElement("link");
 
@@ -1224,6 +1276,9 @@ function render() {
 
   insertElementsAnnex(docMetadata);
   insertBibliography(docMetadata);
+
+  formatTermsAndDefinitions(docMetadata);
+
   numberSections(document.body, "");
   numberTables();
   numberFigures();
