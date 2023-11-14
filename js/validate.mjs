@@ -354,6 +354,22 @@ class FigureMatcher {
     if (element.localName !== "figure")
       return false;
 
+    const children = Array.from(element.children);
+
+    if (children.length != 2 ||
+      !(children[0].localName === "img" || children[0].localName === "pre") ||
+      children[1].localName !== "figcaption") {
+
+      logger.error(`Figure element must contain a pre or img element followed by a figcaption element`, element);
+
+    } else if (children[0].localName === "img") {
+
+      const src = children[0].getAttribute("src");
+
+      if (!src || !src.startsWith("media/"))
+        logger.error(`img element src must start with 'media/'`, element);
+    }
+
     return true;
   }
 }
@@ -753,6 +769,34 @@ class ElementsAnnexMatcher {
 
       if (child.firstElementChild.localName !== "a" || !child.firstElementChild.id || child.childElementCount !== 1 || !child.firstElementChild.title || !child.firstElementChild.href) {
         logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes`, child);
+        continue;
+      }
+
+      const anchor = child.firstElementChild;
+
+      if (! anchor.title) {
+        logger.error("All links listed in the Elements Annex must have a title attribute.", child);
+        continue;
+      }
+
+      const href = anchor.getAttribute("href");
+
+      if (! href) {
+        logger.error("All links listed in the Elements Annex must have an href attribute.", child);
+        continue;
+      }
+
+      if (! href.startsWith("http")) {
+
+        if (href.indexOf("\\") > -1) {
+          logger.error("Relative links listed in the Elements Annex must not contain backslashes.", child);
+          continue;
+        }
+
+        if (! href.startsWith("elements/") || href.indexOf("..") > -1) {
+          logger.error("Relative links listed in the Elements Annex must start with 'elements/'", child);
+          continue;
+        }
       }
 
     }

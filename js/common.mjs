@@ -90,7 +90,7 @@ export function validateHead(head, logger) {
   /* pubTitle */
   metadata.pubTitle = head.ownerDocument.title;
   if (!metadata.pubTitle)
-    fatal("Title missing");
+    fatal(logger, "Title missing");
 
   /* pubType */
   metadata.pubType = getHeadMetadata(head, "pubType");
@@ -115,6 +115,11 @@ export function validateHead(head, logger) {
     metadata.pubPart == null;
     logger.error("pubPart invalid");
   }
+
+  /* pubSuiteTitle */
+  metadata.pubSuiteTitle = getHeadMetadata(head, "pubSuiteTitle");
+  if (metadata.pubSuiteTitle === null &&  metadata.pubPart !== null)
+    fatal(logger, "pubSuiteTitle must be specified if pubPart is specified");
 
   /* pubVersion (optional) */
   metadata.pubVersion = getHeadMetadata(head, "pubVersion");

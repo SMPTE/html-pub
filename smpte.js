@@ -31,18 +31,48 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import { smpteValidate } from "./js/validate.mjs";
 import * as smpte from "./js/common.mjs";
 
-const _SCRIPT_PATH = (new URL(document.currentScript ? document.currentScript.src : import.meta.url)).pathname;
 
-function getScriptPath() {
-  return _SCRIPT_PATH;
+class Logger {
+  constructor() {
+    this.events = [];
+  }
+
+  error(msg, element) {
+    if (element !== undefined) {
+      if (!element.hasAttribute("id") || !element.id) {
+        element.id = Math.floor(Math.random() * 1000000000);
+      }
+      element.classList.add("invalid-tag");
+    }
+    this.events.push({msg: msg, elementId: element === undefined ? null : element.id});
+  }
+
+  hasError() {
+    return this.events.length > 0;
+  }
+
+  errorList() {
+    return this.events;
+  }
 }
+
+const logger_ = new Logger();
+
+const _SCRIPT_PATH = function () {
+  const scripts = document.head.getElementsByTagName("script");
+
+  for (const script of scripts) {
+    const src = script.getAttribute("src");
+    if (src !== null && src.indexOf("smpte.js") > -1)
+      return src.split("/").slice(0, -1).join("/");
+  }
+
+  logger_.error("Could not determine location of SMPTE document script");
+  return null;
+}();
 
 function resolveScriptRelativePath(path) {
-  return getScriptPath().split("/").slice(0, -1).concat([path]).join("/");
-}
-
-function resolveStaticResourcePath(resourceName) {
-  return resolveScriptRelativePath(`static/${resourceName}`);
+  return `${_SCRIPT_PATH}/${path}`;
 }
 
 function asyncFetchLocal(url) {
@@ -91,7 +121,7 @@ const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-number-block">
 {{longPubStage}}
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
-<h1>{{pubTitle}}</h1>
+<h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}} - {{actualPubDateTime}}</div>
 <hr />
 {{draftWarning}}`
@@ -100,7 +130,7 @@ const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscop
 <span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{actualPubNumber}}</div>
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
-<h1>{{pubTitle}}</h1>
+<h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
 <div id="doc-effective">Effective date: {{effectiveDateTime}}</div>
 <hr />`
@@ -174,6 +204,12 @@ function insertFrontMatter(docMetadata) {
   else
     boilerplate = SMPTE_FRONT_MATTER_BOILERPLATE;
 
+  let fullTitle;
+
+  if (docMetadata.pubSuiteTitle !== null)
+    fullTitle = `${docMetadata.pubSuiteTitle} — ${docMetadata.pubTitle}`;
+  else
+    fullTitle = docMetadata.pubTitle;
 
   let revisionOf = "";
 
@@ -190,9 +226,10 @@ function insertFrontMatter(docMetadata) {
       revisionOf: revisionOf,
       longDocType: longDocType,
       longPubStage: longPubStage,
+      fullTitle: fullTitle,
       draftWarning: draftWarning,
       publicationState: publicationState,
-      smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),
+      smpteLogoURL: resolveScriptRelativePath("static/smpte-logo.png"),
       actualPubDateTime: actualPubDateTime,
       actualPubNumber: actualPubNumber,
       ...docMetadata
@@ -501,12 +538,14 @@ function insertElementsAnnex(docMetadata) {
   for(const e of sec.querySelectorAll("li > a")) {
 
     if (! e.title) {
-      logger_.error("All links listed in the Elements Annex must have a title attribute.");
+      logger_.error("All links listed in the Elements Annex must have a title attribute.", e);
       continue;
     }
 
-    if (! e.getAttribute("href")) {
-      logger_.error("All links listed in the Elements Annex must have an href attribute.");
+    const href = e.getAttribute("href");
+
+    if (! href) {
+      logger_.error("All links listed in the Elements Annex must have an href attribute.", e);
       continue;
     }
 
@@ -521,12 +560,12 @@ function insertElementsAnnex(docMetadata) {
 
     e.parentElement.insertBefore(headingLabel, e);
 
-    const isAbsoluteLink = e.getAttribute("href").startsWith("http");
+    const isAbsoluteLink = href.startsWith("http");
 
     if (isAbsoluteLink) {
-      e.innerText = e.getAttribute("href");
+      e.innerText = href;
     } else {
-      e.innerText = e.getAttribute("href").split('\\').pop().split('/').pop();
+      e.innerText = href.split('\\').pop().split('/').pop();
     }
 
     e.parentElement.insertBefore(
@@ -1216,7 +1255,7 @@ function insertIconLink() {
 
   icoLink.type = "image/png";
   icoLink.rel = "icon";
-  icoLink.href = resolveStaticResourcePath("smpte-icon.png");
+  icoLink.href = resolveScriptRelativePath("static/smpte-icon.png");
 
   document.head.insertBefore(icoLink, null);
 }
@@ -1259,32 +1298,6 @@ function render() {
   }
 }
 
-class Logger {
-  constructor() {
-    this.events = [];
-  }
-
-  error(msg, element) {
-    if (element !== undefined) {
-      if (!element.hasAttribute("id") || !element.id) {
-        element.id = Math.floor(Math.random() * 1000000000);
-      }
-      element.classList.add("invalid-tag");
-    }
-    this.events.push({msg: msg, elementId: element === undefined ? null : element.id});
-  }
-
-  hasError() {
-    return this.events.length > 0;
-  }
-
-  errorList() {
-    return this.events;
-  }
-}
-
-const logger_ = new Logger();
-
 document.addEventListener('DOMContentLoaded', async () => {
    try {
     asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
@@ -1314,5 +1327,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-window.smpteGetScriptPath = getScriptPath;
 window.smpteLogger = logger_;

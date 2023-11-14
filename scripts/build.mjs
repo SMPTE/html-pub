@@ -33,9 +33,16 @@ import * as puppeteer from "puppeteer";
 import * as child_process from "child_process";
 import { argv } from "process";
 import * as jsdom from "jsdom";
+import { fileURLToPath } from 'url';
 import AdmZip from "adm-zip";
 
 import { smpteValidate, ErrorLogger } from "../js/validate.mjs";
+
+/**
+ * Determine the location of the build script
+ */
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * build.js (validate | build | deploy)
@@ -54,12 +61,18 @@ function guessContentTypeFromExtension(filePath) {
       return "text/html";
     case ".png":
       return "image/png";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
     case ".svg":
       return "image/svg+xml";
     case ".css":
       return "text/css";
     case ".txt":
       return "text/plain";
+    case ".xml":
+    case ".xsd":
+      return "text/xml";
     default:
       return "application/octet-stream";
   }
@@ -140,56 +153,30 @@ function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
   }
 }
 
-async function build(buildPaths, baseRef, lastEdRef) {
+
+async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
 
   const generatedFiles = {};
 
-  /* make sure the document directory does not contain conflicting names */
-
-  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubStaticDirName)))
-    throw Error(`The document directory cannot contain an entry named ${buildPaths.pubStaticDirName}`);
-
-  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.pubRedlineName)))
-    throw Error(`The document directory cannot contain an entry named ${buildPaths.pubRedlineName}`);
-
-  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.baseRedlineName)))
-    throw Error(`The document directory cannot contain an entry named ${buildPaths.baseRedlineName}`);
-
-  if (fs.existsSync(path.join(buildPaths.docDirPath, buildPaths.renderedDocName)))
-    throw Error(`The document directory cannot contain an entry named ${buildPaths.renderedDocName}`);
-
-  /* create the build directory if it does not already exists */
-
-  fs.mkdirSync(buildPaths.buildDirPath, {"recursive" : true});
-
-  /* populate the publication directory */
-
-  fs.rmSync(buildPaths.pubDirPath, { recursive: true, force: true });
-
-  mirrorDirExcludeTooling(buildPaths.docDirPath, buildPaths.pubDirPath);
-
   /* render the document */
 
-  const renderedDoc = await render(buildPaths.docPath);
+  const renderedDoc = await render(path.join(buildPaths.docDirPath, buildPaths.docName));
 
   fs.writeFileSync(buildPaths.renderedDocPath, renderedDoc.docHTML);
 
   generatedFiles.html = buildPaths.renderedDocName;
 
-  /* mirror static directory */
-
-  mirrorDirExcludeTooling(
-    path.join(path.dirname(renderedDoc.scriptPath), buildPaths.pubStaticDirName),
-    path.join(buildPaths.pubDirPath, buildPaths.pubStaticDirName)
-    );
-
   /* create pdf */
 
-  const pdfFileName = renderedDoc.docTitle + ".pdf";
+  generatedFiles.pdf = `SMPTE ${docMetadata.pubType} ${docMetadata.pubNumber}`;
 
-  child_process.execSync(`npm exec -c 'pagedjs-cli ${buildPaths.renderedDocPath} -o "${path.join(buildPaths.pubDirPath, pdfFileName)}"'`);
+  if (docMetadata.pubPart !== null) {
+    generatedFiles.pdf += `-${docMetadata.pubPart} ${docMetadata.pubSuiteTitle} - `
+  }
 
-  generatedFiles.pdf = pdfFileName;
+  generatedFiles.pdf += `${docMetadata.pubTitle}.pdf`;
+
+  child_process.execSync(`npm exec -c 'pagedjs-cli ${buildPaths.renderedDocPath} -o "${path.join(buildPaths.pubDirPath, generatedFiles.pdf)}"'`);
 
   /* generate base redline, if requested */
 
@@ -238,7 +225,7 @@ async function generateRedline(buildPaths, refCommit, refPath, rlPath) {
 
   fs.writeFileSync(refPath, r.docHTML);
 
-  child_process.execSync(`perl "${path.dirname(r.scriptPath)}/lib/htmldiff/htmldiff.pl" "${refPath}" "${buildPaths.renderedDocPath}" "${rlPath}"`);
+  child_process.execSync(`perl '${path.join(__dirname, "../lib/htmldiff/htmldiff.pl")}' "${refPath}" "${buildPaths.renderedDocPath}" "${rlPath}"`);
 
 }
 
@@ -258,14 +245,16 @@ async function generatePubLinks(buildPaths, pubLinks) {
     if ("pubRedline" in pubLinks)
       linksDocContents += `[Redline to most recent edition](${encodeURI(pubLinks.pubRedline)})\n`;
 
-    if ("zip" in pubLinks)
-      linksDocContents += `[ZIP package](${encodeURI(pubLinks.zip)})\n`;
+    if ("reviewZip" in pubLinks)
+      linksDocContents += `[ZIP package](${encodeURI(pubLinks.reviewZip)})\n`;
 
   } else {
     linksDocContents += "No links available";
   }
 
   fs.writeFileSync(buildPaths.pubLinksPath, linksDocContents);
+
+  return buildPaths.pubLinksPath;
 }
 
 async function s3Upload(buildPaths, versionKey, generatedFiles) {
@@ -290,54 +279,37 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
 
   const deployPrefix = process.env.CANONICAL_LINK_PREFIX || `http://${s3Bucket}.s3-website-${s3Region}.amazonaws.com/`;
 
-  let htmlLinks;
-
   if ("html" in generatedFiles) {
     pubLinks.clean = `${deployPrefix}${s3PubKeyPrefix}`;
-    htmlLinks = `<p><a href="${encodeURI(generatedFiles.html)}">Clean</a></p>`;
   }
 
   if ("pdf" in generatedFiles) {
     pubLinks.pdf = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
-    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pdf)}">Clean PDF</a></p>`;
   }
 
   if ("baseRedline" in generatedFiles) {
     pubLinks.baseRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
-    htmlLinks += `<p><a href="${encodeURI(generatedFiles.baseRedline)}">Redline to current draft</a></p>`;
   }
 
   if ("pubRedline" in generatedFiles) {
     pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
-    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>`;
   }
 
-  if ("zip" in generatedFiles) {
-    pubLinks.zip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.zip}`;
-    htmlLinks += `<p><a href="${encodeURI(generatedFiles.zip)}">Zip file</a></p>`;
+  if ("reviewZip" in generatedFiles) {
+    pubLinks.reviewZip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.reviewZip}`;
   }
 
-  fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="utf-8" />
-      <meta http-equiv="x-ua-compatible" content="ie=edge" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>Publication artifacts</title>
-      <link rel="icon" href="data:,">
-    </head>
-    <body>
-      ${htmlLinks}
-    </body>
-  </html>`);
+  if ("libraryZip" in generatedFiles) {
+    pubLinks.libraryZip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.libraryZip}`;
+  }
 
   s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
 
   return pubLinks;
 }
 
-async function makeZip(buildPaths, generatedFiles, docMetadata) {
-  var zip = new AdmZip();
+async function makeReviewZip(buildPaths, generatedFiles, docMetadata) {
+  const zip = new AdmZip();
 
   if (fs.existsSync(buildPaths.pubElementsPath))
     zip.addLocalFolder(buildPaths.pubElementsPath, buildPaths.pubElementsDirName);
@@ -347,6 +319,9 @@ async function makeZip(buildPaths, generatedFiles, docMetadata) {
 
   if (fs.existsSync(buildPaths.pubMediaPath))
     zip.addLocalFolder(buildPaths.pubMediaPath, buildPaths.pubMediaDirName);
+
+  if (fs.existsSync(buildPaths.manifestPath))
+    zip.addLocalFile(buildPaths.manifestPath);
 
   if ("html" in generatedFiles)
     zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.html));
@@ -390,6 +365,125 @@ async function makeZip(buildPaths, generatedFiles, docMetadata) {
   return zipFn;
 }
 
+async function makePubArtifacts(buildPaths, generatedFiles, docMetadata) {
+  let htmlLinks;
+
+  if ("html" in generatedFiles) {
+    htmlLinks = `<p><a href="${encodeURI(generatedFiles.html)}">Clean</a></p>\n`;
+  }
+
+  if ("pdf" in generatedFiles) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pdf)}">Clean PDF</a></p>\n`;
+  }
+
+  if ("baseRedline" in generatedFiles) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.baseRedline)}">Redline to current draft</a></p>\n`;
+  }
+
+  if ("pubRedline" in generatedFiles) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>\n`;
+  }
+
+  if (generatedFiles.reviewZip !== undefined) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.reviewZip)}">Review zip file</a></p>\n`;
+  }
+
+  if (generatedFiles.libraryZip !== undefined) {
+    htmlLinks += `<p><a href="${encodeURI(generatedFiles.libraryZip)}">Library zip file</a></p>\n`;
+  }
+
+  fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="x-ua-compatible" content="ie=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Publication artifacts</title>
+      <link rel="icon" href="data:,">
+    </head>
+    <body>
+      ${htmlLinks}
+    </body>
+  </html>`);
+
+  return buildPaths.pubArtifactsPath;
+}
+
+async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
+
+  if (docMetadata.pubDateTime === null || docMetadata.pubStage === null)
+    return null;
+
+  /* create manifest file */
+
+  const manifest = {
+    approved: docMetadata.pubDateTime,
+    stage: docMetadata.pubStage.toLowerCase(),
+    main: []
+  };
+
+  if (generatedFiles.elements.length > 0)
+    manifest.elements = generatedFiles.elements;
+
+  if (generatedFiles.media.length > 0)
+    manifest.media = generatedFiles.media;
+
+  if ("pdf" in generatedFiles)
+    manifest.main.push({
+      mediaType: "application/pdf",
+      path: generatedFiles.pdf
+    });
+
+  if ("html" in generatedFiles)
+    manifest.main.push({
+      mediaType: "text/html",
+      path: generatedFiles.html
+    });
+
+  /* create zip file */
+
+  const zip = new AdmZip();
+
+  zip.addFile(buildPaths.manifestName, JSON.stringify(manifest, null, "  "))
+
+  manifest.main.forEach(e => {
+    zip.addFile(
+       e.path,
+       fs.readFileSync(path.join(buildPaths.pubDirPath, e.path))
+    );
+ });
+
+  if (manifest.media !== null)
+    manifest.media.forEach(e => {
+        zip.addFile(
+          e.path,
+          fs.readFileSync(path.join(buildPaths.pubDirPath, e.path))
+        );
+    });
+
+  if (manifest.elements !== null)
+    manifest.elements.forEach(e => {
+        zip.addFile(
+          e.file.path,
+          fs.readFileSync(path.join(buildPaths.pubDirPath, e.file.path))
+        );
+    });
+
+  for (const entry of zip.getEntries()) {
+    entry.header.time = manifest.approved;
+  }
+
+  /* create zip file */
+
+  const zipFn = `${manifest.approved.replaceAll("-", "")}-${manifest.stage}.zip`
+
+  const zipPath = path.join(buildPaths.pubDirPath, zipFn);
+
+  zip.writeZip(zipPath);
+
+  return zipFn;
+}
+
 async function render(docPath) {
 
   const commitHash = child_process.execSync(`git -C "${path.dirname(docPath)}" rev-parse HEAD`, {stdio: ['ignore', 'pipe', 'ignore']}).toString().trim();
@@ -410,10 +504,6 @@ async function render(docPath) {
 
     await page.goto(pageURL);
 
-    const docTitle = await page.evaluate(() => document.getElementById("doc-designator").innerText + " " + document.title);
-
-    const scriptPath = await page.evaluate(() => typeof _SCRIPT_PATH !== "undefined" ? _SCRIPT_PATH /* for compatibility */ : smpteGetScriptPath());
-
     await page.evaluate(() => {
       /* remove all scripts */
       const elements = document.getElementsByTagName('script');
@@ -421,7 +511,7 @@ async function render(docPath) {
         elements[i].parentNode.removeChild(elements[i]);
 
       /* update the location of static assets */
-
+      document.querySelector('head link[rel="icon"]').href = "static/smpte-icon.png";
       document.getElementById("smpte-logo").src = "static/smpte-logo.png";
 
       /* refuse to render if there are page errors */
@@ -436,9 +526,7 @@ async function render(docPath) {
     const docHTML = await page.content();
 
     return {
-      "docHTML": docHTML,
-      "docTitle": docTitle,
-      "scriptPath": decodeURI(scriptPath)
+      docHTML: docHTML
     };
 
   } finally {
@@ -467,12 +555,17 @@ class BuildPaths {
     this.renderedDocName = "index.html";
     this.renderedDocPath = path.join(this.pubDirPath, this.renderedDocName);
 
+    this.manifestName = "manifest.json";
+    this.manifestPath = path.join(this.buildDirPath, this.manifestName);
+
     this.refDirPath = path.join(this.buildDirPath, "ref");
     this.renderedRefDocPath = path.join(this.buildDirPath, "ref.html");
 
-    this.pubLinksPath = path.join(this.buildDirPath, "pr-links.md");
+    this.pubLinksName = "pr-links.md";
+    this.pubLinksPath = path.join(this.buildDirPath, this.pubLinksName);
 
-    this.pubArtifactsPath = path.join(this.pubDirPath, "pub-artifacts.html");
+    this.pubArtifactsName = "pub-artifacts.html";
+    this.pubArtifactsPath = path.join(this.pubDirPath, this.pubArtifactsName);
 
     this.pubMediaPath = path.join(this.pubDirPath,  this.pubMediaDirName);
     this.pubStaticPath = path.join(this.pubDirPath, this.pubStaticDirName);
@@ -485,6 +578,9 @@ class BuildPaths {
     this.baseRedlineName = "base-rl.html";
     this.baseRedlinePath = path.join(this.pubDirPath, this.baseRedlineName);
     this.baseRedLineRefPath = path.join(this.buildDirPath, this.baseRedlineName);
+
+    this.varsName = "vars.txt";
+    this.varsPath = path.join(this.buildDirPath, this.varsName);
   }
 
 }
@@ -557,9 +653,74 @@ async function main() {
   if (logger.hasFailed())
     throw Error(`SMPTE schema validation failed:\n${logger.errorList().join("\n")}`);
 
-  /* build document */
+   /* collect elements */
 
-  const generatedFiles = await build(buildPaths, baseRef, config.lastEdRef);
+   const generatedFiles = {
+    elements: [],
+    media: []
+   };
+
+   for (const element of dom.window.document.querySelectorAll("section#sec-elements ol li a")) {
+    const href = element.getAttribute("href");
+    if (! href.startsWith("http"))
+      generatedFiles.elements.push({
+        title: element.title.replace(/\s+/g, " "),
+        file: {
+          path: href,
+          mediaType: guessContentTypeFromExtension(href)
+        }
+      });
+  }
+
+  /* add images */
+
+  for (const img of dom.window.document.querySelectorAll("img")) {
+    const src = img.getAttribute("src");
+    if (! src.startsWith("http"))
+      generatedFiles.media.push({
+        path: src,
+        mediaType: guessContentTypeFromExtension(src)
+      });
+  }
+
+  /* add static assets */
+
+  generatedFiles.media.push({
+    path: "static/smpte-logo.png",
+    mediaType: "image/png"
+  });
+
+  generatedFiles.media.push({
+    path: "static/smpte-icon.png",
+    mediaType: "image/png"
+  });
+
+  /* create the build directory if it does not already exists */
+
+  fs.mkdirSync(buildPaths.buildDirPath, {"recursive" : true});
+
+  /* populate the publication directory */
+
+  fs.rmSync(buildPaths.pubDirPath, { recursive: true, force: true });
+
+  mirrorDirExcludeTooling(
+    path.join(buildPaths.docDirPath, buildPaths.pubMediaDirName),
+    buildPaths.pubMediaPath
+  );
+
+  mirrorDirExcludeTooling(
+    path.join(buildPaths.docDirPath, buildPaths.pubElementsDirName),
+    buildPaths.pubElementsPath
+  );
+
+  mirrorDirExcludeTooling(
+    path.join(__dirname, "../static"),
+    buildPaths.pubStaticPath
+    );
+
+  /* render document */
+
+  Object.assign(generatedFiles, await build(buildPaths, baseRef, config.lastEdRef, docMetadata));
 
   /* validate rendered document */
 
@@ -570,25 +731,49 @@ async function main() {
     throw Error("Rendered document validation failed.");
   }
 
-  /* generate zip file */
+  /* keep track of exported variables */
 
-  generatedFiles.zip = await makeZip(buildPaths, generatedFiles, docMetadata)
+  let exportedVars = "";
+
+  /* generate the publication artifacts links page */
+
+  generatedFiles.pubArtifacts = await makePubArtifacts(buildPaths, generatedFiles, docMetadata);
 
   /* skip deployment if validating only */
 
   if (buildPhase === "validate") {
+
     console.warn("Skipping deploy to S3.");
-    return;
+
+  } else {
+    /* deploy to S3 */
+
+    const pubLinks = await s3Upload(buildPaths, branchName, generatedFiles);
+
+    await s3Upload(buildPaths, commitHash, generatedFiles);
+
+    if (pubLinks) {
+      const pubLinksPath = await generatePubLinks(buildPaths, pubLinks);
+      if (pubLinksPath !== null)
+        exportedVars += `PUB_LINKS=${pubLinksPath}\n`;
+    }
   }
 
-  /* deploy to S3 */
+  /* generate the document library zip file */
 
-  const pubLinks = await s3Upload(buildPaths, branchName, generatedFiles);
+  generatedFiles.libraryZip = await makeLibraryZip(buildPaths, generatedFiles, docMetadata);
+  if (generatedFiles.libraryZip !== null)
+    exportedVars += `LIBRARY_ZIP=${path.join(buildPaths.pubDirPath, generatedFiles.libraryZip)}\n`;
 
-  s3Upload(buildPaths, commitHash, generatedFiles);
+  /* generate the review zip file */
 
-  if (pubLinks)
-    generatePubLinks(buildPaths, pubLinks);
+  generatedFiles.reviewZip = await makeReviewZip(buildPaths, generatedFiles, docMetadata);
+  if (generatedFiles.reviewZip !== null)
+    exportedVars += `REVIEW_ZIP=${path.join(buildPaths.pubDirPath, generatedFiles.reviewZip)}\n`;
+
+  /* export variables to other GitHub workflow steps */
+
+  fs.writeFileSync(buildPaths.varsPath, exportedVars, {encoding:"utf-8"});
 
 }
 

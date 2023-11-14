@@ -117,7 +117,15 @@
           <code>tooling</code> directory.</li>
         </ul>
 
-        <p>The <code>title</code> element shall be equal to the title of the document, without any document number.</p>
+        <p>The <code>title</code> element shall be equal to the title of the document, excluding:</p>
+        <ul>
+          <li>the name of the publisher, e.g., SMPTE;</li>
+          <li>the document type, e.g., ST;</li>
+          <li>the document number, e.g., 428-1;</li>
+          <li>the title of the suite if the document is part of a suite.</li>
+        </ul>
+
+        <p class="example">The <code>title</code> of SMPTE ST 429-2 is <i>DCP Operational Constraints</i>.</p>
 
         <p>In addition to the <code>title</code> element, the <code>head</code> element contains SMPTE publication metadata in
         the form of <code>meta</code> elements as specified below.</p>
@@ -171,11 +179,20 @@
       <section id="sec-pubPart">
         <h4><code>pubPart</code></h4>
 
-        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
-        equal to <code>pubPart</code>.</p>
+        <p>The <code>head</code> element shall contain exactly one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubPart</code> if the document is part of a suite, and none otherwise.</p>
 
         <p>The element shall have a <code>content</code> attribute equal to the document part number, which is a sequence of
         digits.</p>
+      </section>
+
+      <section id="sec-pubSuiteTitle">
+        <h4><code>pubSuiteTitle</code></h4>
+
+        <p>The <code>head</code> element shall contain exactly one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubSuiteTitle</code> if the document is part of a suite, and none otherwise.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to the title of the document suite.</p>
       </section>
 
       <section id="sec-pubVersion">
@@ -887,8 +904,12 @@
         <ul>
           <li>an <code>id</code> attribute whose value starts with <code>figure-</code></li>
           <li>one <code>img</code> or <code>pre</code> element</li>
-          <li>one <code>figcaption</code> element following the <code>img</code> element</li>
+          <li>one <code>figcaption</code> element following the <code>img</code> or <code>pre</code> element</li>
         </ul>
+
+        <p>If an <code>img</code> element is present, then its <code>src</code>
+        attribute shall be present and be a relative path starting with the
+        string <code>media/</code>.</p>
 
         <p>Figures are automatically numbered.</p>
 
