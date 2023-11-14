@@ -735,18 +735,6 @@ async function main() {
 
   let exportedVars = "";
 
-  /* generate the document library zip file */
-
-  generatedFiles.libraryZip = await makeLibraryZip(buildPaths, generatedFiles, docMetadata);
-  if (generatedFiles.libraryZip !== null)
-    exportedVars += `LIBRARY_ZIP=${path.join(buildPaths.pubDirPath, generatedFiles.libraryZip)}\n`;
-
-  /* generate the review zip file */
-
-  generatedFiles.reviewZip = await makeReviewZip(buildPaths, generatedFiles, docMetadata);
-  if (generatedFiles.reviewZip !== null)
-    exportedVars += `REVIEW_ZIP=${path.join(buildPaths.pubDirPath, generatedFiles.reviewZip)}\n`;
-
   /* generate the publication artifacts links page */
 
   generatedFiles.pubArtifacts = await makePubArtifacts(buildPaths, generatedFiles, docMetadata);
@@ -770,6 +758,20 @@ async function main() {
         exportedVars += `PUB_LINKS=${pubLinksPath}\n`;
     }
   }
+
+  /* generate the document library zip file */
+
+  generatedFiles.libraryZip = await makeLibraryZip(buildPaths, generatedFiles, docMetadata);
+  if (generatedFiles.libraryZip !== null)
+    exportedVars += `LIBRARY_ZIP=${path.join(buildPaths.pubDirPath, generatedFiles.libraryZip)}\n`;
+
+  /* generate the review zip file */
+
+  generatedFiles.reviewZip = await makeReviewZip(buildPaths, generatedFiles, docMetadata);
+  if (generatedFiles.reviewZip !== null)
+    exportedVars += `REVIEW_ZIP=${path.join(buildPaths.pubDirPath, generatedFiles.reviewZip)}\n`;
+
+  /* export variables to other GitHub workflow steps */
 
   fs.writeFileSync(buildPaths.varsPath, exportedVars, {encoding:"utf-8"});
 
