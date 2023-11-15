@@ -90,7 +90,10 @@ function guessContentTypeFromExtension(filePath) {
  * @param targetDir Target directory
  */
 function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
-  relParentPath = relParentPath || "";
+  const relParentPath = relParentPath || "";
+
+  if (! fs.existsSync(path.join(srcDir, relParentPath)))
+    return;
 
   fs.mkdirSync(path.join(targetDir, relParentPath), {"recursive" : true});
 
