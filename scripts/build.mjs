@@ -456,7 +456,7 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
     );
  });
 
-  if (manifest.media !== null)
+  if (manifest.media)
     manifest.media.forEach(e => {
         zip.addFile(
           e.path,
@@ -464,7 +464,7 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
         );
     });
 
-  if (manifest.elements !== null)
+  if (manifest.elements)
     manifest.elements.forEach(e => {
         zip.addFile(
           e.file.path,
