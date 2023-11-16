@@ -92,6 +92,9 @@ function guessContentTypeFromExtension(filePath) {
 function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
   relParentPath = relParentPath || "";
 
+  if (! fs.existsSync(path.join(srcDir, relParentPath)))
+    return;
+
   fs.mkdirSync(path.join(targetDir, relParentPath), {"recursive" : true});
 
   for(let srcName of fs.readdirSync(path.join(srcDir, relParentPath))) {
@@ -453,7 +456,7 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
     );
  });
 
-  if (manifest.media !== null)
+  if (manifest.media)
     manifest.media.forEach(e => {
         zip.addFile(
           e.path,
@@ -461,7 +464,7 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
         );
     });
 
-  if (manifest.elements !== null)
+  if (manifest.elements)
     manifest.elements.forEach(e => {
         zip.addFile(
           e.file.path,
