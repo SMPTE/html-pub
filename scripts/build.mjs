@@ -514,8 +514,13 @@ async function render(docPath) {
         elements[i].parentNode.removeChild(elements[i]);
 
       /* update the location of static assets */
-      document.querySelector('head link[rel="icon"]').href = "static/smpte-icon.png";
-      document.getElementById("smpte-logo").src = "static/smpte-logo.png";
+      const icon = document.querySelector('head link[rel="icon"]');
+      if (icon)
+        icon.href = "static/smpte-icon.png";
+
+      const logo = document.getElementById("smpte-logo");
+      if (logo)
+        logo.src = "static/smpte-logo.png";
 
       /* refuse to render if there are page errors */
       const errorList = typeof smpteLogger !== "undefined" ? smpteLogger.errorList() : listEvents(); /* for compatibility */
