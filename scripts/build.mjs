@@ -507,6 +507,8 @@ async function render(docPath) {
 
     await page.goto(pageURL);
 
+    await page.waitForFunction(() => window._smpteRenderComplete === undefined || window._smpteRenderComplete === true);
+
     await page.evaluate(() => {
       /* remove all scripts */
       const elements = document.getElementsByTagName('script');
@@ -529,7 +531,7 @@ async function render(docPath) {
           console.error(`  ${event.msg}\n`);
         throw new Error(`Page has errors`);
       }
-    })
+    });
 
     const docHTML = await page.content();
 

@@ -31,7 +31,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import { smpteValidate } from "./js/validate.mjs";
 import * as smpte from "./js/common.mjs";
 
-
 class Logger {
   constructor() {
     this.events = [];
@@ -137,8 +136,8 @@ const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscop
 
 const SMPTE_FRONT_MATTER_ID = "sec-front-matter";
 
-function insertFrontMatter(docMetadata) {
 
+function insertFrontMatter(docMetadata) {
   let sec = document.getElementById(SMPTE_FRONT_MATTER_ID);
 
   if (sec !== null) {
@@ -1220,15 +1219,15 @@ function resolveLinks(docMetadata) {
   }
 }
 
-function insertSnippets() {
-  Array.from(
+function asyncInsertSnippets() {
+  return Promise.all(Array.from(
     document.querySelectorAll("pre[data-include]"),
     (e) => {
       asyncFetchLocal(e.getAttribute("data-include"))
         .then(data => e.textContent = data)
         .catch(err => logError("Cannot fetch: " + err));
     }
-  );
+  ));
 }
 
 function formatTermsAndDefinitions(docMetadata) {
@@ -1260,10 +1259,17 @@ function insertIconLink() {
   document.head.insertBefore(icoLink, null);
 }
 
-function render() {
+async function render() {
+  const asyncFunctions = [];
+
   let docMetadata = loadDocMetadata();
 
-  insertSnippets();
+  asyncFunctions.push(asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css")));
+
+  if (docMetadata.pubState === smpte.PUB_STATE_DRAFT)
+    asyncFunctions.push(asyncAddStylesheet(resolveScriptRelativePath("css/smpte-draft.css")));
+
+  asyncFunctions.push(asyncInsertSnippets());
 
   insertIconLink();
   insertFrontMatter(docMetadata);
@@ -1296,13 +1302,17 @@ function render() {
     pagedJS.id = "paged-js-script";
     document.head.appendChild(pagedJS);
   }
+
+  return Promise.all(asyncFunctions);
 }
+
+window._smpteRenderComplete = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
    try {
-    asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
     smpteValidate(window.document, logger_);
-    render();
+    await render();
+    window._smpteRenderComplete = true;
   } catch (e) {
     logger_.error(e);
   }
