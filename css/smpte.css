@@ -341,7 +341,7 @@ table > caption {
   break-inside: avoid;
 }
 
-tr, thead {
+tr, thead, tbody, th {
   break-inside: avoid;
 }
 
