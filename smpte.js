@@ -1306,13 +1306,13 @@ async function render() {
   return Promise.all(asyncFunctions);
 }
 
-var smpteRenderComplete = false;
+window._smpteRenderComplete = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
    try {
     smpteValidate(window.document, logger_);
     await render();
-    smpteRenderComplete = true;
+    window._smpteRenderComplete = true;
   } catch (e) {
     logger_.error(e);
   }
