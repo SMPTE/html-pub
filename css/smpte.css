@@ -275,6 +275,7 @@ table {
   border-collapse: collapse;
   margin: auto;
   min-width: 40%;
+  break-inside: avoid;
 }
 
 th, td {
@@ -341,7 +342,7 @@ table > caption {
   break-inside: avoid;
 }
 
-tr, thead {
+tr, thead, tbody, th {
   break-inside: avoid;
 }
 
