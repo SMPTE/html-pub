@@ -275,6 +275,7 @@ table {
   border-collapse: collapse;
   margin: auto;
   min-width: 40%;
+  break-inside: avoid;
 }
 
 th, td {
