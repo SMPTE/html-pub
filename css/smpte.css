@@ -56,6 +56,11 @@ h1 {
   padding-left: 1rem;
 }
 
+#doc-version-string {
+  color: #606060;
+  font-size: 0.8em;
+}
+
 /* headers */
 
 

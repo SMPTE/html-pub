@@ -173,8 +173,18 @@ function insertFrontMatter(docMetadata) {
       case smpte.EG_PUBTYPE:
         if (docMetadata.pubPart !== null)
           actualPubNumber += `-<span itemprop="doc-part" id="doc-part">${docMetadata.pubPart}</span>`;
-        if (docMetadata.pubStage === smpte.PUB_STAGE_PUB)
-          actualPubNumber += `:<span itemprop="doc-version" id="doc-version">${docMetadata.pubVersion}</span>`;
+        if (docMetadata.pubStage === smpte.PUB_STAGE_PUB) {
+          let pubVersion;
+          if (docMetadata.pubVersion) {
+            pubVersion = docMetadata.pubVersion;
+          } else {
+            const d = new Date(docMetadata.pubDateTime);
+            pubVersion = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          }
+          actualPubNumber += `<span id="doc-version-string">:<span itemprop="doc-version" id="doc-version">${pubVersion}</span></span>`;
+
+        }
+          
         break;
     }
   }
