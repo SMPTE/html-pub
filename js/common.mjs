@@ -199,10 +199,6 @@ export function validateHead(head, logger) {
   /* specific to engineering documents */
   if (ENGDOC_PUBTYPES.has(metadata.pubType)) {
 
-    /* pubVersion */
-    if (metadata.pubStage === PUB_STAGE_PUB && metadata.pubVersion === null)
-      fatal(logger, "pubVersion must be present for published engineering documents");
-
     /* pubStage */
     if (metadata.pubStage === null) {
         fatal(logger, "pubStage must be specified for engineering documents.");
