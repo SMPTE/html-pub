@@ -69,7 +69,8 @@ h2 {
   margin-bottom: 0;
   font-size: 1.5rem;
   font-weight: bold;
-  break-after: avoid;
+  break-after: avoid-page;
+  break-inside: avoid-page;
 }
 
 h2 span.heading-label {
@@ -83,7 +84,8 @@ h3 {
   margin-bottom: 0;
   font-size: 1rem;
   font-weight: bold;
-  break-after: avoid;
+  break-after: avoid-page;
+  break-inside: avoid-page;
 }
 
 h3 span.heading-label {
@@ -96,7 +98,8 @@ h4 {
   margin-bottom: 0;
   font-size: 1rem;
   font-weight: bold;
-  break-after: avoid;
+  break-after: avoid-page;
+  break-inside: avoid-page;
 }
 
 h4 span.heading-label {
@@ -108,7 +111,8 @@ h5 {
   margin-top: 1.5em;
   margin-bottom: 0;
   font-size: 1rem;
-  break-after: avoid;
+  break-after: avoid-page;
+  break-inside: avoid-page;
 }
 
 h5 span.heading-label {
@@ -120,7 +124,8 @@ h6 {
   margin-top: 1.5em;
   margin-bottom: 0;
   font-size: 1rem;
-  break-after: avoid;
+  break-after: avoid-page;
+  break-inside: avoid-page;
 }
 
 h6 span.heading-label {
@@ -280,7 +285,6 @@ table {
   border-collapse: collapse;
   margin: auto;
   min-width: 40%;
-  break-inside: avoid;
 }
 
 th, td {
@@ -343,12 +347,16 @@ table > caption {
   font-weight: bold;
   font-size: 0.8rem;
   text-align: center;
-  break-after: avoid;
-  break-inside: avoid;
+  break-after: avoid-page;
+  break-inside: avoid-page;
 }
 
-tr, thead, tbody, th {
-  break-inside: avoid;
+table, tr, thead, tbody, tfoot {
+  break-inside: avoid-page;
+}
+
+thead, thead tr {
+  break-after: avoid-page;
 }
 
 /* images */
@@ -369,8 +377,8 @@ figcaption {
   font-weight: bold;
   font-size: 0.8rem;
   text-align: center;
-  break-before: avoid;
-  break-inside: avoid;
+  break-before: avoid-page;
+  break-inside: avoid-page;
 }
 
 figure {
