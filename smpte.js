@@ -637,7 +637,7 @@ function insertConformance(docMetadata) {
     helpful to the user, but not indispensable, and can be removed, changed, or added editorially without
      affecting interoperability. Informative text does not contain any conformance keywords. </p>
 
-  <p>All text in this document is, by default, normative, except: the Introduction, any section explicitly
+  <p>All text in this document is, by default, normative, except: the Introduction, any clause explicitly
   labeled as "Informative" or individual paragraphs that start with "Note:" </p>
 
 <p>The keywords "shall" and "shall not" indicate requirements strictly to be followed in order to conform to the
