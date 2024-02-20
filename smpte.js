@@ -532,7 +532,7 @@ function insertElementsAnnex(docMetadata) {
     return;
   }
 
-  sec.classList.add("annex");
+  sec.classList.add("unnumbered");
 
   const intro = document.createElement("p");
   intro.innerText = "This annex lists non-prose elements of this document."
@@ -578,14 +578,11 @@ function insertElementsAnnex(docMetadata) {
     }
 
     e.parentElement.insertBefore(
-      document.createTextNode(` ${e.title} (${isAbsoluteLink ? "url:" : "file:"} `),
+      document.createTextNode(` ${e.title} ${e.classList.contains("informative")? "(informative)" : "(normative)"}. ${isAbsoluteLink ? "url:" : "file:"} <`),
       e
     );
 
-    e.parentElement.insertBefore(
-      document.createTextNode(")"),
-      null
-    );
+    e.parentElement.insertBefore(document.createTextNode(">."), null);
 
   }
 }
