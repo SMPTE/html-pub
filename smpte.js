@@ -582,7 +582,7 @@ function insertElementsAnnex(docMetadata) {
       e
     );
 
-    e.parentElement.insertBefore(document.createTextNode(">."), null);
+    e.parentElement.insertBefore(document.createTextNode(">."), e.nextSibling);
 
   }
 }
