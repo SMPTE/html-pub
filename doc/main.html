@@ -958,7 +958,14 @@
           <li>one or more <code>tbody</code> element, with <code>tr</code> element(s) as needed for each row</li>
         </ul>
 
-        <p class="note">Page breaks are avoided within a <code>tbody</code> element when generating PDF. Care should be taken for especially long tables to ensure rendering is as expected. For data in tables spanning multiple pages, other options should be considered and used.</p>
+        <p>Unless all columns are uniform in contents, the relative width of
+        each column should be specified by setting the CSS <code>width</code>
+        property as a percentage value on each <code>th</code> element.</p>
+
+        <p class="note">Page breaks are avoided within a <code>tbody</code>
+        element when generating PDF. Care should be taken for especially long
+        tables to ensure rendering is as expected. For data in tables spanning
+        multiple pages, other options should be considered and used.</p>
 
         <div class="example">
 <pre>
@@ -966,8 +973,8 @@
   &lt;caption&gt;Sample Table&lt;/caption&gt;
   &lt;thead&gt;
     &lt;tr&gt;
-      &lt;th&gt;Sample Number&lt;/th&gt;
-      &lt;th&gt;Sample Name&lt;/th&gt;
+      &lt;th style="width: 30%"&gt;Sample Number&lt;/th&gt;
+      &lt;th style="width: 70%"&gt;Sample Name&lt;/th&gt;
     &lt;/tr&gt;
   &lt;/thead&gt;
   &lt;tbody&gt;
@@ -989,8 +996,8 @@
             <caption>Sample Table</caption>
             <thead>
               <tr>
-                <th>Sample Number</th>
-                <th>Sample Name</th>
+                <th style="width: 30%">Sample Number</th>
+                <th style="width: 70%">Sample Name</th>
               </tr>
             </thead>
             <tbody>
