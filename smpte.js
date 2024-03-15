@@ -348,7 +348,7 @@ function insertIntroduction(docMetadata) {
 
   if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
     let b = document.createElement("p");
-    b.innerHTML = "<em>This section is entirely informative and does not form an integral part of this Engineering Document.</em>";
+    b.innerHTML = "<em>This clause is entirely informative and does not form an integral part of this Engineering Document.</em>";
     sec.insertBefore(b, h2.nextSibling)
   }
 }
