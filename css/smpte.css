@@ -414,10 +414,14 @@ div.formula > .heading-label {
   margin-top: 1rem;
 }
 
-/* elements */
+/* additional elements */
 
 #sec-elements ol {
   list-style-type: none;
+}
+
+#sec-elements {
+  break-before: page;
 }
 
 /* links */
