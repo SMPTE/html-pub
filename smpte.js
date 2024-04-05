@@ -655,7 +655,7 @@ ${implConformance}
 
 <p>Unless otherwise specified, the order of precedence of the types of normative information in
   this document shall be as follows: Normative prose shall be the authoritative definition;
-  Tables shall be next; then formal languages; then figures; and then any other language forms.</p>
+  tables shall be next; then formal languages; then figures; and then any other language forms.</p>
   `;
 }
 
