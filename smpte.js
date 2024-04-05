@@ -122,6 +122,10 @@ const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-number-block">
 <div id="long-doc-type">{{longDocType}}</div>
 <h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}} - {{actualPubDateTime}}</div>
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>,
+Society of Motion Picture and Television Engineers</span>.
+All rights reserved. No part of this material may be reproduced, by any means whatsoever,
+without the prior written permission of the Society of Motion Picture and Television Engineers.</p>
 <hr />
 {{draftWarning}}`
 
@@ -132,6 +136,10 @@ const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscop
 <h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
 <div id="doc-effective">Effective date: {{effectiveDateTime}}</div>
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>,
+Society of Motion Picture and Television Engineers</span>.
+All rights reserved. No part of this material may be reproduced, by any means whatsoever,
+without the prior written permission of the Society of Motion Picture and Television Engineers.</p>
 <hr />`
 
 const SMPTE_FRONT_MATTER_ID = "sec-front-matter";
@@ -157,8 +165,12 @@ function insertFrontMatter(docMetadata) {
   if (docMetadata.pubDateTime === null || docMetadata.pubState == smpte.PUB_STATE_DRAFT) {
     actualPubDateTime = new Date();
   } else {
-    actualPubDateTime = new Date(docMetadata.pubDateTime).toISOString().slice(0, 10);
+    actualPubDateTime = new Date(docMetadata.pubDateTime);
   }
+
+  const formattedPubDateTime = docMetadata.pubState == smpte.PUB_STATE_DRAFT ?
+    actualPubDateTime :
+    actualPubDateTime.toISOString().slice(0, 10);
 
   let actualPubNumber = "";
   if (docMetadata.pubNumber !== null) {
@@ -239,8 +251,9 @@ function insertFrontMatter(docMetadata) {
       draftWarning: draftWarning,
       publicationState: publicationState,
       smpteLogoURL: resolveScriptRelativePath("static/smpte-logo.png"),
-      actualPubDateTime: actualPubDateTime,
+      actualPubDateTime: formattedPubDateTime,
       actualPubNumber: actualPubNumber,
+      copyrightYear: actualPubDateTime.getFullYear(),
       ...docMetadata
     }
     );
@@ -662,8 +675,7 @@ ${implConformance}
 const SMPTE_FOREWORD_ID = "sec-foreword";
 
 const SMPTE_AG_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
-<p><a href="https://www.smpte.org">SMPTE (the Society of
-Motion Picture and Television Engineers)</a> is an
+<p>The Society of Motion Picture and Television Engineers (SMPTE) is an
 internationally-recognized standards developing organization. Headquartered
 and incorporated in the United States of America, SMPTE has members in over
 80 countries on six continents. SMPTE’s Engineering Documents, including
@@ -672,17 +684,16 @@ by SMPTE’s Technology Committees. Participation in these Committees is open
 to all with a bona fide interest in their work. SMPTE cooperates closely
 with other standards-developing organizations, including ISO, IEC and ITU.
 SMPTE Engineering Documents are drafted in accordance with the rules given
-in its Standards Operations Manual.</p>
+in its Standards Operations Manual. For more information, please visit
+<a href="https://www.smpte.org">www.smpte.org</a>.</p>
 
 <p>This Standards Administrative Guideline forms an adjunct to the use and
 interpretation of the SMPTE Standards Operations Manual. In the event of a
 conflict, the Operations Manual shall prevail.</p>
-
-<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>, Society of Motion Picture and Television Engineers</span>. All rights reserved. No part of this material may be reproduced, by any means whatsoever, without the prior written permission of the Society of Motion Picture and Television Engineers.</p>`
+`
 
 const SMPTE_DOC_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
-<p><a href="https://www.smpte.org">SMPTE (the Society of
-Motion Picture and Television Engineers)</a> is an
+<p>The Society of Motion Picture and Television Engineers (SMPTE) is an
 internationally-recognized standards developing organization. Headquartered
 and incorporated in the United States of America, SMPTE has members in over
 80 countries on six continents. SMPTE’s Engineering Documents, including
@@ -691,7 +702,8 @@ by SMPTE’s Technology Committees. Participation in these Committees is open
 to all with a bona fide interest in their work. SMPTE cooperates closely
 with other standards-developing organizations, including ISO, IEC and ITU.
 SMPTE Engineering Documents are drafted in accordance with the rules given
-in its Standards Operations Manual.</p>
+in its Standards Operations Manual.</p> For more information, please visit
+<a href="https://www.smpte.org">www.smpte.org</a>.</p>
 
 <p>At the time of publication no notice had been received by SMPTE claiming patent
 rights essential to the implementation of this Engineering Document.
@@ -699,8 +711,7 @@ However, attention is drawn to the possibility that some of the elements of this
 SMPTE shall not be held responsible for identifying any or all such patent rights.</p>
 
 {{authorProse}}
-
-<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>, Society of Motion Picture and Television Engineers</span>. All rights reserved. No part of this material may be reproduced, by any means whatsoever, without the prior written permission of the Society of Motion Picture and Television Engineers.</p>`
+`
 
 const SMPTE_DRAFT_WARNING = `
 <div id="sec-draft-warning">
@@ -1271,13 +1282,6 @@ async function render() {
 
   let docMetadata = loadDocMetadata();
 
-  asyncFunctions.push(asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css")));
-
-  if (docMetadata.pubState === smpte.PUB_STATE_DRAFT)
-    asyncFunctions.push(asyncAddStylesheet(resolveScriptRelativePath("css/smpte-draft.css")));
-
-  asyncFunctions.push(asyncInsertSnippets());
-
   insertIconLink();
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
@@ -1301,6 +1305,13 @@ async function render() {
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
   addHeadingLinks(docMetadata);
+
+  asyncFunctions.push(asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css")));
+
+  if (docMetadata.pubState === smpte.PUB_STATE_DRAFT)
+    asyncFunctions.push(asyncAddStylesheet(resolveScriptRelativePath("css/smpte-draft.css")));
+
+  asyncFunctions.push(asyncInsertSnippets());
 
   /* debug print version */
   if (docMetadata.media === "print") {
