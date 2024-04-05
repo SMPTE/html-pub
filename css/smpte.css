@@ -492,8 +492,6 @@ code:hover {
   #sec-elements a {
     color: currentColor;
     text-decoration: none;
-    pointer-events: none;
-    cursor: default;
   }
 
   @page:first {
