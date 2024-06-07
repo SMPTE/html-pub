@@ -575,7 +575,7 @@ class NormativeReferencesMatcher {
     if (e.id !== "sec-normative-references")
       return false;
 
-    validateReferences(e, "Normative references", logger);
+    validateReferences(e, logger);
 
     return true;
   }
@@ -812,7 +812,7 @@ class BibliographyMatcher {
     if (e.id !== "sec-bibliography")
       return false;
 
-    validateReferences(e, "Bibliography references", logger);
+    validateReferences(e, logger);
 
     return true;
   }
