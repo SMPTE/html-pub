@@ -11,8 +11,6 @@ inputs:
     required: true
   GITHUB_TOKEN:
     required: true
-  GITHUB_REF_NAME:
-    required: true
 
 runs:
   using: "composite"
@@ -67,9 +65,7 @@ runs:
     - name: Upload artifacts to the release
       if: github.event_name == 'release'
       shell: bash
-      env:
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: |
-        gh release upload ${{ inputs.GITHUB_REF_NAME }} ${{ steps.build.outputs.LIBRARY_ZIP }}
-        gh release upload ${{ inputs.GITHUB_REF_NAME }} ${{ steps.build.outputs.REVIEW_ZIP }}
-        gh release edit ${{ inputs.GITHUB_REF_NAME }} --notes-file ${{ steps.build.outputs.PUB_LINKS }}
+        gh release upload $GITHUB_REF_NAME ${{ steps.build.outputs.LIBRARY_ZIP }}
+        gh release upload $GITHUB_REF_NAME ${{ steps.build.outputs.REVIEW_ZIP }}
+        gh release edit $GITHUB_REF_NAME --notes-file ${{ steps.build.outputs.PUB_LINKS }}
