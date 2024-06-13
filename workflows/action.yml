@@ -68,6 +68,6 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: |
-        gh release upload ${{ github.event.release.tag_name }} ${{ steps.build.outputs.LIBRARY_ZIP }}
-        gh release upload ${{ github.event.release.tag_name }} ${{ steps.build.outputs.REVIEW_ZIP }}
+        ${{ steps.build.outputs.LIBRARY_ZIP }} && gh release upload ${{ github.event.release.tag_name }} ${{ steps.build.outputs.LIBRARY_ZIP }}
+        ${{ steps.build.outputs.REVIEW_ZIP }} &&  gh release upload ${{ github.event.release.tag_name }} ${{ steps.build.outputs.REVIEW_ZIP }}
         gh release edit ${{ github.event.release.tag_name }} --notes-file ${{ steps.build.outputs.PUB_LINKS }}
