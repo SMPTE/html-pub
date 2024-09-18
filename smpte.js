@@ -548,7 +548,7 @@ function insertElementsAnnex(docMetadata) {
   sec.classList.add("unnumbered");
 
   const intro = document.createElement("p");
-  intro.innerText = "This annex lists non-prose elements of this document."
+  intro.innerText = "The following are the non-prose elements of this document."
   sec.insertBefore(intro, sec.firstChild);
 
   const h2 = document.createElement("h2");
