@@ -698,13 +698,13 @@ function insertConformance(docMetadata) {
     sections.forEach((element) => {
       let id = element.id;
       if ((id !== "sec-front-matter") && (id !== "sec-foreword") && (id !== "sec-conformance")) {
-        if (element.innerText.includes("shall")) {
+        if (element.innerText.toLowerCase().includes("shall")) {
           logger_.error(`EG must not contain Conformance Notation - "shall" found`, element);
         }
-        if (element.innerText.includes("should")) {
+        if (element.innerText.toLowerCase().includes("should")) {
           logger_.error(`EG must not contain Conformance Notation - "should" found`, element);
         }
-        if (element.innerText.includes("may")) {
+        if (element.innerText.toLowerCase().includes("may")) {
           logger_.error(`EG must not contain Conformance Notation - "may" found`, element);
         }
       }
