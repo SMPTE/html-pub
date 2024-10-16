@@ -612,8 +612,7 @@ function insertConformance(docMetadata) {
     return;
   }
 
-  if (docMetadata.pubType == smpte.EG_PUBTYPE) {
-    if (sec !== null)
+  if ((docMetadata.pubType == smpte.EG_PUBTYPE) && (sec !== null)) {
       logger_.error("EG must not contain a Conformance section.");
   }
 
@@ -637,7 +636,7 @@ function insertConformance(docMetadata) {
 
     } else {
 
-      implConformance = sec.innerText;
+      implConformance = sec.innerHTML;
 
     }
 
@@ -696,18 +695,22 @@ function insertConformance(docMetadata) {
     
     const sections = document.querySelectorAll('section');
     sections.forEach((element) => {
-      let id = element.id;
-      if ((id !== "sec-front-matter") && (id !== "sec-foreword") && (id !== "sec-conformance")) {
-        if (element.innerText.toLowerCase().includes("shall")) {
-          logger_.error(`EG must not contain Conformance Notation - "shall" found`, element);
-        }
-        if (element.innerText.toLowerCase().includes("should")) {
-          logger_.error(`EG must not contain Conformance Notation - "should" found`, element);
-        }
-        if (element.innerText.toLowerCase().includes("may")) {
-          logger_.error(`EG must not contain Conformance Notation - "may" found`, element);
-        }
+   
+      const id = element.id;
+
+      if (id === "sec-front-matter" || id === "sec-foreword" || id === "sec-conformance")
+        return;
+      
+      if (element.innerText.toLowerCase().includes("shall")) {
+        logger_.error(`EG must not contain Conformance Notation - "shall" found`, element);
       }
+      if (element.innerText.toLowerCase().includes("should")) {
+        logger_.error(`EG must not contain Conformance Notation - "should" found`, element);
+      }
+      if (element.innerText.toLowerCase().includes("may")) {
+        logger_.error(`EG must not contain Conformance Notation - "may" found`, element);
+      }
+    
     });
   }
 
