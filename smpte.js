@@ -693,25 +693,24 @@ function insertConformance(docMetadata) {
 
   if (docMetadata.pubType === smpte.EG_PUBTYPE) {
     
-    const sections = document.querySelectorAll('section');
-    sections.forEach((element) => {
-   
-      const id = element.id;
-
-      if (id === "sec-front-matter" || id === "sec-foreword" || id === "sec-conformance")
-        return;
+    for (let section of document.querySelectorAll("body > section")) {
+    
+      let id = section.id;
       
-      if (element.innerText.toLowerCase().includes("shall")) {
-        logger_.error(`EG must not contain Conformance Notation - "shall" found`, element);
+      if (id === "sec-front-matter" || id === "sec-foreword" || id === "sec-conformance")
+        continue;
+      
+      if (section.innerText.toLowerCase().includes("shall")) {
+        logger_.error(`EG must not contain Conformance Notation - "shall" found`, section);
       }
-      if (element.innerText.toLowerCase().includes("should")) {
-        logger_.error(`EG must not contain Conformance Notation - "should" found`, element);
+      if (section.innerText.toLowerCase().includes("should")) {
+        logger_.error(`EG must not contain Conformance Notation - "should" found`, section);
       }
-      if (element.innerText.toLowerCase().includes("may")) {
-        logger_.error(`EG must not contain Conformance Notation - "may" found`, element);
+      if (section.innerText.toLowerCase().includes("may")) {
+        logger_.error(`EG must not contain Conformance Notation - "may" found`, section);
       }
     
-    });
+    };
   }
 
 }
