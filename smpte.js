@@ -606,14 +606,11 @@ function insertConformance(docMetadata) {
 
   let sec = document.getElementById(SMPTE_CONFORMANCE_ID);
 
-  if (docMetadata.pubType == smpte.OM_PUBTYPE) {
+  if (!(docMetadata.pubType == smpte.RP_PUBTYPE || docMetadata.pubType == smpte.ST_PUBTYPE)) {
     if (sec !== null)
-      logger_.error("OM must not contain a Conformance section.");
-    return;
-  }
-
-  if ((docMetadata.pubType == smpte.EG_PUBTYPE) && (sec !== null)) {
-      logger_.error("EG must not contain a Conformance section.");
+      logger_.error(`An ${docMetadata.pubType} document must not contain a conformance section`);
+    if (docMetadata.pubType != smpte.EG_PUBTYPE)
+      return;
   }
 
   if (sec === null) {
@@ -689,28 +686,6 @@ function insertConformance(docMetadata) {
     interoperability information.</p>
     `;
 
-  }
-
-  if (docMetadata.pubType === smpte.EG_PUBTYPE) {
-    
-    for (let section of document.querySelectorAll("body > section")) {
-    
-      let id = section.id;
-      
-      if (id === "sec-front-matter" || id === "sec-foreword" || id === "sec-conformance")
-        continue;
-      
-      if (section.innerText.toLowerCase().includes("shall")) {
-        logger_.error(`EG must not contain Conformance Notation - "shall" found`, section);
-      }
-      if (section.innerText.toLowerCase().includes("should")) {
-        logger_.error(`EG must not contain Conformance Notation - "should" found`, section);
-      }
-      if (section.innerText.toLowerCase().includes("may")) {
-        logger_.error(`EG must not contain Conformance Notation - "may" found`, section);
-      }
-    
-    };
   }
 
 }
@@ -1280,6 +1255,27 @@ function resolveLinks(docMetadata) {
   }
 }
 
+const CONFORMANCE_RE = /\s*(shall)|(should)|(may)\s/i;
+
+function checkConformanceNotation(docMetadata) {
+  if (docMetadata.pubType !== smpte.EG_PUBTYPE)
+    return;
+
+  for (let section of document.querySelectorAll("section:not(:has(section))")) {
+
+    const id = section.id;
+
+    if (id === SMPTE_FRONT_MATTER_ID || id === SMPTE_FOREWORD_ID || id === SMPTE_CONFORMANCE_ID)
+      continue;
+
+    const r = CONFORMANCE_RE.exec(section.innerText);
+
+    if (r !== null)
+      logger_.error(`An EG must not contain the conformance notation ${r[1]}`, section);
+
+  };
+}
+
 function asyncInsertSnippets() {
   return Promise.all(Array.from(
     document.querySelectorAll("pre[data-include]"),
@@ -1326,6 +1322,7 @@ async function render() {
   let docMetadata = loadDocMetadata();
 
   insertIconLink();
+  checkConformanceNotation(docMetadata);
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
   insertIntroduction(docMetadata);
