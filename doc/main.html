@@ -62,7 +62,13 @@
         <a>https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks</a>.
       </li>
       <li>
-        Start editing the main prose element at <code>html-pub-template/doc/main.html</code>.
+        If working on a project that has a repository, update the <code>origin</code> remote to that repository:
+<pre>git remote set-url origin &lt;HTTPS URL of the project repository found on GitHub&gt;</pre>
+        For example:
+<pre>git remote set-url origin https://github.com/SMPTE/stxxx-y-private.git</pre>
+      </li>
+      <li>
+        Start editing the main prose element at <code>doc/main.html</code>.
       </li>
     </ol>
 
@@ -2151,7 +2157,9 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
           <ol type="a">
             <li>Follow the steps in <a href="#sec-quick-start"></a> to create repo.</li>
             <li>A new branch is created from <code>main</code> called <code>2023-initial-draft</code> (where "2023" is the current year).</li>
-            <li>Template document is updated in <code>2023-initial-draft</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and to <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code>.</li>
+            <li>Make sure that the <code>pubState</code> (<a href="#sec-pubState"></a>) and <code>pubStage</code> (<a
+            href="#sec-pubStage"></a>) of the main prose element in the <code>2023-initial-draft</code> branch are set to
+            <code>draft</code> and <code>WD</code>, respectively.</li>
             <li>Document editor creates initial version of the document.</li>
             <li>A PR is created named <code>2023 Initial Draft</code> from the <code>2023-initial-draft</code> branch on GitHub. </li>
             <li>Skip to Workflow Step (4)</li>
@@ -2162,8 +2170,11 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
           <ol type="a">
             <li>Assumption: There is a prior release labeled <code>2020115-pub</code></li>
             <li>A new branch is created from <code>main</code> called <code>2023-revision</code> (where "2023" is the current year).</li>
-            <li>Document is updated in <code>2023-revision</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and to <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code>.</li>
-            <li><code>.smpte-build.json</code> is updated in <code>2023-revision</code> branch to last release tag <code>2020115-pub</code> (see <a href="#sec-document-github-releases"></a>) </li>
+            <li>Make sure that the <code>pubState</code> (<a href="#sec-pubState"></a>) and <code>pubStage</code> (<a
+              href="#sec-pubStage"></a>) of the main prose element in the <code>2023-initial-draft</code> branch are set to
+              <code>draft</code> and <code>WD</code>, respectively.</li>
+            <li><code>.smpte-build.json</code> is updated in <code>2023-revision</code> branch to last release tag
+            <code>2020115-pub</code> (see <a href="#sec-document-github-releases"></a>) </li>
             <li>Document editor makes initial changes to the document.</li>
             <li>A PR is created named <code>2023 Revision</code> from the <code>2023-revision</code> branch on GitHub. The tooling with create a redline against the most recent edition of the document.</li>
             <li>Continue to Workflow Step (4)</li>
