@@ -606,10 +606,11 @@ function insertConformance(docMetadata) {
 
   let sec = document.getElementById(SMPTE_CONFORMANCE_ID);
 
-  if (docMetadata.pubType == smpte.OM_PUBTYPE) {
+  if (!(docMetadata.pubType == smpte.RP_PUBTYPE || docMetadata.pubType == smpte.ST_PUBTYPE)) {
     if (sec !== null)
-      logger_.error("OM must not contain a Conformance section.");
-    return;
+      logger_.error(`An ${docMetadata.pubType} document must not contain a conformance section`);
+    if (docMetadata.pubType != smpte.EG_PUBTYPE)
+      return;
   }
 
   if (sec === null) {
@@ -632,7 +633,7 @@ function insertConformance(docMetadata) {
 
     } else {
 
-      implConformance = sec.innerText.innerHTML;
+      implConformance = sec.innerHTML;
 
     }
 
@@ -640,36 +641,53 @@ function insertConformance(docMetadata) {
     logger_.error("Conformance section not used in AGs.");
   }
 
-  sec.innerHTML = `
-  <h2>Conformance</h2>
-  <p>Normative text is text that describes elements of the design that are indispensable or contains the
-   conformance language keywords: "shall", "should", or "may". Informative text is text that is potentially
-    helpful to the user, but not indispensable, and can be removed, changed, or added editorially without
-     affecting interoperability. Informative text does not contain any conformance keywords. </p>
+  if (docMetadata.pubType !== smpte.EG_PUBTYPE) {
+    
+    sec.innerHTML = `
+    <h2>Conformance</h2>
+    <p>Normative text is text that describes elements of the design that are indispensable or contains the
+    conformance language keywords: "shall", "should", or "may". Informative text is text that is potentially
+      helpful to the user, but not indispensable, and can be removed, changed, or added editorially without
+      affecting interoperability. Informative text does not contain any conformance keywords. </p>
 
-  <p>All text in this document is, by default, normative, except: the Introduction, any clause explicitly
-  labeled as "Informative" or individual paragraphs that start with "Note:" </p>
+    <p>All text in this document is, by default, normative, except: the Introduction, any clause explicitly
+    labeled as "Informative" or individual paragraphs that start with "Note:" </p>
 
-<p>The keywords "shall" and "shall not" indicate requirements strictly to be followed in order to conform to the
-document and from which no deviation is permitted.</p>
+  <p>The keywords "shall" and "shall not" indicate requirements strictly to be followed in order to conform to the
+  document and from which no deviation is permitted.</p>
 
-<p>The keywords, "should" and "should not" indicate that, among several possibilities, one is recommended
-  as particularly suitable, without mentioning or excluding others; or that a certain course of action
-  is preferred but not necessarily required; or that (in the negative form) a certain possibility
-   or course of action is deprecated but not prohibited.</p>
+  <p>The keywords, "should" and "should not" indicate that, among several possibilities, one is recommended
+    as particularly suitable, without mentioning or excluding others; or that a certain course of action
+    is preferred but not necessarily required; or that (in the negative form) a certain possibility
+    or course of action is deprecated but not prohibited.</p>
 
-<p>The keywords "may" and "need not" indicate courses of action permissible within the limits of the document. </p>
+  <p>The keywords "may" and "need not" indicate courses of action permissible within the limits of the document. </p>
 
-<p>The keyword "reserved" indicates a provision that is not defined at this time, shall not be used,
-  and may be defined in the future. The keyword "forbidden" indicates "reserved" and in addition
-   indicates that the provision will never be defined in the future.</p>
+  <p>The keyword "reserved" indicates a provision that is not defined at this time, shall not be used,
+    and may be defined in the future. The keyword "forbidden" indicates "reserved" and in addition
+    indicates that the provision will never be defined in the future.</p>
 
-${implConformance}
+  ${implConformance}
 
-<p>Unless otherwise specified, the order of precedence of the types of normative information in
-  this document shall be as follows: Normative prose shall be the authoritative definition;
-  tables shall be next; then formal languages; then figures; and then any other language forms.</p>
-  `;
+  <p>Unless otherwise specified, the order of precedence of the types of normative information in
+    this document shall be as follows: Normative prose shall be the authoritative definition;
+    tables shall be next; then formal languages; then figures; and then any other language forms.</p>
+    `;
+
+  } else {
+
+    sec.innerHTML = `
+    <h2>Conformance</h2>
+    <p>This Engineering Guideline is purely informative and meant to provide tutorial information to the 
+    industry. It does not impose Conformance Requirements and avoids the use of Conformance Notation.</p>
+
+    <p>Engineering Guidelines frequently provide tutorial information about a Standard or Recommended Practice
+    and when this is the case, the user should rely on the Standards and Recommended Practices referenced for
+    interoperability information.</p>
+    `;
+
+  }
+
 }
 
 const SMPTE_FOREWORD_ID = "sec-foreword";
@@ -1237,6 +1255,27 @@ function resolveLinks(docMetadata) {
   }
 }
 
+const CONFORMANCE_RE = /\s*(shall)|(should)|(may)\s/i;
+
+function checkConformanceNotation(docMetadata) {
+  if (docMetadata.pubType !== smpte.EG_PUBTYPE)
+    return;
+
+  for (let section of document.querySelectorAll("section:not(:has(section))")) {
+
+    const id = section.id;
+
+    if (id === SMPTE_FRONT_MATTER_ID || id === SMPTE_FOREWORD_ID || id === SMPTE_CONFORMANCE_ID)
+      continue;
+
+    const r = CONFORMANCE_RE.exec(section.innerText);
+
+    if (r !== null)
+      logger_.error(`An EG must not contain the conformance notation ${r[1]}`, section);
+
+  };
+}
+
 function asyncInsertSnippets() {
   return Promise.all(Array.from(
     document.querySelectorAll("pre[data-include]"),
@@ -1283,6 +1322,7 @@ async function render() {
   let docMetadata = loadDocMetadata();
 
   insertIconLink();
+  checkConformanceNotation(docMetadata);
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
   insertIntroduction(docMetadata);
