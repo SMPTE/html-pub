@@ -237,19 +237,19 @@ async function generatePubLinks(buildPaths, pubLinks) {
 
   if (pubLinks) {
     if ("clean" in pubLinks)
-      linksDocContents += `[Clean](${encodeURI(pubLinks.clean)})\n`;
+      linksDocContents += `[Clean](${pubLinks.clean})\n`;
 
     if ("pdf" in pubLinks)
-      linksDocContents += `[Clean PDF](${encodeURI(pubLinks.pdf)})\n`;
+      linksDocContents += `[Clean PDF](${pubLinks.pdf})\n`;
 
     if ("baseRedline" in pubLinks)
-      linksDocContents += `[Redline to current draft](${encodeURI(pubLinks.baseRedline)})\n`;
+      linksDocContents += `[Redline to current draft](${pubLinks.baseRedline})\n`;
 
     if ("pubRedline" in pubLinks)
-      linksDocContents += `[Redline to most recent edition](${encodeURI(pubLinks.pubRedline)})\n`;
+      linksDocContents += `[Redline to most recent edition](${pubLinks.pubRedline})\n`;
 
     if ("reviewZip" in pubLinks)
-      linksDocContents += `[ZIP package](${encodeURI(pubLinks.reviewZip)})\n`;
+      linksDocContents += `[ZIP package](${pubLinks.reviewZip})\n`;
 
   } else {
     linksDocContents += "No links available";
@@ -287,23 +287,23 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
   }
 
   if ("pdf" in generatedFiles) {
-    pubLinks.pdf = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pdf}`;
+    pubLinks.pdf = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.pdf)}`;
   }
 
   if ("baseRedline" in generatedFiles) {
-    pubLinks.baseRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.baseRedline}`;
+    pubLinks.baseRedline = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.baseRedline)}`;
   }
 
   if ("pubRedline" in generatedFiles) {
-    pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.pubRedline}`;
+    pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.pubRedline)}`;
   }
 
   if ("reviewZip" in generatedFiles) {
-    pubLinks.reviewZip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.reviewZip}`;
+    pubLinks.reviewZip = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.reviewZip)}`;
   }
 
   if ("libraryZip" in generatedFiles) {
-    pubLinks.libraryZip = `${deployPrefix}${s3PubKeyPrefix}${generatedFiles.libraryZip}`;
+    pubLinks.libraryZip = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.libraryZip)}`;
   }
 
   s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
@@ -372,27 +372,27 @@ async function makePubArtifacts(buildPaths, generatedFiles, docMetadata) {
   let htmlLinks;
 
   if ("html" in generatedFiles) {
-    htmlLinks = `<p><a href="${encodeURI(generatedFiles.html)}">Clean</a></p>\n`;
+    htmlLinks = `<p><a href="${encodeURIComponent(generatedFiles.html)}">Clean</a></p>\n`;
   }
 
   if ("pdf" in generatedFiles) {
-    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pdf)}">Clean PDF</a></p>\n`;
+    htmlLinks += `<p><a href="${encodeURIComponent(generatedFiles.pdf)}">Clean PDF</a></p>\n`;
   }
 
   if ("baseRedline" in generatedFiles) {
-    htmlLinks += `<p><a href="${encodeURI(generatedFiles.baseRedline)}">Redline to current draft</a></p>\n`;
+    htmlLinks += `<p><a href="${encodeURIComponent(generatedFiles.baseRedline)}">Redline to current draft</a></p>\n`;
   }
 
   if ("pubRedline" in generatedFiles) {
-    htmlLinks += `<p><a href="${encodeURI(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>\n`;
+    htmlLinks += `<p><a href="${encodeURIComponent(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>\n`;
   }
 
   if (generatedFiles.reviewZip !== undefined) {
-    htmlLinks += `<p><a href="${encodeURI(generatedFiles.reviewZip)}">Review zip file</a></p>\n`;
+    htmlLinks += `<p><a href="${encodeURIComponent(generatedFiles.reviewZip)}">Review zip file</a></p>\n`;
   }
 
   if (generatedFiles.libraryZip !== undefined) {
-    htmlLinks += `<p><a href="${encodeURI(generatedFiles.libraryZip)}">Library zip file</a></p>\n`;
+    htmlLinks += `<p><a href="${encodeURIComponent(generatedFiles.libraryZip)}">Library zip file</a></p>\n`;
   }
 
   fs.writeFileSync(buildPaths.pubArtifactsPath, `<!DOCTYPE html>
