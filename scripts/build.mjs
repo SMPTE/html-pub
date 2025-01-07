@@ -182,10 +182,10 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
   }
 
   if (docMetadata.pubPart !== null) {
-    generatedFiles.pdf += ` ${docMetadata.pubSuiteTitle} - `
+    generatedFiles.pdf += ` ${docMetadata.pubSuiteTitle} -`
   }
 
-  generatedFiles.pdf += `${docMetadata.pubTitle}.pdf`;
+  generatedFiles.pdf += ` ${docMetadata.pubTitle}.pdf`;
 
   child_process.execSync(`npm exec -c 'pagedjs-cli ${buildPaths.renderedDocPath} --additional-script ${__dirname}/../js/patchPDF.js -o "${path.join(buildPaths.pubDirPath, generatedFiles.pdf)}"'`);
 
