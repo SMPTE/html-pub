@@ -174,7 +174,15 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
   generatedFiles.pdf = `SMPTE ${docMetadata.pubType} ${docMetadata.pubNumber}`;
 
   if (docMetadata.pubPart !== null) {
-    generatedFiles.pdf += `-${docMetadata.pubPart} ${docMetadata.pubSuiteTitle} - `
+    generatedFiles.pdf += `-${docMetadata.pubPart}`
+  }
+
+  if (docMetadata.pubDateTime !== null) {
+    generatedFiles.pdf += `:${docMetadata.pubDateTime}`
+  }
+
+  if (docMetadata.pubPart !== null) {
+    generatedFiles.pdf += ` ${docMetadata.pubSuiteTitle} - `
   }
 
   generatedFiles.pdf += `${docMetadata.pubTitle}.pdf`;
