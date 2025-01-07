@@ -178,7 +178,7 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
   }
 
   if (docMetadata.pubDateTime !== null) {
-    generatedFiles.pdf += `:${docMetadata.pubDateTime}`
+    generatedFiles.pdf += ` (${docMetadata.pubDateTime})`
   }
 
   if (docMetadata.pubPart !== null) {
