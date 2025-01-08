@@ -182,10 +182,10 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
   }
 
   if (docMetadata.pubPart !== null) {
-    generatedFiles.pdf += `-${docMetadata.pubSuiteTitle.replace(/[\s—–‐‑]+/g, "-")}-`
+    generatedFiles.pdf += `-${docMetadata.pubSuiteTitle.replace(/[\s—–‐‑]+/g, "-")}`
   }
 
-  generatedFiles.pdf += `${docMetadata.pubTitle.replace(/[\s—–‐‑]+/g, "-")}.pdf`;
+  generatedFiles.pdf += `-${docMetadata.pubTitle.replace(/[\s—–‐‑]+/g, "-")}.pdf`;
 
   child_process.execSync(`npm exec -c 'pagedjs-cli ${buildPaths.renderedDocPath} --additional-script ${__dirname}/../js/patchPDF.js -o "${path.join(buildPaths.pubDirPath, generatedFiles.pdf)}"'`);
 
