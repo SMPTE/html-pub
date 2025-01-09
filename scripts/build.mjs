@@ -171,13 +171,18 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
 
   /* create pdf */
 
-  generatedFiles.pdf = `SMPTE ${docMetadata.pubType} ${docMetadata.pubNumber}`;
-
+  generatedFiles.pdf = `SMPTE-${docMetadata.pubType}-${docMetadata.pubNumber}`;
   if (docMetadata.pubPart !== null) {
-    generatedFiles.pdf += `-${docMetadata.pubPart} ${docMetadata.pubSuiteTitle} - `
+    generatedFiles.pdf += `-${docMetadata.pubPart}`
   }
-
-  generatedFiles.pdf += `${docMetadata.pubTitle}.pdf`;
+  if (docMetadata.pubDateTime !== null) {
+    generatedFiles.pdf += `-${docMetadata.pubDateTime}`
+  }
+  if (docMetadata.pubPart !== null) {
+    generatedFiles.pdf += `-${docMetadata.pubSuiteTitle}`
+  }
+  generatedFiles.pdf += `-${docMetadata.pubTitle}.pdf`;
+  generatedFiles.pdf = generatedFiles.pdf.replace(/[\s—–‐‑]+/g, "-");
 
   child_process.execSync(`npm exec -c 'pagedjs-cli ${buildPaths.renderedDocPath} --additional-script ${__dirname}/../js/patchPDF.js -o "${path.join(buildPaths.pubDirPath, generatedFiles.pdf)}"'`);
 
