@@ -184,7 +184,7 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
   generatedFiles.pdf += `-${docMetadata.pubTitle}.pdf`;
   generatedFiles.pdf = generatedFiles.pdf.replace(/[\s—–‐‑]+/g, "-");
 
-  child_process.execSync(`npm exec -c 'pagedjs-cli ${buildPaths.renderedDocPath} --additional-script ${__dirname}/../js/patchPDF.js -o "${path.join(buildPaths.pubDirPath, generatedFiles.pdf)}"'`);
+  await makePDF(buildPaths.renderedDocPath, path.join(buildPaths.pubDirPath, generatedFiles.pdf));
 
   /* generate base redline, if requested */
 
@@ -490,6 +490,77 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
   zip.writeZip(zipPath);
 
   return zipFn;
+}
+
+async function makePDF(docPath, pdfPath) {
+  const timeout = 6000000;
+
+  const browser = await puppeteer.launch({
+    args: ["--disable-dev-shm-usage", "--allow-file-access-from-files"]
+  });
+
+
+  const page = await browser.newPage();
+  page.setDefaultTimeout(timeout);
+  await page.emulateMediaType("print");
+  await page.goto("file://" + path.resolve(docPath));
+  await page.content();
+  await page.evaluate(() => {
+    window.PagedConfig = window.PagedConfig || {};
+    window.PagedConfig.auto = false;
+  });
+  await page.addScriptTag({ url: 'https://unpkg.com/pagedjs/dist/paged.polyfill.js' });
+
+  let renderingDone;
+  let rendered = new Promise(function (resolve, reject) {
+    renderingDone = resolve;
+  });
+  await page.exposeFunction("onRendered", (msg) => {
+    console.log(msg);
+    renderingDone();
+  });
+  await page.exposeFunction("onPage", (position) => {
+    if (position % 10 === 0) {
+      console.log("Rendering: Page " + (position + 1));
+    }
+  });
+  await page.evaluate(async () => {
+    document.querySelectorAll('#sec-elements a[href]')
+      .forEach(e => { if (!e.href.startsWith("http")) e.removeAttribute("href"); });
+
+    window.PagedPolyfill.on("page", (page) => {
+      window.onPage(page.position);
+    });
+    window.PagedPolyfill.on("rendered", (flow) => {
+      let msg = "Rendering " + flow.total + " pages took " + flow.performance + " milliseconds.";
+      window.onRendered(msg);
+    })
+    await window.PagedPolyfill.preview();
+  }).catch((error) => {
+    throw error;
+  });
+  await page.waitForNetworkIdle({
+    timeout: timeout
+  });
+  await rendered;
+  await page.waitForSelector(".pagedjs_pages");
+
+  const pdf = await page.pdf({
+    timeout: timeout,
+    printBackground: true,
+    displayHeaderFooter: false,
+    margin: {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    }
+  });
+
+  fs.writeFileSync(pdfPath, pdf);
+
+  await browser.close();
+
 }
 
 async function render(docPath) {
