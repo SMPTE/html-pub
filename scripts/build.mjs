@@ -496,7 +496,7 @@ async function makePDF(docPath, pdfPath) {
   const timeout = 6000000;
 
   const browser = await puppeteer.launch({
-    args: ["--disable-dev-shm-usage", "--allow-file-access-from-files"]
+    args: ["--no-sandbox", "--disable-dev-shm-usage", "--allow-file-access-from-files"]
   });
 
 
@@ -570,7 +570,7 @@ async function render(docPath) {
   /* render the page */
 
   const browser = await puppeteer.launch({
-    args: ["--disable-dev-shm-usage", "--allow-file-access-from-files"],
+    args: ["--no-sandbox", "--disable-dev-shm-usage", "--allow-file-access-from-files"],
   });
 
   try {
