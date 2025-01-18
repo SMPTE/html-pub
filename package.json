@@ -8,8 +8,7 @@
     "@aws-sdk/client-iam": "3.525.0",
     "@aws-sdk/client-s3": "3.525.0",
     "adm-zip": "0.5.10",
-    "jsdom": "^20.0.3",
-    "pagedjs-cli": "0.4.3",
-    "puppeteer": "19.7.5"
+    "jsdom": "26.0.0",
+    "puppeteer": "24.1.0"
   }
 }
