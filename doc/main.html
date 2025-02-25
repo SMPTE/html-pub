@@ -323,8 +323,9 @@
         <p>The element shall be present if <code>pubState</code> is <code>pub</code>.</p>
 
         <p>The element shall have a <code>content</code> attribute that conforms to the pattern <code>YYYY-MM-DD</code>, where
-        <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day of the approval date of the
-        document.</p>
+        <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day of the most recent approval date of the
+        document.</p> 
+        <p class="note">This date should only be updated if changes have been made after the last approval state. If the document has not been edited and/or changed due to ballot comments, this date might remain the same across multiple ballots. </p>
       </section>
 
       <section id="sec-effectiveDateTime">
@@ -2123,14 +2124,30 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <code>20230615-fcd</code> or <code>20230925-pub</code>
       </p>
       <p>
-        The <code>latestEditionTag</code> property in the <code>.smpte-build.json</code> file should always be equal to the name of the most recent git tag. This will trigger the tooling to create a link for <code>Redline to most recent edition</code> during any PRs and merges to the main branch. 
+        The <code>latestEditionTag</code> property in the <code>.smpte-build.json</code> file shall always be equal to the name of the most recent git tag. This will trigger the tooling to create a link for <code>Redline to most recent edition</code> during any PRs and merges to the <code>main</code> branch. 
       </p>
       <p>
-        The tooling will automatically generate zip files suitable for both TC review/balloting and SMPTE Document Library publishing within the release details page. 
-      </p>
+        The tooling will automatically generate zip files within the release details page, to be used for both :</p>
+        <ul>
+          <li>TC review/balloting (named as per <a href="#bib-smpte-ag-02"></a>)</li>
+          <li>(and) SMPTE Document Library publishing (named by the tag)</li>
+        </ul>
+       
+      <p class="example">See <a>https://github.com/SMPTE/st428-24-private/releases/tag/20241101-dp</a>, where <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/27c-st-428-24-dp-2024-12-06-pub.zip</a> (ballot zip), and <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/20241101-dp.zip</a> (publish zip) are available. </p>
+      
       <p>
         See <a href="#sec-sample-workflow"></a> for a sample workflow utilizing releases. 
       </p>
+
+    </section>
+
+    <section id="sec-pr-guidelines">
+      <h3>Pull Request Guidelines</h3>
+
+      <p>
+        Generally, no changes to a document shall ever be made directly on the <code>main</code> branch, which doesn't allow the tooling to create needed redlines. Instead, changes (regardless of the nature of the change) shall always be made on a new branch and managed via a PR (Pull Request). Each PR is then merged to <code>main</code> after approval, as noted below in <a href="#sec-sample-workflow"></a> at the various stages. 
+      </p>
+      <p>PRs should have at least (1) approver that is not the the person requesting the PR. This can be the DG chair, TC chair, commentor, or secondary editor, depending on nature of the PR. For instance, on ballot state change PRs, this should be the DG or TC chair, and for publication state PRs, the TC chairs. See <a href="#sec-sample-workflow"></a> for more details.</p>
 
     </section>
 
@@ -2139,9 +2156,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       <p>
         The below list shows a sample workflow which would be the steps for an Engineering Document going through the an initial draft or revision and the balloting process. 
       </p>
-      <p>
-        Generally, no changes to a document shall ever be made directly on the <code>main</code> branch, which often doesn't allow the tooling to create needed redlines. Instead changes (regardless of the nature of the change) shall always be made on a new branch and managed via a PR (Pull Request), and then merged to <code>main</code> after approval, as noted below at the various stages. 
-      </p>
+      
       <p class="note">Editors and Chairs should be aware of the general guidelines provided in the <a href="#bib-smpte-gh-om"></a>.
       </p>
       <ol>
@@ -2196,7 +2211,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
             <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
             <li>A release is created targeted at <code>main</code> named <code>20230415-wd</code> with a tag of the same name.</li>
             <li>The tooling creates the zip needed for TC 2-week preFCD review, with redlines against latest edition and/or last draft (if applicable)</li>
-            <li>ZIP is sent to TC for 2-week preFCD review</li>
+            <li>The link to the ZIP is sent to TC for 2-week preFCD review</li>
             <li>Continue to Workflow Step (6)</li>
           </ol>
         </li>
@@ -2229,7 +2244,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
             </li>
             <li>PR is merged to <code>main</code>.</li>
             <li>A release is created targeted at <code>main</code> named <code>20230415-cd1</code> (or <code>20230515-cd1</code> if Workflow Step 7 was used) with a tag of the same name.</li>
-            <li>If document is to continue to FCD ballot, the ZIP file that is generated by the tooling in <code>main</code> with required redlines is sent to the TC for FCD ballot. Skip to Workflow Step (9)</li>
+            <li>If document is to continue to FCD ballot, the link to the ZIP file that is generated by the tooling in <code>main</code> with required redlines is sent to the TC for FCD ballot. Skip to Workflow Step (9)</li>
             <li>If document is to undergo a PCD period, the contents in the ZIP file generated by the tooling in <code>main</code> are used for the PCD. After PCD period ends, go back to Workflow Step (6). See <a href="#sec-document-github-releases"></a> for iterative CD naming. </li>
             <li>Continue to Workflow Step (9)</li>
           </ol>
@@ -2252,7 +2267,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
             <li>Comment resolution ends, document is updated to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-07-15" /&gt;</code> (assumed date of  completion).</li>
             <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
             <li>A release is created targeted at <code>main</code> named <code>20230715-fcd</code> with a tag of the same name.</li>
-            <li>The ZIP file that is generated by the tooling in <code>main</code> is sent to the TC for pre-DP review.</li>
+            <li>The link to the ZIP file that is generated by the tooling in <code>main</code> is sent to the TC for pre-DP review.</li>
             <li>Continue to Workflow Step (11)</li>
           </ol>
         </li>
@@ -2271,7 +2286,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
             <li>PR is created on GitHub with the changes as per needed to resolve comments. The tooling creates redline for review against the last edition (release <code>20230415-cd1</code> or <code>20230515-cd1</code> or <code>20230715-fcd</code>).</li>
             <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
             <li>A release is created targeted at <code>main</code> named <code>20230415-dp</code> (or <code>20230515-dp</code> or <code>20230715-dp</code>) with a tag of the same name.</li>
-            <li>The ZIP file that is generated by the tooling in <code>main</code> is sent to ST for ST audit.</li>
+            <li>The link to the ZIP file that is generated by the tooling in <code>main</code> is sent to DoS for ST audit.</li>
             <li>Continue to Workflow Step (13)</li>
           </ol>
         </li>
@@ -2288,9 +2303,9 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
             <li>Document is updated in <code>20230415-pub</code> branch to <code>&lt;meta itemprop="pubStage" content="pub" /&gt;</code></li>
             <li>If document is a revision, <code>.smpte-build.json</code> is updated in <code>20230415-pub</code> branch to <code>2020115-pub</code> tag </li>
             <li>PR is created on GitHub from <code>20230415-pub</code></li>
-            <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
+            <li>PR is approved by document editor, DG chair, and TC chair(s). PR is merged to <code>main</code>.</li>
             <li>A release is created targeted at <code>main</code> named <code>20230415-pub</code> (or <code>20230515-pub</code> or <code>20230715-pub</code>) with a tag of the same name.</li>
-            <li>The document is now "published".</li>
+            <li>The document is now "published" on main.</li>
             <li> Send SMPTE HO the <code>20230415-pub.zip</code> (or <code>20230515-pub.zip</code> or <code>20230715-pub.zip</code>) generated in the release to use in the <a>https://github.com/SMPTE/document-library</a>.
               <ul>
                 <li>Automation for this step is planned for a future date.</li>
@@ -2316,6 +2331,8 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       <li><cite id="bib-iso-directives-part2">ISO/IEC Directives, Part 2</cite>, Principles and rules for the structure and drafting
       of ISO and IEC documents (Ninth edition, 2021).
       <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
+      <li><cite id="bib-smpte-ag-02">SMPTE AG 02</cite>, Document Naming and Packaging.
+        <a>https://www.smpte.org/about/policies-and-governance</a></li>
       <li><cite id="bib-smpte-ag-16">SMPTE AG 16</cite>, Standards Style Guide.
       <a>https://www.smpte.org/about/policies-and-governance</a></li>
       <li><cite id="bib-smpte-gh-om">SMPTE GitHub Operating Manual</cite>
