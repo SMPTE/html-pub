@@ -1,4 +1,4 @@
-# Tooling and documentation for HTML SMPTE documents
+# SMPTE _AG-26_ - _HTML-Pub: Tooling and documentation for HTML documents_
 
 _This repository is public._
 
