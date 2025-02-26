@@ -691,7 +691,7 @@ function insertConformance(docMetadata) {
     <h2>Conformance</h2>
     <p>The following keywords have a specific meaning in the context of this document:</p>
     <ul>
-      <li>SHALL and SHALL NOT express a requirement from which no deviation is permitted;</li>
+      <li><i>shall</i> and <i>shall not</i> express a requirement from which no deviation is permitted;</li>
 
       <li>SHOULD and SHOULD NOT express a strong recommendation without necessarily mentioning or 
       excluding other choices;</li>
