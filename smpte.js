@@ -696,7 +696,7 @@ function insertConformance(docMetadata) {
       <li><i>should</i> and <i>should not</i> express a strong recommendation without necessarily mentioning or 
       excluding other choices;</li>
       <li><i>may</i> expresses explicit liberty (or opportunity) to do something;</li>
-      <li>NOTE and INFORMATIVE indicates that the associated prose is not indispensable, and can be removed, changed, or 
+      <li><i>Note</i> and <i>informative</i> indicates that the associated prose is not indispensable, and can be removed, changed, or 
       added editorially without affecting the scope, or the document's usage.</li>
     </ul>  
     `;
