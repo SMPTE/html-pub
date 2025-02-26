@@ -693,7 +693,7 @@ function insertConformance(docMetadata) {
     <ul>
       <li><i>shall</i> and <i>shall not</i> express a requirement from which no deviation is permitted;</li>
 
-      <li>SHOULD and SHOULD NOT express a strong recommendation without necessarily mentioning or 
+      <li><i>should</i> and <i>should not</i> express a strong recommendation without necessarily mentioning or 
       excluding other choices;</li>
       <li>MAY expresses explicit liberty (or opportunity) to do something;</li>
       <li>NOTE and INFORMATIVE indicates that the associated prose is not indispensable, and can be removed, changed, or 
