@@ -606,7 +606,7 @@ function insertConformance(docMetadata) {
 
   let sec = document.getElementById(SMPTE_CONFORMANCE_ID);
 
-  if (!(docMetadata.pubType == smpte.RP_PUBTYPE || docMetadata.pubType == smpte.ST_PUBTYPE)) {
+  if (!(docMetadata.pubType == smpte.RP_PUBTYPE || docMetadata.pubType == smpte.ST_PUBTYPE || docMetadata.pubType == smpte.AG_PUBTYPE)) {
     if (sec !== null)
       logger_.error(`An ${docMetadata.pubType} document must not contain a conformance section`);
     if (docMetadata.pubType != smpte.EG_PUBTYPE)
@@ -638,10 +638,10 @@ function insertConformance(docMetadata) {
     }
 
   } else if (sec.innerText.trim().length !== 0) {
-    logger_.error("Conformance section not used in AGs.");
+    logger_.error("AGs cannot contain author-specified Conformance prose.");
   }
 
-  if (docMetadata.pubType !== smpte.EG_PUBTYPE) {
+  if (docMetadata.pubType == smpte.RP_PUBTYPE || docMetadata.pubType == smpte.ST_PUBTYPE) {
     
     sec.innerHTML = `
     <h2>Conformance</h2>
@@ -674,7 +674,7 @@ function insertConformance(docMetadata) {
     tables shall be next; then formal languages; then figures; and then any other language forms.</p>
     `;
 
-  } else {
+  } else if (docMetadata.pubType === smpte.EG_PUBTYPE) {
 
     sec.innerHTML = `
     <h2>Conformance</h2>
@@ -686,6 +686,20 @@ function insertConformance(docMetadata) {
     interoperability information.</p>
     `;
 
+  }  else {
+    sec.innerHTML = `
+    <h2>Conformance</h2>
+    <p>The following keywords have a specific meaning in the context of this document:</p>
+    <ul>
+      <li><i>shall</i> and <i>shall not</i> express a requirement from which no deviation is permitted;</li>
+
+      <li><i>should</i> and <i>should not</i> express a strong recommendation without necessarily mentioning or 
+      excluding other choices;</li>
+      <li><i>may</i> expresses explicit liberty (or opportunity) to do something;</li>
+      <li><i>Note</i> and <i>informative</i> indicates that the associated prose is not indispensable, and can be removed, changed, or 
+      added editorially without affecting the scope, or the document's usage.</li>
+    </ul>  
+    `;
   }
 
 }
