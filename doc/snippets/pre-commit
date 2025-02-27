@@ -1,8 +1,0 @@
-#!/bin/sh
-if test -f "tooling/scripts/validate.mjs"; then
-  validate=./tooling/scripts/validate.mjs
-else
-  validate=./scripts/validate.mjs
-fi
-
-node $validate ./doc/main.html
