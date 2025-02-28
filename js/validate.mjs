@@ -217,8 +217,8 @@ class DdMatcher {
       return false;
 
     for (const child of element.children) {
-      if (!AnyPhrasingMatcher.match(child, logger))
-        logger.error(`Dd contains non-phrasing element`, child);
+      if (!FlowMatcher.match(child, logger))
+        logger.error(`Dd contains non-flow element`, child);
     }
 
     return true;
