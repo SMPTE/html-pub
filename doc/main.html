@@ -163,11 +163,13 @@
 
         <p>The element shall have a <code>content</code> attribute equal to one of the following values:</p>
         <ul>
-          <li><code>AG</code>, if the document is an Administrative Guideline;</li>
-          <li><code>OM</code>, if the document is an Operations Manual;</li>
           <li><code>ST</code>, if the document is a Standard;</li>
-          <li><code>RP</code>, if the document is a Recommended Practice; or</li>
-          <li><code>EG</code>, if the document is an Engineering Guideline.</li>
+          <li><code>RP</code>, if the document is a Recommended Practice;</li>
+          <li><code>EG</code>, if the document is an Engineering Guideline;</li>
+          <li><code>ER</code>, if the document is an Engineering Report;</li>
+          <li><code>RDD</code>, if the document is an Registered Disclosure Document;</li>
+          <li><code>AG</code>, if the document is an Administrative Guideline; or</li>
+          <li><code>OM</code>, if the document is an Operations Manual.</li>
         </ul>
 
       </section>
@@ -371,6 +373,10 @@
               <td>0 or 1</td>
             </tr>
             <tr>
+              <td><a>Proponent contact info</a></td>
+              <td>0 or 1</td>
+            </tr>
+            <tr>
               <td><a>Introduction</a></td>
               <td>0 or 1</td>
             </tr>
@@ -440,6 +446,32 @@
         </div>
       </section>
 
+      <section id="sec-proponent-section">
+        <h4>Proponent contact info section</h4>
+
+        <p>The <dfn>Proponent contact info</dfn> section contains contact information about the proponents of an RDD document. It shall only be present and is required when <code>pubType</code> is set to <code>RDD</code>.</p>
+
+        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+        <code>sec-proponent</code>.</p>
+
+        <p>The heading shall not be present.</p>
+
+        <p>If present, the section shall contain a single <code>dl</code> element as described in <a href="#sec-dl-element"></a>, using a single <code>dt</code> element for each company name, and multiple lines of <code>dd</code> as needed for contact information for each company listed. The contact infomation should at least include an address and email, reach out to SMPTE HO for further deatails. </p>
+
+        <div class="example">
+<pre>&lt;section id=&quot;sec-proponent&quot;&gt;
+  &lt;dl&gt;
+    &lt;dt&gt;Your Company Name Here&lt;/dt&gt;
+    &lt;dd&gt;Contact Name&lt;/dd&gt;
+    &lt;dd&gt;1234 Main St, Anytown, ST 12345&lt;/dd&gt;
+    &lt;dd&gt;&lt;a&gt;mailto:name@companyname.com&lt;/a&gt;&lt;/dd&gt;
+    &lt;dd&gt;&lt;a&gt;https://companyname.com&lt;/a&gt;&lt;/dd&gt;
+  &lt;dl&gt;
+&lt;/section&gt;
+</pre>
+        </div>
+      </section>
+
       <section id="sec-introduction-section">
         <h4>Introduction section</h4>
 
@@ -483,7 +515,7 @@
         <h4>Conformance section</h4>
 
         <p>The <dfn>Conformance</dfn> section contains author-supplied, conformance-related prose that is added to the SMPTE
-        boilerplate text.</p>
+        boilerplate text that is generated depending on <code>pubType</code>.</p>
 
         <p>The absence of this section indicates that no author-supplied, conformance-related prose is provided.</p>
 
@@ -500,6 +532,8 @@
         </div>
 
         <p>This section is prohibited unless the document is a Standard or Recommended Practice.</p>
+
+        <p class="note">If <code>pubType</code> is set to <code>EG</code> or <code>ER</code>, the usage of Conformance Notation is disallowed throughout the document.</p>
 
       </section>
 
