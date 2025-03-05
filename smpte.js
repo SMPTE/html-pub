@@ -183,6 +183,8 @@ function insertFrontMatter(docMetadata) {
       case smpte.ST_PUBTYPE:
       case smpte.RP_PUBTYPE:
       case smpte.EG_PUBTYPE:
+      case smpte.ER_PUBTYPE:
+      case smpte.RDD_PUBTYPE:
         if (docMetadata.pubPart !== null)
           actualPubNumber += `-<span itemprop="doc-part" id="doc-part">${docMetadata.pubPart}</span>`;
         if (docMetadata.pubStage === smpte.PUB_STAGE_PUB) {
@@ -333,6 +335,39 @@ function insertTOC(docMetadata) {
   toc.appendChild(h2);
 
   _processSubSections(toc, document.body, 1);
+}
+
+const SMPTE_PROPONENT_ID = "sec-proponent";
+
+function insertProponent(docMetadata) {
+  const sec = document.getElementById(SMPTE_PROPONENT_ID);
+
+  if (sec === null && docMetadata.pubType === smpte.RDD_PUBTYPE) {
+    logger_.error("Missing required proponent section.");
+    return;
+  } if (sec !== null && docMetadata.pubType !== smpte.RDD_PUBTYPE) {
+    logger_.error("Proponent section only allowed for RDD documents.");
+    return;
+  } 
+
+  if (sec === null)
+    return;
+
+  sec.className = "unnumbered";
+
+  let h2 = sec.getElementsByTagName("h3");
+
+  if (h2.length == 0) {
+    h2 = document.createElement("h2");
+    sec.insertBefore(h2, sec.firstChild);
+  } else if (h3.length == 1) {
+    h2 = h2[0];
+  } else {
+    logger_.error("Proponent section has multiple headings.");
+    return;
+  }
+  h2.innerText = "Proponent contact info";
+  
 }
 
 const SMPTE_INTRODUCTION_ID = "sec-introduction";
@@ -609,7 +644,7 @@ function insertConformance(docMetadata) {
   if (!(docMetadata.pubType == smpte.RP_PUBTYPE || docMetadata.pubType == smpte.ST_PUBTYPE || docMetadata.pubType == smpte.AG_PUBTYPE)) {
     if (sec !== null)
       logger_.error(`An ${docMetadata.pubType} document must not contain a conformance section`);
-    if (docMetadata.pubType != smpte.EG_PUBTYPE)
+    if (!(docMetadata.pubType == smpte.EG_PUBTYPE || docMetadata.pubType == smpte.ER_PUBTYPE))
       return;
   }
 
@@ -686,6 +721,14 @@ function insertConformance(docMetadata) {
     interoperability information.</p>
     `;
 
+  } else if (docMetadata.pubType === smpte.ER_PUBTYPE) {
+
+    sec.innerHTML = `
+    <h2>Conformance</h2>
+    <p>This Engineering Guideline is purely informative and meant to information to the 
+    industry. It does not impose Conformance Requirements and avoids the use of Conformance Notation.</p>
+    `;
+
   }  else {
     sec.innerHTML = `
     <h2>Conformance</h2>
@@ -706,7 +749,7 @@ function insertConformance(docMetadata) {
 
 const SMPTE_FOREWORD_ID = "sec-foreword";
 
-const SMPTE_AG_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
+const SMPTE_GEN_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
 <p>The Society of Motion Picture and Television Engineers (SMPTE) is an
 internationally-recognized standards developing organization. Headquartered
 and incorporated in the United States of America, SMPTE has members in over
@@ -716,26 +759,42 @@ by SMPTE’s Technology Committees. Participation in these Committees is open
 to all with a bona fide interest in their work. SMPTE cooperates closely
 with other standards-developing organizations, including ISO, IEC and ITU.
 SMPTE Engineering Documents are drafted in accordance with the rules given
-in its Standards Operations Manual. For more information, please visit
+in its Standards Operations Manual.</p> 
+
+<p>For more information, please visit
 <a href="https://www.smpte.org">www.smpte.org</a>.</p>
+`
+
+const SMPTE_AG_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
 
 <p>This Standards Administrative Guideline forms an adjunct to the use and
 interpretation of the SMPTE Standards Operations Manual. In the event of a
 conflict, the Operations Manual shall prevail.</p>
 `
+const SMPTE_RDD_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
+<p>This document is a Registered Disclosure Document prepared by the sponsor(s) identified 
+below. It has been examined by the appropriate SMPTE Technology Committee and is believed to 
+contain adequate information to satisfy the objectives defined in the Scope, and to be   
+technically consistent.</p>
+<p>This document is NOT a Standard, Recommended Practice or Engineering Guideline and does NOT 
+imply a finding or representation of the Society.</p>
+<p>Every attempt has been made to ensure that the information contained in this document is 
+accurate. Errors in this document should be reported to the SMPTE Registered Disclosure 
+Document proponent(s) identified below with a copy to 
+<a href="mailto:eng@smpte.org">eng@smpte.org</a>.</p>
 
-const SMPTE_DOC_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
-<p>The Society of Motion Picture and Television Engineers (SMPTE) is an
-internationally-recognized standards developing organization. Headquartered
-and incorporated in the United States of America, SMPTE has members in over
-80 countries on six continents. SMPTE’s Engineering Documents, including
-Standards, Recommended Practices, and Engineering Guidelines, are prepared
-by SMPTE’s Technology Committees. Participation in these Committees is open
-to all with a bona fide interest in their work. SMPTE cooperates closely
-with other standards-developing organizations, including ISO, IEC and ITU.
-SMPTE Engineering Documents are drafted in accordance with the rules given
-in its Standards Operations Manual.</p> For more information, please visit
-<a href="https://www.smpte.org">www.smpte.org</a>.</p>
+{{authorProse}}
+
+<p>All other inquiries in respect of this document, including inquiries as to intellectual 
+property requirements, should be addressed to the SMPTE Registered Disclosure Document 
+proponent(s) identified below.</p>
+`
+const SMPTE_ER_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
+
+{{authorProse}}
+`
+
+const SMPTE_DOC_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
 
 <p>At the time of publication no notice had been received by SMPTE claiming patent
 rights essential to the implementation of this Engineering Document.
@@ -782,6 +841,10 @@ function insertForeword(docMetadata) {
     if (authorProse.trim().length > 0)
       logger_.error("AGs cannot contain author-specified Foreword prose.")
     sec.innerHTML = fillTemplate(SMPTE_AG_FOREWORD_BOILERPLATE, {copyrightYear: (new Date()).getFullYear()});
+  } else if (docMetadata.pubType == smpte.RDD_PUBTYPE) {
+    sec.innerHTML = fillTemplate(SMPTE_RDD_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});  
+  } else if (docMetadata.pubType == smpte.ER_PUBTYPE) {
+    sec.innerHTML = fillTemplate(SMPTE_ER_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});  
   } else {
     sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});
   }
@@ -1272,7 +1335,7 @@ function resolveLinks(docMetadata) {
 const CONFORMANCE_RE = /\s*(shall)|(should)|(may)\s/i;
 
 function checkConformanceNotation(docMetadata) {
-  if (docMetadata.pubType !== smpte.EG_PUBTYPE)
+  if (!(docMetadata.pubType == smpte.EG_PUBTYPE || docMetadata.pubType == smpte.ER_PUBTYPE))
     return;
 
   for (let section of document.querySelectorAll("section:not(:has(section))")) {
@@ -1285,7 +1348,7 @@ function checkConformanceNotation(docMetadata) {
     const r = CONFORMANCE_RE.exec(section.innerText);
 
     if (r !== null)
-      logger_.error(`An EG must not contain the conformance notation ${r[1]}`, section);
+      logger_.error(`An ${docMetadata.pubType} must not contain the conformance notation ${r[1]}`, section);
 
   };
 }
@@ -1339,6 +1402,7 @@ async function render() {
   checkConformanceNotation(docMetadata);
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
+  insertProponent(docMetadata);
   insertIntroduction(docMetadata);
   insertScope(docMetadata);
   insertConformance(docMetadata);
