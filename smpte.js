@@ -337,36 +337,18 @@ function insertTOC(docMetadata) {
   _processSubSections(toc, document.body, 1);
 }
 
-const SMPTE_PROPONENT_ID = "sec-proponent";
+const SMPTE_PROPONENT_ID = "rdd-proponent";
 
 function insertProponent(docMetadata) {
   const sec = document.getElementById(SMPTE_PROPONENT_ID);
 
   if (sec === null && docMetadata.pubType === smpte.RDD_PUBTYPE) {
-    logger_.error("Missing required proponent section.");
+    logger_.error("Missing required proponents.");
     return;
   } if (sec !== null && docMetadata.pubType !== smpte.RDD_PUBTYPE) {
-    logger_.error("Proponent section only allowed for RDD documents.");
+    logger_.error("Proponents only allowed for RDD documents.");
     return;
   } 
-
-  if (sec === null)
-    return;
-
-  sec.className = "unnumbered";
-
-  let h2 = sec.getElementsByTagName("h3");
-
-  if (h2.length == 0) {
-    h2 = document.createElement("h2");
-    sec.insertBefore(h2, sec.firstChild);
-  } else if (h3.length == 1) {
-    h2 = h2[0];
-  } else {
-    logger_.error("Proponent section has multiple headings.");
-    return;
-  }
-  h2.innerText = "Proponent contact info";
   
 }
 
@@ -783,11 +765,11 @@ accurate. Errors in this document should be reported to the SMPTE Registered Dis
 Document proponent(s) identified below with a copy to 
 <a href="mailto:eng@smpte.org">eng@smpte.org</a>.</p>
 
-{{authorProse}}
-
 <p>All other inquiries in respect of this document, including inquiries as to intellectual 
 property requirements, should be addressed to the SMPTE Registered Disclosure Document 
 proponent(s) identified below.</p>
+
+{{authorProse}}
 `
 const SMPTE_ER_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
 
@@ -833,7 +815,7 @@ function insertForeword(docMetadata) {
 
   let authorProse = sec.innerHTML;
 
-  if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
+  if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType) && docMetadata.pubType != smpte.RDD_PUBTYPE) {
     authorProse = `<p>This document was prepared by Technology Committee ${docMetadata.pubTC}.</p>` + authorProse;
   }
 

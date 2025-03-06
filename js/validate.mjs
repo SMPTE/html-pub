@@ -503,13 +503,6 @@ class ForewordMatcher {
   }
 }
 
-class ProponentMatcher {
-
-  static match(e, logger) {
-    return e.localName === "section" && e.id === "sec-proponent";
-  }
-}
-
 class IntroductionMatcher {
 
   static match(e, logger) {
@@ -836,10 +829,6 @@ function validateBody(body, logger) {
   if (elements.length > 0 && ForewordMatcher.match(elements[0], logger))
     elements.shift();
 
-  /* validate (optional) proponent (for RDDs) */
-
-  if (elements.length > 0 && ProponentMatcher.match(elements[0], logger))
-    elements.shift();
 
   /* validate optional introduction */
 
