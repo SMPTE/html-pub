@@ -805,6 +805,12 @@ function insertForeword(docMetadata) {
     return;
   }
 
+  if (docMetadata.pubType == smpte.RDD_PUBTYPE) {
+    if (sec === null)
+      logger_.error("RDD must contain a Foreword section.");
+
+  }
+
   if (sec === null && docMetadata.pubType != smpte.OM_PUBTYPE) {
     sec = document.createElement("section");
     sec.id = SMPTE_FOREWORD_ID;

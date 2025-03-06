@@ -1,5 +1,7 @@
 # SMPTE HTML Publication artifacts
 /build
+/package.json
+/package-lock.json
 
 # MacOS
 .DS_Store
