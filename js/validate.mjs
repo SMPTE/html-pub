@@ -495,10 +495,22 @@ class BlockMatcher {
   }
 }
 
+function validateProponents(sectionElement, logger) {
+
+  if (sectionElement.childElementCount > 0) {
+    for (const forewordElement of sectionElement.children) {
+      if (forewordElement.localName === "dl" && forewordElement.id !== "element-proponent") {
+        logger.error(`Foreword cannot contain dl element that doesn't have id of element-proponent`, forewordElement);
+      }
+    }
+    return;
+  }
+}
 
 class ForewordMatcher {
 
   static match(e, logger) {
+    validateProponents(e, logger);
     return e.localName === "section" && e.id === "sec-foreword";
   }
 }

@@ -337,7 +337,7 @@ function insertTOC(docMetadata) {
   _processSubSections(toc, document.body, 1);
 }
 
-const SMPTE_PROPONENT_ID = "rdd-proponent";
+const SMPTE_PROPONENT_ID = "element-proponent";
 
 function insertProponent(docMetadata) {
   const sec = document.getElementById(SMPTE_PROPONENT_ID);
