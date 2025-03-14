@@ -30,17 +30,21 @@ export const AG_PUBTYPE = "AG";
 export const ST_PUBTYPE = "ST";
 export const RP_PUBTYPE = "RP";
 export const EG_PUBTYPE = "EG";
+export const ER_PUBTYPE = "ER";
+export const RDD_PUBTYPE = "RDD";
 
-export const PUB_TYPES = new Set([AG_PUBTYPE, OM_PUBTYPE, ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
+export const PUB_TYPES = new Set([AG_PUBTYPE, OM_PUBTYPE, ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE, ER_PUBTYPE, RDD_PUBTYPE]);
 export const LONG_PUB_TYPE = new Map([
   [AG_PUBTYPE, "Administrative Guideline"],
   [OM_PUBTYPE, "Operations Manual"],
   [ST_PUBTYPE, "SMPTE Standard"],
   [RP_PUBTYPE, "SMPTE Recommended Practice"],
-  [EG_PUBTYPE, "SMPTE Engineering Guideline"]
+  [EG_PUBTYPE, "SMPTE Engineering Guideline"],
+  [ER_PUBTYPE, "SMPTE Engineering Report"],
+  [RDD_PUBTYPE, "SMPTE Registered Disclosure Document"]
 ])
 
-export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
+export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE, ER_PUBTYPE, RDD_PUBTYPE]);
 
 export const PUB_STAGE_PUB = "PUB";
 export const PUB_STAGE_DP = "DP";

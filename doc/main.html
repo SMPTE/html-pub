@@ -163,11 +163,13 @@
 
         <p>The element shall have a <code>content</code> attribute equal to one of the following values:</p>
         <ul>
-          <li><code>AG</code>, if the document is an Administrative Guideline;</li>
-          <li><code>OM</code>, if the document is an Operations Manual;</li>
           <li><code>ST</code>, if the document is a Standard;</li>
-          <li><code>RP</code>, if the document is a Recommended Practice; or</li>
-          <li><code>EG</code>, if the document is an Engineering Guideline.</li>
+          <li><code>RP</code>, if the document is a Recommended Practice;</li>
+          <li><code>EG</code>, if the document is an Engineering Guideline;</li>
+          <li><code>ER</code>, if the document is an Engineering Report;</li>
+          <li><code>RDD</code>, if the document is an Registered Disclosure Document;</li>
+          <li><code>AG</code>, if the document is an Administrative Guideline; or</li>
+          <li><code>OM</code>, if the document is an Operations Manual.</li>
         </ul>
 
       </section>
@@ -422,22 +424,60 @@
       <section id="sec-foreword-section">
         <h4>Foreword section</h4>
 
-        <p>The <dfn>Foreword</dfn> section contains author-supplied prose, e.g. list of substantive changes since the last edition,
-        that is added to the SMPTE boilerplate text.</p>
+        <section id="sec-foreword-general">
+          <h5>General</h5>
 
-        <p>The absence of this section indicates that no author-supplied prose was provided.</p>
 
-        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
-        <code>sec-foreword</code>.</p>
+          <p>The <dfn>Foreword</dfn> section contains author-supplied prose, e.g. list of substantive changes since the last edition,
+          that is added to the SMPTE boilerplate text.</p>
 
-        <p>The heading shall not be present.</p>
+          <p>The absence of this section indicates that no author-supplied prose was provided.</p>
 
-        <div class="example">
+          <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+          <code>sec-foreword</code>.</p>
+
+          <p>The heading shall not be present.</p>
+
+          <div class="example">
 <pre>&lt;section id=&quot;sec-foreword&quot;&gt;
   &lt;p&gt;This is the additional information relevant to the document.&lt;/p&gt;
 &lt;/section&gt;
 </pre>
-        </div>
+          </div>
+
+        </section>
+        <section id="sec-foreword-rdd">
+          <h5>RDD</h5>
+
+          <p>When <code>pubType</code> is set to <code>RDD</code>, the <a>Foreword</a> section shall be present and there there shall be a single <code>dl</code>, after any author-supplied prose if supplied, which contains contact information about the proponent(s) of the RDD document. </p>
+
+          <p>The <code>id</code> attribute shall be present on the <code>dl</code> element and equal to
+          <code>rdd-proponent</code>. </p>
+
+          <p>If present, the <code>dl</code> element shall use a single <code>dt</code> element for each company name designated as a Proponent of the document, and multiple lines of <code>dd</code> as needed for contact information for each company listed. The contact infomation should at least include an address and email, reach out to SMPTE HO for further deatails. </p> 
+
+          <div class="example">
+<pre>
+&lt;section id=&quot;element-proponent&quot;&gt;
+  &lt;p&gt;This is the additional information relevant to the document.&lt;/p&gt;
+  &lt;dl id=&quot;rdd-proponent&quot;&gt;
+    &lt;dt&gt;Company 1 Name Here&lt;/dt&gt;
+      &lt;dd&gt;Contact Name&lt;/dd&gt;
+      &lt;dd&gt;Company Address&lt;/dd&gt;
+      &lt;dd&gt;&lt;a&gt;Contact Email&lt;/a&gt;&lt;/dd&gt;
+      &lt;dd&gt;&lt;a&gt;Company Website&lt;/a&gt;&lt;/dd&gt;
+    &lt;dt&gt;Company 2 Name Here&lt;/dt&gt;
+      &lt;dd&gt;Contact Name&lt;/dd&gt;
+      &lt;dd&gt;Company Address&lt;/dd&gt;
+      &lt;dd&gt;&lt;a&gt;Contact Email&lt;/a&gt;&lt;/dd&gt;
+      &lt;dd&gt;&lt;a&gt;Company Website&lt;/a&gt;&lt;/dd&gt;
+  &lt;dl&gt;
+&lt;/section&gt;
+</pre>
+          </div>
+      
+        </section>
+
       </section>
 
       <section id="sec-introduction-section">
@@ -483,7 +523,7 @@
         <h4>Conformance section</h4>
 
         <p>The <dfn>Conformance</dfn> section contains author-supplied, conformance-related prose that is added to the SMPTE
-        boilerplate text.</p>
+        boilerplate text that is generated depending on <code>pubType</code>.</p>
 
         <p>The absence of this section indicates that no author-supplied, conformance-related prose is provided.</p>
 
