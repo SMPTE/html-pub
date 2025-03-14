@@ -337,21 +337,6 @@ function insertTOC(docMetadata) {
   _processSubSections(toc, document.body, 1);
 }
 
-const SMPTE_PROPONENT_ID = "element-proponent";
-
-function insertProponent(docMetadata) {
-  const sec = document.getElementById(SMPTE_PROPONENT_ID);
-
-  if (sec === null && docMetadata.pubType === smpte.RDD_PUBTYPE) {
-    logger_.error("Missing required proponents.");
-    return;
-  } if (sec !== null && docMetadata.pubType !== smpte.RDD_PUBTYPE) {
-    logger_.error("Proponents only allowed for RDD documents.");
-    return;
-  } 
-  
-}
-
 const SMPTE_INTRODUCTION_ID = "sec-introduction";
 
 function insertIntroduction(docMetadata) {
@@ -707,8 +692,8 @@ function insertConformance(docMetadata) {
 
     sec.innerHTML = `
     <h2>Conformance</h2>
-    <p>This Engineering Guideline is purely informative and meant to information to the 
-    industry. It does not impose Conformance Requirements and avoids the use of Conformance Notation.</p>
+    <p>This Engineering Report is meant to provide information to the 
+    industry. It does not impose requirements.</p>
     `;
 
   }  else {
@@ -770,6 +755,7 @@ property requirements, should be addressed to the SMPTE Registered Disclosure Do
 proponent(s) identified below.</p>
 
 {{authorProse}}
+
 `
 const SMPTE_ER_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
 
@@ -811,6 +797,16 @@ function insertForeword(docMetadata) {
 
   }
 
+  const SMPTE_PROPONENT_ID = document.getElementById("element-proponent");
+
+  if (SMPTE_PROPONENT_ID === null && docMetadata.pubType === smpte.RDD_PUBTYPE) {
+    logger_.error("Missing required proponents.");
+    return;
+  } if (SMPTE_PROPONENT_ID !== null && docMetadata.pubType !== smpte.RDD_PUBTYPE) {
+    logger_.error("Proponents only allowed for RDD documents.");
+    return;
+  } 
+
   if (sec === null && docMetadata.pubType != smpte.OM_PUBTYPE) {
     sec = document.createElement("section");
     sec.id = SMPTE_FOREWORD_ID;
@@ -838,6 +834,9 @@ function insertForeword(docMetadata) {
   }
 
 }
+
+  
+  
 
 function addHeadingLinks(docMetadata) {
   const headings = document.querySelectorAll("h2, h3, h4, h5, h6");
@@ -1390,7 +1389,6 @@ async function render() {
   checkConformanceNotation(docMetadata);
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
-  insertProponent(docMetadata);
   insertIntroduction(docMetadata);
   insertScope(docMetadata);
   insertConformance(docMetadata);
