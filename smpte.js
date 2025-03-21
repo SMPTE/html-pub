@@ -1370,7 +1370,7 @@ async function render() {
   /* debug print version */
   if (docMetadata.media === "print") {
     let pagedJS = document.createElement("script");
-    pagedJS.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
+    pagedJS.setAttribute("src", "https://cdn.jsdelivr.net/npm/pagedjs@0.4.3/dist/paged.polyfill.js");
     pagedJS.id = "paged-js-script";
     document.head.appendChild(pagedJS);
   }
