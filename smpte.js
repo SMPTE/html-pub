@@ -129,8 +129,20 @@ without the prior written permission of the Society of Motion Picture and Televi
 <hr />
 {{draftWarning}}`
 
+const SMPTE_PUB_AG_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
+<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
+<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
+<div id="long-doc-type">{{longDocType}}</div>
+<h1>{{fullTitle}}</h1>
+<div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>,
+Society of Motion Picture and Television Engineers</span>.
+All rights reserved. No part of this material may be reproduced, by any means whatsoever,
+without the prior written permission of the Society of Motion Picture and Television Engineers.</p>
+<hr />`
+
 const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{actualPubNumber}}</div>
+<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
 <div id="long-doc-type">{{longDocType}}</div>
 <h1>{{fullTitle}}</h1>
@@ -224,6 +236,8 @@ function insertFrontMatter(docMetadata) {
 
   if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.OM_PUBTYPE)
     boilerplate = SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE;
+  else if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.AG_PUBTYPE)
+    boilerplate = SMPTE_PUB_AG_FRONT_MATTER_BOILERPLATE;
   else
     boilerplate = SMPTE_FRONT_MATTER_BOILERPLATE;
 
@@ -1420,7 +1434,7 @@ async function render() {
   /* debug print version */
   if (docMetadata.media === "print") {
     let pagedJS = document.createElement("script");
-    pagedJS.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
+    pagedJS.setAttribute("src", "https://cdn.jsdelivr.net/npm/pagedjs@0.4.3/dist/paged.polyfill.js");
     pagedJS.id = "paged-js-script";
     document.head.appendChild(pagedJS);
   }

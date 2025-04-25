@@ -509,7 +509,7 @@ async function makePDF(docPath, pdfPath) {
     window.PagedConfig = window.PagedConfig || {};
     window.PagedConfig.auto = false;
   });
-  await page.addScriptTag({ url: 'https://unpkg.com/pagedjs/dist/paged.polyfill.js' });
+  await page.addScriptTag({ url: 'https://cdn.jsdelivr.net/npm/pagedjs@0.4.3/dist/paged.polyfill.js' });
 
   let renderingDone;
   let rendered = new Promise(function (resolve, reject) {

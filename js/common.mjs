@@ -188,8 +188,10 @@ export function validateHead(head, logger) {
     if(metadata.pubDateTime === null)
       fatal(logger, "pubDateTime must be present if the document is in pub state.");
 
-    if (metadata.pubNumber === null)
-      logger.error("pubNumber must be specified if the document is in pub state.");
+    if (metadata.pubNumber === null) {
+      if (metadata.pubType !== OM_PUBTYPE)
+        logger.error("pubNumber must be specified if the document is in pub state.");
+    }
   }
 
   /* specific to OM */
