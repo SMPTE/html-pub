@@ -958,7 +958,7 @@ function numberTables() {
 
       headingLabel.appendChild(document.createTextNode("Table "));
       headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" –⁠ "));
+      headingLabel.appendChild(document.createTextNode(" — "));
 
 
       caption.insertBefore(headingLabel, caption.firstChild);
@@ -999,7 +999,7 @@ function numberFigures() {
 
       headingLabel.appendChild(document.createTextNode("Figure "));
       headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" –⁠ "));
+      headingLabel.appendChild(document.createTextNode(" — "));
 
 
       figcaption.insertBefore(headingLabel, figcaption.firstChild);
