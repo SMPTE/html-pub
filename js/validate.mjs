@@ -159,8 +159,12 @@ class EqDivMatcher {
     if (element.localName !== "div" || element.className !== "formula")
       return false;
 
-    if (element.childElementCount !== 1 || element.firstElementChild.localName !== "math")
-      logger.error(`Formula div must contain a single math element`, element);
+    // TODO: MathJax formulas aren't encased in <math> elements.
+    // https://github.com/SMPTE/html-pub/issues/156
+    if (element.childElementCount !== 0) {
+      if (element.childElementCount !== 1 || element.firstElementChild.localName !== "math")
+        logger.error(`Formula div must contain a single math element`, element);
+    }
 
     if (element.id === null)
       logger.error("Formula div is missing an id attribute", element);
