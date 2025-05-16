@@ -7,9 +7,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script type="module" src="../smpte.js"></script>
   <meta itemprop="pubType" content="AG" />
-  <!--   <meta itemprop="pubNumber" content="99" /> --> 
- <meta itemprop="pubState" content="draft" />
-  <title>Editing HTML documents</title>
+  <meta itemprop="pubNumber" content="26" />
+  <!-- <meta itemprop="pubPart" content="XX" /> -->
+  <meta itemprop="pubState" content="draft" />
+  <!-- meta itemprop="pubStage" content="WD" / -->
+  <meta itemprop="pubConfidential" content="no" />
+  <!--< meta itemprop="pubTC" content="XX" /> -->
+  <meta itemprop="pubSuiteTitle" content="HTML Pub" />
+  <meta itemprop="pubDateTime" content="2025-02-26" />
+  <!-- <meta itemprop="pubRevisionOf" content="SMPTE ST XXXX-Y:ZZZZ" /> -->
+  <title>Tooling and documentation for HTML documents</title>
 </head>
 
 <body>
@@ -23,7 +30,7 @@
   </section>
 
   <section id="sec-scope">
-    <p>This Administrative Guideline describes the process for auhtoring SMPTE documents using HTML.</p>
+    <p>This Administrative Guideline describes the process for authoring SMPTE documents using HTML.</p>
   </section>
 
   <section id="sec-normative-references">
@@ -55,7 +62,13 @@
         <a>https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks</a>.
       </li>
       <li>
-        Start editing the main prose element at <code>html-pub-template/doc/main.html</code>.
+        If working on a project that has a repository, update the <code>origin</code> remote to that repository:
+<pre>git remote set-url origin &lt;HTTPS URL of the project repository found on GitHub&gt;</pre>
+        For example:
+<pre>git remote set-url origin https://github.com/SMPTE/stxxx-y-private.git</pre>
+      </li>
+      <li>
+        Start editing the main prose element at <code>doc/main.html</code>.
       </li>
     </ol>
 
@@ -95,7 +108,7 @@
         </figure>
 
         <p>The <code>smpte.js</code> script contains the code that renders the HTML document provided by the author into an HTML
-        document approprtiate for publication. This rendering happens automatically when loading the document in a web browser.</p>
+        document appropriate for publication. This rendering happens automatically when loading the document in a web browser.</p>
 
     </section>
 
@@ -117,7 +130,15 @@
           <code>tooling</code> directory.</li>
         </ul>
 
-        <p>The <code>title</code> element shall be equal to the title of the document, without any document number.</p>
+        <p>The <code>title</code> element shall be equal to the title of the document, excluding:</p>
+        <ul>
+          <li>the name of the publisher, e.g., SMPTE;</li>
+          <li>the document type, e.g., ST;</li>
+          <li>the document number, e.g., 428-1;</li>
+          <li>the title of the suite if the document is part of a suite.</li>
+        </ul>
+
+        <p class="example">The <code>title</code> of SMPTE ST 429-2 is <i>DCP Operational Constraints</i>.</p>
 
         <p>In addition to the <code>title</code> element, the <code>head</code> element contains SMPTE publication metadata in
         the form of <code>meta</code> elements as specified below.</p>
@@ -142,11 +163,13 @@
 
         <p>The element shall have a <code>content</code> attribute equal to one of the following values:</p>
         <ul>
-          <li><code>AG</code>, if the document is an Administrative Guideline;</li>
-          <li><code>OM</code>, if the document is an Operations Manual;</li>
           <li><code>ST</code>, if the document is a Standard;</li>
-          <li><code>RP</code>, if the document is a Recommended Practice; or</li>
-          <li><code>EG</code>, if the document is an Engineering Guideline.</li>
+          <li><code>RP</code>, if the document is a Recommended Practice;</li>
+          <li><code>EG</code>, if the document is an Engineering Guideline;</li>
+          <li><code>ER</code>, if the document is an Engineering Report;</li>
+          <li><code>RDD</code>, if the document is an Registered Disclosure Document;</li>
+          <li><code>AG</code>, if the document is an Administrative Guideline; or</li>
+          <li><code>OM</code>, if the document is an Operations Manual.</li>
         </ul>
 
       </section>
@@ -171,11 +194,20 @@
       <section id="sec-pubPart">
         <h4><code>pubPart</code></h4>
 
-        <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
-        equal to <code>pubPart</code>.</p>
+        <p>The <code>head</code> element shall contain exactly one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubPart</code> if the document is part of a suite, and none otherwise.</p>
 
         <p>The element shall have a <code>content</code> attribute equal to the document part number, which is a sequence of
         digits.</p>
+      </section>
+
+      <section id="sec-pubSuiteTitle">
+        <h4><code>pubSuiteTitle</code></h4>
+
+        <p>The <code>head</code> element shall contain exactly one <code>meta</code> element with an <code>itemprop</code> attribute
+        equal to <code>pubSuiteTitle</code> if the document is part of a suite, and none otherwise.</p>
+
+        <p>The element shall have a <code>content</code> attribute equal to the title of the document suite.</p>
       </section>
 
       <section id="sec-pubVersion">
@@ -184,10 +216,14 @@
         <p>The <code>head</code> element shall contain zero or one <code>meta</code> element with an <code>itemprop</code> attribute
         equal to <code>pubVersion</code>.</p>
 
-        <p>The element shall be present if the document is an Engineering Document and the <code>pubStage</code> is
-        <code>PUB</code>.</p>
+        <p>The element shall have a <code>content</code> attribute. The value of
+        this attribute overrides the document version that is automatically
+        generated by the tooling for Engineering Document and the
+        <code>pubStage</code> is <code>PUB</code>.</p>
 
-        <p>The element shall have a <code>content</code> attribute equal to the document version.</p>
+        <p>This element shall be present if and only if the document version
+        does not follow current practice.</p>
+
       </section>
 
       <section id="sec-pubState">
@@ -255,6 +291,31 @@
         document.</p>
       </section>
 
+      <section id="sec-pubConfidential">
+        <h4><code>pubConfidential</code></h4>
+
+        <p>The <code>head</code> element shall contain zero or one
+        <code>meta</code> element with an <code>itemprop</code> attribute equal
+        to <code>pubConfidential</code>.</p>
+
+        <p>If present, the element shall have a <code>content</code> attribute
+        equal to one of the following values:</p>
+
+        <dl>
+          <dt><code>yes</code></dt>
+          <dd>The Engineering Document is SMPTE confidential.</dd>
+          <dt><code>no</code></dt>
+          <dd>The Engineering Document is not SMPTE confidential.</dd>
+        </dl>
+
+        <p>The element shall not be present unless the document is an
+        Engineering Document.</p>
+
+        <p>Unless specified otherwise, an Engineering Document that is not at
+        publication stage is confidential.</p>
+      </section>
+
+
       <section id="sec-pubDateTime">
         <h4><code>pubDateTime</code></h4>
 
@@ -264,8 +325,9 @@
         <p>The element shall be present if <code>pubState</code> is <code>pub</code>.</p>
 
         <p>The element shall have a <code>content</code> attribute that conforms to the pattern <code>YYYY-MM-DD</code>, where
-        <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day of the publication date of the
-        document.</p>
+        <code>YYYY</code>, <code>MM</code> and <code>DD</code> are the year, month and day of the most recent approval date of the
+        document.</p> 
+       <p>See AG-02 for a definition of approval date.</p>
       </section>
 
       <section id="sec-effectiveDateTime">
@@ -362,22 +424,60 @@
       <section id="sec-foreword-section">
         <h4>Foreword section</h4>
 
-        <p>The <dfn>Foreword</dfn> section contains author-supplied prose, e.g. list of substantive changes since the last edition,
-        that is added to the SMPTE boilerplate text.</p>
+        <section id="sec-foreword-general">
+          <h5>General</h5>
 
-        <p>The absence of this section indicates that no author-supplied prose was provided.</p>
 
-        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
-        <code>sec-foreword</code>.</p>
+          <p>The <dfn>Foreword</dfn> section contains author-supplied prose, e.g. list of substantive changes since the last edition,
+          that is added to the SMPTE boilerplate text.</p>
 
-        <p>The heading shall not be present.</p>
+          <p>The absence of this section indicates that no author-supplied prose was provided.</p>
 
-        <div class="example">
+          <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+          <code>sec-foreword</code>.</p>
+
+          <p>The heading shall not be present.</p>
+
+          <div class="example">
 <pre>&lt;section id=&quot;sec-foreword&quot;&gt;
-  &lt;p&gt;This is the additional infomation relevant to the document.&lt;/p&gt;
+  &lt;p&gt;This is the additional information relevant to the document.&lt;/p&gt;
 &lt;/section&gt;
 </pre>
-        </div>
+          </div>
+
+        </section>
+        <section id="sec-foreword-rdd">
+          <h5>RDD</h5>
+
+          <p>When <code>pubType</code> is set to <code>RDD</code>, the <a>Foreword</a> section shall be present and there there shall be a single <code>dl</code>, after any author-supplied prose if supplied, which contains contact information about the proponent(s) of the RDD document. </p>
+
+          <p>The <code>id</code> attribute shall be present on the <code>dl</code> element and equal to
+          <code>rdd-proponent</code>. </p>
+
+          <p>If present, the <code>dl</code> element shall use a single <code>dt</code> element for each company name designated as a Proponent of the document, and multiple lines of <code>dd</code> as needed for contact information for each company listed. The contact infomation should at least include an address and email, reach out to SMPTE HO for further deatails. </p> 
+
+          <div class="example">
+<pre>
+&lt;section id=&quot;element-proponent&quot;&gt;
+  &lt;p&gt;This is the additional information relevant to the document.&lt;/p&gt;
+  &lt;dl id=&quot;rdd-proponent&quot;&gt;
+    &lt;dt&gt;Company 1 Name Here&lt;/dt&gt;
+      &lt;dd&gt;Contact Name&lt;/dd&gt;
+      &lt;dd&gt;Company Address&lt;/dd&gt;
+      &lt;dd&gt;&lt;a&gt;Contact Email&lt;/a&gt;&lt;/dd&gt;
+      &lt;dd&gt;&lt;a&gt;Company Website&lt;/a&gt;&lt;/dd&gt;
+    &lt;dt&gt;Company 2 Name Here&lt;/dt&gt;
+      &lt;dd&gt;Contact Name&lt;/dd&gt;
+      &lt;dd&gt;Company Address&lt;/dd&gt;
+      &lt;dd&gt;&lt;a&gt;Contact Email&lt;/a&gt;&lt;/dd&gt;
+      &lt;dd&gt;&lt;a&gt;Company Website&lt;/a&gt;&lt;/dd&gt;
+  &lt;dl&gt;
+&lt;/section&gt;
+</pre>
+          </div>
+      
+        </section>
+
       </section>
 
       <section id="sec-introduction-section">
@@ -423,7 +523,7 @@
         <h4>Conformance section</h4>
 
         <p>The <dfn>Conformance</dfn> section contains author-supplied, conformance-related prose that is added to the SMPTE
-        boilerplate text.</p>
+        boilerplate text that is generated depending on <code>pubType</code>.</p>
 
         <p>The absence of this section indicates that no author-supplied, conformance-related prose is provided.</p>
 
@@ -438,6 +538,9 @@
 &lt;/section&gt;
 </pre>
         </div>
+
+        <p>This section is prohibited unless the document is a Standard or Recommended Practice.</p>
+
       </section>
 
       <section id="sec-norm-refs-section">
@@ -460,7 +563,7 @@
           be used when citing the reference in the prose.</li>
           <li>The <code>cite</code> element shall contain an <code>id</code> attribute with value prefixed by
           <code>bib-</code>.</li>
-          <li>Each <code>li</code> element may contain additional title infomation.
+          <li>Each <code>li</code> element may contain additional title information.
           <li>Each <code>li</code> element may contain one <code>a</code> element that contains a location where the reference can
           be retrieved.</li>
         </ul>
@@ -506,13 +609,16 @@
           constraints:
             <ul>
               <li>The <code>id</code> attribute of the <code>dl</code> element shall be equal to <code>terms-int-defs</code>.</li>
-              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol. More than one <code>dt</code> element
-              can precede a <code>dd</code> element, in which case all the terms, abbreviations and symbols in the immediately
-              preceding <code>dt</code> elements are synomys.</li>
-              <li>Each <code>dd</code> element contains the matching definition. One or two <code>dd</code> elements can follow a
-              <code>dt</code> element. The first <code>dd</code> element immediately following the <code>dt</code> element shall be
-              a definition. The second <code>dd</code> element, if present, shall reference a bibliographic entry, in which case the
-              entry will be considered the source of the definition of the term.</li>
+              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol. Zero or more additional <code>dt</code> elements
+              can follow the first <code>dt</code> element, in which case all the terms, abbreviations and symbols in the immediately
+              preceding <code>dt</code> elements are synonyms.</li>
+              <li>The first <code>dd</code> element immediately following the last <code>dt</code> element, if present, shall be
+              a definition.</li>
+              <li>The next <code>dd</code> element, if present, shall contain a single reference to a bibliographic entry,
+              in which case the entry is the source of the definition of the term.</li>
+              <li>The remaining <code>dd</code> elements, if present,
+              shall have a <code>class</code> attribute that contains the value <code>note</code>, in which case the
+              elements are notes to the entry.</li>
             </ul>
           </li>
         </ul>
@@ -528,6 +634,7 @@
     &lt;dd&gt;number that is printed with ink or exposed onto the film at the time of
     manufacture at regular intervals, typically one foot.&lt;/dd&gt;
     &lt;dd&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;&lt;/dd&gt;
+    &lt;dd class="note"&gt;Key number shall not be confused with key frame.&lt;/dd&gt;
   &lt;/dl&gt;
 &lt;/section&gt;
 </pre>
@@ -600,11 +707,11 @@
         <div class="example">
 <pre>&lt;section class=&quot;annex&quot; id=&quot;sec-addtional-info&quot; data-informative=&quot;true&quot;&gt;
   &lt;h2&gt;Additional Info&lt;/h2&gt;
-  &lt;section id=&quot;sec-addtional-info-sub-section&quot;&gt;
+  &lt;section id=&quot;sec-additional-info-sub-section&quot;&gt;
     &lt;h3&gt;Additional Info Sub Section&lt;/h3&gt;
     &lt;p&gt;Some technical content&lt;/p&gt;
   &lt;/section&gt;
-  &lt;section id=&quot;sec-addtional-info-sub-section-more&quot;&gt;
+  &lt;section id=&quot;sec-additional-info-sub-section-more&quot;&gt;
     &lt;h3&gt;Additional Info Sub Section More&lt;/h3&gt;
     &lt;p&gt;Some technical content&lt;/p&gt;
   &lt;/section&gt;
@@ -635,26 +742,32 @@
         <ul>
           <li>an <code>id</code> attribute whose value is prefixed with <code>element-</code>;</li>
           <li>a <code>title</code> attribute that provides a short description of the element;</li>
-          <li>a <code>href</code> attribute that links to the element, as detailed below.</li>
+          <li>a <code>href</code> attribute that links to the element, as detailed below; and</li>
+          <li>a <code>class</code> attribute that contains the token <code>informative</code> if the element is informative.</li>
         </ul>
 
         <p>
           Each additional element shall be managed in one of the following ways:
         </p>
         <ul>
-          <li>as a file in the doc/elements directory, in which case the link to the element shall be relative path to the file, e.g. <code>.elements/element.txt</code></li>
-          <li>in a separate SMPTE repository, in which case the link to the element shall be a versioned link to the repo, e.g. <code>https://github.com/SMPTE/html-pub/tree/631ed7a0312fa183c356a7b742129ce46f92736f</code></li>
+          <li>as a file in the <code>doc/elements</code> directory, in which case the
+          <code>href</code> attribute shall be relative path to the file, e.g.
+          <code>elements/element.txt</code> (<a href="#element-sample-text"></a>); or</li>
+
+          <li>in a separate SMPTE repository, in which case the
+          <code>href</code> attribute shall be the absolute URL to a version of the repo, e.g.
+          <code>https://github.com/SMPTE/html-pub/tree/631ed7a0312fa183c356a7b742129ce46f92736f</code> (<a
+          href="#element-url"></a>).</li>
         </ul>
 
-        <p class="note">
-          Non-SMPTE repositories and SMPTE repositories that are not an integral part of the document shall be cited using a bibliographic reference. 
-        </p>
+        <p>Non-SMPTE repositories and SMPTE repositories that are not an integral part of the document shall be cited using a
+        bibliographic reference.</p>
 
         <div class="example">
 <pre>&lt;section id=&quot;sec-elements&quot;&gt;
   &lt;ol&gt;
     &lt;li&gt;
-      &lt;a id=&quot;element-sample-text&quot; title=&quot;Description of the elemnent&quot; href=&quot;./elements/form.docx&quot;&gt;&lt;/a&gt;
+      &lt;a id=&quot;element-sample-text&quot; title=&quot;Description of the element&quot; href=&quot;./elements/form.docx&quot;&gt;&lt;/a&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
 &lt;/section&gt;</pre>
@@ -799,7 +912,7 @@
         <div class="example">
 <pre>
 &lt;dl&gt;
-  &lt;dt&gt;imperative forms&lt;dt&gt;
+  &lt;dt&gt;imperative forms&lt;/dt&gt;
   &lt;dd&gt;&quot;see&quot;&lt;/dd&gt;
   &lt;dt&gt;non-imperative forms&lt;/dt&gt;
   &lt;dd&gt;&quot;according to&quot;&lt;/dd&gt;
@@ -827,7 +940,7 @@
       <section id="sec-list-element">
         <h4>Lists</h4>
 
-        <p>A list can be inserted using either an <code>ol</code> or <code>ul</code> element. The <code>ul</code> (unordered list) element should be used when the order of listed items is not meaniful or important. The <code>ol</code> (ordered list) element should be only used when the order of listed items is meaningful and/or important to the list and/or document.</p>
+        <p>A list can be inserted using either an <code>ol</code> or <code>ul</code> element. The <code>ul</code> (unordered list) element should be used when the order of listed items is not meaningful or important. The <code>ol</code> (ordered list) element should be only used when the order of listed items is meaningful and/or important to the list and/or document.</p>
         
         <p>
           General guidelines for lists:
@@ -868,8 +981,12 @@
         <ul>
           <li>an <code>id</code> attribute whose value starts with <code>figure-</code></li>
           <li>one <code>img</code> or <code>pre</code> element</li>
-          <li>one <code>figcaption</code> element following the <code>img</code> element</li>
+          <li>one <code>figcaption</code> element following the <code>img</code> or <code>pre</code> element</li>
         </ul>
+
+        <p>If an <code>img</code> element is present, then its <code>src</code>
+        attribute shall be present and be a relative path starting with the
+        string <code>media/</code>.</p>
 
         <p>Figures are automatically numbered.</p>
 
@@ -913,7 +1030,14 @@
           <li>one or more <code>tbody</code> element, with <code>tr</code> element(s) as needed for each row</li>
         </ul>
 
-        <p class="note">Page breaks are avoided within a <code>tbody</code> element.</p>
+        <p>Unless all columns are uniform in contents, the relative width of
+        each column should be specified by setting the CSS <code>width</code>
+        property as a percentage value on each <code>th</code> element.</p>
+
+        <p class="note">Page breaks are avoided within a <code>tbody</code>
+        element when generating PDF. Care should be taken for especially long
+        tables to ensure rendering is as expected. For data in tables spanning
+        multiple pages, other options should be considered and used.</p>
 
         <div class="example">
 <pre>
@@ -921,8 +1045,8 @@
   &lt;caption&gt;Sample Table&lt;/caption&gt;
   &lt;thead&gt;
     &lt;tr&gt;
-      &lt;th&gt;Sample Number&lt;/th&gt;
-      &lt;th&gt;Sample Name&lt;/th&gt;
+      &lt;th style="width: 30%"&gt;Sample Number&lt;/th&gt;
+      &lt;th style="width: 70%"&gt;Sample Name&lt;/th&gt;
     &lt;/tr&gt;
   &lt;/thead&gt;
   &lt;tbody&gt;
@@ -944,8 +1068,8 @@
             <caption>Sample Table</caption>
             <thead>
               <tr>
-                <th>Sample Number</th>
-                <th>Sample Name</th>
+                <th style="width: 30%">Sample Number</th>
+                <th style="width: 70%">Sample Name</th>
               </tr>
             </thead>
             <tbody>
@@ -1121,9 +1245,9 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
           <mi>b</mi><mi>x</mi><mo>+</mo><mi>c</mi></mrow></math> to find the position.</p>
         </div>
 
-        <p>A block formula are specified by wrapping a single <code>math</code> element whose <code>display</code> attribute is
+        <p>A block formula is specified by wrapping a single <code>math</code> element whose <code>display</code> attribute is
         <code>"block"</code> in a <code>div</code> element whose class is <code>formula</code> and whose <code>id</code> attribute
-        starts with <code>eq-</code>. Block formulae are numbered and can be referenced: see, for example, <a href="#eq-1"></a>.</p>
+        starts with <code>eq-</code>. Block formulae are numbered and should be referenced: see, for example, <a href="#eq-1"></a>.</p>
 
         <div class="example">
           <pre>
@@ -1449,7 +1573,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         </table>
 
         <p class="note">
-          Classes are available to center align columns 1-8 (as <code>col-x-center</code>), and mutliple classes to <code>table</code> may be added to align more columns as needed.
+          Classes are available to center align columns 1-8 (as <code>col-x-center</code>), and multiple classes to <code>table</code> may be added to align more columns as needed.
         </p>
         <p class="note">
           Tables over 8 columns wide should not be used and instead split into multiple smaller tables.
@@ -1824,7 +1948,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       <h3>List Nesting</h3>
 
       <p>
-        Both <code>ol</code> and <code>ul</code> elements may be nexted as many times within a <code>li</code> element as needed to achieve the required results. See below for various examples. 
+        Both <code>ol</code> and <code>ul</code> elements may be nested as many times within a <code>li</code> element as needed to achieve the required results. See below for various examples. 
       </p>
 
       <div class="example">
@@ -1980,17 +2104,17 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <a href="#tab-document-mapping-status"></a> maps the required values of <code>content</code> for <code>pubState</code> and <code>pubStage</code> during the various stages of document development. 
       </p>
       <table id="tab-document-mapping-status" class="col-2-center col-3-center">
-        <caption>Mapping <code>pubState</code> and <code>pubStage</code> to Document Status</caption>
+        <caption>Mapping <code>pubStage</code> and <code>pubState</code> to Document Status</caption>
         <thead>
           <tr>
             <th>Document Status</th>
-            <th><code>pubState</code> <code>content</code> value</th>
             <th><code>pubStage</code> <code>content</code> value</th>
+            <th><code>pubState</code> <code>content</code> value</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Undergoing intial draft or revision in DG/SG/WG</td>
+            <td>Undergoing initial draft or revision in DG/SG/WG</td>
             <td><code>WD</code></td>
             <td><code>draft</code></td>
           </tr>
@@ -2049,224 +2173,211 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         Whenever the state of the document changes to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> on the <code>main</code> branch, then a release shall be created in the GitHub repo. 
       </p>
       <p>
-        Both the GitHub release and git tab shall be named <code>"r" YYYY "-" pubStage *DIGIT</code>. The <code>DIGIT</code> starts at <code>1</code> and increases each time the document visits the same document stage. 
+        Both the GitHub release and git tag shall be named <code>YYYYMMDD "-" pubStage</code>. The <code>YYYYMMDD</code> should directly represent the value used in <code>pubDateTime</code> as defined in <a href="#sec-pubDateTime"></a>. 
       </p>
       <p class="example">
-        <code>r2023-fcd</code> or <code>r2023-cd2</code>
+        <code>20230615-fcd</code> or <code>20230925-pub</code>
       </p>
       <p>
-        The <code>latestEditionTag</code> property in the <code>.smpte-build.json</code> file should always be equal to the name of the most recent git tag. This will trigger the tooling to create a link for <code>Redline to most recent edition</code> during any PRs and merges to the main branch. 
+        The <code>latestEditionTag</code> property in the <code>.smpte-build.json</code> file shall always be equal to the name of the most recent git tag. This will trigger the tooling to create a link for <code>Redline to most recent edition</code> during any PRs and merges to the <code>main</code> branch. 
       </p>
-
+      <p>
+        The tooling will automatically generate zip files within the release details page, to be used for both :</p>
+        <ul>
+          <li>TC review/balloting (named as per <a href="#bib-smpte-ag-02"></a>)</li>
+          <li>(and) SMPTE Document Library publishing (named by the tag)</li>
+        </ul>
+       
+      <p class="example">See <a>https://github.com/SMPTE/st428-24-private/releases/tag/20241101-dp</a>, where <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/27c-st-428-24-dp-2024-12-06-pub.zip</a> (ballot zip), and <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/20241101-dp.zip</a> (publish zip) are available. </p>
+      
       <p>
         See <a href="#sec-sample-workflow"></a> for a sample workflow utilizing releases. 
       </p>
 
     </section>
 
+    <section id="sec-pr-guidelines">
+      <h3>Pull Request Guidelines</h3>
+
+      <p>
+        Generally, no changes to a document shall ever be made directly on the <code>main</code> branch, which doesn't allow the tooling to create needed redlines. Instead, changes (regardless of the nature of the change) shall always be made on a new branch and managed via a PR (Pull Request). Each PR is then merged to <code>main</code> after approval, as noted below in <a href="#sec-sample-workflow"></a> at the various stages. 
+      </p>
+      <p>PRs should have at least (1) approver that is not the the person requesting the PR. This can be the DG chair, TC chair, commentor, or secondary editor, depending on nature of the PR. For instance, on ballot state change PRs, this should be the DG or TC chair, and for publication state PRs, the TC chairs. See <a href="#sec-sample-workflow"></a> for more details.</p>
+
+    </section>
+
     <section id="sec-sample-workflow">
       <h3>Sample Workflow </h3>
       <p>
-        <a href="#tab-sample-workflow"></a> shows a sample workflow would be the steps for an Engineering Document going through the an initial draft or revision and the balloting process. 
+        The below list shows a sample workflow which would be the steps for an Engineering Document going through the an initial draft or revision and the balloting process. 
       </p>
-      <p>
-        Generally, no changes to a document shall ever be made directly on the <code>main</code> branch, which often doesn't allow the tooling to create needed redlines. Instead changes (regardless of the nature of the change) shall always be made on a new branch and managed via a PR (Pull Request), and then merged to <code>main</code> after approval, as noted below at the various stages. 
-      </p>
+      
       <p class="note">Editors and Chairs should be aware of the general guidelines provided in the <a href="#bib-smpte-gh-om"></a>.
       </p>
-      <table id="tab-sample-workflow" class="col-1-center">
-        <caption>Sample workflow</caption>
-        <thead>
-          <tr>
-            <th>Workflow Step</th>
-            <th>Workflow Trigger</th>
-            <th>Action(s) on document and/or GitHub repo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td>Project is approved</td>
-            <td>
-              <ol type="a">
-                <li>If document is an intial draft, skip to Workflow Step (2)</li>
-                <li>If document is a revision, skip to Workflow Step (3)</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Project is a document initial draft</td>
-            <td>
-              <ol type="a">
-                <li>Follow the steps in <a href="#sec-quick-start"></a> to create repo.</li>
-                <li>A new branch is created from <code>main</code> called <code>r2023-inititial-draft</code>.</li>
-                <li>Template document is updated in <code>r2023-inititial-draft</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and to <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code>.</li>
-                <li>Document editor creates initial version of the document.</li>
-                <li>A PR is created named <code>2023 Initial Draft</code> from the <code>r2023-inititial-draft</code> branch on GitHub. </li>
-                <li>Skip to Workflow Step (4)</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Project is a document revision</td>
-            <td>
-              <ol type="a">
-                <li>Assumption: There is a prior release labeled <code>r2022-pub</code></li>
-                <li>A new branch is created from <code>main</code> called <code>r2023-revision</code>.</li>
-                <li>Document is updated in <code>r2023-revision</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and to <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code>.</li>
-                <li><code>.smpte-build.json</code> is updated in <code>r2023-revision</code> branch to last release tag (see <a href="#sec-document-github-releases"></a>) </li>
-                <li>Document editor makes initial changes to the document.</li>
-                <li>A PR is created named <code>2023 Revision</code> from the <code>r2023-revision</code> branch on GitHub. The tooling with create a redline against the most recent edition of the document.</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>4</td>
-            <td>DG meeting(s) held regarding drafting of the document</td>
-            <td>
-              <ol type="a">
-                <li>Comments are received, either by reflector or during meeting(s).</li>
-                <li>Comments and suggested changes are added to issue tracker.</li>
-                <li>Document is updated via more commits in the current PR, closing comments.</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>5</td>
-            <td>DG is complete with drafting the document</td>
-            <td>
-              <ol type="a">
-                <li>Document is updated in PR to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>, <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code> and and <code>&lt;meta itemprop="pubDateTime" content="2023-04-15" /&gt;</code> (assumed date of completion).</li>
-                <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
-                <li>A release is created targeted at <code>main</code> named <code>r2023-wd</code> with a tag of the same name.</li>
-                <li>The tooling creates the zip needed for TC 2-week preFCD review, with redlines against lastest edition and/or last draft (if applicable)</li>
-                <li>ZIP is sent to TC for 2-week preFCD review</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>6</td>
-            <td>TC 2-week preFCD review occurs</td>
-            <td>
-              <ol type="a">
-                <li>A new branch is created from <code>main</code> called <code>r2023-cd1</code>.</li>
-                <li>Document is updated in <code>r2023-cd1</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and <code>&lt;meta itemprop="pubStage" content="CD" /&gt;</code>.</li>
-                <li><code>.smpte-build.json</code> is updated in <code>r2023-cd1</code> branch to <code>r2023-wd</code> tag </li>
-                <li>A PR is created named <code>r2023 CD1</code> from the <code>r2023-cd1</code> branch on GitHub.</li>
-                <li>If no comments received, skip to Workflow Step (8)</li>
-                <li>If comments are received, continue to Workflow Step (7)</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>7</td>
-            <td>Comments received on pre-FCD ballot review </td>
-            <td>
-              <ol type="a">
-                <li>Document is updated in PR from Workflow Step (6) as needed per comments received.</li>
-                <li>A redline from last draft is created by the tooling as required to resolve comments.</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>8</td>
-            <td>Document is ready for FCD ballot</td>
-            <td>
-              <ol type="a">
-                <li>Document is updated in PR from Workflow Step (6) to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-06-15" /&gt;</code> (assumed date of review completion).</li>
-                <li>PR is merged to <code>main</code>.</li>
-                <li>A release is created targeted at <code>main</code> named <code>r2023-cd1</code> with a tag of the same name.</li>
-                <li>If document is to continue to FCD ballot, the ZIP file that is generated by the tooling in <code>main</code> with required redlines is sent to the TC for FCD ballot. Skip to Workflow Step (9)</li>
-                <li>If document is to undergo a PCD period, the contents in the ZIP file generated by the tooling in <code>main</code> are used for the PCD. After PCD period ends, go back to Workflow Step (6). See <a href="#sec-document-github-releases"></a> for itterative CD naming. </li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>9</td>
-            <td>TC conducts FCD ballot</td>
-            <td>
-              <ol type="a">
-                <li>If no comments received, skip to Workflow Step (12)</li>
-                <li>If comments are received, continue to Workflow Step (10)</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>10</td>
-            <td>FCD ballot comment resolution</td>
-            <td>
-              <ol type="a">
-                <li>A new branch is created from <code>main</code> called <code>r2023-revision-fcd-comment-res</code>.</li>
-                <li>Document is updated in <code>r2023-revision-fcd-comment-res</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and <code>&lt;meta itemprop="pubStage" content="FCD" /&gt;</code>.</li>
-                <li><code>.smpte-build.json</code> is updated in <code>r2023-revision-fcd-comment-res</code> branch to <code>r2023-cd1</code> tag </li>
-                <li>PR is created on GitHub with the changes in <code>r2023-revision-fcd-comment-res</code> as needed to resolve comments. The tooling creates redline for review against the last edition (release <code>r2023-cd1</code>).</li>
-                <Li>Additional commits are added to the PR as need to resolve comments.</Li>
-                <li>Comment resolution ends, document is updated to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-09-15" /&gt;</code> (assumed date of  completion).</li>
-                <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
-                <li>A release is created targeted at <code>main</code> named <code>r2023-fcd</code> with a tag of the same name.</li>
-                <li>The ZIP file that is generated by the tooling in <code>main</code> is sent to the TC for pre-DP review.</li>
-              </ol>
-            </td>
-          </tr>          
-          <tr>
-            <td>11</td>
-            <td>TC conducts DP ballot</td>
-            <td>
-              <ol type="a">
-                <li>DP ballot passes, continue to Workflow Step (12)</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>12</td>
-            <td>Document is now DP</td>
-            <td>
-              <ol type="a">
-                <li>A new branch is created from <code>main</code> called <code>r2023-dp</code>.</li>
-                <li>Document is updated in <code>r2023-dp</code> branch to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>, <code>&lt;meta itemprop="pubStage" content="DP" /&gt;</code>, and <code>&lt;meta itemprop="pubDateTime" content="2023-10-15" /&gt;</code> (assumed date of  completion).</li>
-                <li><code>.smpte-build.json</code> is updated in <code>r2023-fcd</code> branch to <code>r2023-cd1</code> tag </li>
-                <li>PR is created on GitHub with the changes as per needed to resolve comments. The tooling creates redline for review against the last edition (release <code>r2023-cd1</code>).</li>
-                <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
-                <li>A release is created targeted at <code>main</code> named <code>r2023-dp</code> with a tag of the same name.</li>
-                <li>The ZIP file that is generated by the tooling in <code>main</code> is sent to ST for ST audit.</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>13</td>
-            <td>ST conducts ST audit</td>
-            <td>
-              <ol type="a">
-                <li>ST audit passes, continue to Workflow Step (14)</li>
-              </ol>
-            </td>
-          </tr>
-          <tr>
-            <td>14</td>
-            <td>Document is ready for publication</td>
-            <td>
-              <ol type="a">
-                <li>A new branch is created from <code>main</code> called <code>r2023-pub</code>.</li>
-                <li>Document is updated in <code>r2023-pub</code> branch to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>, <code>&lt;meta itemprop="pubStage" content="pub" /&gt;</code>, and <code>&lt;meta itemprop="pubDateTime" content="2023-11-15" /&gt;</code> (assumed date of  completion).</li>
-                <li>If document is a revision, <code>.smpte-build.json</code> is updated in <code>r2023-pub</code> branch to <code>r2022-pub</code> tag </li>
-                <li>PR is created on GitHub from <code>r2023-pub</code></li>
-                <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
-                <li>A release is created targeted at <code>main</code> named <code>r2023-pub</code> with a tag of the same name.</li>
-                <li>The document is now published. Addtional steps may be required by SMPTE HO (TBD).</li>
-              </ol>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <ol>
+          
+        <li>Project is approved
+          <ol type="a">
+            <li>If document is an initial draft, skip to Workflow Step (2)</li>
+            <li>If document is a revision, skip to Workflow Step (3)</li>
+          </ol>
+        </li>
+
+        <li>Project is a document initial draft
+          <ol type="a">
+            <li>Follow the steps in <a href="#sec-quick-start"></a> to create repo.</li>
+            <li>A new branch is created from <code>main</code> called <code>2023-initial-draft</code> (where "2023" is the current year).</li>
+            <li>Make sure that the <code>pubState</code> (<a href="#sec-pubState"></a>) and <code>pubStage</code> (<a
+            href="#sec-pubStage"></a>) of the main prose element in the <code>2023-initial-draft</code> branch are set to
+            <code>draft</code> and <code>WD</code>, respectively.</li>
+            <li>Document editor creates initial version of the document.</li>
+            <li>A PR is created named <code>2023 Initial Draft</code> from the <code>2023-initial-draft</code> branch on GitHub. </li>
+            <li>Skip to Workflow Step (4)</li>
+          </ol>
+        </li>
+
+        <li>Project is a document revision
+          <ol type="a">
+            <li>Assumption: There is a prior release labeled <code>2020115-pub</code></li>
+            <li>A new branch is created from <code>main</code> called <code>2023-revision</code> (where "2023" is the current year).</li>
+            <li>Make sure that the <code>pubState</code> (<a href="#sec-pubState"></a>) and <code>pubStage</code> (<a
+              href="#sec-pubStage"></a>) of the main prose element in the <code>2023-initial-draft</code> branch are set to
+              <code>draft</code> and <code>WD</code>, respectively.</li>
+            <li><code>.smpte-build.json</code> is updated in <code>2023-revision</code> branch to last release tag
+            <code>2020115-pub</code> (see <a href="#sec-document-github-releases"></a>) </li>
+            <li>Document editor makes initial changes to the document.</li>
+            <li>A PR is created named <code>2023 Revision</code> from the <code>2023-revision</code> branch on GitHub. The tooling with create a redline against the most recent edition of the document.</li>
+            <li>Continue to Workflow Step (4)</li>
+          </ol>
+        </li>
+      
+        <li>DG meeting(s) held regarding drafting of the document
+          <ol type="a">
+            <li>Comments are received, either by reflector or during meeting(s).</li>
+            <li>Comments and suggested changes are added to issue tracker.</li>
+            <li>Document is updated via more commits in the current PR, closing comments.</li>
+            <li>Continue to Workflow Step (5)</li>
+          </ol>
+        </li>
+
+        <li>DG is complete with drafting the document
+          <ol type="a">
+            <li>Document is updated in PR to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>, <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-04-15" /&gt;</code> (assumed date of completion).</li>
+            <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
+            <li>A release is created targeted at <code>main</code> named <code>20230415-wd</code> with a tag of the same name.</li>
+            <li>The tooling creates the zip needed for TC 2-week preFCD review, with redlines against latest edition and/or last draft (if applicable)</li>
+            <li>The link to the ZIP is sent to TC for 2-week preFCD review</li>
+            <li>Continue to Workflow Step (6)</li>
+          </ol>
+        </li>
+      
+        <li>TC 2-week preFCD review occurs
+          <ol type="a">
+            <li>A new branch is created from <code>main</code> called <code>20230415-cd1</code>.</li>
+            <li>Document is updated in <code>20230415-cd1</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and <code>&lt;meta itemprop="pubStage" content="CD" /&gt;</code>.</li>
+            <li><code>.smpte-build.json</code> is updated in <code>20230415-cd1</code> branch to <code>20230415-wd</code> tag </li>
+            <li>A PR is created named <code>20230415 CD1</code> from the <code>20230415-cd1</code> branch on GitHub.</li>
+            <li>If no comments received, skip to Workflow Step (8)</li>
+            <li>If comments are received, continue to Workflow Step (7)</li>
+          </ol>
+        </li>
+      
+        <li>Comments received on pre-FCD ballot review 
+          <ol type="a">
+            <li>Document is updated in PR from Workflow Step (6) as needed per comments received. A redline from last draft is created by the tooling as required to resolve comments.</li>
+            <li>Once comments are resolved he document is updated in PR to <code>&lt;meta itemprop="pubDateTime" content="2023-05-15" /&gt;</code> (assumed date of completion).</li>
+            <li>Continue to Workflow Step (8)</li>
+          </ol>
+        </li>
+      
+        <li>Document is ready for FCD ballot
+          <ol type="a">
+            <li>Document is updated in PR from Workflow Step (6) to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>
+              <ul>
+                <li>If document did NOT receive any comments, the <code>pubDateTime</code> remains unchanged from Workflow Step (5). </li>
+              </ul>
+            </li>
+            <li>PR is merged to <code>main</code>.</li>
+            <li>A release is created targeted at <code>main</code> named <code>20230415-cd1</code> (or <code>20230515-cd1</code> if Workflow Step 7 was used) with a tag of the same name.</li>
+            <li>If document is to continue to FCD ballot, the link to the ZIP file that is generated by the tooling in <code>main</code> with required redlines is sent to the TC for FCD ballot. Skip to Workflow Step (9)</li>
+            <li>If document is to undergo a PCD period, the contents in the ZIP file generated by the tooling in <code>main</code> are used for the PCD. After PCD period ends, go back to Workflow Step (6). See <a href="#sec-document-github-releases"></a> for iterative CD naming. </li>
+            <li>Continue to Workflow Step (9)</li>
+          </ol>
+        </li>
+      
+        <li>TC conducts FCD ballot
+          <ol type="a">
+            <li>If no comments received, skip to Workflow Step (12)</li>
+            <li>If comments are received, continue to Workflow Step (10)</li>
+          </ol>
+        </li>
+      
+        <li>FCD ballot comment resolution
+          <ol type="a">
+            <li>A new branch is created from <code>main</code> called <code>2023-revision-fcd-comment-res</code>.</li>
+            <li>Document is updated in <code>2023-revision-fcd-comment-res</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and <code>&lt;meta itemprop="pubStage" content="FCD" /&gt;</code>.</li>
+            <li><code>.smpte-build.json</code> is updated in <code>2023-revision-fcd-comment-res</code> branch to <code>20230415-cd1</code> (or <code>20230515-cd1</code>) tag </li>
+            <li>PR is created on GitHub with the changes in <code>2023-revision-fcd-comment-res</code> as needed to resolve comments. The tooling creates redline for review against the last edition (release <code>20230415-cd1</code> or <code>20230515-cd1</code>).</li>
+            <Li>Additional commits are added to the PR as need to resolve comments.</Li>
+            <li>Comment resolution ends, document is updated to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-07-15" /&gt;</code> (assumed date of  completion).</li>
+            <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
+            <li>A release is created targeted at <code>main</code> named <code>20230715-fcd</code> with a tag of the same name.</li>
+            <li>The link to the ZIP file that is generated by the tooling in <code>main</code> is sent to the TC for pre-DP review.</li>
+            <li>Continue to Workflow Step (11)</li>
+          </ol>
+        </li>
+      
+        <li>TC conducts DP ballot
+          <ol type="a">
+            <li>DP ballot passes, continue to Workflow Step (12)</li>
+          </ol>
+        </li>
+      
+        <li>Document is now DP
+          <ol type="a">
+            <li>A new branch is created from <code>main</code> called <code>20230415-dp</code> (or <code>20230715-dp</code> if Workflow Step 5 was used or <code>20230715-dp</code> if Workflow Step 10 was used).</li>
+            <li>Document is updated in <code>20230415-dp</code> branch to <code>&lt;meta itemprop="pubStage" content="DP" /&gt;</code></li>
+            <li><code>.smpte-build.json</code> is updated in <code>20230415-dp</code> branch to <code>20230415-cd1</code> tag (or <code>20230515-cd1</code>)</li>
+            <li>PR is created on GitHub with the changes as per needed to resolve comments. The tooling creates redline for review against the last edition (release <code>20230415-cd1</code> or <code>20230515-cd1</code> or <code>20230715-fcd</code>).</li>
+            <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
+            <li>A release is created targeted at <code>main</code> named <code>20230415-dp</code> (or <code>20230515-dp</code> or <code>20230715-dp</code>) with a tag of the same name.</li>
+            <li>The link to the ZIP file that is generated by the tooling in <code>main</code> is sent to DoS for ST audit.</li>
+            <li>Continue to Workflow Step (13)</li>
+          </ol>
+        </li>
+      
+        <li>ST conducts ST audit
+          <ol type="a">
+            <li>ST audit passes, continue to Workflow Step (14)</li>
+          </ol>
+        </li>
+      
+        <li>Document is ready for publication
+          <ol type="a">
+            <li>A new branch is created from <code>main</code> called <code>20230415-pub</code> (or <code>20230515-pub</code> or <code>20230715-pub</code>).</li>
+            <li>Document is updated in <code>20230415-pub</code> branch to <code>&lt;meta itemprop="pubStage" content="pub" /&gt;</code></li>
+            <li>If document is a revision, <code>.smpte-build.json</code> is updated in <code>20230415-pub</code> branch to <code>2020115-pub</code> tag </li>
+            <li>PR is created on GitHub from <code>20230415-pub</code></li>
+            <li>PR is approved by document editor, DG chair, and TC chair(s). PR is merged to <code>main</code>.</li>
+            <li>A release is created targeted at <code>main</code> named <code>20230415-pub</code> (or <code>20230515-pub</code> or <code>20230715-pub</code>) with a tag of the same name.</li>
+            <li>The document is now "published" on main.</li>
+            <li> Send SMPTE HO the <code>20230415-pub.zip</code> (or <code>20230515-pub.zip</code> or <code>20230715-pub.zip</code>) generated in the release to use in the <a>https://github.com/SMPTE/document-library</a>.
+              <ul>
+                <li>Automation for this step is planned for a future date.</li>
+              </ul>
+            </li>
+          </ol>
+        </li>
+      </ol>
 
     </section>
   </section>
 
   <section id="sec-elements">
     <ol>
-      <li><a id="element-sample-text" title="Sample text element" href="./elements/sample.txt"></a></li>
+      <li><a id="element-sample-text" title="Sample text element" class="informative" href="elements/sample.txt"></a></li>
+      <li><a id="element-url" title="Sample URL element"
+      href="https://github.com/SMPTE/html-pub/tree/631ed7a0312fa183c356a7b742129ce46f92736f"></a></li>
     </ol>
   </section>
 
@@ -2275,8 +2386,10 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       <li><cite id="bib-iso-directives-part2">ISO/IEC Directives, Part 2</cite>, Principles and rules for the structure and drafting
       of ISO and IEC documents (Ninth edition, 2021).
       <a>https://www.iso.org/sites/directives/current/part2/index.xhtml</a></li>
-      <li><cite id="bib-smpte-ag-16">SMPTE AG-16</cite>, Standards Style Guide.
-      <a>https://www.smpte.org/about/policies-and-governance</a></li>
+      <li><cite id="bib-smpte-ag-02">SMPTE AG 02</cite>, Document Naming and Packaging.
+        <a>https://doc.smpte-doc.org/ag-02/main/</a></li>
+      <li><cite id="bib-smpte-ag-16">SMPTE AG 16</cite>, Standards Style Guide.
+      <a>https://doc.smpte-doc.org/ag-16/main/</a></li>
       <li><cite id="bib-smpte-gh-om">SMPTE GitHub Operating Manual</cite>
         <a>https://github.com/SMPTE/github-operating-manual</a></li>
     </ul>

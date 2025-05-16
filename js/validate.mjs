@@ -217,8 +217,23 @@ class DdMatcher {
       return false;
 
     for (const child of element.children) {
-      if (!AnyPhrasingMatcher.match(child, logger))
-        logger.error(`Dd contains non-phrasing element`, child);
+      if (!FlowMatcher.match(child, logger))
+        logger.error(`Dd contains non-flow element`, child);
+    }
+
+    return true;
+  }
+}
+
+class DefinitionMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd" || element.classList.contains("note"))
+      return false;
+
+    for (const child of element.children) {
+      if (!AnyPhrasingMatcher.match(child, logger)) {
+        logger.error(`Definition contains non-phrasing element`, child);
+      }
     }
 
     return true;
@@ -227,13 +242,29 @@ class DdMatcher {
 
 class DefinitionSourceMatcher {
   static match(element, logger) {
-    if (element.localName !== "dd")
+    if (element.localName !== "dd" || element.classList.contains("note"))
       return false;
 
     const aMatcher = new TerminalPhrasingMatcher("a");
 
-    if (element.childElementCount !== 1 || !aMatcher.match(element.firstElementChild, logger))
-      logger.error(`Definition source must contain a single <a> element`, element);
+    if (element.childElementCount !== 1 || !aMatcher.match(element.firstElementChild, logger)) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+class DefinitionNoteMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd" || !element.classList.contains("note"))
+      return false;
+
+    for (const child of element.children) {
+      if (!AnyPhrasingMatcher.match(child, logger)) {
+        logger.error(`Note to entry contains non-phrasing element`, child);
+      }
+    }
 
     return true;
   }
@@ -322,6 +353,22 @@ class FigureMatcher {
   static match(element, logger) {
     if (element.localName !== "figure")
       return false;
+
+    const children = Array.from(element.children);
+
+    if (children.length != 2 ||
+      !(children[0].localName === "img" || children[0].localName === "pre") ||
+      children[1].localName !== "figcaption") {
+
+      logger.error(`Figure element must contain a pre or img element followed by a figcaption element`, element);
+
+    } else if (children[0].localName === "img") {
+
+      const src = children[0].getAttribute("src");
+
+      if (!src || !src.startsWith("media/"))
+        logger.error(`img element src must start with 'media/'`, element);
+    }
 
     return true;
   }
@@ -448,10 +495,22 @@ class BlockMatcher {
   }
 }
 
+function validateProponents(sectionElement, logger) {
+
+  if (sectionElement.childElementCount > 0) {
+    for (const forewordElement of sectionElement.children) {
+      if (forewordElement.localName === "dl" && forewordElement.id !== "element-proponent") {
+        logger.error(`Foreword cannot contain dl element that doesn't have id of element-proponent`, forewordElement);
+      }
+    }
+    return;
+  }
+}
 
 class ForewordMatcher {
 
   static match(e, logger) {
+    validateProponents(e, logger);
     return e.localName === "section" && e.id === "sec-foreword";
   }
 }
@@ -528,7 +587,7 @@ class NormativeReferencesMatcher {
     if (e.id !== "sec-normative-references")
       return false;
 
-    validateReferences(e, "Normative references", logger);
+    validateReferences(e, logger);
 
     return true;
   }
@@ -564,32 +623,40 @@ class InternalDefinitionsMatcher {
 
     while (children.length > 0) {
 
-      let dtCount = 0;
-
       /* look for dt elements */
-      while (children.length > 0) {
-        if (!DtMatcher.match(children[0], logger))
-          break;
+      let count = 0;
+
+      while (children.length > 0 && DtMatcher.match(children[0], logger)) {
         children.shift();
-        dtCount++;
+        count++;
       }
 
-      let ddCount = 0;
+      if (count === 0) {
+        logger.error(`Invalid definition`, element);
+        break;
+      }
 
       /* look for definition */
-      if (children.length > 0 && DdMatcher.match(children[0], logger)) {
+
+      if (children.length > 0 &&
+             DefinitionMatcher.match(children[0], logger) &&
+             !DefinitionSourceMatcher.match(children[0], logger)) {
         children.shift();
-        ddCount++;
       }
 
       /* look for definition source */
+
       if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
         children.shift();
-        ddCount++;
       }
 
-      if (ddCount === 0 || ddCount > 2 || dtCount === 0)
-        logger.error(`A definition must consist of one or more dt elements followed by one or two dd elements`, element);
+      /* look for notes to entry */
+      count = 0;
+
+      while (children.length > 0 && DefinitionNoteMatcher.match(children[0], logger)) {
+        children.shift();
+        count++;
+      }
 
     }
 
@@ -714,6 +781,34 @@ class ElementsAnnexMatcher {
 
       if (child.firstElementChild.localName !== "a" || !child.firstElementChild.id || child.childElementCount !== 1 || !child.firstElementChild.title || !child.firstElementChild.href) {
         logger.error(`Each <li> element of the Elements Annex must contain a single <a> element with a title, id and href attributes`, child);
+        continue;
+      }
+
+      const anchor = child.firstElementChild;
+
+      if (! anchor.title) {
+        logger.error("All links listed in the Elements Annex must have a title attribute.", child);
+        continue;
+      }
+
+      const href = anchor.getAttribute("href");
+
+      if (! href) {
+        logger.error("All links listed in the Elements Annex must have an href attribute.", child);
+        continue;
+      }
+
+      if (! href.startsWith("http")) {
+
+        if (href.indexOf("\\") > -1) {
+          logger.error("Relative links listed in the Elements Annex must not contain backslashes.", child);
+          continue;
+        }
+
+        if (! href.startsWith("elements/") || href.indexOf("..") > -1) {
+          logger.error("Relative links listed in the Elements Annex must start with 'elements/'", child);
+          continue;
+        }
       }
 
     }
@@ -729,7 +824,7 @@ class BibliographyMatcher {
     if (e.id !== "sec-bibliography")
       return false;
 
-    validateReferences(e, "Bibliography references", logger);
+    validateReferences(e, logger);
 
     return true;
   }
@@ -745,6 +840,7 @@ function validateBody(body, logger) {
 
   if (elements.length > 0 && ForewordMatcher.match(elements[0], logger))
     elements.shift();
+
 
   /* validate optional introduction */
 

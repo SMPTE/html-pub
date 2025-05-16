@@ -31,18 +31,47 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import { smpteValidate } from "./js/validate.mjs";
 import * as smpte from "./js/common.mjs";
 
-const _SCRIPT_PATH = (new URL(document.currentScript ? document.currentScript.src : import.meta.url)).pathname;
+class Logger {
+  constructor() {
+    this.events = [];
+  }
 
-function getScriptPath() {
-  return _SCRIPT_PATH;
+  error(msg, element) {
+    if (element !== undefined) {
+      if (!element.hasAttribute("id") || !element.id) {
+        element.id = Math.floor(Math.random() * 1000000000);
+      }
+      element.classList.add("invalid-tag");
+    }
+    this.events.push({msg: msg, elementId: element === undefined ? null : element.id});
+  }
+
+  hasError() {
+    return this.events.length > 0;
+  }
+
+  errorList() {
+    return this.events;
+  }
 }
+
+const logger_ = new Logger();
+
+const _SCRIPT_PATH = function () {
+  const scripts = document.head.getElementsByTagName("script");
+
+  for (const script of scripts) {
+    const src = script.getAttribute("src");
+    if (src !== null && src.indexOf("smpte.js") > -1)
+      return src.split("/").slice(0, -1).join("/");
+  }
+
+  logger_.error("Could not determine location of SMPTE document script");
+  return null;
+}();
 
 function resolveScriptRelativePath(path) {
-  return getScriptPath().split("/").slice(0, -1).concat([path]).join("/");
-}
-
-function resolveStaticResourcePath(resourceName) {
-  return resolveScriptRelativePath(`static/${resourceName}`);
+  return `${_SCRIPT_PATH}/${path}`;
 }
 
 function asyncFetchLocal(url) {
@@ -83,64 +112,77 @@ function loadDocMetadata() {
   return docMetadata;
 }
 
-const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
+const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-number-block">
+<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
 <span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
 {{revisionOf}}
-<div id="long-doc-type">{{longDocType}}</div>
+</div>
+{{longPubStage}}
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
-<h1>{{pubTitle}}</h1>
+<div id="long-doc-type">{{longDocType}}</div>
+<h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}} - {{actualPubDateTime}}</div>
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>,
+Society of Motion Picture and Television Engineers</span>.
+All rights reserved. No part of this material may be reproduced, by any means whatsoever,
+without the prior written permission of the Society of Motion Picture and Television Engineers.</p>
+<hr />
+{{draftWarning}}`
+
+const SMPTE_PUB_AG_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
+<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
+<img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
+<div id="long-doc-type">{{longDocType}}</div>
+<h1>{{fullTitle}}</h1>
+<div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>,
+Society of Motion Picture and Television Engineers</span>.
+All rights reserved. No part of this material may be reproduced, by any means whatsoever,
+without the prior written permission of the Society of Motion Picture and Television Engineers.</p>
 <hr />`
 
 const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscope="itemscope" itemtype="http://purl.org/dc/elements/1.1/">
-<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{actualPubNumber}}</div>
-<div id="long-doc-type">{{longDocType}}</div>
+<span itemprop="publisher">SMPTE</span>&nbsp;<span id="doc-type">{{pubType}}</span>&nbsp;{{actualPubNumber}}</div>
 <img id="smpte-logo" src="{{smpteLogoURL}}" alt="SMPTE logo" />
-<h1>{{pubTitle}}</h1>
+<div id="long-doc-type">{{longDocType}}</div>
+<h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
 <div id="doc-effective">Effective date: {{effectiveDateTime}}</div>
+<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>,
+Society of Motion Picture and Television Engineers</span>.
+All rights reserved. No part of this material may be reproduced, by any means whatsoever,
+without the prior written permission of the Society of Motion Picture and Television Engineers.</p>
 <hr />`
 
 const SMPTE_FRONT_MATTER_ID = "sec-front-matter";
 
-function insertFrontMatter(docMetadata) {
 
+function insertFrontMatter(docMetadata) {
   let sec = document.getElementById(SMPTE_FRONT_MATTER_ID);
 
   if (sec !== null) {
     throw "Front matter section already exists."
   }
 
-  let longDocType = "";
+  let longDocType = smpte.LONG_PUB_TYPE.get(docMetadata.pubType);
 
-  switch (docMetadata.pubType) {
-    case smpte.AG_PUBTYPE:
-      longDocType = "Administrative Guideline";
-      break;
-    case smpte.OM_PUBTYPE:
-      longDocType = "Operations Manual";
-      break;
-    case smpte.ST_PUBTYPE:
-      longDocType += "SMPTE Standard";
-      break;
-    case smpte.RP_PUBTYPE:
-      longDocType = "SMPTE Recommended Practice";
-      break;
-    case smpte.EG_PUBTYPE:
-      longDocType = "SMPTE Engineering Guideline";
-      break;
+  let longPubStage = "";
+  if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB && smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
+    let confidential = docMetadata.pubConfidential ? "CONFIDENTIAL " : "";
+    longPubStage = `<div id="long-pub-stage">${confidential}${smpte.LONG_PUB_STAGE.get(docMetadata.pubStage)}</div>`;
   }
-
-  if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB && smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType))
-    longDocType = `${docMetadata.pubStage} ${longDocType}`;
 
   let actualPubDateTime;
 
   if (docMetadata.pubDateTime === null || docMetadata.pubState == smpte.PUB_STATE_DRAFT) {
     actualPubDateTime = new Date();
   } else {
-    actualPubDateTime = new Date(docMetadata.pubDateTime).toISOString().slice(0, 10);
+    actualPubDateTime = new Date(docMetadata.pubDateTime);
   }
+
+  const formattedPubDateTime = docMetadata.pubState == smpte.PUB_STATE_DRAFT ?
+    actualPubDateTime :
+    actualPubDateTime.toISOString().slice(0, 10);
 
   let actualPubNumber = "";
   if (docMetadata.pubNumber !== null) {
@@ -153,10 +195,22 @@ function insertFrontMatter(docMetadata) {
       case smpte.ST_PUBTYPE:
       case smpte.RP_PUBTYPE:
       case smpte.EG_PUBTYPE:
+      case smpte.ER_PUBTYPE:
+      case smpte.RDD_PUBTYPE:
         if (docMetadata.pubPart !== null)
           actualPubNumber += `-<span itemprop="doc-part" id="doc-part">${docMetadata.pubPart}</span>`;
-        if (docMetadata.pubStage === smpte.PUB_STAGE_PUB)
-          actualPubNumber += `:<span itemprop="doc-version" id="doc-version">${docMetadata.pubVersion}</span>`;
+        if (docMetadata.pubStage === smpte.PUB_STAGE_PUB) {
+          let pubVersion;
+          if (docMetadata.pubVersion) {
+            pubVersion = docMetadata.pubVersion;
+          } else {
+            const d = new Date(docMetadata.pubDateTime);
+            pubVersion = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          }
+          actualPubNumber += `<span id="doc-version-string">:<span itemprop="doc-version" id="doc-version">${pubVersion}</span></span>`;
+
+        }
+          
         break;
     }
   }
@@ -176,13 +230,23 @@ function insertFrontMatter(docMetadata) {
       break;
   }
 
+  const draftWarning = docMetadata.pubStage === smpte.PUB_STAGE_PUB ? "" : SMPTE_DRAFT_WARNING;
+
   let boilerplate;
 
   if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.OM_PUBTYPE)
     boilerplate = SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE;
+  else if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.AG_PUBTYPE)
+    boilerplate = SMPTE_PUB_AG_FRONT_MATTER_BOILERPLATE;
   else
     boilerplate = SMPTE_FRONT_MATTER_BOILERPLATE;
 
+  let fullTitle;
+
+  if (docMetadata.pubSuiteTitle !== null)
+    fullTitle = `${docMetadata.pubSuiteTitle} — ${docMetadata.pubTitle}`;
+  else
+    fullTitle = docMetadata.pubTitle;
 
   let revisionOf = "";
 
@@ -198,10 +262,14 @@ function insertFrontMatter(docMetadata) {
     {
       revisionOf: revisionOf,
       longDocType: longDocType,
+      longPubStage: longPubStage,
+      fullTitle: fullTitle,
+      draftWarning: draftWarning,
       publicationState: publicationState,
-      smpteLogoURL: resolveStaticResourcePath("smpte-logo.png"),
-      actualPubDateTime: actualPubDateTime,
+      smpteLogoURL: resolveScriptRelativePath("static/smpte-logo.png"),
+      actualPubDateTime: formattedPubDateTime,
       actualPubNumber: actualPubNumber,
+      copyrightYear: actualPubDateTime.getFullYear(),
       ...docMetadata
     }
     );
@@ -309,7 +377,7 @@ function insertIntroduction(docMetadata) {
 
   if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
     let b = document.createElement("p");
-    b.innerHTML = "<em>This section is entirely informative and does not form an integral part of this Engineering Document.</em>";
+    b.innerHTML = "<em>This clause is entirely informative and does not form an integral part of this Engineering Document.</em>";
     sec.insertBefore(b, h2.nextSibling)
   }
 }
@@ -493,10 +561,10 @@ function insertElementsAnnex(docMetadata) {
     return;
   }
 
-  sec.classList.add("annex");
+  sec.classList.add("unnumbered");
 
   const intro = document.createElement("p");
-  intro.innerText = "This annex lists non-prose elements of this document."
+  intro.innerText = "The following are the non-prose elements of this document:"
   sec.insertBefore(intro, sec.firstChild);
 
   const h2 = document.createElement("h2");
@@ -506,6 +574,18 @@ function insertElementsAnnex(docMetadata) {
   let counter = "a".charCodeAt();
 
   for(const e of sec.querySelectorAll("li > a")) {
+
+    if (! e.title) {
+      logger_.error("All links listed in the Elements Annex must have a title attribute.", e);
+      continue;
+    }
+
+    const href = e.getAttribute("href");
+
+    if (! href) {
+      logger_.error("All links listed in the Elements Annex must have an href attribute.", e);
+      continue;
+    }
 
     const headingNum = document.createElement("span");
     headingNum.className = "heading-number";
@@ -518,13 +598,20 @@ function insertElementsAnnex(docMetadata) {
 
     e.parentElement.insertBefore(headingLabel, e);
 
-    e.innerText = "(link)";
+    const isAbsoluteLink = href.startsWith("http");
 
-    if (e.title) {
-      e.parentElement.insertBefore(document.createTextNode(" " + e.title + " "), e);
+    if (isAbsoluteLink) {
+      e.innerText = href;
     } else {
-      logger_.error("All links listed in the Elements Annex must have a title attribute.")
+      e.innerText = href.split('\\').pop().split('/').pop();
     }
+
+    e.parentElement.insertBefore(
+      document.createTextNode(` ${e.title} ${e.classList.contains("informative")? "(informative)" : "(normative)"}. ${isAbsoluteLink ? "url:" : "file:"} <`),
+      e
+    );
+
+    e.parentElement.insertBefore(document.createTextNode(">."), e.nextSibling);
 
   }
 }
@@ -535,10 +622,11 @@ function insertConformance(docMetadata) {
 
   let sec = document.getElementById(SMPTE_CONFORMANCE_ID);
 
-  if (docMetadata.pubType == smpte.OM_PUBTYPE) {
+  if (!(docMetadata.pubType == smpte.RP_PUBTYPE || docMetadata.pubType == smpte.ST_PUBTYPE || docMetadata.pubType == smpte.AG_PUBTYPE)) {
     if (sec !== null)
-      logger_.error("OM must not contain a Conformance section.");
-    return;
+      logger_.error(`An ${docMetadata.pubType} document must not contain a conformance section`);
+    if (!(docMetadata.pubType == smpte.EG_PUBTYPE || docMetadata.pubType == smpte.ER_PUBTYPE))
+      return;
   }
 
   if (sec === null) {
@@ -561,51 +649,89 @@ function insertConformance(docMetadata) {
 
     } else {
 
-      implConformance = sec.innerText.innerHTML;
+      implConformance = sec.innerHTML;
 
     }
 
   } else if (sec.innerText.trim().length !== 0) {
-    logger_.error("Conformance section not used in AGs.");
+    logger_.error("AGs cannot contain author-specified Conformance prose.");
   }
 
-  sec.innerHTML = `
-  <h2>Conformance</h2>
-  <p>Normative text is text that describes elements of the design that are indispensable or contains the
-   conformance language keywords: "shall", "should", or "may". Informative text is text that is potentially
-    helpful to the user, but not indispensable, and can be removed, changed, or added editorially without
-     affecting interoperability. Informative text does not contain any conformance keywords. </p>
+  if (docMetadata.pubType == smpte.RP_PUBTYPE || docMetadata.pubType == smpte.ST_PUBTYPE) {
+    
+    sec.innerHTML = `
+    <h2>Conformance</h2>
+    <p>Normative text is text that describes elements of the design that are indispensable or contains the
+    conformance language keywords: "shall", "should", or "may". Informative text is text that is potentially
+      helpful to the user, but not indispensable, and can be removed, changed, or added editorially without
+      affecting interoperability. Informative text does not contain any conformance keywords. </p>
 
-  <p>All text in this document is, by default, normative, except: the Introduction, any section explicitly
-  labeled as "Informative" or individual paragraphs that start with "Note:" </p>
+    <p>All text in this document is, by default, normative, except: the Introduction, any clause explicitly
+    labeled as "Informative" or individual paragraphs that start with "Note:" </p>
 
-<p>The keywords "shall" and "shall not" indicate requirements strictly to be followed in order to conform to the
-document and from which no deviation is permitted.</p>
+  <p>The keywords "shall" and "shall not" indicate requirements strictly to be followed in order to conform to the
+  document and from which no deviation is permitted.</p>
 
-<p>The keywords, "should" and "should not" indicate that, among several possibilities, one is recommended
-  as particularly suitable, without mentioning or excluding others; or that a certain course of action
-  is preferred but not necessarily required; or that (in the negative form) a certain possibility
-   or course of action is deprecated but not prohibited.</p>
+  <p>The keywords, "should" and "should not" indicate that, among several possibilities, one is recommended
+    as particularly suitable, without mentioning or excluding others; or that a certain course of action
+    is preferred but not necessarily required; or that (in the negative form) a certain possibility
+    or course of action is deprecated but not prohibited.</p>
 
-<p>The keywords "may" and "need not" indicate courses of action permissible within the limits of the document. </p>
+  <p>The keywords "may" and "need not" indicate courses of action permissible within the limits of the document. </p>
 
-<p>The keyword "reserved" indicates a provision that is not defined at this time, shall not be used,
-  and may be defined in the future. The keyword "forbidden" indicates "reserved" and in addition
-   indicates that the provision will never be defined in the future.</p>
+  <p>The keyword "reserved" indicates a provision that is not defined at this time, shall not be used,
+    and may be defined in the future. The keyword "forbidden" indicates "reserved" and in addition
+    indicates that the provision will never be defined in the future.</p>
 
-${implConformance}
+  ${implConformance}
 
-<p>Unless otherwise specified, the order of precedence of the types of normative information in
-  this document shall be as follows: Normative prose shall be the authoritative definition;
-  Tables shall be next; then formal languages; then figures; and then any other language forms.</p>
-  `;
+  <p>Unless otherwise specified, the order of precedence of the types of normative information in
+    this document shall be as follows: Normative prose shall be the authoritative definition;
+    tables shall be next; then formal languages; then figures; and then any other language forms.</p>
+    `;
+
+  } else if (docMetadata.pubType === smpte.EG_PUBTYPE) {
+
+    sec.innerHTML = `
+    <h2>Conformance</h2>
+    <p>This Engineering Guideline is purely informative and meant to provide tutorial information to the 
+    industry. It does not impose Conformance Requirements and avoids the use of Conformance Notation.</p>
+
+    <p>Engineering Guidelines frequently provide tutorial information about a Standard or Recommended Practice
+    and when this is the case, the user should rely on the Standards and Recommended Practices referenced for
+    interoperability information.</p>
+    `;
+
+  } else if (docMetadata.pubType === smpte.ER_PUBTYPE) {
+
+    sec.innerHTML = `
+    <h2>Conformance</h2>
+    <p>This Engineering Report is meant to provide information to the 
+    industry. It does not impose requirements.</p>
+    `;
+
+  }  else {
+    sec.innerHTML = `
+    <h2>Conformance</h2>
+    <p>The following keywords have a specific meaning in the context of this document:</p>
+    <ul>
+      <li><i>shall</i> and <i>shall not</i> express a requirement from which no deviation is permitted;</li>
+
+      <li><i>should</i> and <i>should not</i> express a strong recommendation without necessarily mentioning or 
+      excluding other choices;</li>
+      <li><i>may</i> expresses explicit liberty (or opportunity) to do something;</li>
+      <li><i>Note</i> and <i>informative</i> indicates that the associated prose is not indispensable, and can be removed, changed, or 
+      added editorially without affecting the scope, or the document's usage.</li>
+    </ul>  
+    `;
+  }
+
 }
 
 const SMPTE_FOREWORD_ID = "sec-foreword";
 
-const SMPTE_AG_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
-<p><a href="https://www.smpte.org">SMPTE (the Society of
-Motion Picture and Television Engineers)</a> is an
+const SMPTE_GEN_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
+<p>The Society of Motion Picture and Television Engineers (SMPTE) is an
 internationally-recognized standards developing organization. Headquartered
 and incorporated in the United States of America, SMPTE has members in over
 80 countries on six continents. SMPTE’s Engineering Documents, including
@@ -614,26 +740,43 @@ by SMPTE’s Technology Committees. Participation in these Committees is open
 to all with a bona fide interest in their work. SMPTE cooperates closely
 with other standards-developing organizations, including ISO, IEC and ITU.
 SMPTE Engineering Documents are drafted in accordance with the rules given
-in its Standards Operations Manual.</p>
+in its Standards Operations Manual.</p> 
+
+<p>For more information, please visit
+<a href="https://www.smpte.org">www.smpte.org</a>.</p>
+`
+
+const SMPTE_AG_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
 
 <p>This Standards Administrative Guideline forms an adjunct to the use and
 interpretation of the SMPTE Standards Operations Manual. In the event of a
 conflict, the Operations Manual shall prevail.</p>
+`
+const SMPTE_RDD_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
+<p>This document is a Registered Disclosure Document prepared by the sponsor(s) identified 
+below. It has been examined by the appropriate SMPTE Technology Committee and is believed to 
+contain adequate information to satisfy the objectives defined in the Scope, and to be   
+technically consistent.</p>
+<p>This document is NOT a Standard, Recommended Practice or Engineering Guideline and does NOT 
+imply a finding or representation of the Society.</p>
+<p>Every attempt has been made to ensure that the information contained in this document is 
+accurate. Errors in this document should be reported to the SMPTE Registered Disclosure 
+Document proponent(s) identified below with a copy to 
+<a href="mailto:eng@smpte.org">eng@smpte.org</a>.</p>
 
-<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span> SMPTE</span>, 45 Hamilton Ave., White Plains NY 10601, (914) 761-1100.</p>`
+<p>All other inquiries in respect of this document, including inquiries as to intellectual 
+property requirements, should be addressed to the SMPTE Registered Disclosure Document 
+proponent(s) identified below.</p>
 
-const SMPTE_DOC_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
-<p><a href="https://www.smpte.org">SMPTE (the Society of
-Motion Picture and Television Engineers)</a> is an
-internationally-recognized standards developing organization. Headquartered
-and incorporated in the United States of America, SMPTE has members in over
-80 countries on six continents. SMPTE’s Engineering Documents, including
-Standards, Recommended Practices, and Engineering Guidelines, are prepared
-by SMPTE’s Technology Committees. Participation in these Committees is open
-to all with a bona fide interest in their work. SMPTE cooperates closely
-with other standards-developing organizations, including ISO, IEC and ITU.
-SMPTE Engineering Documents are drafted in accordance with the rules given
-in its Standards Operations Manual.</p>
+{{authorProse}}
+
+`
+const SMPTE_ER_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
+
+{{authorProse}}
+`
+
+const SMPTE_DOC_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
 
 <p>At the time of publication no notice had been received by SMPTE claiming patent
 rights essential to the implementation of this Engineering Document.
@@ -641,12 +784,11 @@ However, attention is drawn to the possibility that some of the elements of this
 SMPTE shall not be held responsible for identifying any or all such patent rights.</p>
 
 {{authorProse}}
-
-<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span> SMPTE</span>, 45 Hamilton Ave., White Plains NY 10601, (914) 761-1100.</p>`
+`
 
 const SMPTE_DRAFT_WARNING = `
 <div id="sec-draft-warning">
-<strong>Warning:</strong> This document is an unpublished, confidential work under development and shall not be referred
+<strong>Warning:</strong> This document is an unpublished work under development and shall not be referred
 to as a SMPTE Standard,
 Recommended Practice, or Engineering Guideline. It is distributed for review and comment; distribution does not constitute
 publication. Recipients of this document are strongly encouraged to submit, with their comments, notification of any relevant
@@ -663,6 +805,22 @@ function insertForeword(docMetadata) {
     return;
   }
 
+  if (docMetadata.pubType == smpte.RDD_PUBTYPE) {
+    if (sec === null)
+      logger_.error("RDD must contain a Foreword section.");
+
+  }
+
+  const SMPTE_PROPONENT_ID = document.getElementById("element-proponent");
+
+  if (SMPTE_PROPONENT_ID === null && docMetadata.pubType === smpte.RDD_PUBTYPE) {
+    logger_.error("Missing required proponents.");
+    return;
+  } if (SMPTE_PROPONENT_ID !== null && docMetadata.pubType !== smpte.RDD_PUBTYPE) {
+    logger_.error("Proponents only allowed for RDD documents.");
+    return;
+  } 
+
   if (sec === null && docMetadata.pubType != smpte.OM_PUBTYPE) {
     sec = document.createElement("section");
     sec.id = SMPTE_FOREWORD_ID;
@@ -673,22 +831,26 @@ function insertForeword(docMetadata) {
 
   let authorProse = sec.innerHTML;
 
-  if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
+  if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType) && docMetadata.pubType != smpte.RDD_PUBTYPE) {
     authorProse = `<p>This document was prepared by Technology Committee ${docMetadata.pubTC}.</p>` + authorProse;
-
-    if (docMetadata.pubStage !== smpte.PUB_STAGE_PUB)
-      authorProse += SMPTE_DRAFT_WARNING;
   }
 
   if (docMetadata.pubType == smpte.AG_PUBTYPE) {
     if (authorProse.trim().length > 0)
       logger_.error("AGs cannot contain author-specified Foreword prose.")
     sec.innerHTML = fillTemplate(SMPTE_AG_FOREWORD_BOILERPLATE, {copyrightYear: (new Date()).getFullYear()});
+  } else if (docMetadata.pubType == smpte.RDD_PUBTYPE) {
+    sec.innerHTML = fillTemplate(SMPTE_RDD_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});  
+  } else if (docMetadata.pubType == smpte.ER_PUBTYPE) {
+    sec.innerHTML = fillTemplate(SMPTE_ER_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});  
   } else {
     sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});
   }
 
 }
+
+  
+  
 
 function addHeadingLinks(docMetadata) {
   const headings = document.querySelectorAll("h2, h3, h4, h5, h6");
@@ -799,7 +961,7 @@ function numberTables() {
 
       headingLabel.appendChild(document.createTextNode("Table "));
       headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" –⁠ "));
+      headingLabel.appendChild(document.createTextNode(" — "));
 
 
       caption.insertBefore(headingLabel, caption.firstChild);
@@ -840,7 +1002,7 @@ function numberFigures() {
 
       headingLabel.appendChild(document.createTextNode("Figure "));
       headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" –⁠ "));
+      headingLabel.appendChild(document.createTextNode(" — "));
 
 
       figcaption.insertBefore(headingLabel, figcaption.firstChild);
@@ -882,41 +1044,81 @@ function numberFormulae() {
   }
 }
 
+function numberNotesToEntry(internalTermsSection) {
+  let counter = 1;
+
+  for (const child of internalTermsSection.children) {
+    if (child.localName === "dt") {
+      counter = 1;
+      continue;
+    }
+
+    if (child.localName !== "dd" || !child.classList.contains("note")) {
+      continue;
+    }
+
+    const headingLabel = document.createElement("span");
+    headingLabel.className = "heading-label";
+
+    const headingNumberElement = document.createElement("span");
+    headingNumberElement.className = "heading-number";
+    headingNumberElement.innerText = counter++;
+
+    headingLabel.appendChild(document.createTextNode("Note "));
+    headingLabel.appendChild(headingNumberElement);
+    headingLabel.appendChild(document.createTextNode(" to entry: "));
+
+    child.insertBefore(headingLabel, child.firstChild);
+  }
+}
+
+function numberSectionNotes(section) {
+  let notes = [];
+
+  function _findNotes(e) {
+    for (const child of e.children) {
+      if (child.localName === "section")
+        numberSectionNotes(child);
+      else if (child.classList.contains("note"))
+        notes.push(child);
+      else
+        _findNotes(child);
+    }
+  }
+
+  _findNotes(section);
+
+  let counter = 1;
+  for (let note of notes) {
+    const headingLabel = document.createElement("span");
+    headingLabel.className = "heading-label";
+
+    const headingNumberElement = document.createElement("span");
+    headingNumberElement.className = "heading-number";
+    if (notes.length !== 1)
+      headingNumberElement.innerText = counter++;
+
+    headingLabel.appendChild(document.createTextNode("NOTE "));
+    headingLabel.appendChild(headingNumberElement);
+    headingLabel.appendChild(document.createTextNode(" —⁠ "));
+
+    note.insertBefore(headingLabel, note.firstChild);
+  }
+}
+
 function numberNotes() {
+  for (const element of document.body.children) {
+    if (element.localName !== "section")
+      continue;
 
-  for (let section of document.querySelectorAll("section")) {
+    if (element.id === "sec-terms-and-definitions") {
+      const terms = document.getElementById("terms-int-defs");
 
-    let notes = [];
-
-    function _findNotes(e) {
-      for (const child of e.children) {
-        if (child.tagName === "SECTION")
-          continue;
-        if (child.classList.contains("note"))
-          notes.push(child);
-          _findNotes(child);
-      }
+      if (terms !== null)
+        numberNotesToEntry(terms);
+    } else {
+      numberSectionNotes(element);
     }
-
-    _findNotes(section);
-
-    let counter = 1;
-    for (let note of notes) {
-      const headingLabel = document.createElement("span");
-      headingLabel.className = "heading-label";
-
-      const headingNumberElement = document.createElement("span");
-      headingNumberElement.className = "heading-number";
-      if (notes.length !== 1)
-        headingNumberElement.innerText = counter++;
-
-      headingLabel.appendChild(document.createTextNode("NOTE "));
-      headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" —⁠ "));
-
-      note.insertBefore(headingLabel, note.firstChild);
-    }
-
   }
 }
 
@@ -1047,24 +1249,24 @@ function resolveLinks(docMetadata) {
         anchor.href = anchor.textContent;
         anchor.classList.add("ext-ref");
 
-      } else {
+      } else if (contents === "") {
 
+        anchor.innerText = "?????";
+        logger_.error(`An anchor must either reference a definition (non-empty contents) or link to a resource (non-empty href attribute).`, anchor);
+
+      } else {
         /* process definitions */
 
         const term = _normalizeTerm(anchor.textContent);
 
         if (! definitions.has(term)) {
-          logger_.error("Unresolved link", anchor);
+          logger_.error(`No definition for ${term} was provided`, anchor);
         } else {
           anchor.href = "#" + definitions.get(term).id;
           anchor.classList.add("dfn-ref");
         }
 
       }
-
-    } else if (specifiedHref.match(/^[a-z]+:/)) {
-
-      /* absolute URLs */
 
     } else if (specifiedHref[0] == "#") {
 
@@ -1082,13 +1284,6 @@ function resolveLinks(docMetadata) {
 
       if (target.localName === "cite") {
         anchor.innerText = target.innerText;
-
-        /* special formatting for definitions */
-
-        if (anchor.parentElement.localName === "dd") {
-          anchor.parentNode.insertBefore(document.createTextNode("[SOURCE: "), anchor);
-          anchor.parentNode.insertBefore(document.createTextNode("]"), anchor.nextSibling);
-        }
 
       } else if (target.localName === "table") {
         anchor.innerText = "Table " + target.querySelector(".heading-number").innerText;
@@ -1137,27 +1332,59 @@ function resolveLinks(docMetadata) {
         anchor.innerText = "????";
       }
 
-    } else if (contents !== "") {
-
-      /* nothing to do */
-
-    } else {
-
-      logger_.error("Empty anchor", anchor);
-
     }
   }
 }
 
-function insertSnippets() {
-  Array.from(
+const CONFORMANCE_RE = /\s*(shall)|(should)|(may)\s/i;
+
+function checkConformanceNotation(docMetadata) {
+  if (!(docMetadata.pubType == smpte.EG_PUBTYPE || docMetadata.pubType == smpte.ER_PUBTYPE))
+    return;
+
+  for (let section of document.querySelectorAll("section:not(:has(section))")) {
+
+    const id = section.id;
+
+    if (id === SMPTE_FRONT_MATTER_ID || id === SMPTE_FOREWORD_ID || id === SMPTE_CONFORMANCE_ID)
+      continue;
+
+    const r = CONFORMANCE_RE.exec(section.innerText);
+
+    if (r !== null)
+      logger_.error(`An ${docMetadata.pubType} must not contain the conformance notation ${r[1]}`, section);
+
+  };
+}
+
+function asyncInsertSnippets() {
+  return Promise.all(Array.from(
     document.querySelectorAll("pre[data-include]"),
     (e) => {
       asyncFetchLocal(e.getAttribute("data-include"))
         .then(data => e.textContent = data)
         .catch(err => logError("Cannot fetch: " + err));
     }
-  );
+  ));
+}
+
+function formatTermsAndDefinitions(docMetadata) {
+  const section = document.getElementById("terms-int-defs");
+
+  if (section === null)
+    return;
+
+  for (const element of section.children) {
+    if (element.localName === "dd" &&
+        element.childNodes.length === 1 &&
+        element.firstChild.nodeType === Node.ELEMENT_NODE &&
+        element.firstChild.localName === "a") {
+      const anchor = element.firstChild;
+      element.classList.add("term-source");
+      element.insertBefore(document.createTextNode("[SOURCE: "), anchor);
+      element.insertBefore(document.createTextNode("]"), anchor.nextSibling);
+    }
+  }
 }
 
 function insertIconLink() {
@@ -1165,17 +1392,18 @@ function insertIconLink() {
 
   icoLink.type = "image/png";
   icoLink.rel = "icon";
-  icoLink.href = resolveStaticResourcePath("smpte-icon.png");
+  icoLink.href = resolveScriptRelativePath("static/smpte-icon.png");
 
   document.head.insertBefore(icoLink, null);
 }
 
-function render() {
+async function render() {
+  const asyncFunctions = [];
+
   let docMetadata = loadDocMetadata();
 
-  insertSnippets();
-
   insertIconLink();
+  checkConformanceNotation(docMetadata);
   insertFrontMatter(docMetadata);
   insertForeword(docMetadata);
   insertIntroduction(docMetadata);
@@ -1186,6 +1414,9 @@ function render() {
 
   insertElementsAnnex(docMetadata);
   insertBibliography(docMetadata);
+
+  formatTermsAndDefinitions(docMetadata);
+
   numberSections(document.body, "");
   numberTables();
   numberFigures();
@@ -1196,46 +1427,31 @@ function render() {
   insertTOC(docMetadata);
   addHeadingLinks(docMetadata);
 
+  asyncFunctions.push(asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css")));
+
+  if (docMetadata.pubState === smpte.PUB_STATE_DRAFT)
+    asyncFunctions.push(asyncAddStylesheet(resolveScriptRelativePath("css/smpte-draft.css")));
+
+  asyncFunctions.push(asyncInsertSnippets());
+
   /* debug print version */
   if (docMetadata.media === "print") {
     let pagedJS = document.createElement("script");
-    pagedJS.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
+    pagedJS.setAttribute("src", "https://cdn.jsdelivr.net/npm/pagedjs@0.4.3/dist/paged.polyfill.js");
     pagedJS.id = "paged-js-script";
     document.head.appendChild(pagedJS);
   }
+
+  return Promise.all(asyncFunctions);
 }
 
-class Logger {
-  constructor() {
-    this.events = [];
-  }
-
-  error(msg, element) {
-    if (element !== undefined) {
-      if (!element.hasAttribute("id") || !element.id) {
-        element.id = Math.floor(Math.random() * 1000000000);
-      }
-      element.classList.add("invalid-tag");
-    }
-    this.events.push({msg: msg, elementId: element === undefined ? null : element.id});
-  }
-
-  hasError() {
-    return this.events.length > 0;
-  }
-
-  errorList() {
-    return this.events;
-  }
-}
-
-const logger_ = new Logger();
+window._smpteRenderComplete = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
    try {
-    asyncAddStylesheet(resolveScriptRelativePath("css/smpte.css"));
     smpteValidate(window.document, logger_);
-    render();
+    await render();
+    window._smpteRenderComplete = true;
   } catch (e) {
     logger_.error(e);
   }
@@ -1260,5 +1476,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-window.smpteGetScriptPath = getScriptPath;
 window.smpteLogger = logger_;

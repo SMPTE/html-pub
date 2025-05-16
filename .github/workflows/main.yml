@@ -1,6 +1,10 @@
 name: Build SMPTE document
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
 
 env:
   AWS_REGION: us-east-1
@@ -11,7 +15,12 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.repository_owner	== 'SMPTE' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'pull_request')
+    if: >
+      github.repository_owner	== 'SMPTE' && (
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      || github.event_name == 'pull_request'
+      || github.event_name == 'release'
+      )
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write
