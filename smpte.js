@@ -918,7 +918,7 @@ function numberSections(element, curHeadingNumber) {
     }
 
     heading.insertBefore(headingLabel, heading.firstChild);
-    if (child.dataset.informative === "true") {
+    if (child.classList.contains("informative")) {
       heading.appendChild(document.createTextNode(" (Informative)"))
     } 
     numberSections(child, numText);

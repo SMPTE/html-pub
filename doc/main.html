@@ -657,7 +657,7 @@
         <p>The <code>class</code> attribute of a <a>Prose section</a> shall not contain the <code>annex</code> class.</p>
 
         <p>
-          To label any <a>Prose section</a> or child of a <a>Prose section</a> as <code>(Informative)</code>, the attribute <code>data-informative="true"</code> shall be present. It is assumed that once any <a>Prose section</a> is labeled as <code>(Informative)</code> all subsequent child(ren) of the <a>Prose section</a> are informative, and do not require the label, and therefore shall not contain the attribute <code>data-informative="true"</code>.  
+          To label any <a>Prose section</a> or child of a <a>Prose section</a> as <code>(Informative)</code>, the <code>class</code> attribute value of <code>informative</code> shall be present. It is assumed that once any <a>Prose section</a> is labeled as <code>(Informative)</code> all subsequent child(ren) of the <a>Prose section</a> are informative, and do not require the label, and therefore shall not contain the <code>class</code> attribute value of <code>informative</code>.  
         </p>
 
         <p>A section heading element of the appropriate level shall be present, starting with level 2 (<code>h2</code>) for all
@@ -680,7 +680,7 @@
     &lt;p&gt;Some technical content&lt;/p&gt;
   &lt;/section&gt;
   &lt;/section&gt;
-  &lt;section id=&quot;sec-info-prose-sub-clause&quot; data-informative=&quot;true&quot;&gt;
+  &lt;section id=&quot;sec-info-prose-sub-clause&quot; class=&quot;informative&quot;&gt;
     &lt;h3&gt;Informative Prose Sub Clause&lt;/h3&gt;
     &lt;p&gt;Some informative content&lt;/p&gt;
   &lt;/section&gt;
@@ -701,11 +701,11 @@
         <p>An <a>Annex section</a> shall not contain nested <a>annex sections</a>.</p>
 
         <p>
-          To label any <a>Annex section</a> or child of a <a>Annex section</a> as <code>(Informative)</code>, the attribute <code>data-informative="true"</code> shall be present. It is assumed that once any <a>Annex section</a> is labeled as <code>(Informative)</code> all subsequent child(ren) of the <a>Annex section</a> are informative, and do not require the label, and therefore shall not contain the attribute <code>data-informative="true"</code>.  
+          To label any <a>Annex section</a> or child of a <a>Annex section</a> as <code>(Informative)</code>, the <code>class</code> attribute value of <code>informative</code> shall be present. It is assumed that once any <a>Annex section</a> is labeled as <code>(Informative)</code> all subsequent child(ren) of the <a>Annex section</a> are informative, and do not require the label, and therefore shall not contain the <code>class</code> attribute value of <code>informative</code>.  
         </p>
 
         <div class="example">
-<pre>&lt;section class=&quot;annex&quot; id=&quot;sec-addtional-info&quot; data-informative=&quot;true&quot;&gt;
+<pre>&lt;section class=&quot;annex informative&quot; id=&quot;sec-addtional-info&quot;&gt;
   &lt;h2&gt;Additional Info&lt;/h2&gt;
   &lt;section id=&quot;sec-additional-info-sub-section&quot;&gt;
     &lt;h3&gt;Additional Info Sub Section&lt;/h3&gt;
@@ -1490,7 +1490,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
   </section>
 
-  <section class="annex" id="sec-table-examples" data-informative="true">
+  <section class="annex informative" id="sec-table-examples">
     <h2>Table Examples</h2>
     <section id="sec-table-alignment">
       <h3>Alignment</h3>
@@ -1834,7 +1834,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
   </section>
 
-  <section class="annex" id="sec-list-examples" data-informative="true">
+  <section class="annex informative" id="sec-list-examples">
     <h2>List Examples</h2>
     <section id="sec-ordered-lists">
       <h3>Customizing Ordered Lists</h3>
