@@ -456,6 +456,7 @@ function insertNormativeReferences(docMetadata) {
   /* style URLs */
 
   for(const u of sec.querySelectorAll("ul a")) {
+    u.parentNode.insertBefore(document.createElement("br"), u);
     u.parentNode.insertBefore(document.createTextNode("url:\u00a0"), u);
   }
 }
@@ -544,6 +545,7 @@ function insertBibliography(docMetadata) {
   /* style links */
 
   for(const u of sec.querySelectorAll("ul a")) {
+    u.parentNode.insertBefore(document.createElement("br"), u);
     u.parentNode.insertBefore(document.createTextNode("url:\u00a0"), u);
   }
 }
