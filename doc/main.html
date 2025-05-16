@@ -662,6 +662,8 @@
         <p><a>Prose sections</a> are automatically numbered, so neither the heading element nor its <code>id</code> attribute should
         contain numbering information.</p>
 
+        
+
         <div class="example">
 <pre>&lt;section id=&quot;sec-prose-clause&quot;&gt;
   &lt;h2&gt;Prose Clause&lt;/h2&gt;
@@ -689,8 +691,12 @@
 
         <p>An <a>Annex section</a> shall not contain nested <a>annex sections</a>.</p>
 
+        <p>
+          By default, an <a>Annex section</a> is labeled as <code>(Normative)</code>. To label any <a>Annex section</a> as <code>(Informative)</code>, the <code>class</code> attribute value of <code>informative</code> shall be present.  
+        </p>
+
         <div class="example">
-<pre>&lt;section class=&quot;annex&quot; id=&quot;sec-additional-info&quot;&gt;
+<pre>&lt;section class=&quot;annex informative&quot; id=&quot;sec-addtional-info&quot;&gt;
   &lt;h2&gt;Additional Info&lt;/h2&gt;
   &lt;section id=&quot;sec-additional-info-sub-section&quot;&gt;
     &lt;h3&gt;Additional Info Sub Section&lt;/h3&gt;
@@ -1475,7 +1481,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
   </section>
 
-  <section class="annex" id="sec-table-examples">
+  <section class="annex informative" id="sec-table-examples">
     <h2>Table Examples</h2>
     <section id="sec-table-alignment">
       <h3>Alignment</h3>
@@ -1819,7 +1825,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
   </section>
 
-  <section class="annex" id="sec-list-examples">
+  <section class="annex informative" id="sec-list-examples">
     <h2>List Examples</h2>
     <section id="sec-ordered-lists">
       <h3>Customizing Ordered Lists</h3>
