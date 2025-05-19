@@ -907,6 +907,11 @@ function numberSections(element, curHeadingNumber) {
 
       headingLabel.appendChild(document.createTextNode("Annex "));
       headingLabel.appendChild(headingNum);
+      if (child.classList.contains("informative")) {
+        heading.appendChild(document.createTextNode(" (Informative)"))
+      } else {
+        heading.appendChild(document.createTextNode(" (Normative)"))
+      }
       heading.insertBefore(document.createElement("br"), heading.firstChild);
 
     } else {
