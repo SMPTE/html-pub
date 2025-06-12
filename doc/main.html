@@ -567,13 +567,28 @@
           <li>Each <code>li</code> element may contain one <code>a</code> element that contains a location where the reference can
           be retrieved.</li>
         </ul>
-
+          <p>Undated references should be used, since they point to the most most up-to-date edition of a document.</p>
+          
+          <p>Dated references may be used when referencing a specific element of the document is necessary, e.g., a table, or when past and future editions of the document are likely to be inadequate. </p>
+            
+          <p class="note">DOI links should be used for both the most recent and specific editions of a SMPTE document. SMPTE HO can provide guidance for specific DOIs available.</p>
+       
         <div class="example">
 <pre>&lt;section id=&quot;sec-normative-references&quot;&gt;
   &lt;ul&gt;
     &lt;li&gt;
       &lt;cite id=&quot;bib-HTML-5&quot;&gt;HTML Standard&lt;/cite&gt;, Living Standard. 
         &lt;a&gt;https://html.spec.whatwg.org/multipage/&lt;/a&gt;&lt;/li&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+      &lt;cite id=&quot;bib-SMPTE-st429-18&quot;&gt;SMPTE ST 429-18&lt;/cite&gt;, D-Cinema Packaging — Immersive Audio Track 
+      File 
+        &lt;a&gt;https://doi.org/10.5594/SMPTE.ST429-18/&lt;/a&gt;&lt;/li&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+      &lt;cite id=&quot;bib-SMPTE-st429-18-2023&quot;&gt;SMPTE ST 429-18:2023&lt;/cite&gt;, D-Cinema Packaging — Immersive 
+      Audio Track File (2023 Edition)
+        &lt;a&gt;https://doi.org/10.5594/SMPTE.ST429-18.2023/&lt;/a&gt;&lt;/li&gt;
     &lt;/li&gt;
   &lt;/ul&gt;
 &lt;/section&gt;</pre>
@@ -2381,6 +2396,8 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <a>https://doc.smpte-doc.org/ag-02/main/</a></li>
       <li><cite id="bib-smpte-ag-16">SMPTE AG 16</cite>, Standards Style Guide
       <a>https://doc.smpte-doc.org/ag-16/main/</a></li>
+      <li><cite id="bib-ag-29">SMPTE AG-29</cite>, Document Library: URL Spec (Persistent URIs)
+        <a>https://github.com/SMPTE/document-url-spec</a></li>
       <li><cite id="bib-smpte-gh-om">SMPTE GitHub Operating Manual</cite>
         <a>https://github.com/SMPTE/github-operating-manual</a></li>
     </ul>
