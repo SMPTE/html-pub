@@ -456,6 +456,7 @@ function insertNormativeReferences(docMetadata) {
   /* style URLs */
 
   for(const u of sec.querySelectorAll("ul a")) {
+    u.parentNode.insertBefore(document.createElement("br"), u);
     u.parentNode.insertBefore(document.createTextNode("url:\u00a0"), u);
   }
 }
@@ -544,6 +545,7 @@ function insertBibliography(docMetadata) {
   /* style links */
 
   for(const u of sec.querySelectorAll("ul a")) {
+    u.parentNode.insertBefore(document.createElement("br"), u);
     u.parentNode.insertBefore(document.createTextNode("url:\u00a0"), u);
   }
 }
@@ -905,6 +907,11 @@ function numberSections(element, curHeadingNumber) {
 
       headingLabel.appendChild(document.createTextNode("Annex "));
       headingLabel.appendChild(headingNum);
+      if (child.classList.contains("informative")) {
+        heading.appendChild(document.createTextNode(" (Informative)"))
+      } else {
+        heading.appendChild(document.createTextNode(" (Normative)"))
+      }
       heading.insertBefore(document.createElement("br"), heading.firstChild);
 
     } else {
