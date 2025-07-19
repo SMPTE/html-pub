@@ -180,14 +180,10 @@ class EqDivMatcher {
     if (element.localName !== "div" || element.className !== "formula")
       return false;
 
-    // TODO: MathJax formulas aren't encased in <math> elements.
-    // https://github.com/SMPTE/html-pub/issues/156
-    if (element.childElementCount !== 0) {
-      if (element.childElementCount !== 1 ||
-              (element.firstElementChild.localName !== "math" &&
-               element.firstElementChild.localName !== "mjx-container")) {
-        logger.error(`Formula div must contain a single math or mjx-container element`, element);
-      }
+    if (element.childElementCount !== 1 ||
+            (element.firstElementChild.localName !== "math" &&
+             element.firstElementChild.localName !== "mjx-container")) {
+      logger.error(`Formula div must contain a single math or mjx-container element`, element);
     }
 
     if (element.id === null)
