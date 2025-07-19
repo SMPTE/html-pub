@@ -101,6 +101,26 @@ class MathMatcher {
   }
 }
 
+class MathJaxMatcher {
+  constructor(localName) {
+    this.localName = localName;
+  }
+
+  match(element, logger) {
+    if (element.localName !== this.localName)
+      return false;
+
+      for (const child of element.children) {
+          if (child.localName != 'mjx-math' &&
+              child.localName != 'mjx-assistive-mml' &&
+              child.localName != 'svg') {
+            logger.error(`MathJax container has unexpected child ` + child.localName, element);
+          }
+      }
+
+    return true;
+  }
+}
 
 const ALL_PHRASING_MATCHERS = [
   new TerminalPhrasingMatcher("abbr"),
@@ -126,7 +146,8 @@ const ALL_PHRASING_MATCHERS = [
   new PhrasingMatcher("u"),
   new TerminalPhrasingMatcher("var"),
   new TerminalPhrasingMatcher("wbr"),
-  new TerminalPhrasingMatcher("a")
+  new TerminalPhrasingMatcher("a"),
+  new MathJaxMatcher("mjx-container")
 ];
 class AnyPhrasingMatcher {
   static match(element, logger) {
@@ -162,8 +183,11 @@ class EqDivMatcher {
     // TODO: MathJax formulas aren't encased in <math> elements.
     // https://github.com/SMPTE/html-pub/issues/156
     if (element.childElementCount !== 0) {
-      if (element.childElementCount !== 1 || element.firstElementChild.localName !== "math")
-        logger.error(`Formula div must contain a single math element`, element);
+      if (element.childElementCount !== 1 ||
+              (element.firstElementChild.localName !== "math" &&
+               element.firstElementChild.localName !== "mjx-container")) {
+        logger.error(`Formula div must contain a single math or mjx-container element`, element);
+      }
     }
 
     if (element.id === null)
