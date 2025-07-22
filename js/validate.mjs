@@ -180,8 +180,11 @@ class EqDivMatcher {
     if (element.localName !== "div" || element.className !== "formula")
       return false;
 
+    // MathJax will asynchronously replace latex equations written in
+    // textContent, escaped by $$ $$ or \[ \] delimiters, with an mjx-container
+    // element. If MathJax has yet not performed this processing, then ensure
+    // that the equation div have an escaped block equation in its textContent.
     if (element.childElementCount === 0) {
-      console.log(element.textContent);
       if (element.textContent.match(/\[.*\]/) ||
           element.textContent.match(/$$.*$$/)) {
         return true;
