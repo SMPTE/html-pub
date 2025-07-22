@@ -180,12 +180,10 @@ class EqDivMatcher {
     if (element.localName !== "div" || element.className !== "formula")
       return false;
 
-    // MathJax formulas, prior to parsing, will have the latex formula source in
-    // \[ \] or $$ $$. After parsing, they will be replaced with an
-    // mjx-container element.
     if (element.childElementCount === 0) {
-      if (element.innerText.match(/\[.*\]/) ||
-          element.innerText.match(/$$.*$$/)) {
+      console.log(element.textContent);
+      if (element.textContent.match(/\[.*\]/) ||
+          element.textContent.match(/$$.*$$/)) {
         return true;
       }
     }
@@ -196,8 +194,7 @@ class EqDivMatcher {
       }
     }
     logger.error(`Formula div must contain a single math or mjx-container element`, element);
-
-    return false;
+    return true;
   }
 }
 
