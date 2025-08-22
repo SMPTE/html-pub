@@ -20,6 +20,10 @@ inputs:
   OFFICIAL_SUBMODULE_BRANCH:
     required: false
     default: main
+  OVERRIDE_SUBMODULE_SHA:
+    required: false
+  OVERRIDE_SUBMODULE_REF:
+    required: false
 
 runs:
   using: "composite"
@@ -35,6 +39,8 @@ runs:
         SUB_PATH: ${{ inputs.OFFICIAL_SUBMODULE_PATH }}
         OFFICIAL_URL: ${{ inputs.OFFICIAL_SUBMODULE_URL }}
         OFFICIAL_BRANCH: ${{ inputs.OFFICIAL_SUBMODULE_BRANCH }}
+        OVERRIDE_SHA: ${{ inputs.OVERRIDE_SUBMODULE_SHA }}
+        OVERRIDE_REF: ${{ inputs.OVERRIDE_SUBMODULE_REF }}
       run: |
         set -euo pipefail
 
@@ -65,28 +71,43 @@ runs:
           exit 1
         fi
 
-        OFFICIAL_SHA=$(git ls-remote "$OFFICIAL_URL" "refs/heads/$OFFICIAL_BRANCH" | awk '{print $1}')
-        if [[ -z "${OFFICIAL_SHA:-}" ]]; then
-          echo "ERROR: Could not read '$OFFICIAL_BRANCH' from '$OFFICIAL_URL'"
-          exit 1
+        if [[ -n "${OVERRIDE_SHA:-}" ]]; then
+          TARGET_SHA="$OVERRIDE_SHA"
+        elif [[ -n "${OVERRIDE_REF:-}" ]]; then
+          TARGET_SHA=$(git ls-remote "$OFFICIAL_URL" "$OVERRIDE_REF" | awk '{print $1}')
+          if [[ -z "${TARGET_SHA:-}" ]]; then
+            echo "ERROR: Could not read override ref '$OVERRIDE_REF' from '$OFFICIAL_URL'"
+            exit 1
+          fi
+        else
+          TARGET_SHA=$(git ls-remote "$OFFICIAL_URL" "refs/heads/$OFFICIAL_BRANCH" | awk '{print $1}')
+          if [[ -z "${TARGET_SHA:-}" ]]; then
+            echo "ERROR: Could not read '$OFFICIAL_BRANCH' from '$OFFICIAL_URL'"
+            exit 1
+          fi
         fi
 
         echo "Recorded(${SUB_PATH}): $RECORDED_SHA"
-        echo "Official ($OFFICIAL_BRANCH): $OFFICIAL_SHA"
+        echo "Target  (${SUB_PATH}): $TARGET_SHA"
 
-        if [[ "$RECORDED_SHA" != "$OFFICIAL_SHA" ]]; then
-          echo "ERROR: Submodule is not on latest official main."
-          echo
-          echo "To fix locally:"
-          echo "  git submodule update --init --remote -- \"${SUB_PATH}\""
-          echo "  # or explicitly:"
-          echo "  cd \"${SUB_PATH}\""
-          echo "  git fetch origin \"${OFFICIAL_BRANCH}\""
-          echo "  git checkout --detach \"origin/${OFFICIAL_BRANCH}\""
-          echo "  cd -"
-          echo "  git add \"${SUB_PATH}\""
-          echo "  git commit -m \"Bump ${SUB_PATH} to latest ${OFFICIAL_BRANCH}\""
-          exit 1
+        if [[ "$RECORDED_SHA" != "$TARGET_SHA" ]]; then
+          if [[ -n "${OVERRIDE_SHA:-}" || -n "${OVERRIDE_REF:-}" ]]; then
+            echo "::warning::Submodule commit mismatch (override active). Recorded=${RECORDED_SHA} Target=${TARGET_SHA}"
+            # Do not exit; proceed to allow testing with override.
+          else
+            echo "ERROR: Submodule is not on latest official main."
+            echo
+            echo "To fix locally:"
+            echo "  git submodule update --init --remote -- \"${SUB_PATH}\""
+            echo "  # or explicitly:"
+            echo "  cd \"${SUB_PATH}\""
+            echo "  git fetch origin \"${OFFICIAL_BRANCH}\""
+            echo "  git checkout --detach \"origin/${OFFICIAL_BRANCH}\""
+            echo "  cd -"
+            echo "  git add \"${SUB_PATH}\""
+            echo "  git commit -m \"Bump ${SUB_PATH} to latest ${OFFICIAL_BRANCH}\""
+            exit 1
+          fi
         fi
 
     - name: Install vnu
