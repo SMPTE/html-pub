@@ -69,20 +69,17 @@ runs:
         echo "Official ($OFFICIAL_BRANCH): $OFFICIAL_SHA"
 
         if [[ "$RECORDED_SHA" != "$OFFICIAL_SHA" ]]; then
-          cat <<'MSG'
-ERROR: Submodule is not on latest official main.
-
-To fix locally:
-  git submodule update --init --remote -- "${SUB_PATH}"
-  # or explicitly:
-  cd "${SUB_PATH}"
-  git fetch origin "${OFFICIAL_BRANCH}"
-  git checkout --detach "origin/${OFFICIAL_BRANCH}"
-  cd -
-  git add "${SUB_PATH}"
-  git commit -m "Bump ${SUB_PATH} to latest ${OFFICIAL_BRANCH}"
-
-MSG
+          echo "ERROR: Submodule is not on latest official main."
+          echo
+          echo "To fix locally:"
+          echo "  git submodule update --init --remote -- \"${SUB_PATH}\""
+          echo "  # or explicitly:"
+          echo "  cd \"${SUB_PATH}\""
+          echo "  git fetch origin \"${OFFICIAL_BRANCH}\""
+          echo "  git checkout --detach \"origin/${OFFICIAL_BRANCH}\""
+          echo "  cd -"
+          echo "  git add \"${SUB_PATH}\""
+          echo "  git commit -m \"Bump ${SUB_PATH} to latest ${OFFICIAL_BRANCH}\""
           exit 1
         fi
 
