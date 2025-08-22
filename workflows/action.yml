@@ -38,6 +38,12 @@ runs:
       run: |
         set -euo pipefail
 
+        # Skip enforcement when running inside the source repository itself.
+        if [[ "${GITHUB_REPOSITORY:-}" == "SMPTE/html-pub" ]]; then
+          echo "Submodule enforcement skipped in source repo (${GITHUB_REPOSITORY})."
+          exit 0
+        fi
+
         if [[ -z "${SUB_PATH:-}" ]]; then
           echo "ERROR: SUB_PATH is empty"; exit 1
         fi
