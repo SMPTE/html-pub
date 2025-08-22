@@ -543,6 +543,7 @@ class ReferenceMatcher {
 
     let aCount = 0;
     let citeCount = 0;
+    let doiCount = 0;
 
     for (const child of element.children) {
       if (child.localName === "a") {
@@ -551,6 +552,8 @@ class ReferenceMatcher {
         if (child.id === null)
           logger.error(`All cite element must have an id attribute`, child);
         citeCount++;
+      } else if (child.matches("span.doi")) {
+        doiCount++;
       }
     }
 
@@ -559,6 +562,9 @@ class ReferenceMatcher {
 
     if (citeCount !== 1)
       logger.error(`Reference element must contain exactly one cite element`, element);
+
+    if (doiCount > 1)
+      logger.error(`Reference element must contain at most one DOI`, element);
 
     return true;
   }
