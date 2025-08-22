@@ -31,7 +31,14 @@ runs:
 
     - name: Confirm that the right workflow is active
       shell: bash
-      run: cmp ${GITHUB_ACTION_PATH}/../.github/workflows/main.yml .github/workflows/main.yml
+      run: |
+        set -euo pipefail
+        REF="${GITHUB_ACTION_PATH}/../.github/workflows/main.yml"
+        LOC=".github/workflows/main.yml"
+        # Ignore override inputs so they don't trigger false diffs
+        diff -u \
+          <(grep -vE '^[[:space:]]*OVERRIDE_SUBMODULE_(SHA|REF):' "$REF") \
+          <(grep -vE '^[[:space:]]*OVERRIDE_SUBMODULE_(SHA|REF):' "$LOC")
 
     - name: Enforce official submodule lock
       shell: bash
