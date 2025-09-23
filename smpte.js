@@ -453,6 +453,21 @@ function insertNormativeReferences(docMetadata) {
 
   h2.innerText = "Normative references";
 
+  /* style DOIs */
+
+  for (const doi of sec.querySelectorAll("ul span.doi")) {
+    doi.parentNode.insertBefore(document.createElement("br"), doi);
+    doi.parentNode.insertBefore(document.createTextNode("doi:\u00a0"), doi);
+
+    const prefix = "https://doi.org/";
+    const url = prefix + doi.textContent.trim();
+
+    const label = document.createTextNode("url:\u00a0");
+    const link = document.createElement("a");
+    link.textContent = url;
+    doi.parentNode.insertBefore(link, label.nextSibling);
+  }
+
   /* style URLs */
 
   for(const u of sec.querySelectorAll("ul a")) {
@@ -541,6 +556,21 @@ function insertBibliography(docMetadata) {
   }
 
   h2.innerText = "Bibliography";
+
+  /* style DOIs */
+
+  for (const doi of sec.querySelectorAll("ul span.doi")) {
+    doi.parentNode.insertBefore(document.createElement("br"), doi);
+    doi.parentNode.insertBefore(document.createTextNode("doi:\u00a0"), doi);
+
+    const prefix = "https://doi.org/";
+    const url = prefix + doi.textContent.trim();
+
+    const label = document.createTextNode("url:\u00a0");
+    const link = document.createElement("a");
+    link.textContent = url;
+    doi.parentNode.insertBefore(link, label.nextSibling);
+  }
 
   /* style links */
 
