@@ -270,6 +270,22 @@ class DefinitionNoteMatcher {
   }
 }
 
+class DefinitionFigureMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd" || !element.classList.contains("figure"))
+      return false;
+
+    // Must contain exactly one figure child
+    const children = Array.from(element.children);
+    if (children.length !== 1 || children[0].localName !== "figure") {
+      logger.error(`Definition figure must contain a single figure element`, element);
+      return true; 
+    }
+
+    return true;
+  }
+}
+
 
 class UlMatcher {
   static match(element, logger) {
@@ -656,6 +672,12 @@ class InternalDefinitionsMatcher {
       while (children.length > 0 && DefinitionNoteMatcher.match(children[0], logger)) {
         children.shift();
         count++;
+      }
+
+      /* look for definition figure */
+
+      if (children.length > 0 && DefinitionFigureMatcher.match(children[0], logger)) {
+        children.shift();
       }
 
     }
