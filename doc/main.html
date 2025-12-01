@@ -564,33 +564,33 @@
           <li>The <code>cite</code> element shall contain an <code>id</code> attribute with value prefixed by
           <code>bib-</code>.</li>
           <li>Each <code>li</code> element may contain additional title information.
-          
           <li>Each <code>li</code> element may contain one <code>a</code> element that contains a location where the reference can
           be retrieved.</li>
           <li>Each <code>li</code> element may contain one <code>span</code> element with a <code>class="doi"</code> attribute that contains the DOI of the document. Using this will also create a DOI resolver URL.</li>
         </ul>
-          <p>Undated references should be used, since they point to the most most up-to-date edition of a document.</p>
+
+        <p>The DOI <code>span</code> element should be used, and not the <code>a</code> element, for both the most recent and specific editions of a SMPTE document. SMPTE HO can provide guidance for specific DOIs available.</p>
+        
+        <p>Undated references should be used, since they point to the most up-to-date edition of a document.</p>
           
-          <p>Dated references shall be used when referencing a specific element of the document, e.g., a table. They should also be used when past and future editions of the document are likely to be inadequate. </p>
-            
-          <p class="note">The DOI <code>span</code> element should be used, and not the <code>a</code> element, for both the most recent and specific editions of a SMPTE document. SMPTE HO can provide guidance for specific DOIs available.</p>
+        <p>Dated references shall be used when referencing a specific element of the document, e.g., a table. They should also be used when past and future editions of the document are likely to be inadequate.</p>
        
         <div class="example">
 <pre>&lt;section id=&quot;sec-normative-references&quot;&gt;
   &lt;ul&gt;
     &lt;li&gt;
-      &lt;cite id=&quot;bib-HTML-5&quot;&gt;HTML Standard&lt;/cite&gt;, Living Standard. 
-        &lt;a&gt;https://html.spec.whatwg.org/multipage/&lt;/a&gt;&lt;/li&gt;
+      &lt;cite id=&quot;bib-HTML-5&quot;&gt;HTML Standard&lt;/cite&gt;, Living Standard
+      &lt;a&gt;https://html.spec.whatwg.org/multipage/&lt;/a&gt;
     &lt;/li&gt;
     &lt;li&gt;
       &lt;cite id=&quot;bib-SMPTE-st429-18&quot;&gt;SMPTE ST 429-18&lt;/cite&gt;, D-Cinema Packaging — Immersive Audio Track 
       File 
-        &lt;span class=&quot;doi&quot;&gt;10.5594/SMPTE.ST429-18/&lt;/span&gt;&lt;/li&gt;
+      &lt;span class=&quot;doi&quot;&gt;10.5594/SMPTE.ST429-18&lt;/span&gt;
     &lt;/li&gt;
     &lt;li&gt;
       &lt;cite id=&quot;bib-SMPTE-st429-18-2023&quot;&gt;SMPTE ST 429-18:2023&lt;/cite&gt;, D-Cinema Packaging — Immersive 
       Audio Track File (2023 Edition)
-        &lt;span class=&quot;doi&quot;&gt;10.5594/SMPTE.ST429-18.2023/&lt;/span&gt;&lt;/li&gt;
+      &lt;span class=&quot;doi&quot;&gt;10.5594/SMPTE.ST429-18.2023&lt;/span&gt;
     &lt;/li&gt;
   &lt;/ul&gt;
 &lt;/section&gt;</pre>
@@ -794,16 +794,16 @@
 
         <p>The absence of this section indicates that no bibliographic references are cited by the document.</p>
 
-        <p>If present, the section shall contain a single <code>ul</code> element that conform to the same requirement as the
+        <p>If present, the section shall contain a single <code>ul</code> element that conforms to the same requirements as the
         <code>ul</code> element of the <a>normative references</a> section.</p>
 
         <div class="example">
 <pre>&lt;section id=&quot;sec-bibliography&quot;&gt;
   &lt;ul&gt;
     &lt;li&gt;
-      &lt;li&gt;&lt;cite id=&quot;bib-iso-directives-part2&quot;&gt;ISO/IEC Directives, Part 2&lt;/cite&gt;,
+      &lt;cite id=&quot;bib-iso-directives-part2&quot;&gt;ISO/IEC Directives, Part 2&lt;/cite&gt;,
       Principles and rules for the structure and drafting of ISO and IEC documents (Ninth edition, 2021)
-      &lt;a&gt;https://www.iso.org/sites/directives/current/part2/index.xhtml&lt;/a&gt;&lt;/li&gt;
+      &lt;a&gt;https://www.iso.org/sites/directives/current/part2/index.xhtml&lt;/a&gt;
     &lt;/li&gt;
   &lt;/ul&gt;
 &lt;/section&gt;</pre>
