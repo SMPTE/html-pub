@@ -1194,6 +1194,36 @@ function numberExamples() {
   }
 }
 
+function numberTerms() {
+  const termsSection = document.getElementById("sec-terms-and-definitions");
+  const terms = document.getElementById("terms-int-defs");
+  if (!termsSection || !terms) return;
+
+  // Clause number for the Terms and definitions section (e.g. "4")
+  const sectionNumberEl = termsSection.querySelector(":scope > h2 .heading-number");
+  const sectionNumber = sectionNumberEl ? sectionNumberEl.innerText.trim() : "";
+
+  let counter = 1;
+
+  for (const child of terms.children) {
+    if (child.localName !== "dt") continue;
+
+    // If multiple <dt> occur in a row, only number the first one
+    const prev = child.previousElementSibling;
+    if (prev && prev.localName === "dt") continue;
+
+    const labelValue = sectionNumber ? `${sectionNumber}.${counter++}` : `${counter++}`;
+
+    const numLine = document.createElement("span");
+    numLine.className = "heading-number term-number";
+    numLine.innerText = labelValue;
+
+    // Number on its own line above the term
+    child.insertBefore(document.createElement("br"), child.firstChild);
+    child.insertBefore(numLine, child.firstChild);
+  }
+}
+
 function _normalizeTerm(term) {
   return term.trim().toLowerCase().replace(/\s+/g," ");
 }
@@ -1457,6 +1487,7 @@ async function render() {
   numberFormulae();
   numberNotes();
   numberExamples();
+  numberTerms();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
   addHeadingLinks(docMetadata);

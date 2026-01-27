@@ -9,12 +9,12 @@
   <meta itemprop="pubType" content="AG" />
   <meta itemprop="pubNumber" content="26" />
   <!-- <meta itemprop="pubPart" content="XX" /> -->
-  <meta itemprop="pubState" content="draft" />
+  <meta itemprop="pubState" content="pub" />
   <!-- meta itemprop="pubStage" content="WD" / -->
   <meta itemprop="pubConfidential" content="no" />
   <!--< meta itemprop="pubTC" content="XX" /> -->
   <meta itemprop="pubSuiteTitle" content="HTML Pub" />
-  <meta itemprop="pubDateTime" content="2025-02-26" />
+  <meta itemprop="pubDateTime" content="2026-01-27" />
   <!-- <meta itemprop="pubRevisionOf" content="SMPTE ST XXXX-Y:ZZZZ" /> -->
   <title>Tooling and documentation for HTML documents</title>
 </head>
@@ -452,7 +452,7 @@
           <p>When <code>pubType</code> is set to <code>RDD</code>, the <a>Foreword</a> section shall be present and there there shall be a single <code>dl</code>, after any author-supplied prose if supplied, which contains contact information about the proponent(s) of the RDD document. </p>
 
           <p>The <code>id</code> attribute shall be present on the <code>dl</code> element and equal to
-          <code>rdd-proponent</code>. </p>
+          <code>element-proponent</code>. </p>
 
           <p>If present, the <code>dl</code> element shall use a single <code>dt</code> element for each company name designated as a Proponent of the document, and multiple lines of <code>dd</code> as needed for contact information for each company listed. The contact infomation should at least include an address and email, reach out to SMPTE HO for further deatails. </p> 
 
@@ -460,7 +460,7 @@
 <pre>
 &lt;section id=&quot;sec-foreword&quot;&gt;
   &lt;p&gt;This is the additional information relevant to the document.&lt;/p&gt;
-  &lt;dl id=&quot;rdd-proponent&quot;&gt;
+  &lt;dl id=&quot;element-proponent&quot;&gt;
     &lt;dt&gt;Company 1 Name Here&lt;/dt&gt;
       &lt;dd&gt;Contact Name&lt;/dd&gt;
       &lt;dd&gt;Company Address&lt;/dd&gt;
@@ -1277,7 +1277,7 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
 
       <section id="sec-special-characters">
         <h4>Special Characters</h4>
-        <p>Characters should should be encoded as UTF-8-encoded Unicode codepoints, e.g. あ, instead of HTML entities, e.g. <code>&amp;#x3042;</code>, except as needed for usage in <code>pre</code> or examples.
+        <p>Characters should be encoded as UTF-8-encoded Unicode codepoints, e.g. あ, instead of HTML entities, e.g. <code>&amp;#x3042;</code>, except as needed for usage in <code>pre</code> or examples.
         </p>
     
       </section>
@@ -1356,7 +1356,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <li>Uploading the rendered document and corresponding redlines to S3</li>
       </ol>
 
-      <p>The build process is carried by the build script <code>scripts/build.mjs</code>, which is usually executed by the
+      <p>The build process carried by the build script <code>scripts/build.mjs</code> is usually executed by the
       GitHub workflow (see <a href="#sec-gh-integration"></a>). The script has the following dependencies:</p>
 
       <ul>
@@ -1480,7 +1480,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <code>AWS_S3_BUCKET</code></figcaption>
       </figure>
 
-      <p>The contents of the bucket is also made available through a Cloudfront distribution, which allows the publication artifacts
+      <p>The contents of the bucket are also made available through a Cloudfront distribution, which allows the publication artifacts
         to be made available through a custom domain name and TLS (currently <code>https://doc.smpte-doc.org/</code>).</p>
     </section>
 
@@ -1592,7 +1592,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <h4>Cell Alignment</h4>
 
         <p>
-          To change the alignment of a individual cell, the class <code>center-cell</code> may be added to each <code>td</code> as needed, as the below example shows. 
+          To change the alignment of an individual cell, the class <code>center-cell</code> may be added to each <code>td</code> as needed, as the below example shows. 
         </p>
 
         <pre data-include="snippets/tab-sample-tabledata-centercell.txt"></pre>
@@ -2210,14 +2210,14 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       <p>
         Generally, no changes to a document shall ever be made directly on the <code>main</code> branch, which doesn't allow the tooling to create needed redlines. Instead, changes (regardless of the nature of the change) shall always be made on a new branch and managed via a PR (Pull Request). Each PR is then merged to <code>main</code> after approval, as noted below in <a href="#sec-sample-workflow"></a> at the various stages. 
       </p>
-      <p>PRs should have at least (1) approver that is not the the person requesting the PR. This can be the DG chair, TC chair, commentor, or secondary editor, depending on nature of the PR. For instance, on ballot state change PRs, this should be the DG or TC chair, and for publication state PRs, the TC chairs. See <a href="#sec-sample-workflow"></a> for more details.</p>
+      <p>PRs should have at least (1) approver that is not the person requesting the PR. This can be the DG chair, TC chair, commentor, or secondary editor, depending on nature of the PR. For instance, on ballot state change PRs, this should be the DG or TC chair, and for publication state PRs, the TC chairs. See <a href="#sec-sample-workflow"></a> for more details.</p>
 
     </section>
 
     <section id="sec-sample-workflow">
       <h3>Sample Workflow </h3>
       <p>
-        The below list shows a sample workflow which would be the steps for an Engineering Document going through the an initial draft or revision and the balloting process. 
+        The below list shows a sample workflow which would be the steps for an Engineering Document going through an initial draft or revision and the balloting process. 
       </p>
       
       <p class="note">Editors and Chairs should be aware of the general guidelines provided in the <a href="#bib-smpte-gh-om"></a>.
