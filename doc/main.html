@@ -9,7 +9,7 @@
   <meta itemprop="pubType" content="AG" />
   <meta itemprop="pubNumber" content="26" />
   <!-- <meta itemprop="pubPart" content="XX" /> -->
-  <meta itemprop="pubState" content="pub" />
+  <meta itemprop="pubState" content="draft" />
   <!-- meta itemprop="pubStage" content="WD" / -->
   <meta itemprop="pubConfidential" content="no" />
   <!--< meta itemprop="pubTC" content="XX" /> -->
@@ -1317,9 +1317,11 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
   <section id="sec-tooling">
     <h2>Tooling</h2>
+    <section id="sec-tooling-general">
+      <h3>General</h3>
 
     <section id="sec-tooling-overview">
-      <h3>Overview</h3>
+      <h4>Overview</h4>
 
       <p>The SMPTE HTML publication tooling consists of several components:</p>
 
@@ -1336,7 +1338,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
     </section>
 
     <section id="sec-tooling-rendering">
-      <h3>Rendering</h3>
+      <h4>Rendering</h4>
 
       <p>At the heart of the tooling is the rendering code at <code>smpte.js</code>.</p>
 
@@ -1345,7 +1347,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
     </section>
 
     <section id="sec-building">
-      <h3>Building</h3>
+      <h4>Building</h4>
 
       <p>Building the document for publication involves the following steps:</p>
 
@@ -1398,7 +1400,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
     </section>
 
     <section id="sec-gh-integration">
-      <h3>GitHub integration</h3>
+      <h4>GitHub integration</h4>
 
       <p>To automatically create and upload to S3 the clean and redline copies of the document when commits are pushed to GitHub,
       the workflow file at <a href="#figure-workflow-file"></a> is stored at <code>.github/workflows/main.yml</code> in the
@@ -1435,7 +1437,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
     </section>
 
     <section id="sec-aws-integration">
-      <h3>Amazon AWS integration</h3>
+      <h4>Amazon AWS integration</h4>
 
       <p>The tooling uploads publication artifacts to an S3 bucket according to the following parameters:</p>
 
@@ -1485,7 +1487,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
     </section>
 
     <section id="sec-tooling-git-hooks">
-      <h3>Git commit hooks</h3>
+      <h4>Git commit hooks</h4>
 
       <p>It is advisable to install the git commit hook listed at <a href="#figure-pre-commit-hook"></a>. It detects errors before a
       document can be committed.</p>
@@ -1495,7 +1497,102 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <figcaption>Pre-commit hook that validates the main element.</figcaption>
       </figure>
     </section>
+    </section>
+     <section id="sec-tooling-local">
+      <h3>Using tooling locally</h3>
 
+    <section id="sec-tooling-local-overview">
+      <h4>Overview</h4>
+      <p>Many of the features and automatic formatting available in the tooling is present and available when working locally. This allows an editor to create and edit a valid HTML document before pushing to a repo and encountering an error.</p>
+      <p>It is recommended to utilize VS Code (<a>https://code.visualstudio.com/</a>) as your local HTML editor, using the Live Preview extension (<a>https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server</a>), which shows some validation in real-time for an editor.</p>
+      <p>Other useful extension(s) for VS Code are:
+        <ul>
+          <li>Git Graph (visual aid) - <a>https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph</a></li>
+        </ul>
+      </p>
+    </section>
+
+    <section id="sec-tooling-local-install">
+      <h4>Installation and prerequisites</h4>
+      <p>
+        To use the full features locally either on command line, or in termimal (also available inside of VS Code), an editor will need to have the following installed locally:
+        <ul>
+          <li>Node.js - <a>https://nodejs.org/en/download</a></li>
+          <li>Python - <a>https://www.python.org/downloads/</a></li>
+          <li>PIP - <a>https://pip.pypa.io/en/stable/installation/</a></li>
+        </ul>
+      </p>
+      <p>Once installed, it is recommended to keep up to date with the latest versions.</p>
+    </section>
+
+    <section id="sec-tooling-local-repo">
+      <h4>Repo setup</h4>
+      <p>Assuming the prerequisites listed in <a href="#sec-tooling-local-install"></a> are already installed, each time a new repo is cloned and work is to be started, the repo will need to be configured for its dependencies, based on the current <code>./package.json</code> file. </p>
+      <p>The command for this is:</p>
+<pre>
+npm install
+</pre>
+
+      <p class="note">This command will update <code>./package-lock.json</code>, and can be run again if changes are made to <code>./package.json</code> for editing and/or updating dependencies based on the repo.</p>
+
+      <p>Once npm/Node is set up, it is also recommended to set up the requirements and further dependencies for validation to run properly.</p>
+
+      <p>The command for this is:</p>
+<pre>
+npm run prevalidate
+</pre>
+
+      <p>This will check and (if needed) install the HTML 5 validator as noted in <a href="#sec-building"></a>. If the HTML 5 validator has already been installed, or the command has been run before (on another repo), the prompt will return: 
+
+<pre>
+html5validator found. HTML validation ready.
+</pre> 
+
+    </section>
+
+    <section id="sec-tooling-local-validate">
+      <h4>Validation</h4>
+      <p>When creating a PR on GitHub, the tooling automatically performs a build process as noted in <a href="#sec-building"></a>, and part of that process is doing validation, both the internal to the tooling and for general HTML 5 validation.</p>
+        
+      <p>While the internal tooling validation occurs at runtime while editing, waiting until the build action during a PR to check the HTML 5 validation can present an editor with unforseen issues (i.e. an invalid element or broken schema error), which then results in failures on the PR/build that must be fixed. Often times when this occurs the preview with redlines is not available in the PR, and/or the tooling will not allow a build to finish. Therefore it is highly recommended an editor runs the validation locally prior to pushing to GitHub to prevent these failures frmo occuring.</p>
+
+      <p>The command for this is:</p>
+<pre>
+npm run validate
+</pre>
+
+    <p class="note">This command reports back errors in (2) seperate sections that are required to be resolved before a build can complete. The HTML validation includes line numbers for the convenience of the editor.</p>
+
+    <div id="ex-example-error" class="example"></div>
+
+<pre>
+> smpte-html-pub-tooling@2.1.0 prevalidate
+> node scripts/ensure-html5validator.mjs
+
+html5validator found. HTML validation ready.
+
+> smpte-html-pub-tooling@2.1.0 validate
+> run-p validate:doc validate:html
+
+> smpte-html-pub-tooling@2.1.0 validate:html
+> html5validator --errors-only ./doc/main.html
+
+> smpte-html-pub-tooling@2.1.0 validate:doc
+> node ./scripts/validate.mjs ./doc/main.html
+
+Unknown element in clause HTMLElement {
+  [Symbol(SameObject caches)]: [Object: null prototype] { children: HTMLCollection {} }
+}
+".../SMPTE/html-pub/./doc/main.html":1512.7-1512.10: error: No "p" element in scope but a "p" end tag seen.
+".../SMPTE/html-pub/./doc/main.html":1524.7-1524.10: error: No "p" element in scope but a "p" end tag seen.
+".../SMPTE/html-pub/./doc/main.html":1554.21-1555.7: error: Saw "<" when expecting an attribute name. Probable cause: Missing ">" immediately before.
+".../SMPTE/html-pub/./doc/main.html":1554.21-1555.9: error: End tag had attributes.
+".../SMPTE/html-pub/./doc/main.html":1555.242-1555.245: error: No "p" element in scope but a "p" end tag seen.
+ERROR: "validate:html" exited with 5.
+</pre>
+
+    </section>
+    </section>
   </section>
 
   <section class="annex informative" id="sec-table-examples">
