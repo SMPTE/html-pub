@@ -1,14 +1,21 @@
 {
   "name": "smpte-html-pub-tooling",
-  "version": "2.0.0-beta.1",
+  "version": "2.1.0",
   "scripts": {
-    "test": "node test/src/testValidation.mjs"
+    "test": "node test/src/testValidation.mjs",
+    "prevalidate": "node scripts/ensure-html5validator.mjs",
+    "validate": "run-p validate:doc validate:html",
+    "validate:doc": "node ./scripts/validate.mjs ./doc/main.html",
+    "validate:html": "html5validator --errors-only ./doc/main.html"
   },
   "dependencies": {
-    "@aws-sdk/client-iam": "3.525.0",
-    "@aws-sdk/client-s3": "3.525.0",
+    "@aws-sdk/client-iam": "^3.978.0",
+    "@aws-sdk/client-s3": "^3.978.0",
     "adm-zip": "0.5.10",
     "jsdom": "26.0.0",
     "puppeteer": "24.1.0"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
   }
 }
