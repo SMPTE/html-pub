@@ -101,6 +101,26 @@ class MathMatcher {
   }
 }
 
+class MathJaxMatcher {
+  constructor(localName) {
+    this.localName = localName;
+  }
+
+  match(element, logger) {
+    if (element.localName !== this.localName)
+      return false;
+
+      for (const child of element.children) {
+          if (child.localName != 'mjx-math' &&
+              child.localName != 'mjx-assistive-mml' &&
+              child.localName != 'svg') {
+            logger.error(`MathJax container has unexpected child ` + child.localName, element);
+          }
+      }
+
+    return true;
+  }
+}
 
 const ALL_PHRASING_MATCHERS = [
   new TerminalPhrasingMatcher("abbr"),
@@ -126,7 +146,8 @@ const ALL_PHRASING_MATCHERS = [
   new PhrasingMatcher("u"),
   new TerminalPhrasingMatcher("var"),
   new TerminalPhrasingMatcher("wbr"),
-  new TerminalPhrasingMatcher("a")
+  new TerminalPhrasingMatcher("a"),
+  new MathJaxMatcher("mjx-container")
 ];
 class AnyPhrasingMatcher {
   static match(element, logger) {
@@ -159,12 +180,23 @@ class EqDivMatcher {
     if (element.localName !== "div" || element.className !== "formula")
       return false;
 
-    if (element.childElementCount !== 1 || element.firstElementChild.localName !== "math")
-      logger.error(`Formula div must contain a single math element`, element);
-
-    if (element.id === null)
-      logger.error("Formula div is missing an id attribute", element);
-
+    // MathJax will asynchronously replace latex equations written in
+    // textContent, escaped by $$ $$ or \[ \] delimiters, with an mjx-container
+    // element. If MathJax has yet not performed this processing, then ensure
+    // that the equation div have an escaped block equation in its textContent.
+    if (element.childElementCount === 0) {
+      if (element.textContent.match(/\[.*\]/) ||
+          element.textContent.match(/$$.*$$/)) {
+        return true;
+      }
+    }
+    if (element.childElementCount === 1) {
+      if (element.firstElementChild.localName === "math" ||
+          element.firstElementChild.localName === "mjx-container") {
+        return true;
+      }
+    }
+    logger.error(`Formula div must contain a single math or mjx-container element`, element);
     return true;
   }
 }
