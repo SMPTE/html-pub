@@ -9,7 +9,7 @@
   <meta itemprop="pubType" content="AG">
   <meta itemprop="pubNumber" content="26">
   <!-- <meta itemprop="pubPart" content="XX"> -->
-  <meta itemprop="pubState" content="pub">
+  <meta itemprop="pubState" content="draft">
   <!-- meta itemprop="pubStage" content="WD"> -->
   <meta itemprop="pubConfidential" content="no">
   <!--< meta itemprop="pubTC" content="XX"> -->
@@ -158,16 +158,6 @@
 
         <p>In addition to the <code>title</code> element, the <code>head</code> element contains SMPTE publication metadata in
         the form of <code>meta</code> elements as specified below.</p>
-
-        <p>The <code>head</code> element may contain additional <code>script</code> elements that import JavaScript libraries for
-        document layout, e.g. <a href="https://www.mathjax.org/">MathJax</a></p>
-
-          <div class="example">
-<pre>&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=es6&quot;&gt;&lt;/script&gt;
-&lt;script type=&quot;text/javascript&quot; id=&quot;MathJax-script&quot;
-  async src=&quot;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js&quot;&gt;
-&lt;/script&gt;</pre>
-          </div>
 
       </section>
 
@@ -363,7 +353,34 @@
         <h4>Additional <code>script</code> elements</h4>
 
 
+        <p>The <code>head</code> element may contain additional <code>script</code> elements that import JavaScript libraries for
+        document layout, e.g. <a href="https://www.mathjax.org/">MathJax</a></p>
+
+          <div class="example">
+<pre>&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=es6&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; id=&quot;MathJax-script&quot;
+  async src=&quot;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js&quot;&gt;
+&lt;/script&gt;</pre>
+          </div>
+
+
       </section>
+
+      <section id="sec-additional-style-elements">
+        <h4>Additional <code>stylesheet</code> elements</h4>
+
+
+        <p>The <code>head</code> element shall not contain additional <code>link</code> elements that import either internal or external <code>stylesheet</code> files. </p>
+
+          <div class="example">
+<pre>&lt;link rel=&quot;stylesheet&quot;  href=&quot;./styles.css&quot;&gt;
+</pre>
+          </div>
+
+        <p class="note">Also see <a href="#sec-additional-style-usage"></a> for guidance on styling.</p>
+
+      </section>
+
     </section>
 
     <section id="sec-body-element">
@@ -1069,8 +1086,8 @@
   &lt;caption&gt;Sample Table&lt;/caption&gt;
   &lt;thead&gt;
     &lt;tr&gt;
-      &lt;th style="width: 30%"&gt;Sample Number&lt;/th&gt;
-      &lt;th style="width: 70%"&gt;Sample Name&lt;/th&gt;
+      &lt;th&gt;Sample Number&lt;/th&gt;
+      &lt;th&gt;Sample Name&lt;/th&gt;
     &lt;/tr&gt;
   &lt;/thead&gt;
   &lt;tbody&gt;
@@ -1092,8 +1109,8 @@
             <caption>Sample Table</caption>
             <thead>
               <tr>
-                <th style="width: 30%">Sample Number</th>
-                <th style="width: 70%">Sample Name</th>
+                <th>Sample Number</th>
+                <th>Sample Name</th>
               </tr>
             </thead>
             <tbody>
@@ -1325,6 +1342,39 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
           <p>This is an <code>element</code> that is rendered with the <code>code</code> HTML element.</p>
         </div>
     
+      </section>
+
+      <section id="sec-additional-style-usage">
+        <h4>Using <code>class</code> attributes</h4>
+        <p>
+          In addition to the restriction of using internal or external defined <code>stylesheet</code> elements as per <a href="#sec-additional-style-elements"></a>, editors shall not use <code>style</code> attributes within <code>html</code> elements for styling. Instead, the styling may be modified using <code>class</code> values where applicable as listed below. 
+        </p>
+
+        <dl>
+          <dt><code>annex</code></dt>
+          <dd>Used on a <code>section</code> element to designate the section as an annex. See <a href="#sec-annex-section"></a>.</dd>
+
+          <dt><code>note</code></dt>
+          <dd>Applied to <code>p</code>, <code>div</code>, or <code>dd</code> elements to create a formatted and automatically numbered note. See <a href="#sec-note-class"></a>.</dd>
+
+          <dt><code>example</code></dt>
+          <dd>Applied to <code>p</code> or <code>div</code> elements to create a formatted and automatically numbered example. See <a href="#sec-example-class"></a>.</dd>
+
+          <dt><code>center-cell</code></dt>
+          <dd>Applied to a <code>td</code> element to center-align the content of that individual table cell. See <a href="#sec-table-alignment-cell"></a>.</dd>
+
+          <dt><code>col-1-center</code> through <code>col-8-center</code></dt>
+          <dd>Applied to a <code>table</code> element to center-align the contents of the specified column. Multiple classes may be combined to center multiple columns. See <a href="#sec-table-alignment-column"></a>.</dd>
+
+          <dt><code>formula</code></dt>
+          <dd>Applied to a <code>div</code> element that contains a block <code>math</code> element to format and number displayed formulae. See <a href="#sec-formulae"></a></dd>
+
+        </dl>
+
+        <p class="note">All other elements are automatically styled by the default SMPTE defined <code>CSS</code> values, such as "<code>code</code>" and may not be altered.</p>
+
+        <p class="note">Tables are automatically formatted for best view on a variety of screen sizes and formats.</p>
+
       </section>
 
     </section>

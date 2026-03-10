@@ -53,8 +53,22 @@ export class ErrorLogger {
   }
 }
 
+function validateDisallowedHeadLinks(head, logger) {
+  for (const linkElement of head.querySelectorAll('link[rel="stylesheet"]')) {
+    logger.error(`Stylesheet links are not permitted in the document head`, linkElement);
+  }
+}
+
+function validateDisallowedStyleAttributes(root, logger) {
+  for (const styledElement of root.querySelectorAll('[style]')) {
+    logger.error(`Style attributes are not permitted`, styledElement);
+  }
+}
+
 export function smpteValidate(doc, logger) {
   const docMetadata = smpte.validateHead(doc.head, logger);
+  validateDisallowedHeadLinks(doc.head, logger);
+  validateDisallowedStyleAttributes(doc.documentElement, logger);
   validateBody(doc.body, logger);
   return docMetadata;
 }
