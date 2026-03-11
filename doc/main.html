@@ -1363,6 +1363,22 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
           <dt><code>center-cell</code></dt>
           <dd>Applied to a <code>td</code> element to center-align the content of that individual table cell. See <a href="#sec-table-alignment-cell"></a>.</dd>
 
+          <dt><code>text-nowrap</code></dt>
+          <dd>Applied to an element to prevent line wrapping of its contents. This is commonly used on <code>th</code> or <code>td</code> elements to keep short identifiers, tags, or codes on a single line. See <a href="#sec-table-width-nowrap-cell"></a></dd>
+
+          <dt><code>col-1-nowrap</code> through <code>col-8-nowrap</code></dt>
+          <dd>Applied to a <code>table</code> element to prevent line wrapping within the specified column. See <a href="#sec-table-width-nowrap-column"></a></dd>
+
+          <dt><code>col-small</code>;</dt>
+          <dt><code>col-medium</code>;</dt>
+          <dt><code>col-wide</code></dt>
+          <dd>Applied to <code>th</code> or <code>td</code> elements to suggest a relative column width for that cell. These classes provide narrow, medium, or wide column layouts without using inline <code>style</code> attributes. See <a href="#sec-table-width-nowrap-cell"></a></dd>
+
+          <dt><code>col-1-small</code> through <code>col-8-small</code>;</dt>
+          <dt><code>col-1-medium</code> through <code>col-8-medium</code>;</dt>
+          <dt><code>col-1-wide</code> through <code>col-8-wide</code></dt>
+          <dd>Applied to a <code>table</code> element to suggest relative widths for specific columns. See <a href="#sec-table-width-nowrap-column"></a></dd>
+
           <dt><code>col-1-center</code> through <code>col-8-center</code></dt>
           <dd>Applied to a <code>table</code> element to center-align the contents of the specified column. Multiple classes may be combined to center multiple columns. See <a href="#sec-table-alignment-column"></a>.</dd>
 
@@ -2001,6 +2017,141 @@ ERROR: "validate:html" exited with 5.
           </tr>
         </tbody>
       </table>
+    </section>
+
+    <section id="sec-table-width-nowrap-cell">
+      <h3>Column Width and No-wrap (Cell-level)</h3>
+
+      <p>
+        Column widths and non-wrapping text may be controlled at the individual cell level using classes such as
+        <code>col-small</code>, <code>col-wide</code>, and <code>text-nowrap</code>.
+      </p>
+
+      <div class="example">
+<pre>
+&lt;table id="tab-sample-tabledata-widthcell"&gt;
+  &lt;caption&gt;Cell-level Width and No-wrap Table Sample&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th class="col-small text-nowrap"&gt;ID&lt;/th&gt;
+      &lt;th&gt;Description&lt;/th&gt;
+      &lt;th class="col-wide"&gt;Identifier&lt;/th&gt;
+      &lt;th class="text-nowrap"&gt;Code&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td class="col-small text-nowrap"&gt;01&lt;/td&gt;
+      &lt;td&gt;Example element&lt;/td&gt;
+      &lt;td class="col-wide"&gt;urn:smpte:example:identifier:0001&lt;/td&gt;
+      &lt;td class="text-nowrap"&gt;A-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class="col-small text-nowrap"&gt;02&lt;/td&gt;
+      &lt;td&gt;Another example element&lt;/td&gt;
+      &lt;td class="col-wide"&gt;urn:smpte:example:identifier:0002&lt;/td&gt;
+      &lt;td class="text-nowrap"&gt;B-02&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</pre>
+
+      <p>is rendered as</p>
+
+      <table id="tab-sample-tabledata-widthcell">
+        <caption>Cell-level Width and No-wrap Table Sample</caption>
+        <thead>
+          <tr>
+            <th class="col-small text-nowrap">ID</th>
+            <th>Description</th>
+            <th class="col-wide">Identifier</th>
+            <th class="text-nowrap">Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-small text-nowrap">01</td>
+            <td>Example element</td>
+            <td class="col-wide">urn:smpte:example:identifier:0001</td>
+            <td class="text-nowrap">A-01</td>
+          </tr>
+          <tr>
+            <td class="col-small text-nowrap">02</td>
+            <td>Another example element</td>
+            <td class="col-wide">urn:smpte:example:identifier:0002</td>
+            <td class="text-nowrap">B-02</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+
+    <section id="sec-table-width-nowrap-column">
+      <h3>Column Width and No-wrap (Column-level)</h3>
+
+      <p>
+        Column width and wrapping behavior may also be controlled for entire columns using table-level classes
+        such as <code>col-3-nowrap</code> and column width classes.
+      </p>
+
+      <div class="example">
+<pre>
+&lt;table id="tab-sample-tabledata-widthcolumn" class="col-3-nowrap col-1-small col-4-wide"&gt;
+  &lt;caption&gt;Column-level Width and No-wrap Table Sample&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;ID&lt;/th&gt;
+      &lt;th&gt;Name&lt;/th&gt;
+      &lt;th&gt;Code&lt;/th&gt;
+      &lt;th&gt;Identifier&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;01&lt;/td&gt;
+      &lt;td&gt;Element One&lt;/td&gt;
+      &lt;td&gt;ABC-0001&lt;/td&gt;
+      &lt;td&gt;urn:smpte:example:identifier:0001&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;02&lt;/td&gt;
+      &lt;td&gt;Element Two&lt;/td&gt;
+      &lt;td&gt;ABC-0002&lt;/td&gt;
+      &lt;td&gt;urn:smpte:example:identifier:0002&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</pre>
+
+      <p>is rendered as</p>
+
+      <table id="tab-sample-tabledata-widthcolumn" class="col-3-nowrap col-1-small col-4-wide">
+        <caption>Column-level Width and No-wrap Table Sample</caption>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Identifier</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>01</td>
+            <td>Element One</td>
+            <td>ABC-0001</td>
+            <td>urn:smpte:example:identifier:0001</td>
+          </tr>
+          <tr>
+            <td>02</td>
+            <td>Element Two</td>
+            <td>ABC-0002</td>
+            <td>urn:smpte:example:identifier:0002</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
     </section>
 
   </section>

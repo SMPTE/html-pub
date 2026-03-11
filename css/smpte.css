@@ -329,6 +329,95 @@ table.col-8-center tr td:nth-child(8) {
   text-align: center;
 }
 
+/* column nowrap utilities */
+
+table.col-1-nowrap tr td:nth-child(1), table.col-1-nowrap tr th:nth-child(1) {
+  white-space: nowrap;
+}
+
+table.col-2-nowrap tr td:nth-child(2), table.col-2-nowrap tr th:nth-child(2) {
+  white-space: nowrap;
+}
+
+table.col-3-nowrap tr td:nth-child(3), table.col-3-nowrap tr th:nth-child(3) {
+  white-space: nowrap;
+}
+
+table.col-4-nowrap tr td:nth-child(4), table.col-4-nowrap tr th:nth-child(4) {
+  white-space: nowrap;
+}
+
+table.col-5-nowrap tr td:nth-child(5), table.col-5-nowrap tr th:nth-child(5) {
+  white-space: nowrap;
+}
+
+table.col-6-nowrap tr td:nth-child(6), table.col-6-nowrap tr th:nth-child(6) {
+  white-space: nowrap;
+}
+
+table.col-7-nowrap tr td:nth-child(7), table.col-7-nowrap tr th:nth-child(7) {
+  white-space: nowrap;
+}
+
+table.col-8-nowrap tr td:nth-child(8), table.col-8-nowrap tr th:nth-child(8) {
+  white-space: nowrap;
+}
+
+/* column width utilities */
+
+/* small */
+
+ table.col-1-small tr td:nth-child(1), table.col-1-small tr th:nth-child(1),
+ table.col-2-small tr td:nth-child(2), table.col-2-small tr th:nth-child(2),
+ table.col-3-small tr td:nth-child(3), table.col-3-small tr th:nth-child(3),
+ table.col-4-small tr td:nth-child(4), table.col-4-small tr th:nth-child(4),
+ table.col-5-small tr td:nth-child(5), table.col-5-small tr th:nth-child(5),
+ table.col-6-small tr td:nth-child(6), table.col-6-small tr th:nth-child(6),
+ table.col-7-small tr td:nth-child(7), table.col-7-small tr th:nth-child(7),
+ table.col-8-small tr td:nth-child(8), table.col-8-small tr th:nth-child(8) {
+   width: 8rem;
+ }
+
+/* medium */
+
+ table.col-1-medium tr td:nth-child(1), table.col-1-medium tr th:nth-child(1),
+ table.col-2-medium tr td:nth-child(2), table.col-2-medium tr th:nth-child(2),
+ table.col-3-medium tr td:nth-child(3), table.col-3-medium tr th:nth-child(3),
+ table.col-4-medium tr td:nth-child(4), table.col-4-medium tr th:nth-child(4),
+ table.col-5-medium tr td:nth-child(5), table.col-5-medium tr th:nth-child(5),
+ table.col-6-medium tr td:nth-child(6), table.col-6-medium tr th:nth-child(6),
+ table.col-7-medium tr td:nth-child(7), table.col-7-medium tr th:nth-child(7),
+ table.col-8-medium tr td:nth-child(8), table.col-8-medium tr th:nth-child(8) {
+   width: 14rem;
+ }
+
+/* wide */
+
+ table.col-1-wide tr td:nth-child(1), table.col-1-wide tr th:nth-child(1),
+ table.col-2-wide tr td:nth-child(2), table.col-2-wide tr th:nth-child(2),
+ table.col-3-wide tr td:nth-child(3), table.col-3-wide tr th:nth-child(3),
+ table.col-4-wide tr td:nth-child(4), table.col-4-wide tr th:nth-child(4),
+ table.col-5-wide tr td:nth-child(5), table.col-5-wide tr th:nth-child(5),
+ table.col-6-wide tr td:nth-child(6), table.col-6-wide tr th:nth-child(6),
+ table.col-7-wide tr td:nth-child(7), table.col-7-wide tr th:nth-child(7),
+ table.col-8-wide tr td:nth-child(8), table.col-8-wide tr th:nth-child(8) {
+   width: 20rem;
+ }
+
+ /* cell width utilities */
+
+th.col-small, td.col-small {
+  width: 8rem;
+}
+
+th.col-medium, td.col-medium {
+  width: 14rem;
+}
+
+th.col-wide, td.col-wide {
+  width: 20rem;
+}
+
 table > caption {
   margin-top: 2em;
   margin-bottom: 1em;
@@ -410,6 +499,14 @@ div.formula > .heading-label {
 
 #sec-elements {
   break-before: page;
+}
+
+/* text utilities */
+
+.text-nowrap,
+th.text-nowrap,
+td.text-nowrap {
+  white-space: nowrap;
 }
 
 /* links */
