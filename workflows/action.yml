@@ -35,6 +35,10 @@ runs:
       shell: bash
       run: npm install ${GITHUB_ACTION_PATH}/..
 
+    - name: Configure git to use HTTPS for GitHub repos
+      shell: bash
+      run: git config --global --replace-all url."https://github.com/".insteadOf "git@github.com:"
+
     - name: Build and deploy spec
       id: build
       shell: bash
