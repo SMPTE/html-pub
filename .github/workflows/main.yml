@@ -66,3 +66,15 @@ jobs:
           AWS_S3_KEY_PREFIX: "${{env.REPOSITORY_NAME}}/"
           CANONICAL_LINK_PREFIX: ${{env.CANONICAL_LINK_PREFIX}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Notify template repo to update submodule
+        if: github.event_name == 'release' && github.repository == 'SMPTE/html-pub'
+        env:
+          GH_TOKEN: ${{ secrets.TEMPLATE_REPO_PAT }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          gh api repos/SMPTE/html-pub-template/dispatches \
+            --method POST \
+            --field event_type=tooling-release \
+            --field "client_payload[tag]=${TAG_NAME}" \
+            --field "client_payload[sha]=${GITHUB_SHA}"

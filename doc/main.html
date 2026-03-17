@@ -14,7 +14,7 @@
   <meta itemprop="pubConfidential" content="no">
   <!--< meta itemprop="pubTC" content="XX"> -->
   <meta itemprop="pubSuiteTitle" content="HTML Pub">
-  <meta itemprop="pubDateTime" content="2026-03-10">
+  <meta itemprop="pubDateTime" content="2026-03-12">
   <!-- <meta itemprop="pubRevisionOf" content="SMPTE ST XXXX-Y:ZZZZ"> -->
   <title>Tooling and documentation for HTML documents</title>
 </head>
@@ -158,16 +158,6 @@
 
         <p>In addition to the <code>title</code> element, the <code>head</code> element contains SMPTE publication metadata in
         the form of <code>meta</code> elements as specified below.</p>
-
-        <p>The <code>head</code> element may contain additional <code>script</code> elements that import JavaScript libraries for
-        document layout, e.g. <a href="https://www.mathjax.org/">MathJax</a></p>
-
-          <div class="example">
-<pre>&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=es6&quot;&gt;&lt;/script&gt;
-&lt;script type=&quot;text/javascript&quot; id=&quot;MathJax-script&quot;
-  async src=&quot;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js&quot;&gt;
-&lt;/script&gt;</pre>
-          </div>
 
       </section>
 
@@ -363,7 +353,34 @@
         <h4>Additional <code>script</code> elements</h4>
 
 
+        <p>The <code>head</code> element may contain additional <code>script</code> elements that import JavaScript libraries for
+        document layout, e.g. <a href="https://www.mathjax.org/">MathJax</a></p>
+
+          <div class="example">
+<pre>&lt;script src=&quot;https://polyfill.io/v3/polyfill.min.js?features=es6&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; id=&quot;MathJax-script&quot;
+  async src=&quot;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js&quot;&gt;
+&lt;/script&gt;</pre>
+          </div>
+
+
       </section>
+
+      <section id="sec-additional-style-elements">
+        <h4>Additional <code>stylesheet</code> elements</h4>
+
+
+        <p>The <code>head</code> element shall not contain additional <code>link</code> elements that import either internal or external <code>stylesheet</code> files. </p>
+
+          <div class="example">
+<pre>&lt;link rel=&quot;stylesheet&quot;  href=&quot;./styles.css&quot;&gt;
+</pre>
+          </div>
+
+        <p class="note">Also see <a href="#sec-additional-style-usage"></a> for guidance on styling.</p>
+
+      </section>
+
     </section>
 
     <section id="sec-body-element">
@@ -1069,8 +1086,8 @@
   &lt;caption&gt;Sample Table&lt;/caption&gt;
   &lt;thead&gt;
     &lt;tr&gt;
-      &lt;th style="width: 30%"&gt;Sample Number&lt;/th&gt;
-      &lt;th style="width: 70%"&gt;Sample Name&lt;/th&gt;
+      &lt;th&gt;Sample Number&lt;/th&gt;
+      &lt;th&gt;Sample Name&lt;/th&gt;
     &lt;/tr&gt;
   &lt;/thead&gt;
   &lt;tbody&gt;
@@ -1092,8 +1109,8 @@
             <caption>Sample Table</caption>
             <thead>
               <tr>
-                <th style="width: 30%">Sample Number</th>
-                <th style="width: 70%">Sample Name</th>
+                <th>Sample Number</th>
+                <th>Sample Name</th>
               </tr>
             </thead>
             <tbody>
@@ -1325,6 +1342,55 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
           <p>This is an <code>element</code> that is rendered with the <code>code</code> HTML element.</p>
         </div>
     
+      </section>
+
+      <section id="sec-additional-style-usage">
+        <h4>Using <code>class</code> attributes</h4>
+        <p>
+          In addition to the restriction of using internal or external defined <code>stylesheet</code> elements as per <a href="#sec-additional-style-elements"></a>, editors shall not use <code>style</code> attributes within <code>html</code> elements for styling. Instead, the styling may be modified using <code>class</code> values where applicable as listed below. 
+        </p>
+
+        <dl>
+          <dt><code>annex</code></dt>
+          <dd>Used on a <code>section</code> element to designate the section as an annex. See <a href="#sec-annex-section"></a>.</dd>
+
+          <dt><code>note</code></dt>
+          <dd>Applied to <code>p</code>, <code>div</code>, or <code>dd</code> elements to create a formatted and automatically numbered note. See <a href="#sec-note-class"></a>.</dd>
+
+          <dt><code>example</code></dt>
+          <dd>Applied to <code>p</code> or <code>div</code> elements to create a formatted and automatically numbered example. See <a href="#sec-example-class"></a>.</dd>
+
+          <dt><code>center-cell</code></dt>
+          <dd>Applied to a <code>td</code> element to center-align the content of that individual table cell. See <a href="#sec-table-alignment-cell"></a>.</dd>
+
+          <dt><code>text-nowrap</code></dt>
+          <dd>Applied to an element to prevent line wrapping of its contents. This is commonly used on <code>th</code> or <code>td</code> elements to keep short identifiers, tags, or codes on a single line. See <a href="#sec-table-width-nowrap-cell"></a></dd>
+
+          <dt><code>col-1-nowrap</code> through <code>col-8-nowrap</code></dt>
+          <dd>Applied to a <code>table</code> element to prevent line wrapping within the specified column. See <a href="#sec-table-width-nowrap-column"></a></dd>
+
+          <dt><code>col-small</code>;</dt>
+          <dt><code>col-medium</code>;</dt>
+          <dt><code>col-wide</code></dt>
+          <dd>Applied to <code>th</code> or <code>td</code> elements to suggest a relative column width for that cell. These classes provide narrow, medium, or wide column layouts without using inline <code>style</code> attributes. See <a href="#sec-table-width-nowrap-cell"></a></dd>
+
+          <dt><code>col-1-small</code> through <code>col-8-small</code>;</dt>
+          <dt><code>col-1-medium</code> through <code>col-8-medium</code>;</dt>
+          <dt><code>col-1-wide</code> through <code>col-8-wide</code></dt>
+          <dd>Applied to a <code>table</code> element to suggest relative widths for specific columns. See <a href="#sec-table-width-nowrap-column"></a></dd>
+
+          <dt><code>col-1-center</code> through <code>col-8-center</code></dt>
+          <dd>Applied to a <code>table</code> element to center-align the contents of the specified column. Multiple classes may be combined to center multiple columns. See <a href="#sec-table-alignment-column"></a>.</dd>
+
+          <dt><code>formula</code></dt>
+          <dd>Applied to a <code>div</code> element that contains a block <code>math</code> element to format and number displayed formulae. See <a href="#sec-formulae"></a></dd>
+
+        </dl>
+
+        <p class="note">All other elements are automatically styled by the default SMPTE defined <code>CSS</code> values, such as "<code>code</code>" and may not be altered.</p>
+
+        <p class="note">Tables are automatically formatted for best view on a variety of screen sizes and formats.</p>
+
       </section>
 
     </section>
@@ -1951,6 +2017,141 @@ ERROR: "validate:html" exited with 5.
           </tr>
         </tbody>
       </table>
+    </section>
+
+    <section id="sec-table-width-nowrap-cell">
+      <h3>Column Width and No-wrap (Cell-level)</h3>
+
+      <p>
+        Column widths and non-wrapping text may be controlled at the individual cell level using classes such as
+        <code>col-small</code>, <code>col-wide</code>, and <code>text-nowrap</code>.
+      </p>
+
+      <div class="example">
+<pre>
+&lt;table id="tab-sample-tabledata-widthcell"&gt;
+  &lt;caption&gt;Cell-level Width and No-wrap Table Sample&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th class="col-small text-nowrap"&gt;ID&lt;/th&gt;
+      &lt;th&gt;Description&lt;/th&gt;
+      &lt;th class="col-wide"&gt;Identifier&lt;/th&gt;
+      &lt;th class="text-nowrap"&gt;Code&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td class="col-small text-nowrap"&gt;01&lt;/td&gt;
+      &lt;td&gt;Example element&lt;/td&gt;
+      &lt;td class="col-wide"&gt;urn:smpte:example:identifier:0001&lt;/td&gt;
+      &lt;td class="text-nowrap"&gt;A-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class="col-small text-nowrap"&gt;02&lt;/td&gt;
+      &lt;td&gt;Another example element&lt;/td&gt;
+      &lt;td class="col-wide"&gt;urn:smpte:example:identifier:0002&lt;/td&gt;
+      &lt;td class="text-nowrap"&gt;B-02&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</pre>
+
+      <p>is rendered as</p>
+
+      <table id="tab-sample-tabledata-widthcell">
+        <caption>Cell-level Width and No-wrap Table Sample</caption>
+        <thead>
+          <tr>
+            <th class="col-small text-nowrap">ID</th>
+            <th>Description</th>
+            <th class="col-wide">Identifier</th>
+            <th class="text-nowrap">Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-small text-nowrap">01</td>
+            <td>Example element</td>
+            <td class="col-wide">urn:smpte:example:identifier:0001</td>
+            <td class="text-nowrap">A-01</td>
+          </tr>
+          <tr>
+            <td class="col-small text-nowrap">02</td>
+            <td>Another example element</td>
+            <td class="col-wide">urn:smpte:example:identifier:0002</td>
+            <td class="text-nowrap">B-02</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+
+    <section id="sec-table-width-nowrap-column">
+      <h3>Column Width and No-wrap (Column-level)</h3>
+
+      <p>
+        Column width and wrapping behavior may also be controlled for entire columns using table-level classes
+        such as <code>col-3-nowrap</code> and column width classes.
+      </p>
+
+      <div class="example">
+<pre>
+&lt;table id="tab-sample-tabledata-widthcolumn" class="col-3-nowrap col-1-small col-4-wide"&gt;
+  &lt;caption&gt;Column-level Width and No-wrap Table Sample&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;ID&lt;/th&gt;
+      &lt;th&gt;Name&lt;/th&gt;
+      &lt;th&gt;Code&lt;/th&gt;
+      &lt;th&gt;Identifier&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;01&lt;/td&gt;
+      &lt;td&gt;Element One&lt;/td&gt;
+      &lt;td&gt;ABC-0001&lt;/td&gt;
+      &lt;td&gt;urn:smpte:example:identifier:0001&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;02&lt;/td&gt;
+      &lt;td&gt;Element Two&lt;/td&gt;
+      &lt;td&gt;ABC-0002&lt;/td&gt;
+      &lt;td&gt;urn:smpte:example:identifier:0002&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</pre>
+
+      <p>is rendered as</p>
+
+      <table id="tab-sample-tabledata-widthcolumn" class="col-3-nowrap col-1-small col-4-wide">
+        <caption>Column-level Width and No-wrap Table Sample</caption>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Identifier</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>01</td>
+            <td>Element One</td>
+            <td>ABC-0001</td>
+            <td>urn:smpte:example:identifier:0001</td>
+          </tr>
+          <tr>
+            <td>02</td>
+            <td>Element Two</td>
+            <td>ABC-0002</td>
+            <td>urn:smpte:example:identifier:0002</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
     </section>
 
   </section>
