@@ -192,12 +192,8 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
 
     console.log(`Generating a redline against base: ${baseRef}.`);
 
-    try {
-      await generateRedline(buildPaths, baseRef, buildPaths.baseRedLineRefPath, buildPaths.baseRedlinePath);
-      generatedFiles.baseRedline = buildPaths.baseRedlineName;
-    } catch (e) {
-      console.warn(`Could not generate a redline: ${e}.`);
-    }
+    await generateRedline(buildPaths, baseRef, buildPaths.baseRedLineRefPath, buildPaths.baseRedlinePath);
+    generatedFiles.baseRedline = buildPaths.baseRedlineName;
 
   }
 
@@ -205,14 +201,12 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
 
   if (lastEdRef !== null) {
 
+    child_process.execSync(`git fetch --tags`);
+
     console.log(`Generating a redline against the latest edition tag: ${lastEdRef}.`);
 
-    try {
-      await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
-      generatedFiles.pubRedline = buildPaths.pubRedlineName;
-    } catch (e) {
-      console.warn(`Could not generate a redline: ${e}.`);
-    }
+    await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
+    generatedFiles.pubRedline = buildPaths.pubRedlineName;
 
   }
 
