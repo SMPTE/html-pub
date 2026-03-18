@@ -201,6 +201,8 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
 
   if (lastEdRef !== null) {
 
+    child_process.execSync(`git fetch --tags`);
+
     console.log(`Generating a redline against the latest edition tag: ${lastEdRef}.`);
 
     await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
