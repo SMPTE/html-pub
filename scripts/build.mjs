@@ -730,8 +730,10 @@ async function main() {
 
   const docMetadata = smpteValidate(dom.window.document, logger);
 
-  if (logger.hasFailed())
-    throw Error(`SMPTE schema validation failed:\n${logger.errorList().join("\n")}`);
+  if (logger.hasFailed()) {
+    const errors = logger.errorList().map(e => `  ${e.message}`).join("\n");
+    throw Error(`SMPTE schema validation failed:\n${errors}`);
+  }
 
    /* collect elements */
 

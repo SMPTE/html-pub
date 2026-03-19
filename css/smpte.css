@@ -209,7 +209,7 @@ blockquote {
 
 /* note and example */
 
-.note, .example {
+.note, .example, .deprecated {
   font-size: 0.9rem;
   margin-left: 1rem;
 }
