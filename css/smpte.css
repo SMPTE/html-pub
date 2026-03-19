@@ -293,77 +293,78 @@ tbody {
   text-align: left;
 }
 
-td.center-cell {
-  text-align: center;
-}
+/* cell alignment utilities */
 
-table.col-1-center tr td:nth-child(1) {
-  text-align: center;
-}
+td.center-cell { text-align: center; }
+td.right-cell  { text-align: right; }
+td.left-cell   { text-align: left; }
+td.top-cell    { vertical-align: top; }
 
-table.col-2-center tr td:nth-child(2) {
-  text-align: center;
-}
+/* column alignment utilities */
 
-table.col-3-center tr td:nth-child(3) {
-  text-align: center;
-}
+/* center */
 
-table.col-4-center tr td:nth-child(4) {
-  text-align: center;
-}
+ table.col-1-center tr td:nth-child(1), table.col-2-center tr td:nth-child(2),
+ table.col-3-center tr td:nth-child(3), table.col-4-center tr td:nth-child(4),
+ table.col-5-center tr td:nth-child(5), table.col-6-center tr td:nth-child(6),
+ table.col-7-center tr td:nth-child(7), table.col-8-center tr td:nth-child(8) {
+   text-align: center;
+ }
 
-table.col-5-center tr td:nth-child(5) {
-  text-align: center;
-}
+/* right */
 
-table.col-6-center tr td:nth-child(6) {
-  text-align: center;
-}
+ table.col-1-right tr td:nth-child(1), table.col-2-right tr td:nth-child(2),
+ table.col-3-right tr td:nth-child(3), table.col-4-right tr td:nth-child(4),
+ table.col-5-right tr td:nth-child(5), table.col-6-right tr td:nth-child(6),
+ table.col-7-right tr td:nth-child(7), table.col-8-right tr td:nth-child(8) {
+   text-align: right;
+ }
 
-table.col-7-center tr td:nth-child(7) {
-  text-align: center;
-}
+/* left */
 
-table.col-8-center tr td:nth-child(8) {
-  text-align: center;
-}
+ table.col-1-left tr td:nth-child(1), table.col-2-left tr td:nth-child(2),
+ table.col-3-left tr td:nth-child(3), table.col-4-left tr td:nth-child(4),
+ table.col-5-left tr td:nth-child(5), table.col-6-left tr td:nth-child(6),
+ table.col-7-left tr td:nth-child(7), table.col-8-left tr td:nth-child(8) {
+   text-align: left;
+ }
+
+/* top */
+
+ table.col-1-top tr td:nth-child(1), table.col-2-top tr td:nth-child(2),
+ table.col-3-top tr td:nth-child(3), table.col-4-top tr td:nth-child(4),
+ table.col-5-top tr td:nth-child(5), table.col-6-top tr td:nth-child(6),
+ table.col-7-top tr td:nth-child(7), table.col-8-top tr td:nth-child(8) {
+   vertical-align: top;
+ }
 
 /* column nowrap utilities */
 
-table.col-1-nowrap tr td:nth-child(1), table.col-1-nowrap tr th:nth-child(1) {
-  white-space: nowrap;
-}
-
-table.col-2-nowrap tr td:nth-child(2), table.col-2-nowrap tr th:nth-child(2) {
-  white-space: nowrap;
-}
-
-table.col-3-nowrap tr td:nth-child(3), table.col-3-nowrap tr th:nth-child(3) {
-  white-space: nowrap;
-}
-
-table.col-4-nowrap tr td:nth-child(4), table.col-4-nowrap tr th:nth-child(4) {
-  white-space: nowrap;
-}
-
-table.col-5-nowrap tr td:nth-child(5), table.col-5-nowrap tr th:nth-child(5) {
-  white-space: nowrap;
-}
-
-table.col-6-nowrap tr td:nth-child(6), table.col-6-nowrap tr th:nth-child(6) {
-  white-space: nowrap;
-}
-
-table.col-7-nowrap tr td:nth-child(7), table.col-7-nowrap tr th:nth-child(7) {
-  white-space: nowrap;
-}
-
-table.col-8-nowrap tr td:nth-child(8), table.col-8-nowrap tr th:nth-child(8) {
-  white-space: nowrap;
-}
+ table.col-1-nowrap tr td:nth-child(1), table.col-1-nowrap tr th:nth-child(1),
+ table.col-2-nowrap tr td:nth-child(2), table.col-2-nowrap tr th:nth-child(2),
+ table.col-3-nowrap tr td:nth-child(3), table.col-3-nowrap tr th:nth-child(3),
+ table.col-4-nowrap tr td:nth-child(4), table.col-4-nowrap tr th:nth-child(4),
+ table.col-5-nowrap tr td:nth-child(5), table.col-5-nowrap tr th:nth-child(5),
+ table.col-6-nowrap tr td:nth-child(6), table.col-6-nowrap tr th:nth-child(6),
+ table.col-7-nowrap tr td:nth-child(7), table.col-7-nowrap tr th:nth-child(7),
+ table.col-8-nowrap tr td:nth-child(8), table.col-8-nowrap tr th:nth-child(8) {
+   white-space: nowrap;
+ }
 
 /* column width utilities */
+
+/* xsmall */
+
+ table.col-1-xsmall tr td:nth-child(1), table.col-1-xsmall tr th:nth-child(1),
+ table.col-2-xsmall tr td:nth-child(2), table.col-2-xsmall tr th:nth-child(2),
+ table.col-3-xsmall tr td:nth-child(3), table.col-3-xsmall tr th:nth-child(3),
+ table.col-4-xsmall tr td:nth-child(4), table.col-4-xsmall tr th:nth-child(4),
+ table.col-5-xsmall tr td:nth-child(5), table.col-5-xsmall tr th:nth-child(5),
+ table.col-6-xsmall tr td:nth-child(6), table.col-6-xsmall tr th:nth-child(6),
+ table.col-7-xsmall tr td:nth-child(7), table.col-7-xsmall tr th:nth-child(7),
+ table.col-8-xsmall tr td:nth-child(8), table.col-8-xsmall tr th:nth-child(8) {
+   width: 2rem;
+ }
 
 /* small */
 
@@ -405,6 +406,10 @@ table.col-8-nowrap tr td:nth-child(8), table.col-8-nowrap tr th:nth-child(8) {
  }
 
  /* cell width utilities */
+
+th.col-xsmall, td.col-xsmall {
+  width: 2rem;
+}
 
 th.col-small, td.col-small {
   width: 8rem;
@@ -499,6 +504,12 @@ div.formula > .heading-label {
 
 #sec-elements {
   break-before: page;
+}
+
+/* list utilities */
+
+ul.list-none {
+  list-style-type: none;
 }
 
 /* text utilities */

@@ -1360,8 +1360,11 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
           <dt><code>example</code></dt>
           <dd>Applied to <code>p</code> or <code>div</code> elements to create a formatted and automatically numbered example. See <a href="#sec-example-class"></a>.</dd>
 
-          <dt><code>center-cell</code></dt>
-          <dd>Applied to a <code>td</code> element to center-align the content of that individual table cell. See <a href="#sec-table-alignment-cell"></a>.</dd>
+          <dt><code>center-cell</code>;</dt>
+          <dt><code>right-cell</code>;</dt>
+          <dt><code>left-cell</code>;</dt>
+          <dt><code>top-cell</code></dt>
+          <dd>Applied to a <code>td</code> element to override the alignment of that individual table cell. See <a href="#sec-table-alignment-cell"></a>.</dd>
 
           <dt><code>text-nowrap</code></dt>
           <dd>Applied to an element to prevent line wrapping of its contents. This is commonly used on <code>th</code> or <code>td</code> elements to keep short identifiers, tags, or codes on a single line. See <a href="#sec-table-width-nowrap-cell"></a></dd>
@@ -1369,18 +1372,26 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
           <dt><code>col-1-nowrap</code> through <code>col-8-nowrap</code></dt>
           <dd>Applied to a <code>table</code> element to prevent line wrapping within the specified column. See <a href="#sec-table-width-nowrap-column"></a></dd>
 
+          <dt><code>col-xsmall</code>;</dt>
           <dt><code>col-small</code>;</dt>
           <dt><code>col-medium</code>;</dt>
           <dt><code>col-wide</code></dt>
-          <dd>Applied to <code>th</code> or <code>td</code> elements to suggest a relative column width for that cell. These classes provide narrow, medium, or wide column layouts without using inline <code>style</code> attributes. See <a href="#sec-table-width-nowrap-cell"></a></dd>
+          <dd>Applied to <code>th</code> or <code>td</code> elements to suggest a relative column width for that cell. These classes provide extra-narrow, narrow, medium, or wide column layouts without using inline <code>style</code> attributes. See <a href="#sec-table-width-nowrap-cell"></a></dd>
 
+          <dt><code>col-1-xsmall</code> through <code>col-8-xsmall</code>;</dt>
           <dt><code>col-1-small</code> through <code>col-8-small</code>;</dt>
           <dt><code>col-1-medium</code> through <code>col-8-medium</code>;</dt>
           <dt><code>col-1-wide</code> through <code>col-8-wide</code></dt>
           <dd>Applied to a <code>table</code> element to suggest relative widths for specific columns. See <a href="#sec-table-width-nowrap-column"></a></dd>
 
-          <dt><code>col-1-center</code> through <code>col-8-center</code></dt>
-          <dd>Applied to a <code>table</code> element to center-align the contents of the specified column. Multiple classes may be combined to center multiple columns. See <a href="#sec-table-alignment-column"></a>.</dd>
+          <dt><code>col-1-center</code> through <code>col-8-center</code>;</dt>
+          <dt><code>col-1-right</code> through <code>col-8-right</code>;</dt>
+          <dt><code>col-1-left</code> through <code>col-8-left</code>;</dt>
+          <dt><code>col-1-top</code> through <code>col-8-top</code></dt>
+          <dd>Applied to a <code>table</code> element to override the alignment of the specified column. Multiple classes may be combined to align multiple columns. See <a href="#sec-table-alignment-column"></a>.</dd>
+
+          <dt><code>list-none</code></dt>
+          <dd>Applied to a <code>ul</code> element to remove bullet markers. See <a href="#sec-list-none"></a>.</dd>
 
           <dt><code>formula</code></dt>
           <dd>Applied to a <code>div</code> element that contains a block <code>math</code> element to format and number displayed formulae. See <a href="#sec-formulae"></a></dd>
@@ -1724,43 +1735,43 @@ ERROR: "validate:html" exited with 5.
         <h4>Column Alignment</h4>
 
         <p>
-          To change the alignment of an entire column, a class such as <code>col-3-center</code> may be added to the <code>table</code> denoting which column to center align, as the below example shows. 
+          To change the alignment of an entire column, classes such as <code>col-3-center</code>, <code>col-3-right</code>, <code>col-3-left</code>, or <code>col-3-top</code> may be added to the <code>table</code> element. Multiple alignment classes may be combined across different columns, and multiple classes targeting the same column are also allowed since horizontal (<code>text-align</code>) and vertical (<code>vertical-align</code>) alignment are independent properties, as the below example shows.
         </p>
 
         <pre data-include="snippets/tab-sample-tabledata-colcenter.txt"></pre>
-        
+
         <p>is rendered as</p>
 
-        <table id="tab-sample-tabledata-colcenter" class="col-3-center">
-          <caption><code>col-x-center</code> Table Sample</caption>
+        <table id="tab-sample-tabledata-colcenter" class="col-1-top col-2-top col-2-right col-3-top col-3-center">
+          <caption><code>col-1-top col-2-top col-2-right col-3-top col-3-center</code> Table Sample</caption>
           <thead>
             <tr>
               <th>Sample Number</th>
-              <th>Sample Name</th>
+              <th>Value</th>
               <th>Sample Code</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>0001</td>
-              <td>Name 01</td>
+              <td>42</td>
               <td><code>Code 1</code></td>
             </tr>
             <tr>
               <td>0002</td>
-              <td>Name 02</td>
+              <td>This is a longer description that spans multiple lines to demonstrate how <code>col-2-top</code> and <code>col-2-right</code> may be combined on the same column to independently control vertical and horizontal alignment.</td>
               <td><code>Code 2</code></td>
             </tr>
             <tr>
               <td>0003</td>
-              <td>Name 03</td>
+              <td>8</td>
               <td><code>Code 3</code></td>
             </tr>
           </tbody>
         </table>
 
         <p class="note">
-          Classes are available to center align columns 1-8 (as <code>col-x-center</code>), and multiple classes to <code>table</code> may be added to align more columns as needed.
+          Alignment classes are available for columns 1–8 using <code>col-x-center</code>, <code>col-x-right</code>, <code>col-x-left</code>, and <code>col-x-top</code>. Multiple classes may be combined on the same <code>table</code> to align different columns independently.
         </p>
         <p class="note">
           Tables over 8 columns wide should not be used and instead split into multiple smaller tables.
@@ -1771,15 +1782,15 @@ ERROR: "validate:html" exited with 5.
         <h4>Cell Alignment</h4>
 
         <p>
-          To change the alignment of an individual cell, the class <code>center-cell</code> may be added to each <code>td</code> as needed, as the below example shows. 
+          To change the alignment of an individual cell, classes such as <code>center-cell</code>, <code>right-cell</code>, <code>left-cell</code>, or <code>top-cell</code> may be added to each <code>td</code> as needed, as the below example shows.
         </p>
 
         <pre data-include="snippets/tab-sample-tabledata-centercell.txt"></pre>
-        
+
         <p>is rendered as</p>
 
         <table id="tab-sample-tabledata-centercell">
-          <caption><code>center-cell</code> Table Sample</caption>
+          <caption>Cell Alignment Table Sample</caption>
           <thead>
             <tr>
               <th>Sample Number</th>
@@ -1789,29 +1800,30 @@ ERROR: "validate:html" exited with 5.
           </thead>
           <tbody>
             <tr>
-              <td>0001</td>
+              <td class="right-cell">0001</td>
               <td>Name 01</td>
               <td><code>Code 1</code></td>
             </tr>
             <tr>
-              <td class="center-cell">centered 0002</td>
+              <td class="center-cell">0002</td>
               <td>Name 02</td>
               <td><code>Code 2</code></td>
             </tr>
             <tr>
-              <td>0003</td>
+              <td class="top-cell">0003</td>
               <td>Name 03</td>
               <td><code>Code 3</code></td>
+            </tr>
+            <tr>
+              <td class="top-cell">0004</td>
+              <td class="top-cell">Name 04</td>
+              <td>This is a longer description that spans multiple lines to demonstrate how the <code>top-cell</code> class aligns the content of the first two cells to the top of the row rather than the default middle alignment when adjacent cells contain more content.</td>
             </tr>
           </tbody>
         </table>
 
         <p class="note">
-          The <code>center-cell</code> class may be added to as many <code>td</code> as needed.
-        </p>
-     
-        <p>
-          Vertical cell alignment is not available at this time, and the default is set to top. 
+          Cell alignment classes may be added to as many <code>td</code> elements as needed and may be combined with column-level alignment classes.
         </p>
       </section>
     </section>
@@ -2097,7 +2109,7 @@ ERROR: "validate:html" exited with 5.
 
       <div class="example">
 <pre>
-&lt;table id="tab-sample-tabledata-widthcolumn" class="col-3-nowrap col-1-small col-4-wide"&gt;
+&lt;table id="tab-sample-tabledata-widthcolumn" class="col-3-nowrap col-1-xsmall col-4-wide"&gt;
   &lt;caption&gt;Column-level Width and No-wrap Table Sample&lt;/caption&gt;
   &lt;thead&gt;
     &lt;tr&gt;
@@ -2126,7 +2138,7 @@ ERROR: "validate:html" exited with 5.
 
       <p>is rendered as</p>
 
-      <table id="tab-sample-tabledata-widthcolumn" class="col-3-nowrap col-1-small col-4-wide">
+      <table id="tab-sample-tabledata-widthcolumn" class="col-3-nowrap col-1-xsmall col-4-wide">
         <caption>Column-level Width and No-wrap Table Sample</caption>
         <thead>
           <tr>
@@ -2416,6 +2428,31 @@ ERROR: "validate:html" exited with 5.
       </div>
 
     </section>
+
+    <section id="sec-list-none">
+      <h3>Unordered List Without Bullets</h3>
+
+      <p>
+        To remove bullet markers from an unordered list, the class <code>list-none</code> may be applied to the <code>ul</code> element, as the below example shows.
+      </p>
+
+      <div class="example">
+<pre>
+&lt;ul class="list-none"&gt;
+  &lt;li&gt;First list item&lt;/li&gt;
+  &lt;li&gt;Second list item&lt;/li&gt;
+  &lt;li&gt;Third list item&lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+        <p>is rendered as:</p>
+        <ul class="list-none">
+          <li>First list item</li>
+          <li>Second list item</li>
+          <li>Third list item</li>
+        </ul>
+      </div>
+    </section>
+
   </section>
   <section class="annex" id="sec-document-status-workflow">
     <h2>Document Status Workflow</h2>
