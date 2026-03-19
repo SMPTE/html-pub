@@ -1,5 +1,5 @@
 <table id="tab-sample-tabledata-centercell">
-  <caption><code>center-cell</code> Table Sample</caption>
+  <caption>Cell Alignment Table Sample</caption>
   <thead>
     <tr>
       <th>Sample Number</th>
@@ -9,19 +9,24 @@
   </thead>
   <tbody>
     <tr>
-      <td>0001</td>
+      <td class="right-cell">0001</td>
       <td>Name 01</td>
       <td><code>Code 1</code></td>
     </tr>
     <tr>
-      <td class="center-cell">centered 0002</td>
+      <td class="center-cell">0002</td>
       <td>Name 02</td>
       <td><code>Code 2</code></td>
     </tr>
     <tr>
-      <td>0003</td>
+      <td class="top-cell">0003</td>
       <td>Name 03</td>
       <td><code>Code 3</code></td>
+    </tr>
+    <tr>
+      <td class="top-cell">0004</td>
+      <td class="top-cell">Name 04</td>
+      <td>This is a longer description that spans multiple lines to demonstrate how the <code>top-cell</code> class aligns the content of the first two cells to the top of the row rather than the default middle alignment when adjacent cells contain more content.</td>
     </tr>
   </tbody>
 </table>
