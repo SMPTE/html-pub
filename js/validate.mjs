@@ -65,10 +65,18 @@ function validateDisallowedStyleAttributes(root, logger) {
   }
 }
 
+function validateFootnoteLocation(root, logger) {
+  for (const fn of root.querySelectorAll('.footnote')) {
+    if (!fn.closest('tfoot'))
+      logger.error(`Footnotes are only permitted inside a table footer`, fn);
+  }
+}
+
 export function smpteValidate(doc, logger) {
   const docMetadata = smpte.validateHead(doc.head, logger);
   validateDisallowedHeadLinks(doc.head, logger);
   validateDisallowedStyleAttributes(doc.documentElement, logger);
+  validateFootnoteLocation(doc.documentElement, logger);
   validateBody(doc.body, logger);
   return docMetadata;
 }

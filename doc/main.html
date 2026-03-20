@@ -1133,9 +1133,77 @@
 <code>&lt;a href=&quot;#tab-sample-tabledata&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#tab-sample-tabledata"></a>.
         </div>
 
-        <p> 
+        <p>
           For more examples of various table layouts and optional cell/column text alignment, see <a href="#sec-table-examples"></a>
         </p>
+
+        <p>Tables may include footnotes. Footnotes shall appear in a <code>tfoot</code> element at the foot of the table,
+        each as a <code>p</code> element with <code>class="footnote"</code> and a unique <code>id</code> attribute. Footnotes are automatically assigned superscript lowercase letters (a, b, c, …) in the order they appear in the <code>tfoot</code> element. 
+        References to footnotes within the table body are marked with an <code>a</code> element whose <code>href</code>
+        attribute references the footnote's <code>id</code>.</p>
+
+        <p class="note">Footnotes are only permitted within tables. They shall not be used outside of a <code>table</code> element.</p>
+
+        <div class="example">
+<pre>
+&lt;table id=&quot;tab-sample-footnote&quot;&gt;
+  &lt;caption&gt;Sample Table with Footnotes&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Sample Number&lt;/th&gt;
+      &lt;th&gt;Sample Name&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;0001&lt;/td&gt;
+      &lt;td&gt;Name 01 &lt;a href=&quot;#fn-doc-example&quot;&gt;&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;0002&lt;/td&gt;
+      &lt;td&gt;Name 02&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot&gt;
+    &lt;tr&gt;
+      &lt;td colspan=&quot;2&quot;&gt;
+        &lt;p class=&quot;footnote&quot; id=&quot;fn-doc-example&quot;&gt;Footnote content goes here.&lt;/p&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+&lt;/table&gt;
+</pre>
+
+          <p>is rendered as</p>
+
+          <table id="tab-sample-footnote">
+            <caption>Sample Table with Footnotes</caption>
+            <thead>
+              <tr>
+                <th>Sample Number</th>
+                <th>Sample Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0001</td>
+                <td>Name 01 <a href="#fn-doc-example"></a></td>
+              </tr>
+              <tr>
+                <td>0002</td>
+                <td>Name 02</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2">
+                  <p class="footnote" id="fn-doc-example">Footnote content goes here.</p>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        
 
       </section>
 
@@ -1359,6 +1427,9 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
           <dt><code>example</code></dt>
           <dd>Applied to <code>p</code> or <code>div</code> elements to create a formatted and automatically numbered example. See <a href="#sec-example-class"></a>.</dd>
+
+          <dt><code>footnote</code></dt>
+          <dd>Applied to a <code>p</code> element inside a <code>tfoot</code> element to create a table footnote. Footnotes are only permitted inside a <code>tfoot</code> element — use outside of tables is not allowed. See <a href="#sec-table-element"></a>.</dd>
 
           <dt><code>center-cell</code>;</dt>
           <dt><code>right-cell</code>;</dt>

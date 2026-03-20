@@ -1206,10 +1206,16 @@ function numberTableFootnotes() {
       if (!fn.id) continue;
       const letter = String.fromCharCode(charCode++);
 
-      /* prepend superscript letter to footnote text */
+      const headingLabel = document.createElement("span");
+      headingLabel.className = "heading-label";      
+      
       const sup = document.createElement("sup");
       sup.textContent = letter;
-      fn.insertBefore(sup, fn.firstChild);
+      
+      headingLabel.appendChild(sup);
+      headingLabel.appendChild(document.createTextNode("\u00a0"));
+
+      fn.insertBefore(headingLabel, fn.firstChild);
 
       /* fill all reference anchors pointing to this footnote */
       for (const ref of table.querySelectorAll(`a[href="#${fn.id}"]`)) {

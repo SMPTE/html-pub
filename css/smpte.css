@@ -207,9 +207,9 @@ blockquote {
   font-style: italic;
 }
 
-/* note and example */
+/* note, example, footnote */
 
-.note, .example {
+.note, .example, .footnote {
   font-size: 0.9rem;
   margin-left: 1rem;
 }
