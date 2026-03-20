@@ -1107,7 +1107,22 @@ function numberNotesToEntry(internalTermsSection) {
   
 }
 
-function numberNoteGroup(notes) {
+function numberSectionNotes(section) {
+  let notes = [];
+
+  function _findNotes(e) {
+    for (const child of e.children) {
+      if (child.localName === "section" || child.localName === "table")
+        numberSectionNotes(child);
+      else if (child.classList.contains("note"))
+        notes.push(child);
+      else
+        _findNotes(child);
+    }
+  }
+
+  _findNotes(section);
+
   let counter = 1;
   for (let note of notes) {
     const headingLabel = document.createElement("span");
@@ -1123,29 +1138,6 @@ function numberNoteGroup(notes) {
     headingLabel.appendChild(document.createTextNode(" —⁠ "));
 
     note.insertBefore(headingLabel, note.firstChild);
-  }
-}
-
-function numberSectionNotes(section) {
-  let notes = [];
-
-  function _findNotes(e) {
-    for (const child of e.children) {
-      if (child.localName === "section" || child.localName === "table")
-        continue;
-      else if (child.classList.contains("note"))
-        notes.push(child);
-      else
-        _findNotes(child);
-    }
-  }
-
-  _findNotes(section);
-  numberNoteGroup(notes);
-
-  for (const table of section.querySelectorAll("table")) {
-    const tableNotes = Array.from(table.querySelectorAll(".note"));
-    numberNoteGroup(tableNotes);
   }
 }
 
