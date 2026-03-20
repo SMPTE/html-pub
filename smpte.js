@@ -1104,24 +1104,10 @@ function numberNotesToEntry(internalTermsSection) {
 
     child.insertBefore(headingLabel, child.firstChild);
   }
+  
 }
 
-function numberSectionNotes(section) {
-  let notes = [];
-
-  function _findNotes(e) {
-    for (const child of e.children) {
-      if (child.localName === "section")
-        numberSectionNotes(child);
-      else if (child.classList.contains("note"))
-        notes.push(child);
-      else
-        _findNotes(child);
-    }
-  }
-
-  _findNotes(section);
-
+function numberNoteGroup(notes) {
   let counter = 1;
   for (let note of notes) {
     const headingLabel = document.createElement("span");
@@ -1137,6 +1123,29 @@ function numberSectionNotes(section) {
     headingLabel.appendChild(document.createTextNode(" —⁠ "));
 
     note.insertBefore(headingLabel, note.firstChild);
+  }
+}
+
+function numberSectionNotes(section) {
+  let notes = [];
+
+  function _findNotes(e) {
+    for (const child of e.children) {
+      if (child.localName === "section" || child.localName === "table")
+        continue;
+      else if (child.classList.contains("note"))
+        notes.push(child);
+      else
+        _findNotes(child);
+    }
+  }
+
+  _findNotes(section);
+  numberNoteGroup(notes);
+
+  for (const table of section.querySelectorAll("table")) {
+    const tableNotes = Array.from(table.querySelectorAll(".note"));
+    numberNoteGroup(tableNotes);
   }
 }
 
@@ -1191,6 +1200,30 @@ function numberExamples() {
       example.insertBefore(headingLabel, example.firstChild);
     }
 
+  }
+}
+
+function numberTableFootnotes() {
+  for (const table of document.querySelectorAll("table")) {
+    const footnotes = Array.from(table.querySelectorAll("tfoot p.footnote"));
+    if (footnotes.length === 0) continue;
+
+    let charCode = "a".charCodeAt(0);
+
+    for (const fn of footnotes) {
+      if (!fn.id) continue;
+      const letter = String.fromCharCode(charCode++);
+
+      /* prepend superscript letter to footnote text */
+      const sup = document.createElement("sup");
+      sup.textContent = letter;
+      fn.insertBefore(sup, fn.firstChild);
+
+      /* fill all reference anchors pointing to this footnote */
+      for (const ref of table.querySelectorAll(`a[href="#${fn.id}"]`)) {
+        ref.textContent = letter;
+      }
+    }
   }
 }
 
@@ -1382,6 +1415,13 @@ function resolveLinks(docMetadata) {
           anchor.innerText = t;
         }
 
+      } else if (target.classList.contains("footnote")) {
+
+        /* footnote ref — letter already filled by numberTableFootnotes; wrap in <sup> */
+        const sup = document.createElement("sup");
+        anchor.replaceWith(sup);
+        sup.appendChild(anchor);
+
       } else if (target.localName === "section") {
 
         anchor.innerText = _getSectionReference(target);
@@ -1487,6 +1527,7 @@ async function render() {
   numberFormulae();
   numberNotes();
   numberExamples();
+  numberTableFootnotes();
   numberTerms();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
