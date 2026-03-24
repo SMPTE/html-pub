@@ -1146,8 +1146,6 @@
 
         <p class="note">Each footnote reference (<code>a</code> element) shall be in the same table as the footnote it references, and each footnote shall be referenced exactly once.</p>
 
-        <p class="note">Notes and footnotes may both appear in a <code>tfoot</code> element. When both are present, all <code>p class="note"</code> elements must appear before any <code>p class="footnote"</code> elements.</p>
-
         <div class="example">
 <pre>
 &lt;table id=&quot;tab-sample-footnote&quot;&gt;
@@ -1207,7 +1205,47 @@
             </tfoot>
           </table>
         </div>
-        
+
+        <p>Notes are permitted in tables cells or <code>tfoot</code> elements and are automatically numbered. When a note is also present in the <code>tfoot</code>, it shall appear before all footnotes:</p>
+
+        <div class="example">
+<pre>
+&lt;tfoot&gt;
+  &lt;tr&gt;
+    &lt;td colspan=&quot;2&quot;&gt;
+      &lt;p class=&quot;note&quot;&gt;Note content goes here.&lt;/p&gt;
+      &lt;p class=&quot;footnote&quot; id=&quot;fn-doc-example-2&quot;&gt;Footnote content goes here.&lt;/p&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tfoot&gt;
+</pre>
+
+          <p>is rendered as</p>
+
+          <table id="tab-sample-footnote-note">
+            <caption>Sample Table with Note and Footnote in Footer</caption>
+            <thead>
+              <tr>
+                <th>Sample Number</th>
+                <th>Sample Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0001</td>
+                <td>Name 01 <a href="#fn-doc-example-2"></a></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2">
+                  <p class="note">Note content goes here.</p>
+                  <p class="footnote" id="fn-doc-example-2">Footnote content goes here.</p>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
 
       </section>
 
