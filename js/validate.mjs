@@ -269,6 +269,36 @@ class DefinitionSourceMatcher {
   }
 }
 
+class DefinitionExampleMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd" || !element.classList.contains("example"))
+      return false;
+
+    for (const child of element.children) {
+      if (!AnyPhrasingMatcher.match(child, logger)) {
+        logger.error(`Note to entry contains non-phrasing element`, child);
+      }
+    }
+
+    return true;
+  }
+}
+
+class DefinitionDeprecatedMatcher {
+  static match(element, logger) {
+    if (element.localName !== "dd" || !element.classList.contains("deprecated"))
+      return false;
+
+    for (const child of element.children) {
+      if (!AnyPhrasingMatcher.match(child, logger)) {
+        logger.error(`Deprecated entry contains non-phrasing element`, child);
+      }
+    }
+
+    return true;
+  }
+}
+
 class DefinitionNoteMatcher {
   static match(element, logger) {
     if (element.localName !== "dd" || !element.classList.contains("note"))
@@ -652,7 +682,8 @@ class InternalDefinitionsMatcher {
       }
 
       if (count === 0) {
-        logger.error(`Invalid definition`, element);
+        const next = children[0];
+        logger.error(`Out of order or unrecognized element in definition${next ? `: ${next.localName}${next.className ? `.${next.className}` : ""}` : ""}<br>Required order is: definition, deprecated, example, note, source`, element);
         break;
       }
 
@@ -664,10 +695,20 @@ class InternalDefinitionsMatcher {
         children.shift();
       }
 
-      /* look for definition source */
+      /* look for deprecated marker (at most one) */
 
-      if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
+      if (children.length > 0 && DefinitionDeprecatedMatcher.match(children[0], logger)) {
         children.shift();
+        if (children.length > 0 && DefinitionDeprecatedMatcher.match(children[0], logger))
+          logger.error(`Only one dd.deprecated is permitted per term`, children[0]);
+      }
+
+      /* look for examples to entry */
+      count = 0;
+
+      while (children.length > 0 && DefinitionExampleMatcher.match(children[0], logger)) {
+        children.shift();
+        count++;
       }
 
       /* look for notes to entry */
@@ -676,6 +717,12 @@ class InternalDefinitionsMatcher {
       while (children.length > 0 && DefinitionNoteMatcher.match(children[0], logger)) {
         children.shift();
         count++;
+      }
+
+      /* look for definition source (must be last) */
+
+      if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
+        children.shift();
       }
 
     }
