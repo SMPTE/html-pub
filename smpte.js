@@ -1222,6 +1222,15 @@ function numberTableFootnotes() {
         ref.textContent = letter;
       }
     }
+function markDeprecated() {
+  const terms = document.getElementById("terms-int-defs");
+  if (!terms) return;
+
+  for (const el of terms.querySelectorAll("dd.deprecated")) {
+    const label = document.createElement("span");
+    label.className = "heading-label";
+    label.appendChild(document.createTextNode("DEPRECATED: "));
+    el.insertBefore(label, el.firstChild);
   }
 }
 
@@ -1526,6 +1535,7 @@ async function render() {
   numberNotes();
   numberExamples();
   numberTableFootnotes();
+  markDeprecated();
   numberTerms();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
