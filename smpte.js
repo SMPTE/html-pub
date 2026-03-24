@@ -1222,6 +1222,9 @@ function numberTableFootnotes() {
         ref.textContent = letter;
       }
     }
+  }
+}
+
 function markDeprecated() {
   const terms = document.getElementById("terms-int-defs");
   if (!terms) return;
