@@ -288,12 +288,14 @@ class DdMatcher {
 
 class DefinitionMatcher {
   static match(element, logger) {
-    if (element.localName !== "dd" || element.classList.contains("note"))
+    if (element.localName !== "dd" || element.classList.contains("note") || element.classList.contains("source"))
       return false;
 
     for (const child of element.children) {
       if (!AnyPhrasingMatcher.match(child, logger)) {
         logger.error(`Definition contains non-phrasing element`, child);
+      } else if (child.localName === "a" && child.hasAttribute("href")) {
+        logger.error(`Definition body must not contain anchor with href; use dd.source instead`, child);
       }
     }
 
@@ -303,14 +305,11 @@ class DefinitionMatcher {
 
 class DefinitionSourceMatcher {
   static match(element, logger) {
-    if (element.localName !== "dd" || element.classList.contains("note"))
+    if (element.localName !== "dd" || !element.classList.contains("source"))
       return false;
 
-    const aMatcher = new TerminalPhrasingMatcher("a");
-
-    if (element.childElementCount !== 1 || !aMatcher.match(element.firstElementChild, logger)) {
-      return false;
-    }
+    if (!Array.from(element.children).some(c => c.localName === "a" && c.hasAttribute("href")))
+      logger.error(`Source entry must contain at least one anchor with an href`, element);
 
     return true;
   }
@@ -730,7 +729,7 @@ class InternalDefinitionsMatcher {
 
       if (count === 0) {
         const next = children[0];
-        logger.error(`Out of order or unrecognized element in definition${next ? `: ${next.localName}${next.className ? `.${next.className}` : ""}` : ""}<br>Required order is: definition, deprecated, example, note, source`, element);
+        logger.error(`Out of order or unrecognized element in definition${next ? `: ${next.localName}${next.className ? `.${next.className}` : ""}` : ""}<br>Required order is: definition, deprecated, example, note, source`, next || element);
         break;
       }
 
@@ -770,6 +769,8 @@ class InternalDefinitionsMatcher {
 
       if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger)) {
         children.shift();
+        if (children.length > 0 && DefinitionSourceMatcher.match(children[0], logger))
+          logger.error(`Only one dd.source is permitted per term`, children[0]);
       }
 
     }
