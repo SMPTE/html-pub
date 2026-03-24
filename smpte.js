@@ -9,7 +9,7 @@ are permitted provided that the following conditions are met:
    list of conditions and the following disclaimer.
 
 2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
+   this list of conditions and the following dissclaimer in the documentation
    and/or other materials provided with the distribution.
 
 3. Neither the name of the copyright holder nor the names of its contributors
@@ -1489,14 +1489,10 @@ function formatTermsAndDefinitions(docMetadata) {
     return;
 
   for (const element of section.children) {
-    if (element.localName === "dd" &&
-        element.childNodes.length === 1 &&
-        element.firstChild.nodeType === Node.ELEMENT_NODE &&
-        element.firstChild.localName === "a") {
-      const anchor = element.firstChild;
+    if (element.localName === "dd" && element.classList.contains("source")) {
       element.classList.add("term-source");
-      element.insertBefore(document.createTextNode("[SOURCE: "), anchor);
-      element.insertBefore(document.createTextNode("]"), anchor.nextSibling);
+      element.insertBefore(document.createTextNode("[SOURCE: "), element.firstChild);
+      element.appendChild(document.createTextNode("]"));
     }
   }
 }

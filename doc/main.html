@@ -665,15 +665,20 @@
               <li>The <code>dd</code> elements following the <code>dt</code> element(s) shall appear in the following
               order — each group is optional, but if present, it shall appear in this sequence:
                 <ol>
-                  <li><strong>Definition:</strong> the first <code>dd</code> element shall be the definition of the term. This element is required.</li>
+                  <li><strong>Definition:</strong> the first <code>dd</code> element shall be the definition of the term. This element is required.
+                  References to other defined terms and <code>dfn</code> elements are permitted using <code>&lt;a&gt;</code> elements without an
+                  <code>href</code> attribute. Citations to clauses or external references (i.e. <code>&lt;a href="#bib-HTML-5"&gt;</code>) are not permitted.</li>
                   <li><strong>Deprecated:</strong> the next <code>dd</code> element, if present, shall have a <code>class</code>
                   attribute containing <code>deprecated</code>, indicating the term is deprecated. At most one such element is permitted.</li>
                   <li><strong>Examples:</strong> the next <code>dd</code> element(s), if present, shall each have a <code>class</code>
                   attribute containing <code>example</code>.</li>
                   <li><strong>Notes:</strong> the next <code>dd</code> element(s), if present, shall each have a <code>class</code>
-                  attribute containing <code>note</code>.</li>
-                  <li><strong>Source:</strong> the last <code>dd</code> element, if present, shall contain a single reference to a
-                  bibliographic entry and serves as the source of the definition.</li>
+                  attribute containing <code>note</code>. References to defined terms, clauses, and external references are all permitted.</li>
+                  <li><strong>Source:</strong> the last <code>dd</code> element, if present, shall have a <code>class</code>
+                  attribute containing <code>source</code> and serves as the source of the definition. At most one such element
+                  is permitted. It shall contain a reference to a bibliographic entry and may contain additional text. If any
+                  changes are made to the original terminological entry, this shall be indicated, along with a description of
+                  what has been modified.</li>
                 </ol>
               </li>
             </ul>
@@ -693,7 +698,7 @@
     &lt;dd class="deprecated"&gt;deprecated term&lt;/dd&gt;
     &lt;dd class="example"&gt;An example of a key number is 12345.&lt;/dd&gt;
     &lt;dd class="note"&gt;Key number shall not be confused with key frame.&lt;/dd&gt;
-    &lt;dd&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;&lt;/dd&gt;
+    &lt;dd class="source"&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;, modified — definition has been updated.&lt;/dd&gt;
   &lt;/dl&gt;
 &lt;/section&gt;
 </pre>
