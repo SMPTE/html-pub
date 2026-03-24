@@ -1104,6 +1104,7 @@ function numberNotesToEntry(internalTermsSection) {
 
     child.insertBefore(headingLabel, child.firstChild);
   }
+  
 }
 
 function numberSectionNotes(section) {
@@ -1111,7 +1112,7 @@ function numberSectionNotes(section) {
 
   function _findNotes(e) {
     for (const child of e.children) {
-      if (child.localName === "section")
+      if (child.localName === "section" || child.localName === "table")
         numberSectionNotes(child);
       else if (child.classList.contains("note"))
         notes.push(child);
@@ -1191,6 +1192,36 @@ function numberExamples() {
       example.insertBefore(headingLabel, example.firstChild);
     }
 
+  }
+}
+
+function numberTableFootnotes() {
+  for (const table of document.querySelectorAll("table")) {
+    const footnotes = Array.from(table.querySelectorAll("tfoot p.footnote"));
+    if (footnotes.length === 0) continue;
+
+    let charCode = "a".charCodeAt(0);
+
+    for (const fn of footnotes) {
+      if (!fn.id) continue;
+      const letter = String.fromCharCode(charCode++);
+
+      const headingLabel = document.createElement("span");
+      headingLabel.className = "heading-label";      
+      
+      const sup = document.createElement("sup");
+      sup.textContent = letter;
+      
+      headingLabel.appendChild(sup);
+      headingLabel.appendChild(document.createTextNode("\u00a0"));
+
+      fn.insertBefore(headingLabel, fn.firstChild);
+
+      /* fill all reference anchors pointing to this footnote */
+      for (const ref of table.querySelectorAll(`a[href="#${fn.id}"]`)) {
+        ref.textContent = letter;
+      }
+    }
   }
 }
 
@@ -1394,6 +1425,13 @@ function resolveLinks(docMetadata) {
           anchor.innerText = t;
         }
 
+      } else if (target.classList.contains("footnote")) {
+
+        /* footnote ref — letter already filled by numberTableFootnotes; wrap in <sup> */
+        const sup = document.createElement("sup");
+        anchor.replaceWith(sup);
+        sup.appendChild(anchor);
+
       } else if (target.localName === "section") {
 
         anchor.innerText = _getSectionReference(target);
@@ -1499,6 +1537,7 @@ async function render() {
   numberFormulae();
   numberNotes();
   numberExamples();
+  numberTableFootnotes();
   markDeprecated();
   numberTerms();
   resolveLinks(docMetadata);

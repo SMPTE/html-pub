@@ -5,7 +5,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script type="module" src="../../../../smpte.js"></script>
-    <meta itemprop="test" content="valid" />
+    <meta itemprop="test" content="invalid" />
     <meta itemprop="pubType" content="ST" />
     <meta itemprop="pubNumber" content="429" />
     <meta itemprop="pubPart" content="6" />
@@ -20,7 +20,32 @@
       <p>This is the scope of the document.</p>
     </section>
 
-    
+    <section id="sec-footnote">
+      <h2>Footnote</h2>
+
+      <table id="tab-sample-tabledata">
+        <caption>Sample Table</caption>
+        <thead>
+          <tr>
+            <th>Sample Number</th>
+            <th>Sample Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0001</td>
+            <td>Name 01 <a href="#fn-1-example"></a></td>
+          </tr>
+          <tr>
+            <td>0002</td>
+            <td>Name 02</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="footnote" id="fn-1-example">Footnote content goes here.</p>
+      
+    </section>
     
   </body>
 </html>
