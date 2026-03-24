@@ -367,14 +367,16 @@
       </section>
 
       <section id="sec-additional-style-elements">
-        <h4>Additional <code>stylesheet</code> elements</h4>
+        <h4>Additional <code>stylesheet</code> and <code>style</code> elements</h4>
 
 
-        <p>The <code>head</code> element shall not contain additional <code>link</code> elements that import either internal or external <code>stylesheet</code> files. </p>
+        <p>The <code>head</code> element shall not contain additional <code>link</code> elements that import either internal or external <code>stylesheet</code> files, nor shall it contain inline <code>style</code> elements.</p>
 
           <div class="example">
 <pre>&lt;link rel=&quot;stylesheet&quot;  href=&quot;./styles.css&quot;&gt;
-</pre>
+&lt;style&gt;
+  p { color: red; }
+&lt;/style&gt;</pre>
           </div>
 
         <p class="note">Also see <a href="#sec-additional-style-usage"></a> for guidance on styling.</p>
@@ -1471,7 +1473,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       <section id="sec-additional-style-usage">
         <h4>Using <code>class</code> attributes</h4>
         <p>
-          In addition to the restriction of using internal or external defined <code>stylesheet</code> elements as per <a href="#sec-additional-style-elements"></a>, editors shall not use <code>style</code> attributes within <code>html</code> elements for styling. Instead, the styling may be modified using <code>class</code> values where applicable as listed below. 
+          In addition to the restriction of using internal or external defined <code>stylesheet</code> and <code>style</code> elements as per <a href="#sec-additional-style-elements"></a>, editors shall not use <code>style</code> attributes within <code>html</code> elements for styling. Instead, the styling may be modified using <code>class</code> values where applicable as listed below. 
         </p>
 
         <dl>
@@ -1522,6 +1524,15 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
           <dt><code>formula</code></dt>
           <dd>Applied to a <code>div</code> element that contains a block <code>math</code> element to format and number displayed formulae. See <a href="#sec-formulae"></a></dd>
+
+          <dt><code>text-right</code></dt>
+          <dd>Applied to an element to right-align its text content.</dd>
+
+          <dt><code>text-left</code></dt>
+          <dd>Applied to an element to left-align its text content.</dd>
+
+          <dt><code>syntax</code></dt>
+          <dd>Applied to a <code>td</code> or <code>th</code> element in a syntax listing table to render its contents in a monospace font at a reduced size.</dd>
 
         </dl>
 
