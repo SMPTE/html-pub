@@ -1142,7 +1142,11 @@
         References to footnotes within the table body are marked with an <code>a</code> element whose <code>href</code>
         attribute references the footnote's <code>id</code>.</p>
 
-        <p class="note">Footnotes are only permitted within tables. They shall not be used outside of a <code>table</code> element.</p>
+        <p class="note">Footnotes are only permitted within tables. They must not be used outside of a <code>table</code> element.</p>
+
+        <p class="note">Each footnote reference (<code>a</code> element) shall be in the same table as the footnote it references, and each footnote shall be referenced exactly once.</p>
+
+        <p class="note">Notes and footnotes may both appear in a <code>tfoot</code> element. When both are present, all <code>p class="note"</code> elements must appear before any <code>p class="footnote"</code> elements.</p>
 
         <div class="example">
 <pre>

@@ -72,11 +72,50 @@ function validateFootnoteLocation(root, logger) {
   }
 }
 
+function validateTfootNoteOrder(root, logger) {
+  for (const tfoot of root.querySelectorAll('tfoot')) {
+    let seenFootnote = false;
+    for (const p of tfoot.querySelectorAll('p')) {
+      if (p.classList.contains('footnote')) {
+        seenFootnote = true;
+      } else if (p.classList.contains('note') && seenFootnote) {
+        logger.error(`Notes in tfoot must appear before all footnotes`, p);
+      }
+    }
+  }
+}
+
+function validateFootnoteReferences(root, logger) {
+  const refCounts = new Map();
+
+  for (const anchor of root.querySelectorAll('a[href^="#"]')) {
+    const id = anchor.getAttribute('href').substring(1);
+    const target = root.ownerDocument.getElementById(id);
+
+    if (!target || !target.classList.contains('footnote'))
+      continue;
+
+    /* check same table */
+    const anchorTable = anchor.closest('table');
+    const footnoteTable = target.closest('table');
+
+    if (!anchorTable || anchorTable !== footnoteTable)
+      logger.error(`Footnote reference must be in the same table as its footnote`, anchor);
+
+    /* track reference count */
+    refCounts.set(id, (refCounts.get(id) ?? 0) + 1);
+    if (refCounts.get(id) > 1)
+      logger.error(`Footnote "${id}" is referenced more than once`, anchor);
+  }
+}
+
 export function smpteValidate(doc, logger) {
   const docMetadata = smpte.validateHead(doc.head, logger);
   validateDisallowedHeadLinks(doc.head, logger);
   validateDisallowedStyleAttributes(doc.documentElement, logger);
   validateFootnoteLocation(doc.documentElement, logger);
+  validateTfootNoteOrder(doc.documentElement, logger);
+  validateFootnoteReferences(doc.documentElement, logger);
   validateBody(doc.body, logger);
   return docMetadata;
 }
