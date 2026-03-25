@@ -520,6 +520,21 @@ td.text-nowrap {
   white-space: nowrap;
 }
 
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+/* syntax tables */
+
+.syntax {
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
 /* links */
 
 .ext-ref {

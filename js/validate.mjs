@@ -65,6 +65,12 @@ function validateDisallowedStyleAttributes(root, logger) {
   }
 }
 
+function validateDisallowedStyleElements(root, logger) {
+  for (const styleElement of root.querySelectorAll('style')) {
+    logger.error(`Style elements are not permitted`, styleElement);
+  }
+}
+
 function validateFootnoteLocation(root, logger) {
   for (const fn of root.querySelectorAll('.footnote')) {
     if (!fn.closest('tfoot'))
@@ -113,6 +119,7 @@ export function smpteValidate(doc, logger) {
   const docMetadata = smpte.validateHead(doc.head, logger);
   validateDisallowedHeadLinks(doc.head, logger);
   validateDisallowedStyleAttributes(doc.documentElement, logger);
+  validateDisallowedStyleElements(doc.documentElement, logger);
   validateFootnoteLocation(doc.documentElement, logger);
   validateTfootNoteOrder(doc.documentElement, logger);
   validateFootnoteReferences(doc.documentElement, logger);
@@ -169,7 +176,7 @@ const ALL_PHRASING_MATCHERS = [
   new PhrasingMatcher("bdo"),
   new PhrasingMatcher("bdi"),
   new TerminalPhrasingMatcher("br"),
-  new TerminalPhrasingMatcher("code"),
+  new PhrasingMatcher("code"),
   new TerminalPhrasingMatcher("dfn"),
   new PhrasingMatcher("em"),
   new PhrasingMatcher("i"),
