@@ -28,7 +28,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-import { smpteValidate } from "./js/validate.mjs";
+import { smpteValidate, validateDataIncludes } from "./js/validate.mjs";
 import * as smpte from "./js/common.mjs";
 
 class Logger {
@@ -77,7 +77,7 @@ function resolveScriptRelativePath(path) {
 function asyncFetchLocal(url) {
   return new Promise(function(resolve, reject) {
     var xhr = new XMLHttpRequest
-    xhr.onload = () => resolve(xhr.responseText);
+    xhr.onload = () => xhr.status === 200 ? resolve(xhr.responseText) : reject(new TypeError(`File not found: ${url}`));
     xhr.onerror = () =>  reject(new TypeError('Local request failed'));
     xhr.open('GET', url);
     xhr.send(null);
@@ -91,7 +91,7 @@ async function asyncAddStylesheet(url) {
       s.textContent = data;
       document.head.appendChild(s);
       })
-    .catch(err => logError("Cannot fetch: " + err));
+    .catch(err => logger_.error("Cannot fetch: " + err));
 }
 
 function fillTemplate(template, data) {
@@ -1475,9 +1475,9 @@ function asyncInsertSnippets() {
   return Promise.all(Array.from(
     document.querySelectorAll("pre[data-include]"),
     (e) => {
-      asyncFetchLocal(e.getAttribute("data-include"))
+      return asyncFetchLocal(e.getAttribute("data-include"))
         .then(data => e.textContent = data)
-        .catch(err => logError("Cannot fetch: " + err));
+        .catch(() => {});
     }
   ));
 }
@@ -1564,6 +1564,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    try {
     smpteValidate(window.document, logger_);
     await render();
+    validateDataIncludes(window.document, logger_);
     window._smpteRenderComplete = true;
   } catch (e) {
     logger_.error(e);

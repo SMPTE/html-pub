@@ -115,6 +115,13 @@ function validateFootnoteReferences(root, logger) {
   }
 }
 
+export function validateDataIncludes(doc, logger) {
+  for (const el of doc.querySelectorAll("pre[data-include]")) {
+    if (el.textContent.trim() === "")
+      logger.error(`data-include file not found: ${el.getAttribute("data-include")}`, el);
+  }
+}
+
 export function smpteValidate(doc, logger) {
   const docMetadata = smpte.validateHead(doc.head, logger);
   validateDisallowedHeadLinks(doc.head, logger);
