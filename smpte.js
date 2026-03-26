@@ -593,7 +593,7 @@ function insertElementsAnnex(docMetadata) {
     return;
   }
 
-  sec.classList.add("unnumbered");
+  sec.classList.add("annex", "informative");
 
   const intro = document.createElement("p");
   intro.innerText = "The following are the non-prose elements of this document:"
