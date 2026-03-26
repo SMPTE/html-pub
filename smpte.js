@@ -900,6 +900,50 @@ function addHeadingLinks(docMetadata) {
 
     heading.appendChild(headingLink);
   }
+
+  for (const table of document.querySelectorAll("table[id]")) {
+    const caption = table.querySelector("caption");
+    if (!caption) continue;
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${table.id}`;
+    link.innerHTML = "🔗";
+    caption.appendChild(link);
+  }
+
+  for (const figure of document.querySelectorAll("figure[id]")) {
+    const figcaption = figure.querySelector("figcaption");
+    if (!figcaption) continue;
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${figure.id}`;
+    link.innerHTML = "🔗";
+    figcaption.appendChild(link);
+  }
+
+  for (const formula of document.querySelectorAll("div.formula[id]")) {
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${formula.id}`;
+    link.innerHTML = "🔗";
+    formula.appendChild(link);
+  }
+
+  for (const note of document.querySelectorAll(".note[id]")) {
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${note.id}`;
+    link.innerHTML = "🔗";
+    note.appendChild(link);
+  }
+
+  for (const example of document.querySelectorAll(".example[id]")) {
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${example.id}`;
+    link.innerHTML = "🔗";
+    example.appendChild(link);
+  }
 }
 
 function numberSections(element, curHeadingNumber) {

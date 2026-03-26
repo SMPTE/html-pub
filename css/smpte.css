@@ -232,19 +232,16 @@ a.heading-link {
 }
 
 @media only screen {
-  h2:hover .heading-link {
-    visibility: visible;
-  }
-  h3:hover .heading-link {
-    visibility: visible;
-  }
-  h4:hover .heading-link {
-    visibility: visible;
-  }
-  h5:hover .heading-link {
-    visibility: visible;
-  }
-  h6:hover .heading-link {
+  h2:hover .heading-link,
+  h3:hover .heading-link,
+  h4:hover .heading-link,
+  h5:hover .heading-link,
+  h6:hover .heading-link,
+  caption:hover .heading-link,
+  figcaption:hover .heading-link,
+  div.formula:hover .heading-link,
+  .note:hover .heading-link,
+  .example:hover .heading-link {
     visibility: visible;
   }
 }
