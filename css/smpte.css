@@ -214,6 +214,16 @@ blockquote {
   margin-left: 1rem;
 }
 
+.example {
+  padding-left: 1rem;
+}
+
+.example > .heading-label {
+  display: block;
+  margin-left: -1rem;
+  margin-bottom: 0.25em;
+}
+
 /* lists */
 
 li {

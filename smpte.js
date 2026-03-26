@@ -1231,7 +1231,6 @@ function numberExamples() {
 
       headingLabel.appendChild(document.createTextNode("EXAMPLE "));
       headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" —⁠ "));
 
       example.insertBefore(headingLabel, example.firstChild);
     }
