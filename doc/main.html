@@ -1825,6 +1825,37 @@ ERROR: "validate:html" exited with 5.
 </pre>
 
     </section>
+
+    <section id="sec-tooling-local-submodule">
+      <h4>Updating the tooling submodule</h4>
+      <p>Document repositories include the tooling (<code>./tooling/</code>) as a git submodule. When the tooling is updated, each document repo must be manually bumped to point to the new tooling commit.</p>
+
+      <p>To check which commit the submodule is currently pinned to and whether it is behind the remote, run:</p>
+<pre>
+git submodule status
+</pre>
+
+      <p>The output lists each submodule with its current commit SHA. To determine whether the submodule is current, compare the commit SHA against the latest release tag and commit at <a>https://github.com/SMPTE/html-pub</a>.</p>
+
+      <p>To update the submodule to the latest commit on its tracked remote branch, run:</p>
+<pre>
+git submodule update --remote
+</pre>
+
+      <p class="note">This command fetches from the submodule's remote and advances the pointer in the superproject to the latest available commit on the tracked branch. It does not automatically stage or commit the change in the parent repo.</p>
+
+      <p>After updating, the parent repository will show the submodule directory as modified. Stage and commit the bump with:</p>
+<pre>
+git add tooling/
+git commit -m "Bump tooling to latest"
+</pre>
+
+      <p>Push the change to the remote as normal:</p>
+<pre>
+git push
+</pre>
+
+    </section>
     </section>
   </section>
 
