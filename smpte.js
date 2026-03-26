@@ -1520,7 +1520,7 @@ function asyncInsertSnippets() {
     document.querySelectorAll("pre[data-include]"),
     (e) => {
       return asyncFetchLocal(e.getAttribute("data-include"))
-        .then(data => e.textContent = data)
+        .then(data => { e.textContent = data; e.removeAttribute("data-include"); })
         .catch(() => {});
     }
   ));
