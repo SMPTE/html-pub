@@ -741,8 +741,16 @@ class InternalDefinitionsMatcher {
 
       if (count === 0) {
         const next = children[0];
-        logger.error(`Out of order or unrecognized element in definition${next ? `: ${next.localName}${next.className ? `.${next.className}` : ""}` : ""}<br>Required order is: definition, deprecated, example, note, source`, next || element);
+        logger.error(`Out of order or unrecognized element in definition${next ? `: ${next.localName}${next.className ? `.${next.className}` : ""}` : ""}<br>Required order is: deprecated, definition, example, note, source`, next || element);
         break;
+      }
+
+      /* look for deprecated marker (at most one) */
+
+      if (children.length > 0 && DefinitionDeprecatedMatcher.match(children[0], logger)) {
+        children.shift();
+        if (children.length > 0 && DefinitionDeprecatedMatcher.match(children[0], logger))
+          logger.error(`Only one dd.deprecated is permitted per term`, children[0]);
       }
 
       /* look for definition */
@@ -753,13 +761,7 @@ class InternalDefinitionsMatcher {
         children.shift();
       }
 
-      /* look for deprecated marker (at most one) */
-
-      if (children.length > 0 && DefinitionDeprecatedMatcher.match(children[0], logger)) {
-        children.shift();
-        if (children.length > 0 && DefinitionDeprecatedMatcher.match(children[0], logger))
-          logger.error(`Only one dd.deprecated is permitted per term`, children[0]);
-      }
+      
 
       /* look for examples to entry */
       count = 0;
