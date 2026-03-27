@@ -28,11 +28,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 import * as jsdom from "jsdom"
 import process from "process";
 import * as fs from "fs";
+import * as path from "path";
 import {smpteValidate} from "../js/validate.mjs";
 
 async function main() {
-  const dom = new jsdom.JSDOM(fs.readFileSync(process.argv[2]));
-  smpteValidate(dom.window.document, console);
+  const filePath = path.resolve(process.argv[2]);
+  const dom = new jsdom.JSDOM(fs.readFileSync(filePath));
+  const fileExists = (src) => fs.existsSync(path.resolve(path.dirname(filePath), src));
+  smpteValidate(dom.window.document, console, fileExists);
 }
 
 main().catch(e => { console.error(e); process.exitCode = 1; });

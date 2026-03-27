@@ -14,7 +14,7 @@
   <meta itemprop="pubConfidential" content="no">
   <!--< meta itemprop="pubTC" content="XX"> -->
   <meta itemprop="pubSuiteTitle" content="HTML Pub">
-  <meta itemprop="pubDateTime" content="2026-03-24">
+  <meta itemprop="pubDateTime" content="2026-03-26">
   <!-- <meta itemprop="pubRevisionOf" content="SMPTE ST XXXX-Y:ZZZZ"> -->
   <title>Tooling and documentation for HTML documents</title>
 </head>
@@ -391,14 +391,14 @@
       <section id="sec-body-general">
         <h4>Overall structure</h4>
 
-        <p>The <code>body</code> element shall consist of an ordered sequence of <code>section</code> elements, as specified at <a
+        <p>The <code>body</code> element shall consist of an ordered sequence of <code>section</code> elements to create their respective clauses, as specified at <a
         href="#tab-body-structure"></a>.</p>
 
         <table id="tab-body-structure" class="col-2-center">
-          <caption>Ordered sequence of <code>section</code> elements comprising the <code>body</code> element.</caption>
+          <caption>Ordered sequence of clause / <code>section</code> elements comprising the <code>body</code> element.</caption>
           <thead>
             <tr>
-              <th>Section Name</th>
+              <th>Clause name / <code>section</code> element</th>
               <th>Cardinality</th>
             </tr>
           </thead>
@@ -426,15 +426,15 @@
               <td>0 or 1</td>
             </tr>
             <tr>
-              <td><a>Prose section</a></td>
+              <td><a>Prose</a></td>
               <td>0 or more</td>
             </tr>
             <tr>
-              <td><a>Annex section</a></td>
+              <td><a>Annex</a></td>
               <td>0 or more</td>
             </tr>
             <tr>
-              <td><a>Additional elements section</a></td>
+              <td><a>Additional elements</a></td>
               <td>0 or 1</td>
             </tr>
             <tr>
@@ -449,7 +449,7 @@
 
         <ul>
           <li>clauses are numbered automatically;</li>
-          <li>headings of <code>section</code> elements other than <a>Prose sections</a> and <a>Annex sections</a> are
+          <li>headings of <code>section</code> elements (clause names) other than <a>Prose</a> and <a>Annex</a> are
           automatically generated;</li>
           <li>boilerplate is added, including the SMPTE masthead.</li>
         </ul>
@@ -457,16 +457,16 @@
       </section>
 
       <section id="sec-foreword-section">
-        <h4>Foreword section</h4>
+        <h4>Foreword <code>section</code></h4>
 
         <section id="sec-foreword-general">
           <h5>General</h5>
 
 
-          <p>The <dfn>Foreword</dfn> section contains author-supplied prose, e.g. list of substantive changes since the last edition,
+          <p>The <dfn>Foreword</dfn> <code>section</code> contains author-supplied prose, e.g. list of substantive changes since the last edition,
           that is added to the SMPTE boilerplate text.</p>
 
-          <p>The absence of this section indicates that no author-supplied prose was provided.</p>
+          <p>The absence of this <code>section</code> indicates that no author-supplied prose was provided.</p>
 
           <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
           <code>sec-foreword</code>.</p>
@@ -484,7 +484,7 @@
         <section id="sec-foreword-rdd">
           <h5>RDD</h5>
 
-          <p>When <code>pubType</code> is set to <code>RDD</code>, the <a>Foreword</a> section shall be present and there there shall be a single <code>dl</code>, after any author-supplied prose if supplied, which contains contact information about the proponent(s) of the RDD document. </p>
+          <p>When <code>pubType</code> is set to <code>RDD</code>, the <a>Foreword</a> <code>section</code> shall be present and there there shall be a single <code>dl</code>, after any author-supplied prose if supplied, which contains contact information about the proponent(s) of the RDD document. </p>
 
           <p>The <code>id</code> attribute shall be present on the <code>dl</code> element and equal to
           <code>element-proponent</code>. </p>
@@ -516,11 +516,11 @@
       </section>
 
       <section id="sec-introduction-section">
-        <h4>Introduction section</h4>
+        <h4>Introduction <code>section</code></h4>
 
-        <p>The <dfn>Introduction</dfn> section contains author-supplied prose that forms the introduction of the document.</p>
+        <p>The <dfn>Introduction</dfn> <code>section</code> contains author-supplied prose that forms the introduction of the document.</p>
 
-        <p>The absence of this section indicates that the document has no introduction.</p>
+        <p>The absence of this <code>section</code> indicates that the document has no introduction.</p>
 
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
         <code>sec-introduction</code>.</p>
@@ -537,9 +537,9 @@
       </section>
 
       <section id="sec-scope-section">
-        <h4>Scope section</h4>
+        <h4>Scope <code>section</code></h4>
 
-        <p>The <dfn>Scope</dfn> section contains author-supplied prose that forms the scope of the document.</p>
+        <p>The <dfn>Scope</dfn> <code>section</code> contains author-supplied prose that forms the scope of the document.</p>
 
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
         <code>sec-scope</code>.</p>
@@ -555,12 +555,12 @@
       </section>
 
       <section id="sec-conformance-section">
-        <h4>Conformance section</h4>
+        <h4>Conformance <code>section</code></h4>
 
-        <p>The <dfn>Conformance</dfn> section contains author-supplied, conformance-related prose that is added to the SMPTE
+        <p>The <dfn>Conformance</dfn> <code>section</code> contains author-supplied, conformance-related prose that is added to the SMPTE
         boilerplate text that is generated depending on <code>pubType</code>.</p>
 
-        <p>The absence of this section indicates that no author-supplied, conformance-related prose is provided.</p>
+        <p>The absence of this <code>section</code> indicates that no author-supplied, conformance-related prose is provided.</p>
 
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
         <code>sec-conformance</code>.</p>
@@ -574,23 +574,23 @@
 </pre>
         </div>
 
-        <p>This section is prohibited unless the document is a Standard or Recommended Practice.</p>
+        <p>This <code>section</code> is prohibited unless the document is a Standard or Recommended Practice.</p>
 
       </section>
 
       <section id="sec-norm-refs-section">
-        <h4>Normative references section</h4>
+        <h4>Normative references <code>section</code></h4>
 
-        <p>The <dfn>Normative references</dfn> section collects normative references cited in the document.</p>
+        <p>The <dfn>Normative references</dfn> <code>section</code> collects normative references cited in the document.</p>
 
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
         <code>sec-normative-references</code>.</p>
 
         <p>The heading shall not be present.</p>
 
-        <p>The absence of this section indicates that no normative references are cited by the document.</p>
+        <p>The absence of this <code>section</code> indicates that no normative references are cited by the document.</p>
 
-        <p>If present, the section shall contain a single <code>ul</code> element where each <code>li</code>
+        <p>If present, the <code>section</code> shall contain a single <code>ul</code> element where each <code>li</code>
           element is a normative reference, such that:</p>
 
         <ul>
@@ -634,9 +634,9 @@
       </section>
 
       <section id="sec-terms-definitions-clause">
-        <h4>Terms and definitions section</h4>
+        <h4>Terms and definitions <code>section</code></h4>
 
-        <p>The <dfn>Terms and definitions</dfn> section collects terms, abbreviations and symbols that are not defined inline the
+        <p>The <dfn>Terms and definitions</dfn> <code>section</code> collects terms, abbreviations and symbols that are not defined inline the
         clauses of the document, as described in <a href="#sec-dfn-element"></a>.</p>
 
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
@@ -644,7 +644,7 @@
 
         <p>The heading shall not be present.</p>
 
-        <p>The absence of this section indicates that all terms and abbreviations are defined inline the clauses of the
+        <p>The absence of this <code>section</code> indicates that all terms and abbreviations are defined inline the clauses of the
         document.</p>
 
         <p>If present, the <code>section</code> contains one or both of the following elements:</p>
@@ -665,13 +665,13 @@
               can follow the first <code>dt</code> element, in which case all the terms, abbreviations and symbols in the immediately
               preceding <code>dt</code> elements are synonyms.</li>
               <li>The <code>dd</code> elements following the <code>dt</code> element(s) shall appear in the following
-              order — each group is optional, but if present, it shall appear in this sequence:
+              order — each group is optional (except the definition), but if present, it shall appear in this sequence:
                 <ol>
-                  <li><strong>Definition:</strong> the first <code>dd</code> element shall be the definition of the term. This element is required.
+                  <li><strong>Deprecated:</strong> the first <code>dd</code> element, if present, shall have a <code>class</code>
+                  attribute containing <code>deprecated</code>, indicating the term is deprecated. At most one such element is permitted.</li>
+                  <li><strong>Definition:</strong> the next <code>dd</code> element shall be the definition of the term. This element is required.
                   References to other defined terms and <code>dfn</code> elements are permitted using <code>&lt;a&gt;</code> elements without an
                   <code>href</code> attribute. Citations to clauses or external references (i.e. <code>&lt;a href="#bib-HTML-5"&gt;</code>) are not permitted.</li>
-                  <li><strong>Deprecated:</strong> the next <code>dd</code> element, if present, shall have a <code>class</code>
-                  attribute containing <code>deprecated</code>, indicating the term is deprecated. At most one such element is permitted.</li>
                   <li><strong>Examples:</strong> the next <code>dd</code> element(s), if present, shall each have a <code>class</code>
                   attribute containing <code>example</code>.</li>
                   <li><strong>Notes:</strong> the next <code>dd</code> element(s), if present, shall each have a <code>class</code>
@@ -695,9 +695,9 @@
   &lt;/ul&gt;
   &lt;dl id=&quot;terms-int-defs&quot;&gt;
     &lt;dt&gt;&lt;dfn&gt;key number&lt;/dfn&gt;&lt;/dt&gt;
-    &lt;dd&gt;number that is printed with ink or exposed onto the film at the time of
-    manufacture at regular intervals, typically one foot.&lt;/dd&gt;
     &lt;dd class="deprecated"&gt;deprecated term&lt;/dd&gt;
+    &lt;dd&gt;number that is printed with ink or exposed onto the film at the time of
+    manufacture at regular intervals, typically one foot&lt;/dd&gt;
     &lt;dd class="example"&gt;An example of a key number is 12345.&lt;/dd&gt;
     &lt;dd class="note"&gt;Key number shall not be confused with key frame.&lt;/dd&gt;
     &lt;dd class="source"&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;, modified — definition has been updated.&lt;/dd&gt;
@@ -706,26 +706,26 @@
 </pre>
         </div>
 
-        <p class="note">The boilerplate of the section will be generated automatically.</p>
+        <p class="note">The boilerplate of the clause will be generated automatically.</p>
 
       </section>
 
       <section id="sec-prose-section">
-        <h4>Prose section(s)</h4>
+        <h4>Prose <code>section</code>(s)</h4>
 
-        <p>Each <dfn>Prose section</dfn> contains author-supplied technical prose.</p>
+        <p>Each <dfn>Prose</dfn> <code>section</code>contains author-supplied technical prose.</p>
 
-        <p>A <a>Prose section</a> may contain other nested <a>Prose sections</a>. If any child of a <a>Prose section</a> is a
-        <a>Prose section</a>, then all children shall be <a>Prose sections</a>.</p>
+        <p>A <a>Prose</a> <code>section</code> may contain other nested <a>Prose</a> <code>section</code> elements. If any child of a <a>Prose</a> <code>section</code> is a
+        <a>Prose</a> <code>section</code>, then all children shall be <a>Prose</a> <code>section</code> elements.</p>
 
         <p>The <code>id</code> attribute shall be present and its value should be prefixed with <code>sec-</code>.</p>
 
-        <p>The <code>class</code> attribute of a <a>Prose section</a> shall not contain the <code>annex</code> class.</p>
+        <p>The <code>class</code> attribute of a <a>Prose</a> <code>section</code> shall not contain the <code>annex</code> class.</p>
 
-        <p>A section heading element of the appropriate level shall be present, starting with level 2 (<code>h2</code>) for all
-        <a>Prose sections</a> that are children of the <code>body</code> element.</p>
+        <p>A <code>section</code> heading element of the appropriate level shall be present, starting with level 2 (<code>h2</code>) for all
+        <a>Prose</a> <code>section</code> elements that are children of the <code>body</code> element.</p>
 
-        <p><a>Prose sections</a> are automatically numbered, so neither the heading element nor its <code>id</code> attribute should
+        <p><a>Prose</a> <code>section</code> elements are automatically numbered, so neither the heading element nor its <code>id</code> attribute should
         contain numbering information.</p>
 
         
@@ -748,28 +748,28 @@
       </section>
 
       <section id="sec-annex-section">
-        <h4>Annex section(s)</h4>
+        <h4>Annex <code>section</code>(s)</h4>
 
-        <p>An <dfn>Annex section</dfn> contains an author-supplied technical annex.</p>
+        <p>An <dfn>Annex</dfn> <code>section</code> contains an author-supplied technical annex.</p>
 
-        <p>The requirements for an <a>Annex section</a> are the same as those of a <a>Prose section</a>, with the exception that the
-        <a>Annex section</a> shall contain the <code>class</code> attribute with value of <code>annex</code>.</p>
+        <p>The requirements for an <a>Annex</a> <code>section</code> are the same as those of a <a>Prose</a> <code>section</code>, with the exception that the
+        <a>Annex</a> <code>section</code> shall contain the <code>class</code> attribute with value of <code>annex</code>.</p>
 
-        <p>An <a>Annex section</a> shall not contain nested <a>annex sections</a>.</p>
+        <p>An <a>Annex</a> <code>section</code> shall not contain nested <a>annex</a> <code>class</code> elements.</p>
 
         <p>
-          By default, an <a>Annex section</a> is labeled as <code>(Normative)</code>. To label any <a>Annex section</a> as <code>(Informative)</code>, the <code>class</code> attribute value of <code>informative</code> shall be present.  
+          By default, an <a>Annex</a> <code>section</code> is labeled as <code>(Normative)</code>. To label any <a>Annex</a> <code>section</code> as <code>(Informative)</code>, the <code>class</code> attribute value of <code>informative</code> shall be present.  
         </p>
 
         <div class="example">
-<pre>&lt;section class=&quot;annex informative&quot; id=&quot;sec-addtional-info&quot;&gt;
+<pre>&lt;section class=&quot;annex informative&quot; id=&quot;sec-additional-info&quot;&gt;
   &lt;h2&gt;Additional Info&lt;/h2&gt;
   &lt;section id=&quot;sec-additional-info-sub-section&quot;&gt;
-    &lt;h3&gt;Additional Info Sub Section&lt;/h3&gt;
+    &lt;h3&gt;Additional Info Sub Clause&lt;/h3&gt;
     &lt;p&gt;Some technical content&lt;/p&gt;
   &lt;/section&gt;
   &lt;section id=&quot;sec-additional-info-sub-section-more&quot;&gt;
-    &lt;h3&gt;Additional Info Sub Section More&lt;/h3&gt;
+    &lt;h3&gt;Additional Info Sub Clause More&lt;/h3&gt;
     &lt;p&gt;Some technical content&lt;/p&gt;
   &lt;/section&gt;
 &lt;/section&gt;
@@ -779,18 +779,18 @@
       </section>
 
       <section id="sec-elements-section">
-        <h4>Additional elements section</h4>
+        <h4>Additional elements <code>section</code></h4>
 
-        <p>The <dfn>additional elements section</dfn> collects the non-prose elements of the document.</p>
+        <p>The <dfn>additional elements</dfn> <code>section</code> collects the non-prose elements of the document.</p>
 
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
         <code>sec-elements</code>.</p>
 
-        <p>The heading of the section shall not be present.</p>
+        <p>The heading of the<code>section</code> shall not be present.</p>
 
-        <p>If present, the section shall:</p>
+        <p>If present, the <code>section</code> shall:</p>
         <ul>
-          <li>come immediately before the <a>Bibliography</a> section; and</li>
+          <li>come immediately before the <a>Bibliography</a> <code>section</code>; and</li>
           <li>contain a single ordered list <code>ol</code> where each element <code>li</code> contains exactly one <code>a</code>
           that links to an element of the document.</li>
         </ul>
@@ -824,27 +824,29 @@
 <pre>&lt;section id=&quot;sec-elements&quot;&gt;
   &lt;ol&gt;
     &lt;li&gt;
-      &lt;a id=&quot;element-sample-text&quot; title=&quot;Description of the element&quot; href=&quot;./elements/form.docx&quot;&gt;&lt;/a&gt;
+      &lt;a id=&quot;element-sample-text&quot; title=&quot;Description of the element&quot; href=&quot;elements/form.docx&quot;&gt;&lt;/a&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
 &lt;/section&gt;</pre>
         </div>
+
+        <p class="note">This clause will automatically be labeled as the last <a>Annex</a> clause and marked as informative.</p>
       </section>
 
       <section id="sec-bibliography-section">
-        <h4>Bibliography section</h4>
+        <h4>Bibliography <code>section</code></h4>
 
-        <p>The <dfn>Bibliography</dfn> section contains author-supplied bibliographic references.</p>
+        <p>The <dfn>Bibliography</dfn> <code>section</code> contains author-supplied bibliographic references.</p>
 
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
         <code>sec-bibliography</code>.</p>
 
         <p>The heading shall not be present.</p>
 
-        <p>The absence of this section indicates that no bibliographic references are cited by the document.</p>
+        <p>The absence of this <code>section</code> indicates that no bibliographic references are cited by the document.</p>
 
-        <p>If present, the section shall contain a single <code>ul</code> element that conforms to the same requirements as the
-        <code>ul</code> element of the <a>normative references</a> section.</p>
+        <p>If present, the <code>section</code> shall contain a single <code>ul</code> element that conforms to the same requirements as the
+        <code>ul</code> element of the <a>normative references</a> <code>section</code>.</p>
 
         <div class="example">
 <pre>&lt;section id=&quot;sec-bibliography&quot;&gt;
@@ -869,7 +871,7 @@
         <h4>Referencing clauses</h4>
 
         <p>When referencing a clause, an <code>a</code> element with its <code>href</code> attribute referencing a
-        <code>section</code> element shall be used. The text of the link will be automatically set to section number.</p>
+        <code>section</code> element shall be used. The text of the link will be automatically set to clause number.</p>
 
   <div class="example">
     <code>&lt;a href=&quot;#sec-scope&quot;&gt;&lt;/a&gt;</code> is rendered as <a
@@ -883,7 +885,7 @@
         <h4>Citing normative references</h4>
 
         <p>When citing a normative reference, an <code>a</code> element with its <code>href</code> attribute referencing a
-          <code>cite</code> element from the <a>normative references</a> section shall be used. The text of the link will be
+          <code>cite</code> element from the <a>normative references</a> <code>section</code> shall be used. The text of the link will be
           automatically set to the contents of the
           <code>cite</code> element.</p>
 
@@ -896,7 +898,7 @@
       <section id="sec-elements-linking">
         <h4>Citing non-prose elements</h4>
 
-        <p>When citing an non-prose element of the document, an <code>a</code> element with its <code>href</code> referencing an <code>a</code> element from the <a>additional elements section</a> shall be used. The text of the link will be automatically set to the letter of the element in element list.</p>
+        <p>When citing an non-prose element of the document, an <code>a</code> element with its <code>href</code> referencing an <code>a</code> element from the <a>additional elements</a> <code>section</code> shall be used. The text of the link will be automatically set to the letter of the element in element list.</p>
 
         <div class="example">
 <code>&lt;a href=&quot;#element-sample-text&quot;&gt;&lt;/a&gt;</code> is rendered as <a href="#element-sample-text"></a>.
@@ -908,7 +910,7 @@
         <h4>Citing bibliographic references</h4>
 
         <p>When citing a bibliographic reference in the prose, an <code>a</code> element with its <code>href</code> attribute
-        referencing a <code>cite</code> element from the <a>Bibliography</a> section shall be used. The text of the link will be
+        referencing a <code>cite</code> element from the <a>Bibliography</a> <code>section</code> shall be used. The text of the link will be
         automatically set to the contents of the <code>cite</code> element.</p>
 
         <p class="example">
@@ -1058,7 +1060,7 @@
           <p>is rendered as</p>
 
           <figure id="figure-sample-image">
-            <img class="figure" src="media/sample.png">
+            <img src="media/sample.png">
             <figcaption>Example of a figure</figcaption>
           </figure>
         </div>
@@ -1298,7 +1300,7 @@ SHORTNAME = 1*4("/" 1*(ALPHA / DIGIT / "-" / "_" / ".") )
 PUBNUM = 1*(DIGIT) ["-" 1*(DIGIT)]
 REVISION = STABLEREV
 STABLEREV = 4(DIGIT) [2(DIGIT)]
-&lt;pre&gt;
+&lt;/pre&gt;
 </pre>
         </div>
 
@@ -1478,7 +1480,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
         <dl>
           <dt><code>annex</code></dt>
-          <dd>Used on a <code>section</code> element to designate the section as an annex. See <a href="#sec-annex-section"></a>.</dd>
+          <dd>Used on a <code>section</code> element to designate the clause as an annex. See <a href="#sec-annex-section"></a>.</dd>
 
           <dt><code>note</code></dt>
           <dd>Applied to <code>p</code>, <code>div</code>, or <code>dd</code> elements to create a formatted and automatically numbered note. See <a href="#sec-note-class"></a>.</dd>
@@ -1781,10 +1783,43 @@ html5validator found. HTML validation ready.
 
     </section>
 
+    <section id="sec-tooling-local-submodule">
+      <h4>Updating the tooling submodule</h4>
+      <p>Document repositories include the tooling (<code>./tooling/</code>) as a git submodule. When the tooling is updated, each document repo must be manually bumped to point to the new tooling commit. It is important to keep the submodule as up to date as possible, as updates may include bug fixes, validation improvements, and formatting changes that affect document output.</p>
+
+      <p class="note">Individual changes to files within the <code>./tooling/</code> submodule directory are not permitted. All tooling changes must be made through the <a>https://github.com/SMPTE/html-pub</a> repository and picked up via a submodule bump.</p>
+
+      <p>To check which commit the submodule is currently pinned to and whether it is behind the remote, run:</p>
+<pre>
+git submodule status
+</pre>
+
+      <p>The output lists each submodule with its current commit SHA. To determine whether the submodule is current, compare the commit SHA against the latest release tag and commit at <a>https://github.com/SMPTE/html-pub</a>.</p>
+
+      <p>To update the submodule to the latest commit on its tracked remote branch, run:</p>
+<pre>
+git submodule update --remote
+</pre>
+
+      <p class="note">This command fetches from the submodule's remote and advances the pointer in the superproject to the latest available commit on the tracked branch. It does not automatically stage or commit the change in the parent repo.</p>
+
+      <p>After updating, the parent repository will show the submodule directory as modified. Stage and commit the bump with:</p>
+<pre>
+git add tooling/
+git commit -m "Bump tooling to latest"
+</pre>
+
+      <p>Push the change to the remote as normal:</p>
+<pre>
+git push
+</pre>
+
+    </section>
+
     <section id="sec-tooling-local-validate">
       <h4>Validation</h4>
       <p>When creating a PR on GitHub, the tooling automatically performs a build process as noted in <a href="#sec-building"></a>, and part of that process is doing validation, both the internal to the tooling and for general HTML 5 validation.</p>
-        
+
       <p>While the internal tooling validation occurs at runtime while editing, waiting until the build action during a PR to check the HTML 5 validation can present an editor with unforseen issues (i.e. an invalid element or broken schema error), which then results in failures on the PR/build that must be fixed. Often times when this occurs the preview with redlines is not available in the PR, and/or the tooling will not allow a build to finish. Therefore it is highly recommended an editor runs the validation locally prior to pushing to GitHub to prevent these failures frmo occuring.</p>
 
       <p>The command for this is:</p>
@@ -1822,6 +1857,15 @@ Unknown element in clause HTMLElement {
 ERROR: "validate:html" exited with 5.
 </pre>
 
+    </section>
+
+    <section id="sec-tooling-local-submodule-validation">
+      <h4>Handling new validation errors after a tooling bump</h4>
+      <p>A tooling update may introduce new or stricter validation rules. After bumping the submodule, run validation locally as described in <a href="#sec-tooling-local-validate"></a> before committing or pushing.</p>
+
+      <p>If validation reports new errors that were not present before the bump, those errors must be resolved in the document source before the bump commit is pushed. Do not push a submodule bump that causes a document to fail validation.</p>
+
+      <p class="note">Validation errors introduced by a tooling update reflect real issues in the document source. They should be corrected in the document, not worked around by reverting or pinning to an older tooling commit.</p>
     </section>
     </section>
   </section>

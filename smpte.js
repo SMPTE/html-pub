@@ -28,7 +28,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-import { smpteValidate } from "./js/validate.mjs";
+import { smpteValidate, validateDataIncludes } from "./js/validate.mjs";
 import * as smpte from "./js/common.mjs";
 
 class Logger {
@@ -77,7 +77,7 @@ function resolveScriptRelativePath(path) {
 function asyncFetchLocal(url) {
   return new Promise(function(resolve, reject) {
     var xhr = new XMLHttpRequest
-    xhr.onload = () => resolve(xhr.responseText);
+    xhr.onload = () => xhr.status === 200 ? resolve(xhr.responseText) : reject(new TypeError(`File not found: ${url}`));
     xhr.onerror = () =>  reject(new TypeError('Local request failed'));
     xhr.open('GET', url);
     xhr.send(null);
@@ -91,7 +91,7 @@ async function asyncAddStylesheet(url) {
       s.textContent = data;
       document.head.appendChild(s);
       })
-    .catch(err => logError("Cannot fetch: " + err));
+    .catch(err => logger_.error("Cannot fetch: " + err));
 }
 
 function fillTemplate(template, data) {
@@ -593,7 +593,7 @@ function insertElementsAnnex(docMetadata) {
     return;
   }
 
-  sec.classList.add("unnumbered");
+  sec.classList.add("annex", "informative");
 
   const intro = document.createElement("p");
   intro.innerText = "The following are the non-prose elements of this document:"
@@ -900,6 +900,50 @@ function addHeadingLinks(docMetadata) {
 
     heading.appendChild(headingLink);
   }
+
+  for (const table of document.querySelectorAll("table[id]")) {
+    const caption = table.querySelector("caption");
+    if (!caption) continue;
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${table.id}`;
+    link.innerHTML = "🔗";
+    caption.appendChild(link);
+  }
+
+  for (const figure of document.querySelectorAll("figure[id]")) {
+    const figcaption = figure.querySelector("figcaption");
+    if (!figcaption) continue;
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${figure.id}`;
+    link.innerHTML = "🔗";
+    figcaption.appendChild(link);
+  }
+
+  for (const formula of document.querySelectorAll("div.formula[id]")) {
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${formula.id}`;
+    link.innerHTML = "🔗";
+    formula.appendChild(link);
+  }
+
+  for (const note of document.querySelectorAll(".note[id]")) {
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${note.id}`;
+    link.innerHTML = "🔗";
+    note.appendChild(link);
+  }
+
+  for (const example of document.querySelectorAll(".example[id]")) {
+    const link = document.createElement("a");
+    link.className = "heading-link";
+    link.href = `#${example.id}`;
+    link.innerHTML = "🔗";
+    example.appendChild(link);
+  }
 }
 
 function numberSections(element, curHeadingNumber) {
@@ -1187,7 +1231,6 @@ function numberExamples() {
 
       headingLabel.appendChild(document.createTextNode("EXAMPLE "));
       headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" —⁠ "));
 
       example.insertBefore(headingLabel, example.firstChild);
     }
@@ -1475,9 +1518,9 @@ function asyncInsertSnippets() {
   return Promise.all(Array.from(
     document.querySelectorAll("pre[data-include]"),
     (e) => {
-      asyncFetchLocal(e.getAttribute("data-include"))
-        .then(data => e.textContent = data)
-        .catch(err => logError("Cannot fetch: " + err));
+      return asyncFetchLocal(e.getAttribute("data-include"))
+        .then(data => { e.textContent = data; e.removeAttribute("data-include"); })
+        .catch(() => {});
     }
   ));
 }
@@ -1564,6 +1607,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    try {
     smpteValidate(window.document, logger_);
     await render();
+    validateDataIncludes(window.document, logger_);
     window._smpteRenderComplete = true;
   } catch (e) {
     logger_.error(e);

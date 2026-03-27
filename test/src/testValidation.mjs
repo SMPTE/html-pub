@@ -33,8 +33,8 @@ import {smpteValidate, ErrorLogger} from "../../js/validate.mjs";
 
 const testDirPath = "test/resources/html/validation";
 
-async function _test(path) {
-  const dom = new jsdom.JSDOM(fs.readFileSync(path));
+async function _test(filePath) {
+  const dom = new jsdom.JSDOM(fs.readFileSync(filePath));
 
   const expectation = dom.window.document.head.querySelector("meta[itemprop='test']").getAttribute("content");
 
@@ -42,8 +42,10 @@ async function _test(path) {
 
   let hasThrown = false;
 
+  const fileExists = (src) => fs.existsSync(path.resolve(path.dirname(filePath), src));
+
   try {
-    smpteValidate(dom.window.document, logger);
+    smpteValidate(dom.window.document, logger, fileExists);
   } catch (e) {
     logger.error(`Exception: ${e.stack}`);
     hasThrown = true;
@@ -52,11 +54,11 @@ async function _test(path) {
   const hasPassed = !logger.hasFailed() && !hasThrown;
 
   if ((expectation === "valid" && hasPassed) || (expectation !== "valid" && !hasPassed)) {
-    console.log(`${path} passed.`);
+    console.log(`${filePath} passed.`);
     return true;
   }
 
-  console.log(`**** ${path} failed.`);
+  console.log(`**** ${filePath} failed.`);
   logger.errorList().map(msg => console.log(`    ${msg.message}`));
 
   return false;
