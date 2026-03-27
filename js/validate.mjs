@@ -115,12 +115,15 @@ function validateFootnoteReferences(root, logger) {
   }
 }
 
-export function validateDataIncludes(doc, logger) {
-  for (const el of doc.querySelectorAll("pre[data-include]"))
-    logger.error(`data-include file not found: ${el.getAttribute("data-include")}`, el);
+export function validateDataIncludes(doc, logger, fileExists = null) {
+  for (const el of doc.querySelectorAll("pre[data-include]")) {
+    const src = el.getAttribute("data-include");
+    if (fileExists === null || !fileExists(src))
+      logger.error(`data-include file not found: ${src}`, el);
+  }
 }
 
-export function smpteValidate(doc, logger) {
+export function smpteValidate(doc, logger, fileExists = null) {
   const docMetadata = smpte.validateHead(doc.head, logger);
   validateDisallowedHeadLinks(doc.head, logger);
   validateDisallowedStyleAttributes(doc.documentElement, logger);
@@ -129,6 +132,8 @@ export function smpteValidate(doc, logger) {
   validateTfootNoteOrder(doc.documentElement, logger);
   validateFootnoteReferences(doc.documentElement, logger);
   validateBody(doc.body, logger);
+  if (fileExists !== null)
+    validateDataIncludes(doc, logger, fileExists);
   return docMetadata;
 }
 
