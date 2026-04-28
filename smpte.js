@@ -1605,7 +1605,13 @@ window._smpteRenderComplete = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
    try {
-    smpteValidate(window.document, logger_);
+    let source = null;
+    try {
+      source = await asyncFetchLocal(window.location.href);
+    } catch (e) {
+      console.warn("Source-based validation skipped: could not fetch document source.", e);
+    }
+    smpteValidate(window.document, logger_, null, source);
     await render();
     validateDataIncludes(window.document, logger_);
     window._smpteRenderComplete = true;

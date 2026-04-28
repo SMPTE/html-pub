@@ -618,12 +618,12 @@
       &lt;a&gt;https://html.spec.whatwg.org/multipage/&lt;/a&gt;
     &lt;/li&gt;
     &lt;li&gt;
-      &lt;cite id=&quot;bib-SMPTE-st429-18&quot;&gt;SMPTE ST 429-18&lt;/cite&gt;, D-Cinema Packaging — Immersive Audio Track 
+      &lt;cite id=&quot;bib-SMPTE-st429-18&quot;&gt;SMPTE ST 429-18&lt;/cite&gt;, D-Cinema Packaging - Immersive Audio Track 
       File 
       &lt;span class=&quot;doi&quot;&gt;10.5594/SMPTE.ST429-18&lt;/span&gt;
     &lt;/li&gt;
     &lt;li&gt;
-      &lt;cite id=&quot;bib-SMPTE-st429-18-2023&quot;&gt;SMPTE ST 429-18:2023&lt;/cite&gt;, D-Cinema Packaging — Immersive 
+      &lt;cite id=&quot;bib-SMPTE-st429-18-2023&quot;&gt;SMPTE ST 429-18:2023&lt;/cite&gt;, D-Cinema Packaging - Immersive 
       Audio Track File (2023 Edition)
       &lt;span class=&quot;doi&quot;&gt;10.5594/SMPTE.ST429-18.2023&lt;/span&gt;
     &lt;/li&gt;
@@ -665,7 +665,7 @@
               can follow the first <code>dt</code> element, in which case all the terms, abbreviations and symbols in the immediately
               preceding <code>dt</code> elements are synonyms.</li>
               <li>The <code>dd</code> elements following the <code>dt</code> element(s) shall appear in the following
-              order — each group is optional (except the definition), but if present, it shall appear in this sequence:
+              order - each group is optional (except the definition), but if present, it shall appear in this sequence:
                 <ol>
                   <li><strong>Deprecated:</strong> the first <code>dd</code> element, if present, shall have a <code>class</code>
                   attribute containing <code>deprecated</code>, indicating the term is deprecated. At most one such element is permitted.</li>
@@ -700,7 +700,7 @@
     manufacture at regular intervals, typically one foot&lt;/dd&gt;
     &lt;dd class="example"&gt;An example of a key number is 12345.&lt;/dd&gt;
     &lt;dd class="note"&gt;Key number shall not be confused with key frame.&lt;/dd&gt;
-    &lt;dd class="source"&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;, modified — definition has been updated.&lt;/dd&gt;
+    &lt;dd class="source"&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;, modified - definition has been updated.&lt;/dd&gt;
   &lt;/dl&gt;
 &lt;/section&gt;
 </pre>
@@ -1156,7 +1156,7 @@
         </p>
 
         <p>Tables may include footnotes. Footnotes shall appear in a <code>tfoot</code> element at the foot of the table,
-        each as a <code>p</code> element with <code>class="footnote"</code> and a unique <code>id</code> attribute. Footnotes are automatically assigned superscript lowercase letters (a, b, c, …) in the order they appear in the <code>tfoot</code> element. 
+        each as a <code>p</code> element with <code>class="footnote"</code> and a unique <code>id</code> attribute. Footnotes are automatically assigned superscript lowercase letters (a, b, c, etc) in the order they appear in the <code>tfoot</code> element. 
         References to footnotes within the table body are marked with an <code>a</code> element whose <code>href</code>
         attribute references the footnote's <code>id</code>.</p>
 
@@ -1434,13 +1434,40 @@ One needs to evaluate &lt;math&gt;&lt;mrow&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mo&gt;=&
 
         <p class="note">Tools such as <a>https://temml.org/</a> can be used to convert from Latex to MathML.</p>
 
+        <p>The unicode minus sign (<code>&amp;#x2212;</code>) is used in math expressions instead of the hyphen-minus, e.g. <code>&amp;#x2212;42</code> renders as &#x2212;42, and <code>6x &amp;#x2212; 103y</code> renders as 6x &#x2212; 103y.</p>
+
       </section>
 
       <section id="sec-special-characters">
         <h4>Special Characters</h4>
         <p>Characters should be encoded as UTF-8-encoded Unicode codepoints, e.g. あ, instead of HTML entities, e.g. <code>&amp;#x3042;</code>, except as needed for usage in <code>pre</code> or examples.
         </p>
-    
+
+        <p>The characters listed in <a href="#tab-illegal-characters"></a> are an exception to this guidance. They are commonly inserted by word processors (e.g. curly quotes substituted for straight quotes, en/em dashes substituted for hyphens) and shall not appear as literal codepoints in the document source. When one of these characters is genuinely needed, it shall be written as a unicode character reference (e.g. <code>&amp;#x201C;</code>) so that author intent is explicit.</p>
+
+        <table id="tab-illegal-characters" class="col-3-center">
+          <caption>Characters not permitted as literals in document source</caption>
+          <thead>
+            <tr><th>Codepoint</th><th>Name</th><th>Preview</th><th>Reference</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>U+2018</td><td>Left Single Quotation Mark</td><td>&#x2018;</td><td><code>&amp;#x2018;</code></td></tr>
+            <tr><td>U+2019</td><td>Right Single Quotation Mark</td><td>&#x2019;</td><td><code>&amp;#x2019;</code></td></tr>
+            <tr><td>U+201C</td><td>Left Double Quotation Mark</td><td>&#x201C;</td><td><code>&amp;#x201C;</code></td></tr>
+            <tr><td>U+201D</td><td>Right Double Quotation Mark</td><td>&#x201D;</td><td><code>&amp;#x201D;</code></td></tr>
+            <tr><td>U+2013</td><td>En Dash</td><td>&#x2013;</td><td><code>&amp;#x2013;</code></td></tr>
+            <tr><td>U+2014</td><td>Em Dash</td><td>&#x2014;</td><td><code>&amp;#x2014;</code></td></tr>
+            <tr><td>U+2011</td><td>Non-Breaking Hyphen</td><td>&#x2011;</td><td><code>&amp;#x2011;</code></td></tr>
+            <tr><td>U+2026</td><td>Horizontal Ellipsis</td><td>&#x2026;</td><td><code>&amp;#x2026;</code></td></tr>
+            <tr><td>U+00A0</td><td>No-Break Space</td><td>[&#xA0;]</td><td><code>&amp;#xA0;</code></td></tr>
+            <tr><td>U+00AD</td><td>Soft Hyphen</td><td>[&#xAD;]</td><td><code>&amp;#xAD;</code></td></tr>
+            <tr><td>U+00A9</td><td>Copyright Sign</td><td>&#xA9;</td><td><code>&amp;#xA9;</code></td></tr>
+            <tr><td>U+00AE</td><td>Registered Sign</td><td>&#xAE;</td><td><code>&amp;#xAE;</code></td></tr>
+          </tbody>
+        </table>
+
+        <p class="note">The validator reports each literal occurrence with line and column information. Numeric unicode, or named character references (e.g. <code>&amp;#x201C;</code>, <code>&amp;ldquo;</code>) are recognized as deliberate and are not flagged.</p>
+
       </section>
       
       <section id="sec-code-element-usage">
@@ -1489,7 +1516,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
           <dd>Applied to <code>p</code> or <code>div</code> elements to create a formatted and automatically numbered example. See <a href="#sec-example-class"></a>.</dd>
 
           <dt><code>footnote</code></dt>
-          <dd>Applied to a <code>p</code> element inside a <code>tfoot</code> element to create a table footnote. Footnotes are only permitted inside a <code>tfoot</code> element — use outside of tables is not allowed. See <a href="#sec-table-element"></a>.</dd>
+          <dd>Applied to a <code>p</code> element inside a <code>tfoot</code> element to create a table footnote. Footnotes are only permitted inside a <code>tfoot</code> element - use outside of tables is not allowed. See <a href="#sec-table-element"></a>.</dd>
 
           <dt><code>center-cell</code>;</dt>
           <dt><code>right-cell</code>;</dt>
@@ -1953,7 +1980,7 @@ ERROR: "validate:html" exited with 5.
         </table>
 
         <p class="note">
-          Alignment classes are available for columns 1–8 using <code>col-x-center</code>, <code>col-x-right</code>, <code>col-x-left</code>, and <code>col-x-top</code>. Multiple classes may be combined on the same <code>table</code> to align different columns independently.
+          Alignment classes are available for columns 1-8 using <code>col-x-center</code>, <code>col-x-right</code>, <code>col-x-left</code>, and <code>col-x-top</code>. Multiple classes may be combined on the same <code>table</code> to align different columns independently.
         </p>
         <p class="note">
           Tables over 8 columns wide should not be used and instead split into multiple smaller tables.

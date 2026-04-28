@@ -123,7 +123,156 @@ export function validateDataIncludes(doc, logger, fileExists = null) {
   }
 }
 
-export function smpteValidate(doc, logger, fileExists = null) {
+const ILLEGAL_CHARS_RE = /[‘’“”–—‑… ­©®]/g;
+
+function _formatChar(ch) {
+  return `U+${ch.codePointAt(0).toString(16).toUpperCase().padStart(4, "0")}`;
+}
+
+const ILLEGAL_CHARS_SET = new Set("‘’“”–—‑… ­©®");
+const NAMED_ENTITIES = {
+  ldquo: "“", rdquo: "”", lsquo: "‘", rsquo: "’",
+  ndash: "–", mdash: "—", hellip: "…", NonBreakingHyphen: "‑",
+  nbsp: " ", shy: "­", copy: "©", reg: "®",
+};
+const ID_ATTR_RE = /\bid\s*=\s*["']([^"']+)["']/g;
+
+function _resolveEntity(body) {
+  if (body[0] === "#") {
+    const isHex = body[1] === "x" || body[1] === "X";
+    const num = isHex ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
+    return Number.isFinite(num) ? String.fromCodePoint(num) : null;
+  }
+  return Object.prototype.hasOwnProperty.call(NAMED_ENTITIES, body) ? NAMED_ENTITIES[body] : null;
+}
+
+function _scanSource(source) {
+  const textTokens = [];
+  const attrLiterals = [];
+  let inTag = false;
+  let inComment = false;
+  let inRawText = null;
+  let i = 0;
+  while (i < source.length) {
+    if (inComment) {
+      if (source.startsWith("-->", i)) { inComment = false; i += 3; continue; }
+      i++;
+      continue;
+    }
+    if (inRawText) {
+      const closeRe = new RegExp(`^</${inRawText}\\s*>`, "i");
+      const m = source.slice(i).match(closeRe);
+      if (m) { inRawText = null; i += m[0].length; continue; }
+      i++;
+      continue;
+    }
+    if (inTag) {
+      if (source[i] === ">") { inTag = false; i++; continue; }
+      if (ILLEGAL_CHARS_SET.has(source[i]))
+        attrLiterals.push({ char: source[i], srcIdx: i });
+      i++;
+      continue;
+    }
+    if (source.startsWith("<!--", i)) { inComment = true; i += 4; continue; }
+    if (source[i] === "<") {
+      const m = source.slice(i).match(/^<(script|style)\b[^>]*>/i);
+      if (m) { inRawText = m[1].toLowerCase(); i += m[0].length; continue; }
+      inTag = true;
+      i++;
+      continue;
+    }
+    if (source[i] === "&") {
+      const m = source.slice(i).match(/^&(#x?[0-9A-Fa-f]+|[a-zA-Z]+);/);
+      if (m) {
+        const resolved = _resolveEntity(m[1]);
+        if (resolved && ILLEGAL_CHARS_SET.has(resolved))
+          textTokens.push({ char: resolved, form: "entity", srcIdx: i });
+        i += m[0].length;
+        continue;
+      }
+    }
+    if (ILLEGAL_CHARS_SET.has(source[i]))
+      textTokens.push({ char: source[i], form: "literal", srcIdx: i });
+    i++;
+  }
+  return { textTokens, attrLiterals };
+}
+
+function _enumDomTextIllegalChars(doc) {
+  const occs = [];
+  const NodeFilter = doc.defaultView.NodeFilter;
+  const walker = doc.createTreeWalker(doc.documentElement, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const parent = n.parentElement;
+    const parentName = parent && parent.localName.toLowerCase();
+    if (parentName === "script" || parentName === "style") continue;
+    for (const dm of n.nodeValue.matchAll(ILLEGAL_CHARS_RE))
+      occs.push({ textNode: n, offset: dm.index, char: dm[0] });
+  }
+  return occs;
+}
+
+function _findLineCol(source, idx) {
+  const before = source.slice(0, idx);
+  const line = before.split("\n").length;
+  const lastNl = before.lastIndexOf("\n");
+  const col = lastNl === -1 ? idx + 1 : idx - lastNl;
+  return { line, col };
+}
+
+function _findEnclosingByClosestId(source, idx, doc) {
+  const before = source.slice(0, idx);
+  const matches = [...before.matchAll(ID_ATTR_RE)];
+  if (matches.length === 0) return undefined;
+  const found = doc.getElementById(matches[matches.length - 1][1]);
+  return found || undefined;
+}
+
+function _logIllegalChar(logger, source, char, srcIdx, element) {
+  const { line, col } = _findLineCol(source, srcIdx);
+  const cp = char.codePointAt(0).toString(16).toUpperCase();
+  const message = `Illegal character ${_formatChar(char)} in source at line ${line}, column ${col}; use a unicode character reference (&#x${cp};) if intentional`;
+  if (element !== undefined && typeof logger.errorList === "function")
+    logger.error(message, element);
+  else
+    logger.error(message);
+}
+
+export function validateIllegalCharactersInSource(source, logger, doc = null) {
+  const { textTokens, attrLiterals } = _scanSource(source);
+
+  let domOccs = null;
+  if (doc !== null) {
+    const collected = _enumDomTextIllegalChars(doc);
+    if (collected.length === textTokens.length) {
+      let aligned = true;
+      for (let i = 0; i < textTokens.length; i++) {
+        if (textTokens[i].char !== collected[i].char) { aligned = false; break; }
+      }
+      if (aligned) domOccs = collected;
+    }
+  }
+
+  for (let i = 0; i < textTokens.length; i++) {
+    const t = textTokens[i];
+    if (t.form !== "literal") continue;
+    let element;
+    if (domOccs !== null)
+      element = domOccs[i].textNode.parentElement || undefined;
+    else if (doc !== null)
+      element = _findEnclosingByClosestId(source, t.srcIdx, doc);
+    _logIllegalChar(logger, source, t.char, t.srcIdx, element);
+  }
+
+  for (const a of attrLiterals) {
+    let element;
+    if (doc !== null)
+      element = _findEnclosingByClosestId(source, a.srcIdx, doc);
+    _logIllegalChar(logger, source, a.char, a.srcIdx, element);
+  }
+}
+
+export function smpteValidate(doc, logger, fileExists = null, source = null) {
   const docMetadata = smpte.validateHead(doc.head, logger);
   validateDisallowedHeadLinks(doc.head, logger);
   validateDisallowedStyleAttributes(doc.documentElement, logger);
@@ -134,6 +283,8 @@ export function smpteValidate(doc, logger, fileExists = null) {
   validateBody(doc.body, logger);
   if (fileExists !== null)
     validateDataIncludes(doc, logger, fileExists);
+  if (source !== null)
+    validateIllegalCharactersInSource(source, logger, doc);
   return docMetadata;
 }
 
