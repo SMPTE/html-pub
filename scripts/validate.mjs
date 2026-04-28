@@ -33,9 +33,13 @@ import {smpteValidate} from "../js/validate.mjs";
 
 async function main() {
   const filePath = path.resolve(process.argv[2]);
-  const dom = new jsdom.JSDOM(fs.readFileSync(filePath));
-  const fileExists = (src) => fs.existsSync(path.resolve(path.dirname(filePath), src));
-  smpteValidate(dom.window.document, console, fileExists);
+  const source = fs.readFileSync(filePath, "utf8");
+  const dom = new jsdom.JSDOM(source);
+  const readFile = (src) => {
+    const p = path.resolve(path.dirname(filePath), src);
+    return fs.existsSync(p) ? fs.readFileSync(p, "utf8") : null;
+  };
+  smpteValidate(dom.window.document, console, readFile, source);
 }
 
 main().catch(e => { console.error(e); process.exitCode = 1; });
