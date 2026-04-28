@@ -115,11 +115,26 @@ function validateFootnoteReferences(root, logger) {
   }
 }
 
-export function validateDataIncludes(doc, logger, fileExists = null) {
+export function validateDataIncludes(doc, logger, readFile = null) {
+  if (readFile === null) return;
   for (const el of doc.querySelectorAll("pre[data-include]")) {
     const src = el.getAttribute("data-include");
-    if (fileExists === null || !fileExists(src))
+    const content = readFile(src);
+    if (content === null) {
       logger.error(`data-include file not found: ${src}`, el);
+      continue;
+    }
+    for (const m of content.matchAll(ILLEGAL_CHARS_RE)) {
+      const before = content.slice(0, m.index);
+      const line = before.split("\n").length;
+      const lastNl = before.lastIndexOf("\n");
+      const col = lastNl === -1 ? m.index + 1 : m.index - lastNl;
+      const message = `Illegal character ${_formatChar(m[0])} in ${src} at line ${line}, column ${col}`;
+      if (typeof logger.errorList === "function")
+        logger.error(message, el);
+      else
+        logger.error(message);
+    }
   }
 }
 
@@ -272,7 +287,7 @@ export function validateIllegalCharactersInSource(source, logger, doc = null) {
   }
 }
 
-export function smpteValidate(doc, logger, fileExists = null, source = null) {
+export function smpteValidate(doc, logger, readFile = null, source = null) {
   const docMetadata = smpte.validateHead(doc.head, logger);
   validateDisallowedHeadLinks(doc.head, logger);
   validateDisallowedStyleAttributes(doc.documentElement, logger);
@@ -281,8 +296,8 @@ export function smpteValidate(doc, logger, fileExists = null, source = null) {
   validateTfootNoteOrder(doc.documentElement, logger);
   validateFootnoteReferences(doc.documentElement, logger);
   validateBody(doc.body, logger);
-  if (fileExists !== null)
-    validateDataIncludes(doc, logger, fileExists);
+  if (readFile !== null)
+    validateDataIncludes(doc, logger, readFile);
   if (source !== null)
     validateIllegalCharactersInSource(source, logger, doc);
   return docMetadata;

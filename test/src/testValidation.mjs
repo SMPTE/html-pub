@@ -43,10 +43,13 @@ async function _test(filePath) {
 
   let hasThrown = false;
 
-  const fileExists = (src) => fs.existsSync(path.resolve(path.dirname(filePath), src));
+  const readFile = (src) => {
+    const p = path.resolve(path.dirname(filePath), src);
+    return fs.existsSync(p) ? fs.readFileSync(p, "utf8") : null;
+  };
 
   try {
-    smpteValidate(dom.window.document, logger, fileExists, source);
+    smpteValidate(dom.window.document, logger, readFile, source);
   } catch (e) {
     logger.error(`Exception: ${e.stack}`);
     hasThrown = true;
