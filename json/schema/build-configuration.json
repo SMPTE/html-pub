@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "latestEditionTag": {
-      "description": "Git commit or tag used when generating redlines against the latest edition of the document",
+      "description": "Optional override for the redline base. When set, the build uses this git commit or tag when generating redlines against the latest edition. When unset or null, the build auto-derives the redline base from the most recent matching git tag (most recent prior `-pub` tag when the document's pubStage is PUB; otherwise the most recent prior dated tag of any stage).",
       "type": [ "string", "null" ]
     }
   }

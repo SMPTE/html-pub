@@ -671,11 +671,49 @@ class BuildConfig {
     try {
       config = JSON.parse(fs.readFileSync(path.join(docDirPath, ".smpte-build.json")));
     } catch {
-      console.log("Could not read the publication config file.");
+      /* file is optional; auto-derivation is used when it is absent */
     }
 
-    this.lastEdRef = config.latestEditionTag || null;
+    this.latestEditionTag = config.latestEditionTag || null;
   }
+}
+
+const DATED_TAG_RE = /^\d{8}-(pub|fcd|cd|wd|dp)$/;
+
+function deriveLastEdRef(pubStage, override) {
+  if (override !== null && override !== undefined && override !== "") {
+    return override;
+  }
+
+  const editionOnly = pubStage === "PUB";
+  const globs = editionOnly ? ["*-pub"] : ["*-pub", "*-fcd", "*-cd", "*-wd", "*-dp"];
+
+  let allTags;
+  try {
+    allTags = child_process.execSync(`git tag -l ${globs.map(g => `'${g}'`).join(" ")} --sort=-version:refname`)
+      .toString()
+      .split("\n")
+      .map(t => t.trim())
+      .filter(t => DATED_TAG_RE.test(t));
+  } catch {
+    return null;
+  }
+
+  let headTags;
+  try {
+    headTags = new Set(
+      child_process.execSync("git tag --points-at HEAD")
+        .toString()
+        .split("\n")
+        .map(t => t.trim())
+        .filter(Boolean)
+    );
+  } catch {
+    headTags = new Set();
+  }
+
+  const candidate = allTags.find(t => !headTags.has(t));
+  return candidate || null;
 }
 
 async function main() {
@@ -802,7 +840,9 @@ async function main() {
 
   /* render document */
 
-  Object.assign(generatedFiles, await build(buildPaths, baseRef, config.lastEdRef, docMetadata));
+  const lastEdRef = deriveLastEdRef(docMetadata.pubStage, config.latestEditionTag);
+
+  Object.assign(generatedFiles, await build(buildPaths, baseRef, lastEdRef, docMetadata));
 
   /* validate rendered document */
 

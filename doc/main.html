@@ -9,8 +9,8 @@
   <meta itemprop="pubType" content="AG">
   <meta itemprop="pubNumber" content="26">
   <!-- <meta itemprop="pubPart" content="XX"> -->
-  <meta itemprop="pubState" content="pub">
-  <!-- meta itemprop="pubStage" content="WD"> -->
+  <meta itemprop="pubState" content="draft">
+  <meta itemprop="pubStage" content="PUB">
   <meta itemprop="pubConfidential" content="no">
   <!--< meta itemprop="pubTC" content="XX"> -->
   <meta itemprop="pubSuiteTitle" content="HTML Pub">
@@ -1639,23 +1639,25 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
       <p>The S3 upload step can be skipped by providing the <code>validate</code> argument to the build script.</p>
 
-      <p>The build process can be configured using the <code>.smpte-build.json</code> file which is contains a JSON object that
-      conforms to the JSON schema at <a href="#figure-build-configuration-schema"></a>.</p>
+      <p>The build process MAY be configured using an optional <code>.smpte-build.json</code> file containing a JSON object that
+      conforms to the JSON schema at <a href="#figure-build-configuration-schema"></a>. When the file is absent, the build derives
+      its configuration from the document metadata and the repository's git tags.</p>
 
       <figure id="figure-build-configuration-schema">
         <pre data-include="../json/schema/build-configuration.json"></pre>
-        <figcaption>Schema for the build configuration file <code>.smpte-build.json</code>.</figcaption>
+        <figcaption>Schema for the optional build configuration file <code>.smpte-build.json</code>.</figcaption>
       </figure>
 
-      <p>If present or not equal to <code>null</code>, the <code>latestEditionTag</code> property contains the Git tag or commit
-      that is used when generating a redline against the latest published edition of the document.</p>
+      <p>If present and not equal to <code>null</code>, the <code>latestEditionTag</code> property overrides the auto-selected
+      redline base with the specified Git tag or commit. When absent or <code>null</code>, the redline base is auto-selected as
+      described in <a href="#sec-document-github-releases"></a>.</p>
 
       <div class="example">
   <pre data-include="../.smpte-build.json"></pre>
       </div>
 
       <p>
-        For further explanation of determining the value of <code>latestEditionTag</code>, see <a href="#sec-document-github-releases"></a>
+        For further explanation of how the redline base is determined, see <a href="#sec-document-github-releases"></a>.
       </p>
     </section>
 
@@ -2834,28 +2836,32 @@ ERROR: "validate:html" exited with 5.
     <section id="sec-document-github-releases">
       <h3>GitHub Releases</h3>
       <p>
-        Whenever the state of the document changes to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> on the <code>main</code> branch, then a release shall be created in the GitHub repo. 
+        Whenever the state of the document changes to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> on the <code>main</code> branch, the tooling automatically creates a <em>draft</em> release in the GitHub repo. An authorized editor reviews and publishes the draft to finalize the release and trigger production of the associated artifacts.
       </p>
       <p>
-        Both the GitHub release and git tag shall be named <code>YYYYMMDD "-" pubStage</code>. The <code>YYYYMMDD</code> should directly represent the value used in <code>pubDateTime</code> as defined in <a href="#sec-pubDateTime"></a>. 
+        Both the GitHub release and the git tag shall be named <code>YYYYMMDD "-" pubStage</code>, where <code>YYYYMMDD</code> directly represents the value of <code>pubDateTime</code> (as defined in <a href="#sec-pubDateTime"></a>) and the <code>pubStage</code> suffix is the value of the <code>pubStage</code> meta in lowercase.
       </p>
       <p class="example">
         <code>20230615-fcd</code> or <code>20230925-pub</code>
       </p>
       <p>
-        The <code>latestEditionTag</code> property in the <code>.smpte-build.json</code> file shall always be equal to the name of the most recent git tag. This will trigger the tooling to create a link for <code>Redline to most recent edition</code> during any PRs and merges to the <code>main</code> branch. 
+        The tooling determines the redline base automatically. When <code>pubStage</code> is <code>PUB</code>, the redline is generated against the most recent prior <code>-pub</code> tag (the previous edition); for any other <code>pubStage</code>, the redline is generated against the most recent prior dated tag of any stage (iterative draft-to-draft). The <code>Redline to most recent edition</code> link is generated for every PR and merge to <code>main</code> without manual configuration. If no prior matching tag exists, the redline is omitted. A <code>latestEditionTag</code> value MAY be set in <code>.smpte-build.json</code> to override the auto-selected base &mdash; for example, when rebuilding an archived edition or pinning to a specific historical release.
       </p>
       <p>
-        The tooling will automatically generate zip file packages within the release details page, to be used for both :</p>
-        <ul>
-          <li>TC review/balloting (named as per <a href="#bib-smpte-ag-02"></a>)</li>
-          <li>(and) SMPTE Document Library publishing (named by the tag)</li>
-        </ul>
-       
-      <p class="example">See <a>https://github.com/SMPTE/st428-24-private/releases/tag/20241101-dp</a>, where <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/27c-st-428-24-dp-2024-12-06-pub.zip</a> (ballot zip), and <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/20241101-dp.zip</a> (publish zip) are available. </p>
-      
+        For workflow events that share both <code>pubDateTime</code> and <code>pubStage</code> with the most recent release but represent a distinct release moment (e.g., entering the PCD period from a Pre-FCD review on the same day), the merge commit message shall include the token <code>[force-release]</code>. The tooling appends a numeric suffix (<code>-2</code>, <code>-3</code>, &hellip;) to the tag to disambiguate.
+      </p>
       <p>
-        See <a href="#sec-sample-workflow"></a> for a sample workflow utilizing releases. 
+        Publishing the draft release triggers the tooling to automatically generate zip file packages and attach them to the release details page, used for:
+      </p>
+      <ul>
+        <li>TC review/balloting (named as per <a href="#bib-smpte-ag-02"></a>)</li>
+        <li>SMPTE Document Library publishing (named by the tag)</li>
+      </ul>
+      <p class="example">
+        See <a>https://github.com/SMPTE/st428-24-private/releases/tag/20241101-dp</a>, where <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/27c-st-428-24-dp-2024-12-06-pub.zip</a> (ballot zip) and <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/20241101-dp.zip</a> (publish zip) are available.
+      </p>
+      <p>
+        See <a href="#sec-sample-workflow"></a> for a sample workflow utilizing releases.
       </p>
 
     </section>
