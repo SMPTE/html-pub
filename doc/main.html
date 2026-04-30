@@ -1715,12 +1715,14 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <dt><strong>Redline to most recent published edition</strong> (<code>pub-rl.html</code>)</dt>
         <dd>
           <p>Generated against the most recent prior git tag matching <code>YYYYMMDD-pub</code> &mdash; the previous published edition. Shows what has changed since the last edition was published. The reference base may be overridden by setting <code>latestEditionTag</code> in <code>.smpte-build.json</code> &mdash; useful when rebuilding an archived edition or pinning to a specific historical release.</p>
+          <p>This redline satisfies the requirement in <a href="#bib-smpte-ag-02"></a> for a redline against the published document (the baseline draft) when preparing a revision.</p>
           <p><em>Generated:</em> on every event. <em>Omitted:</em> when no prior <code>-pub</code> tag exists (e.g., the first edition).</p>
         </dd>
 
         <dt><strong>Redline to most recent release</strong> (<code>release-rl.html</code>)</dt>
         <dd>
           <p>Generated against the most recent prior git tag matching <code>YYYYMMDD-{stage}</code> for any recognized <code>pubStage</code> (<code>-wd</code>, <code>-cd</code>, <code>-fcd</code>, <code>-dp</code>, or <code>-pub</code>). Shows iterative changes since the last release tag of any kind, supporting draft-to-draft review across the workflow stages defined in <a href="#sec-document-mapping-status"></a>.</p>
+          <p>This redline satisfies the requirement in <a href="#bib-smpte-ag-02"></a> that markup from the ballot document be provided for comment resolution.</p>
           <p><em>Generated:</em> on every event. <em>Omitted:</em> when no prior dated release tag exists. May coincide with the published-edition redline when no draft tags exist between published editions.</p>
         </dd>
       </dl>
