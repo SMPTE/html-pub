@@ -711,8 +711,8 @@ class BuildConfig {
   }
 }
 
-const DATED_TAG_RE = /^\d{8}-(pub|fcd|cd|wd|dp)$/;
-const PUB_TAG_RE = /^\d{8}-pub$/;
+const DATED_TAG_RE = /^\d{8}-(pub|fcd|cd|wd|dp)(-\d+)?$/;
+const PUB_TAG_RE = /^\d{8}-pub(-\d+)?$/;
 
 function getHeadTags() {
   try {
@@ -748,11 +748,11 @@ function deriveLastEdRef(override) {
   if (override !== null && override !== undefined && override !== "") {
     return override;
   }
-  return pickLatestTag(["*-pub"], PUB_TAG_RE);
+  return pickLatestTag(["*-pub*"], PUB_TAG_RE);
 }
 
 function deriveLastReleaseRef() {
-  return pickLatestTag(["*-pub", "*-fcd", "*-cd", "*-wd", "*-dp"], DATED_TAG_RE);
+  return pickLatestTag(["*-pub*", "*-fcd*", "*-cd*", "*-wd*", "*-dp*"], DATED_TAG_RE);
 }
 
 async function main() {
