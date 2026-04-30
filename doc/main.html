@@ -2851,6 +2851,15 @@ ERROR: "validate:html" exited with 5.
         For workflow events that share both <code>pubDateTime</code> and <code>pubStage</code> with the most recent release but represent a distinct release moment (e.g., entering the PCD period from a Pre-FCD review on the same day), the merge commit message shall include the token <code>[force-release]</code>. The tooling appends a numeric suffix (<code>-2</code>, <code>-3</code>, &hellip;) to the tag to disambiguate.
       </p>
       <p>
+        To publish the draft release after it has been auto-created:
+      </p>
+      <ol>
+        <li>In the repository on GitHub, navigate to the <strong>Releases</strong> page (<code>https://github.com/{org}/{repo}/releases</code>).</li>
+        <li>Open the draft release whose name matches the expected <code>YYYYMMDD-pubStage</code> tag for the merged document state.</li>
+        <li>Click <strong>Edit</strong>, review the auto-generated release notes, and confirm that the target commit corresponds to the merge that produced the new state.</li>
+        <li>Click <strong>Publish release</strong>.</li>
+      </ol>
+      <p>
         Publishing the draft release triggers the tooling to automatically generate zip file packages and attach them to the release details page, used for:
       </p>
       <ul>
