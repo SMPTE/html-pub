@@ -751,7 +751,9 @@ function deriveLastEdRef(override) {
   return pickLatestTag(["*-pub*"], PUB_TAG_RE);
 }
 
-function deriveLastReleaseRef() {
+function deriveLastReleaseRef(pubStage) {
+  /* a -pub release only needs the redline to the prior published edition */
+  if (pubStage === "PUB") return null;
   return pickLatestTag(["*-pub*", "*-fcd*", "*-cd*", "*-wd*", "*-dp*"], DATED_TAG_RE);
 }
 
@@ -880,7 +882,7 @@ async function main() {
   /* render document */
 
   const lastEdRef = deriveLastEdRef(config.latestEditionTag);
-  const lastReleaseRef = deriveLastReleaseRef();
+  const lastReleaseRef = deriveLastReleaseRef(docMetadata.pubStage);
 
   Object.assign(generatedFiles, await build(buildPaths, baseRef, lastEdRef, lastReleaseRef, docMetadata));
 

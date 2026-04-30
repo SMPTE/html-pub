@@ -1723,7 +1723,7 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
         <dd>
           <p>Generated against the most recent prior git tag matching <code>YYYYMMDD-{stage}</code> for any recognized <code>pubStage</code> (<code>-wd</code>, <code>-cd</code>, <code>-fcd</code>, <code>-dp</code>, or <code>-pub</code>). Shows iterative changes since the last release tag of any kind, supporting draft-to-draft review across the workflow stages defined in <a href="#sec-document-mapping-status"></a>.</p>
           <p>This redline satisfies the requirement in <a href="#bib-smpte-ag-02"></a> that markup from the ballot document be provided for comment resolution.</p>
-          <p><em>Generated:</em> on every event. <em>Omitted:</em> when no prior dated release tag exists. May coincide with the published-edition redline when no draft tags exist between published editions.</p>
+          <p><em>Generated:</em> when the current document's <code>pubStage</code> is <code>WD</code>, <code>CD</code>, <code>FCD</code>, or <code>DP</code>. <em>Omitted:</em> when <code>pubStage</code> is <code>PUB</code> (a published edition's relevant comparison is to the prior published edition only) or when no prior dated release tag exists.</p>
         </dd>
       </dl>
 
