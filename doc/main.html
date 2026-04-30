@@ -1649,15 +1649,15 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       </figure>
 
       <p>If present and not equal to <code>null</code>, the <code>latestEditionTag</code> property overrides the auto-selected
-      redline base with the specified Git tag or commit. When absent or <code>null</code>, the redline base is auto-selected as
-      described in <a href="#sec-document-github-releases"></a>.</p>
+      base for the published-edition redline with the specified Git tag or commit. When absent or <code>null</code>, the base is
+      auto-selected as described in <a href="#sec-redlines"></a>.</p>
 
       <div class="example">
   <pre data-include="../.smpte-build.json"></pre>
       </div>
 
       <p>
-        For further explanation of how the redline base is determined, see <a href="#sec-document-github-releases"></a>.
+        For the complete description of redline outputs produced by the tooling, see <a href="#sec-redlines"></a>.
       </p>
     </section>
 
@@ -1695,6 +1695,37 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       </ul>
 
       <p>The workflow file automatically sets <code>AWS_S3_KEY_PREFIX</code> to the name of the repository.</p>
+
+    </section>
+
+    <section id="sec-redlines">
+      <h4>Redlines</h4>
+
+      <p>The tooling automatically produces redline (change-tracked) renderings of the document on every build &mdash; pull requests, merges to <code>main</code>, and release publications. Redlines compare the current rendered document against a chosen reference rendering using the <code>htmldiff</code> utility, and the resulting HTML files are deployed to S3 alongside the clean output and bundled into the review zip when applicable.</p>
+
+      <p>Three redlines may be produced per build, each with a different reference base:</p>
+
+      <dl>
+        <dt><strong>Redline to current draft</strong> (<code>base-rl.html</code>)</dt>
+        <dd>
+          <p>Generated against the pull request's target branch (typically <code>main</code>), via the <code>GITHUB_BASE_REF</code> environment variable provided by GitHub Actions on pull request events. Shows what the PR itself changes relative to the branch it will merge into.</p>
+          <p><em>Generated:</em> on pull request events. <em>Omitted:</em> on push and release events, where no PR base is defined.</p>
+        </dd>
+
+        <dt><strong>Redline to most recent published edition</strong> (<code>pub-rl.html</code>)</dt>
+        <dd>
+          <p>Generated against the most recent prior git tag matching <code>YYYYMMDD-pub</code> &mdash; the previous published edition. Shows what has changed since the last edition was published. The reference base may be overridden by setting <code>latestEditionTag</code> in <code>.smpte-build.json</code> &mdash; useful when rebuilding an archived edition or pinning to a specific historical release.</p>
+          <p><em>Generated:</em> on every event. <em>Omitted:</em> when no prior <code>-pub</code> tag exists (e.g., the first edition).</p>
+        </dd>
+
+        <dt><strong>Redline to most recent release</strong> (<code>release-rl.html</code>)</dt>
+        <dd>
+          <p>Generated against the most recent prior git tag matching <code>YYYYMMDD-{stage}</code> for any recognized <code>pubStage</code> (<code>-wd</code>, <code>-cd</code>, <code>-fcd</code>, <code>-dp</code>, or <code>-pub</code>). Shows iterative changes since the last release tag of any kind, supporting draft-to-draft review across the workflow stages defined in <a href="#sec-document-mapping-status"></a>.</p>
+          <p><em>Generated:</em> on every event. <em>Omitted:</em> when no prior dated release tag exists. May coincide with the published-edition redline when no draft tags exist between published editions.</p>
+        </dd>
+      </dl>
+
+      <p>In all cases, any tag pointing at the <code>HEAD</code> commit is excluded from selection, so a freshly-tagged release does not redline against itself. When the build runs on a pull request, links to all available redline outputs are included in the comment posted to the PR (see <a href="#sec-gh-integration"></a>). When the build runs on a release publication, the redline files are bundled into the review zip attached to the release (see <a href="#sec-document-github-releases"></a>).</p>
 
     </section>
 
@@ -2845,7 +2876,7 @@ ERROR: "validate:html" exited with 5.
         <code>20230615-fcd</code> or <code>20230925-pub</code>
       </p>
       <p>
-        The tooling determines the redline base automatically. When <code>pubStage</code> is <code>PUB</code>, the redline is generated against the most recent prior <code>-pub</code> tag (the previous edition); for any other <code>pubStage</code>, the redline is generated against the most recent prior dated tag of any stage (iterative draft-to-draft). The <code>Redline to most recent edition</code> link is generated for every PR and merge to <code>main</code> without manual configuration. If no prior matching tag exists, the redline is omitted. A <code>latestEditionTag</code> value MAY be set in <code>.smpte-build.json</code> to override the auto-selected base &mdash; for example, when rebuilding an archived edition or pinning to a specific historical release.
+        Both the published-edition redline (<code>pub-rl.html</code>) and the most-recent-release redline (<code>release-rl.html</code>) are bundled into the review zip attached to the release. See <a href="#sec-redlines"></a> for the complete description of the redline outputs the tooling produces and how their reference bases are chosen.
       </p>
       <p>
         For workflow events that share both <code>pubDateTime</code> and <code>pubStage</code> with the most recent release but represent a distinct release moment (e.g., entering the PCD period from a Pre-FCD review on the same day), the merge commit message shall include the token <code>[force-release]</code>. The tooling appends a numeric suffix (<code>-2</code>, <code>-3</code>, &hellip;) to the tag to disambiguate.
