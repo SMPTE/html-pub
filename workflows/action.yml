@@ -11,6 +11,19 @@ inputs:
     required: true
   GITHUB_TOKEN:
     required: true
+  OFFICIAL_SUBMODULE_PATH:
+    required: false
+    default: tooling
+  OFFICIAL_SUBMODULE_URL:
+    required: false
+    default: https://github.com/SMPTE/html-pub.git
+  OFFICIAL_SUBMODULE_BRANCH:
+    required: false
+    default: main
+  OVERRIDE_SUBMODULE_SHA:
+    required: false
+  OVERRIDE_SUBMODULE_REF:
+    required: false
 
 runs:
   using: "composite"
@@ -18,7 +31,91 @@ runs:
 
     - name: Confirm that the right workflow is active
       shell: bash
-      run: cmp ${GITHUB_ACTION_PATH}/../.github/workflows/main.yml .github/workflows/main.yml
+      run: |
+        set -euo pipefail
+        REF="${GITHUB_ACTION_PATH}/../.github/workflows/main.yml"
+        LOC=".github/workflows/main.yml"
+        # Ignore override inputs so they don't trigger false diffs
+        diff -u \
+          <(grep -vE '^[[:space:]]*OVERRIDE_SUBMODULE_(SHA|REF):' "$REF") \
+          <(grep -vE '^[[:space:]]*OVERRIDE_SUBMODULE_(SHA|REF):' "$LOC")
+
+    - name: Enforce official submodule lock
+      shell: bash
+      env:
+        SUB_PATH: ${{ inputs.OFFICIAL_SUBMODULE_PATH }}
+        OFFICIAL_URL: ${{ inputs.OFFICIAL_SUBMODULE_URL }}
+        OFFICIAL_BRANCH: ${{ inputs.OFFICIAL_SUBMODULE_BRANCH }}
+        OVERRIDE_SHA: ${{ inputs.OVERRIDE_SUBMODULE_SHA }}
+        OVERRIDE_REF: ${{ inputs.OVERRIDE_SUBMODULE_REF }}
+      run: |
+        set -euo pipefail
+
+        # Skip enforcement when running inside the source repository itself.
+        if [[ "${GITHUB_REPOSITORY:-}" == "SMPTE/html-pub" ]]; then
+          echo "Submodule enforcement skipped in source repo (${GITHUB_REPOSITORY})."
+          exit 0
+        fi
+
+        if [[ -z "${SUB_PATH:-}" ]]; then
+          echo "ERROR: SUB_PATH is empty"; exit 1
+        fi
+
+        if [[ ! -f ".gitmodules" ]]; then
+          echo "ERROR: .gitmodules not found. This repository must declare the '${SUB_PATH}' submodule."
+          exit 1
+        fi
+
+        URL_IN_MODULES=$(git config -f .gitmodules --get "submodule.${SUB_PATH}.url" || true)
+        if [[ "$URL_IN_MODULES" != "$OFFICIAL_URL" ]]; then
+          echo "ERROR: ${SUB_PATH} URL in .gitmodules is '$URL_IN_MODULES' but must be '$OFFICIAL_URL'"
+          exit 1
+        fi
+
+        RECORDED_SHA=$(git ls-tree HEAD "$SUB_PATH" | awk '{print $3}')
+        if [[ -z "${RECORDED_SHA:-}" ]]; then
+          echo "ERROR: No submodule commit recorded for ${SUB_PATH}. Did you add and commit the submodule?"
+          exit 1
+        fi
+
+        if [[ -n "${OVERRIDE_SHA:-}" ]]; then
+          TARGET_SHA="$OVERRIDE_SHA"
+        elif [[ -n "${OVERRIDE_REF:-}" ]]; then
+          TARGET_SHA=$(git ls-remote "$OFFICIAL_URL" "$OVERRIDE_REF" | awk '{print $1}')
+          if [[ -z "${TARGET_SHA:-}" ]]; then
+            echo "ERROR: Could not read override ref '$OVERRIDE_REF' from '$OFFICIAL_URL'"
+            exit 1
+          fi
+        else
+          TARGET_SHA=$(git ls-remote "$OFFICIAL_URL" "refs/heads/$OFFICIAL_BRANCH" | awk '{print $1}')
+          if [[ -z "${TARGET_SHA:-}" ]]; then
+            echo "ERROR: Could not read '$OFFICIAL_BRANCH' from '$OFFICIAL_URL'"
+            exit 1
+          fi
+        fi
+
+        echo "Recorded(${SUB_PATH}): $RECORDED_SHA"
+        echo "Target  (${SUB_PATH}): $TARGET_SHA"
+
+        if [[ "$RECORDED_SHA" != "$TARGET_SHA" ]]; then
+          if [[ -n "${OVERRIDE_SHA:-}" || -n "${OVERRIDE_REF:-}" ]]; then
+            echo "::warning::Submodule commit mismatch (override active). Recorded=${RECORDED_SHA} Target=${TARGET_SHA}"
+            # Do not exit; proceed to allow testing with override.
+          else
+            echo "ERROR: Submodule is not on latest official main."
+            echo
+            echo "To fix locally:"
+            echo "  git submodule update --init --remote -- \"${SUB_PATH}\""
+            echo "  # or explicitly:"
+            echo "  cd \"${SUB_PATH}\""
+            echo "  git fetch origin \"${OFFICIAL_BRANCH}\""
+            echo "  git checkout --detach \"origin/${OFFICIAL_BRANCH}\""
+            echo "  cd -"
+            echo "  git add \"${SUB_PATH}\""
+            echo "  git commit -m \"Bump ${SUB_PATH} to latest ${OFFICIAL_BRANCH}\""
+            exit 1
+          fi
+        fi
 
     - name: Install vnu
       shell: bash
