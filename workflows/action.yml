@@ -47,6 +47,41 @@ runs:
         node ${GITHUB_ACTION_PATH}/../scripts/build.mjs deploy
         cat ./build/vars.txt > "$GITHUB_OUTPUT"
 
+    - name: Create draft release if pubState=pub on main
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+      run: |
+        TAG=$(node ${GITHUB_ACTION_PATH}/../scripts/derive-release-tag.mjs | grep '^tag=' | head -1 | cut -d= -f2)
+        if [[ -z "$TAG" ]]; then
+          echo "pubState != pub or metadata incomplete; skipping draft release."
+          exit 0
+        fi
+        FORCE=""
+        if [[ "${{ github.event.head_commit.message }}" == *"[force-release]"* ]]; then
+          FORCE="1"
+        fi
+        FINAL_TAG="$TAG"
+        if git rev-parse "refs/tags/${TAG}" >/dev/null 2>&1; then
+          if [[ -z "$FORCE" ]]; then
+            echo "Tag ${TAG} already exists; no-op."
+            exit 0
+          fi
+          FINAL_TAG=""
+          for i in $(seq 2 99); do
+            if ! git rev-parse "refs/tags/${TAG}-${i}" >/dev/null 2>&1; then
+              FINAL_TAG="${TAG}-${i}"
+              break
+            fi
+          done
+          if [[ -z "$FINAL_TAG" ]]; then
+            echo "Could not resolve a free suffix for ${TAG} after 99 attempts." >&2
+            exit 1
+          fi
+        fi
+        gh release create "$FINAL_TAG" --draft --title "$FINAL_TAG" --target "$GITHUB_SHA" --generate-notes
+
     - name: Determine which pull request we are on
       uses: jwalton/gh-find-current-pr@v1
       if: github.event_name == 'pull_request'

@@ -157,7 +157,7 @@ function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
 }
 
 
-async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
+async function build(buildPaths, baseRef, lastEdRef, lastReleaseRef, docMetadata) {
 
   const generatedFiles = {};
 
@@ -197,16 +197,31 @@ async function build(buildPaths, baseRef, lastEdRef, docMetadata) {
 
   }
 
-  /* generate pub redline, if requested */
+  /* fetch tags once for both pub and release redlines */
+
+  if (lastEdRef !== null || lastReleaseRef !== null) {
+    child_process.execSync(`git fetch --tags`);
+  }
+
+  /* generate redline against most recent published edition, if requested */
 
   if (lastEdRef !== null) {
 
-    child_process.execSync(`git fetch --tags`);
-
-    console.log(`Generating a redline against the latest edition tag: ${lastEdRef}.`);
+    console.log(`Generating a redline against the latest published edition tag: ${lastEdRef}.`);
 
     await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
     generatedFiles.pubRedline = buildPaths.pubRedlineName;
+
+  }
+
+  /* generate redline against most recent release tag, if requested */
+
+  if (lastReleaseRef !== null) {
+
+    console.log(`Generating a redline against the latest release tag: ${lastReleaseRef}.`);
+
+    await generateRedline(buildPaths, lastReleaseRef, buildPaths.releaseRedLineRefPath, buildPaths.releaseRedlinePath);
+    generatedFiles.releaseRedline = buildPaths.releaseRedlineName;
 
   }
 
@@ -245,7 +260,10 @@ async function generatePubLinks(buildPaths, pubLinks) {
       linksDocContents += `[Redline to current draft](${pubLinks.baseRedline})\n`;
 
     if ("pubRedline" in pubLinks)
-      linksDocContents += `[Redline to most recent edition](${pubLinks.pubRedline})\n`;
+      linksDocContents += `[Redline to most recent published edition](${pubLinks.pubRedline})\n`;
+
+    if ("releaseRedline" in pubLinks)
+      linksDocContents += `[Redline to most recent release](${pubLinks.releaseRedline})\n`;
 
     if ("reviewZip" in pubLinks)
       linksDocContents += `[ZIP package](${pubLinks.reviewZip})\n`;
@@ -297,6 +315,10 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
     pubLinks.pubRedline = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.pubRedline)}`;
   }
 
+  if ("releaseRedline" in generatedFiles) {
+    pubLinks.releaseRedline = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.releaseRedline)}`;
+  }
+
   if ("reviewZip" in generatedFiles) {
     pubLinks.reviewZip = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.reviewZip)}`;
   }
@@ -333,6 +355,9 @@ async function makeReviewZip(buildPaths, generatedFiles, docMetadata) {
 
   if ("pubRedline" in generatedFiles)
     zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.pubRedline));
+
+  if ("releaseRedline" in generatedFiles)
+    zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.releaseRedline));
 
   /* create zip filename */
 
@@ -383,7 +408,11 @@ async function makePubArtifacts(buildPaths, generatedFiles, docMetadata) {
   }
 
   if ("pubRedline" in generatedFiles) {
-    htmlLinks += `<p><a href="${encodeURIComponent(generatedFiles.pubRedline)}">Redline to most recent edition</a></p>\n`;
+    htmlLinks += `<p><a href="${encodeURIComponent(generatedFiles.pubRedline)}">Redline to most recent published edition</a></p>\n`;
+  }
+
+  if ("releaseRedline" in generatedFiles) {
+    htmlLinks += `<p><a href="${encodeURIComponent(generatedFiles.releaseRedline)}">Redline to most recent release</a></p>\n`;
   }
 
   if (generatedFiles.reviewZip !== undefined) {
@@ -655,6 +684,10 @@ class BuildPaths {
     this.pubRedlinePath = path.join(this.pubDirPath, this.pubRedlineName);
     this.pubRedLineRefPath = path.join(this.buildDirPath, this.pubRedlineName);
 
+    this.releaseRedlineName = "release-rl.html";
+    this.releaseRedlinePath = path.join(this.pubDirPath, this.releaseRedlineName);
+    this.releaseRedLineRefPath = path.join(this.buildDirPath, this.releaseRedlineName);
+
     this.baseRedlineName = "base-rl.html";
     this.baseRedlinePath = path.join(this.pubDirPath, this.baseRedlineName);
     this.baseRedLineRefPath = path.join(this.buildDirPath, this.baseRedlineName);
@@ -671,11 +704,57 @@ class BuildConfig {
     try {
       config = JSON.parse(fs.readFileSync(path.join(docDirPath, ".smpte-build.json")));
     } catch {
-      console.log("Could not read the publication config file.");
+      /* file is optional; auto-derivation is used when it is absent */
     }
 
-    this.lastEdRef = config.latestEditionTag || null;
+    this.latestEditionTag = config.latestEditionTag || null;
   }
+}
+
+const DATED_TAG_RE = /^\d{8}-(pub|fcd|cd|wd|dp)(-\d+)?$/;
+const PUB_TAG_RE = /^\d{8}-pub(-\d+)?$/;
+
+function getHeadTags() {
+  try {
+    return new Set(
+      child_process.execSync("git tag --points-at HEAD")
+        .toString()
+        .split("\n")
+        .map(t => t.trim())
+        .filter(Boolean)
+    );
+  } catch {
+    return new Set();
+  }
+}
+
+function pickLatestTag(globs, filterRe) {
+  let allTags;
+  try {
+    allTags = child_process.execSync(`git tag -l ${globs.map(g => `'${g}'`).join(" ")} --sort=-version:refname`)
+      .toString()
+      .split("\n")
+      .map(t => t.trim())
+      .filter(t => filterRe.test(t));
+  } catch {
+    return null;
+  }
+
+  const headTags = getHeadTags();
+  return allTags.find(t => !headTags.has(t)) || null;
+}
+
+function deriveLastEdRef(override) {
+  if (override !== null && override !== undefined && override !== "") {
+    return override;
+  }
+  return pickLatestTag(["*-pub*"], PUB_TAG_RE);
+}
+
+function deriveLastReleaseRef(pubStage) {
+  /* a -pub release only needs the redline to the prior published edition */
+  if (pubStage === "PUB") return null;
+  return pickLatestTag(["*-pub*", "*-fcd*", "*-cd*", "*-wd*", "*-dp*"], DATED_TAG_RE);
 }
 
 async function main() {
@@ -802,7 +881,10 @@ async function main() {
 
   /* render document */
 
-  Object.assign(generatedFiles, await build(buildPaths, baseRef, config.lastEdRef, docMetadata));
+  const lastEdRef = deriveLastEdRef(config.latestEditionTag);
+  const lastReleaseRef = deriveLastReleaseRef(docMetadata.pubStage);
+
+  Object.assign(generatedFiles, await build(buildPaths, baseRef, lastEdRef, lastReleaseRef, docMetadata));
 
   /* validate rendered document */
 

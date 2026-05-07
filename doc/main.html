@@ -9,8 +9,8 @@
   <meta itemprop="pubType" content="AG">
   <meta itemprop="pubNumber" content="26">
   <!-- <meta itemprop="pubPart" content="XX"> -->
-  <meta itemprop="pubState" content="pub">
-  <!-- meta itemprop="pubStage" content="WD"> -->
+  <meta itemprop="pubState" content="draft">
+  <meta itemprop="pubStage" content="PUB">
   <meta itemprop="pubConfidential" content="no">
   <!--< meta itemprop="pubTC" content="XX"> -->
   <meta itemprop="pubSuiteTitle" content="HTML Pub">
@@ -46,6 +46,8 @@
          <a>https://doc.smpte-doc.org/ag-07/main/</a></li>
         <li><cite id="bib-smpte-ag-31">SMPTE AG 31</cite>, GitHub Operating Guidelines
          <a>https://doc.smpte-doc.org/ag-31/main/</a></li>
+        <li><cite id="bib-smpte-ag-33">SMPTE AG 33</cite>, Document Process and Workflow
+         <a>https://doc.smpte-doc.org/ag-33/main/</a></li>
     </ul>
   </section>
 
@@ -246,7 +248,7 @@
         </ul>
 
         <p>
-          For further explanation of determining the value of the document's <code>pubState</code>, see <a href="#sec-document-mapping-status"></a>
+          For further explanation of determining the value of the document's <code>pubState</code>, see <a href="#bib-smpte-ag-33"></a>
         </p>
 
       </section>
@@ -270,7 +272,7 @@
         </ul>
 
         <p>
-          For further explanation of determining the value of the document's <code>pubStage</code>, see <a href="#sec-document-mapping-status"></a>
+          For further explanation of determining the value of the document's <code>pubStage</code>, see <a href="#bib-smpte-ag-33"></a>
         </p>
 
       </section>
@@ -1639,23 +1641,25 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
 
       <p>The S3 upload step can be skipped by providing the <code>validate</code> argument to the build script.</p>
 
-      <p>The build process can be configured using the <code>.smpte-build.json</code> file which is contains a JSON object that
-      conforms to the JSON schema at <a href="#figure-build-configuration-schema"></a>.</p>
+      <p>The build process MAY be configured using an optional <code>.smpte-build.json</code> file containing a JSON object that
+      conforms to the JSON schema at <a href="#figure-build-configuration-schema"></a>. When the file is absent, the build derives
+      its configuration from the document metadata and the repository's git tags.</p>
 
       <figure id="figure-build-configuration-schema">
         <pre data-include="../json/schema/build-configuration.json"></pre>
-        <figcaption>Schema for the build configuration file <code>.smpte-build.json</code>.</figcaption>
+        <figcaption>Schema for the optional build configuration file <code>.smpte-build.json</code>.</figcaption>
       </figure>
 
-      <p>If present or not equal to <code>null</code>, the <code>latestEditionTag</code> property contains the Git tag or commit
-      that is used when generating a redline against the latest published edition of the document.</p>
+      <p>If present and not equal to <code>null</code>, the <code>latestEditionTag</code> property overrides the auto-selected
+      base for the published-edition redline with the specified Git tag or commit. When absent or <code>null</code>, the base is
+      auto-selected as described in <a href="#sec-redlines"></a>.</p>
 
       <div class="example">
   <pre data-include="../.smpte-build.json"></pre>
       </div>
 
       <p>
-        For further explanation of determining the value of <code>latestEditionTag</code>, see <a href="#sec-document-github-releases"></a>
+        For the complete description of redline outputs produced by the tooling, see <a href="#sec-redlines"></a>.
       </p>
     </section>
 
@@ -1693,6 +1697,39 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       </ul>
 
       <p>The workflow file automatically sets <code>AWS_S3_KEY_PREFIX</code> to the name of the repository.</p>
+
+    </section>
+
+    <section id="sec-redlines">
+      <h4>Redlines</h4>
+
+      <p>The tooling automatically produces redline (change-tracked) renderings of the document on every build &mdash; pull requests, merges to <code>main</code>, and release publications. Redlines compare the current rendered document against a chosen reference rendering using the <code>htmldiff</code> utility, and the resulting HTML files are deployed to S3 alongside the clean output and bundled into the review zip when applicable.</p>
+
+      <p>Three redlines may be produced per build, each with a different reference base:</p>
+
+      <dl>
+        <dt><strong>Redline to current draft</strong> (<code>base-rl.html</code>)</dt>
+        <dd>
+          <p>Generated against the pull request's target branch (typically <code>main</code>), via the <code>GITHUB_BASE_REF</code> environment variable provided by GitHub Actions on pull request events. Shows what the PR itself changes relative to the branch it will merge into.</p>
+          <p><em>Generated:</em> on pull request events. <em>Omitted:</em> on push and release events, where no PR base is defined.</p>
+        </dd>
+
+        <dt><strong>Redline to most recent published edition</strong> (<code>pub-rl.html</code>)</dt>
+        <dd>
+          <p>Generated against the most recent prior git tag matching <code>YYYYMMDD-pub</code> &mdash; the previous published edition. Shows what has changed since the last edition was published. The reference base may be overridden by setting <code>latestEditionTag</code> in <code>.smpte-build.json</code> &mdash; useful when rebuilding an archived edition or pinning to a specific historical release.</p>
+          <p>This redline satisfies the requirement in <a href="#bib-smpte-ag-02"></a> for a redline against the published document (the baseline draft) when preparing a revision.</p>
+          <p><em>Generated:</em> on every event. <em>Omitted:</em> when no prior <code>-pub</code> tag exists (e.g., the first edition).</p>
+        </dd>
+
+        <dt><strong>Redline to most recent release</strong> (<code>release-rl.html</code>)</dt>
+        <dd>
+          <p>Generated against the most recent prior git tag matching <code>YYYYMMDD-{stage}</code> for any recognized <code>pubStage</code> (<code>-wd</code>, <code>-cd</code>, <code>-fcd</code>, <code>-dp</code>, or <code>-pub</code>). Shows iterative changes since the last release tag of any kind, supporting draft-to-draft review across the workflow stages defined in <a href="#bib-smpte-ag-33"></a>.</p>
+          <p>This redline satisfies the requirement in <a href="#bib-smpte-ag-02"></a> that markup from the ballot document be provided for comment resolution.</p>
+          <p><em>Generated:</em> when the current document's <code>pubStage</code> is <code>WD</code>, <code>CD</code>, <code>FCD</code>, or <code>DP</code>. <em>Omitted:</em> when <code>pubStage</code> is <code>PUB</code> (a published edition's relevant comparison is to the prior published edition only) or when no prior dated release tag exists.</p>
+        </dd>
+      </dl>
+
+      <p>In all cases, any tag pointing at the <code>HEAD</code> commit is excluded from selection, so a freshly-tagged release does not redline against itself. When the build runs on a pull request, links to all available redline outputs are included in the comment posted to the PR (see <a href="#sec-gh-integration"></a>). When the build runs on a release publication, the redline files are bundled into the review zip attached to the release (see <a href="#sec-release-artifacts"></a>).</p>
 
     </section>
 
@@ -2664,377 +2701,50 @@ ERROR: "validate:html" exited with 5.
 
   </section>
   <section class="annex" id="sec-document-status-workflow">
-    <h2>Document Status Workflow</h2>
-    
-    <section id="sec-document-mapping-status">
-      <h3>Mapping <code>meta</code> tags to Document Status</h3>
-      <p>
-        <a href="#tab-document-mapping-status"></a> maps the required <code>content</code> values of   <code>pubState</code>, <code>pubStage</code>, and <code>pubConfidential</code> during the various stages of document development. These values represent the naming convention(s) as defined in <a href="#bib-smpte-ag-02"></a> and flowcharts as defined in <a href="#bib-smpte-ag-07"></a>
-      </p>
-      <table id="tab-document-mapping-status" class="col-2-center col-3-center col-4-center">
-        <caption>Mapping <code>content</code> values for <code>meta</code> tags to Document Status</caption>
-        <thead>
-          <tr>
-            <th>Document Status</th>
-            <th><code>pubStage</code> value</th>
-            <th><code>pubState</code> value</th>
-            <th><code>pubConfidential</code> value</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Initial draft or revision (Working Draft) in:
-              <br/>Draft Group (DG)
-              <br/>Study Group (SG)
-              <br/>Working Group (WG)</td>
-            <td><code>WD</code></td>
-            <td><code>draft</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td class="center-cell" colspan="4"><em>>> Document moves to TC >></em></td>
-          </tr>
-          <tr>
-            <td>Pre-FCD (Final Committee Draft) review</td>
-            <td><code>WD</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td class="center-cell" colspan="4"><em>>> If pre-FCD comments received, back to DG/SG/WG >></em></td>
-          </tr>
-          <tr>
-            <td>Pre-FCD comment resolution ongoing </td>
-            <td><code>CD</code></td>
-            <td><code>draft</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>Pre-FCD comment resolution complete </td>
-            <td><code>CD</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td class="center-cell" colspan="4"><em>>> Document moves to TC >></em></td>
-          </tr>
-          <tr>
-            <td>PCD (Public Committee Draft) period</td>
-            <td><code>CD</code></td>
-            <td><code>pub</code></td>
-            <td><code>no</code></td>
-          </tr>
-          <tr>
-            <td>PCD comment resolution ongoing (moves back to DG/SG/WG)</td>
-            <td><code>CD</code></td>
-            <td><code>draft</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>PCD comment resolution complete</td>
-            <td colspan="3"><em>>> Back to Pre-FCD (Final Committee Draft) review >></em></td>
-          </tr>
-      
-          <tr>
-            <td class="center-cell" colspan="4"><em>(OR)</em></td>
-          </tr>
-          <tr>
-            <td>Ready for FCD ballot</td>
-            <td><code>CD</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>FCD ballot period</td>
-            <td><code>CD</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td class="center-cell" colspan="4"><em>>> If FCD ballot comments received >></em></td>
-          </tr>
-          <tr>
-            <td>FCD ballot comment resolution ongoing</td>
-            <td><code>FCD</code></td>
-            <td><code>draft</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>FCD ballot comment resolution complete</td>
-            <td><code>FCD</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>Pre-DP (Draft Publication) review</td>
-            <td><code>FCD</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>Pre-DP ballot period</td>
-            <td><code>FCD</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td class="center-cell" colspan="4"><em>(ELSE)</em></td>
-          </tr>
-          <tr>
-            <td>FCD ballot passes, no comments</td>
-            <td><code>DP</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>DP ballot passes</td>
-            <td><code>DP</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>Ready for ST (Standards Committee) Audit</td>
-            <td><code>DP</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>ST Audit period</td>
-            <td><code>DP</code></td>
-            <td><code>pub</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>ST Audit complete</td>
-            <td><code>PUB</code></td>
-            <td><code>draft</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>Waiting for publication</td>
-            <td><code>PUB</code></td>
-            <td><code>draft</code></td>
-            <td><code>yes</code></td>
-          </tr>
-          <tr>
-            <td>Published</td>
-            <td><code>PUB</code></td>
-            <td><code>pub</code></td>
-            <td><code>no</code></td>
-          </tr>
-        </tbody>
-      </table>
+    <h2>Auto-draft releases</h2>
 
-      <p>
-        See <a href="#sec-sample-workflow"></a> for a sample workflow utilizing these statuses. 
-      </p>
-
+    <section id="sec-auto-draft-releases-general">
+      <h3>General</h3>
+      <p>This annex describes the tooling behavior that auto-drafts GitHub releases. For the document workflow that drives <em>when</em> releases are created and <em>who</em> publishes them, see <a href="#bib-smpte-ag-33"></a>.</p>
     </section>
 
-    <section id="sec-document-github-releases">
-      <h3>GitHub Releases</h3>
-      <p>
-        Whenever the state of the document changes to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> on the <code>main</code> branch, then a release shall be created in the GitHub repo. 
-      </p>
-      <p>
-        Both the GitHub release and git tag shall be named <code>YYYYMMDD "-" pubStage</code>. The <code>YYYYMMDD</code> should directly represent the value used in <code>pubDateTime</code> as defined in <a href="#sec-pubDateTime"></a>. 
-      </p>
-      <p class="example">
-        <code>20230615-fcd</code> or <code>20230925-pub</code>
-      </p>
-      <p>
-        The <code>latestEditionTag</code> property in the <code>.smpte-build.json</code> file shall always be equal to the name of the most recent git tag. This will trigger the tooling to create a link for <code>Redline to most recent edition</code> during any PRs and merges to the <code>main</code> branch. 
-      </p>
-      <p>
-        The tooling will automatically generate zip file packages within the release details page, to be used for both :</p>
-        <ul>
-          <li>TC review/balloting (named as per <a href="#bib-smpte-ag-02"></a>)</li>
-          <li>(and) SMPTE Document Library publishing (named by the tag)</li>
-        </ul>
-       
-      <p class="example">See <a>https://github.com/SMPTE/st428-24-private/releases/tag/20241101-dp</a>, where <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/27c-st-428-24-dp-2024-12-06-pub.zip</a> (ballot zip), and <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/20241101-dp.zip</a> (publish zip) are available. </p>
-      
-      <p>
-        See <a href="#sec-sample-workflow"></a> for a sample workflow utilizing releases. 
-      </p>
-
+    <section id="sec-release-trigger">
+      <h3>Trigger and auto-draft</h3>
+      <p>Whenever the state of the document changes to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> on the <code>main</code> branch, the tooling automatically creates a <em>draft</em> release in the GitHub repo. A user with appropriate permissions reviews and publishes the draft to finalize the release and trigger production of the associated artifacts.</p>
     </section>
 
-    <section id="sec-pr-guidelines">
-      <h3>Pull Request Guidelines</h3>
-
-      <p>
-        Generally, no changes to a document shall ever be made directly on the <code>main</code> branch, which doesn't allow the tooling to create needed redlines. Instead, changes (regardless of the nature of the change) shall always be made on a new branch and managed via a PR (Pull Request). Each PR is then merged to <code>main</code> after approval, as noted below in <a href="#sec-sample-workflow"></a> at the various stages. 
-      </p>
-      <p>PRs should have at least (1) approver that is not the person requesting the PR. This can be the DG chair, TC chair, commentor, or secondary editor, depending on nature of the PR. For instance, on ballot state change PRs, this should be the DG or TC chair, and for publication state PRs, the TC chairs. See <a href="#sec-sample-workflow"></a> for more details.</p>
-
+    <section id="sec-release-naming">
+      <h3>Tag and release naming</h3>
+      <p>The GitHub release and the git tag shall be named <code>YYYYMMDD "-" pubStage</code>, where <code>YYYYMMDD</code> represents the value of <code>pubDateTime</code> (as defined in <a href="#sec-pubDateTime"></a>) and the <code>pubStage</code> suffix is the value of the <code>pubStage</code> meta in lowercase.</p>
+      <p class="example"><code>20230615-fcd</code> or <code>20230925-pub</code></p>
     </section>
 
-    <section id="sec-sample-workflow">
-      <h3>Sample Workflow </h3>
-      <p>
-        The below list shows a sample workflow which would be the steps for an Engineering Document going through an initial draft or revision and the balloting process. 
-      </p>
-      
-      <p class="note">Editors and Chairs should be aware of the general guidelines provided in the <a href="#bib-smpte-ag-31"></a>.
-      </p>
+    <section id="sec-release-force">
+      <h3>Same-day iterations</h3>
+      <p>For workflow events that share both <code>pubDateTime</code> and <code>pubStage</code> with the most recent release but represent a distinct release moment, the merge commit message shall include the token <code>[force-release]</code>. The tooling appends a numeric suffix (<code>-2</code>, <code>-3</code>, &hellip;) to the tag to disambiguate.</p>
+    </section>
+
+    <section id="sec-release-publish">
+      <h3>Publishing the draft release</h3>
+      <p>To publish a draft release after it has been auto-created:</p>
       <ol>
-          
-        <li>Project is approved
-          <ol type="a">
-            <li>If document is an initial draft, skip to Workflow Step (2)</li>
-            <li>If document is a revision, skip to Workflow Step (3)</li>
-          </ol>
-        </li>
-
-        <li>Project is a document initial draft
-          <ol type="a">
-            <li>Follow the steps in <a href="#sec-quick-start"></a> to create repo.</li>
-            <li>A new branch is created from <code>main</code> called <code>2023-initial-draft</code> (where "2023" is the current year).</li>
-            <li>Make sure that the <code>pubState</code> (<a href="#sec-pubState"></a>) and <code>pubStage</code> (<a
-            href="#sec-pubStage"></a>) of the main prose element in the <code>2023-initial-draft</code> branch are set to
-            <code>draft</code> and <code>WD</code>, respectively.</li>
-            <li>Document editor creates initial version of the document.</li>
-            <li>A PR is created named <code>2023 Initial Draft</code> from the <code>2023-initial-draft</code> branch on GitHub. </li>
-            <li>Skip to Workflow Step (4)</li>
-          </ol>
-        </li>
-
-        <li>Project is a document revision
-          <ol type="a">
-            <li>Assumption: There is a prior release labeled <code>2020115-pub</code></li>
-            <li>A new branch is created from <code>main</code> called <code>2023-revision</code> (where "2023" is the current year).</li>
-            <li>Make sure that the <code>pubState</code> (<a href="#sec-pubState"></a>) and <code>pubStage</code> (<a
-              href="#sec-pubStage"></a>) of the main prose element in the <code>2023-initial-draft</code> branch are set to
-              <code>draft</code> and <code>WD</code>, respectively.</li>
-            <li><code>.smpte-build.json</code> is updated in <code>2023-revision</code> branch to last release tag
-            <code>2020115-pub</code> (see <a href="#sec-document-github-releases"></a>) </li>
-            <li>Document editor makes initial changes to the document.</li>
-            <li>A PR is created named <code>2023 Revision</code> from the <code>2023-revision</code> branch on GitHub. The tooling with create a redline against the most recent edition of the document.</li>
-            <li>Continue to Workflow Step (4)</li>
-          </ol>
-        </li>
-      
-        <li>DG meeting(s) held regarding drafting of the document
-          <ol type="a">
-            <li>Comments are received, either by reflector or during meeting(s).</li>
-            <li>Comments and suggested changes are added to issue tracker.</li>
-            <li>Document is updated via more commits in the current PR, closing comments.</li>
-            <li>Continue to Workflow Step (5)</li>
-          </ol>
-        </li>
-
-        <li>DG is complete with drafting the document
-          <ol type="a">
-            <li>Document is updated in PR to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>, <code>&lt;meta itemprop="pubStage" content="WD" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-04-15" /&gt;</code> (assumed date of completion).</li>
-            <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
-            <li>A release is created targeted at <code>main</code> named <code>20230415-wd</code> with a tag of the same name.</li>
-            <li>The tooling creates the zip needed for TC 2-week preFCD review, with redlines against latest edition and/or last draft (if applicable)</li>
-            <li>The link to the ZIP is sent to TC for 2-week preFCD review</li>
-            <li>Continue to Workflow Step (6)</li>
-          </ol>
-        </li>
-      
-        <li>TC 2-week preFCD review occurs
-          <ol type="a">
-            <li>A new branch is created from <code>main</code> called <code>20230415-cd1</code>.</li>
-            <li>Document is updated in <code>20230415-cd1</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and <code>&lt;meta itemprop="pubStage" content="CD" /&gt;</code>.</li>
-            <li><code>.smpte-build.json</code> is updated in <code>20230415-cd1</code> branch to <code>20230415-wd</code> tag </li>
-            <li>A PR is created named <code>20230415 CD1</code> from the <code>20230415-cd1</code> branch on GitHub.</li>
-            <li>If no comments received, skip to Workflow Step (8)</li>
-            <li>If comments are received, continue to Workflow Step (7)</li>
-          </ol>
-        </li>
-      
-        <li>Comments received on pre-FCD ballot review 
-          <ol type="a">
-            <li>Document is updated in PR from Workflow Step (6) as needed per comments received. A redline from last draft is created by the tooling as required to resolve comments.</li>
-            <li>Once comments are resolved he document is updated in PR to <code>&lt;meta itemprop="pubDateTime" content="2023-05-15" /&gt;</code> (assumed date of completion).</li>
-            <li>Continue to Workflow Step (8)</li>
-          </ol>
-        </li>
-      
-        <li>Document is ready for FCD ballot
-          <ol type="a">
-            <li>Document is updated in PR from Workflow Step (6) to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code>
-              <ul>
-                <li>If document did NOT receive any comments, the <code>pubDateTime</code> remains unchanged from Workflow Step (5). </li>
-              </ul>
-            </li>
-            <li>PR is merged to <code>main</code>.</li>
-            <li>A release is created targeted at <code>main</code> named <code>20230415-cd1</code> (or <code>20230515-cd1</code> if Workflow Step 7 was used) with a tag of the same name.</li>
-            <li>If document is to continue to FCD ballot, the link to the ZIP file that is generated by the tooling in <code>main</code> with required redlines is sent to the TC for FCD ballot. Skip to Workflow Step (9)</li>
-            <li>If document is to undergo a PCD period, the contents in the ZIP file generated by the tooling in <code>main</code> are used for the PCD. After PCD period ends, go back to Workflow Step (6). See <a href="#sec-document-github-releases"></a> for iterative CD naming. </li>
-            <li>Continue to Workflow Step (9)</li>
-          </ol>
-        </li>
-      
-        <li>TC conducts FCD ballot
-          <ol type="a">
-            <li>If no comments received, skip to Workflow Step (12)</li>
-            <li>If comments are received, continue to Workflow Step (10)</li>
-          </ol>
-        </li>
-      
-        <li>FCD ballot comment resolution
-          <ol type="a">
-            <li>A new branch is created from <code>main</code> called <code>2023-revision-fcd-comment-res</code>.</li>
-            <li>Document is updated in <code>2023-revision-fcd-comment-res</code> branch to <code>&lt;meta itemprop="pubState" content="draft" /&gt;</code> and <code>&lt;meta itemprop="pubStage" content="FCD" /&gt;</code>.</li>
-            <li><code>.smpte-build.json</code> is updated in <code>2023-revision-fcd-comment-res</code> branch to <code>20230415-cd1</code> (or <code>20230515-cd1</code>) tag </li>
-            <li>PR is created on GitHub with the changes in <code>2023-revision-fcd-comment-res</code> as needed to resolve comments. The tooling creates redline for review against the last edition (release <code>20230415-cd1</code> or <code>20230515-cd1</code>).</li>
-            <Li>Additional commits are added to the PR as need to resolve comments.</Li>
-            <li>Comment resolution ends, document is updated to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> and <code>&lt;meta itemprop="pubDateTime" content="2023-07-15" /&gt;</code> (assumed date of  completion).</li>
-            <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
-            <li>A release is created targeted at <code>main</code> named <code>20230715-fcd</code> with a tag of the same name.</li>
-            <li>The link to the ZIP file that is generated by the tooling in <code>main</code> is sent to the TC for pre-DP review.</li>
-            <li>Continue to Workflow Step (11)</li>
-          </ol>
-        </li>
-      
-        <li>TC conducts DP ballot
-          <ol type="a">
-            <li>DP ballot passes, continue to Workflow Step (12)</li>
-          </ol>
-        </li>
-      
-        <li>Document is now DP
-          <ol type="a">
-            <li>A new branch is created from <code>main</code> called <code>20230415-dp</code> (or <code>20230715-dp</code> if Workflow Step 5 was used or <code>20230715-dp</code> if Workflow Step 10 was used).</li>
-            <li>Document is updated in <code>20230415-dp</code> branch to <code>&lt;meta itemprop="pubStage" content="DP" /&gt;</code></li>
-            <li><code>.smpte-build.json</code> is updated in <code>20230415-dp</code> branch to <code>20230415-cd1</code> tag (or <code>20230515-cd1</code>)</li>
-            <li>PR is created on GitHub with the changes as per needed to resolve comments. The tooling creates redline for review against the last edition (release <code>20230415-cd1</code> or <code>20230515-cd1</code> or <code>20230715-fcd</code>).</li>
-            <li>PR is approved by document editor and DG chair. PR is merged to <code>main</code>.</li>
-            <li>A release is created targeted at <code>main</code> named <code>20230415-dp</code> (or <code>20230515-dp</code> or <code>20230715-dp</code>) with a tag of the same name.</li>
-            <li>The link to the ZIP file that is generated by the tooling in <code>main</code> is sent to DoS for ST audit.</li>
-            <li>Continue to Workflow Step (13)</li>
-          </ol>
-        </li>
-      
-        <li>ST conducts ST audit
-          <ol type="a">
-            <li>ST audit passes, continue to Workflow Step (14)</li>
-          </ol>
-        </li>
-      
-        <li>Document is ready for publication
-          <ol type="a">
-            <li>A new branch is created from <code>main</code> called <code>20230415-pub</code> (or <code>20230515-pub</code> or <code>20230715-pub</code>).</li>
-            <li>Document is updated in <code>20230415-pub</code> branch to <code>&lt;meta itemprop="pubStage" content="pub" /&gt;</code></li>
-            <li>If document is a revision, <code>.smpte-build.json</code> is updated in <code>20230415-pub</code> branch to <code>2020115-pub</code> tag </li>
-            <li>PR is created on GitHub from <code>20230415-pub</code></li>
-            <li>PR is approved by document editor, DG chair, and TC chair(s). PR is merged to <code>main</code>.</li>
-            <li>A release is created targeted at <code>main</code> named <code>20230415-pub</code> (or <code>20230515-pub</code> or <code>20230715-pub</code>) with a tag of the same name.</li>
-            <li>The document is now "published" on main.</li>
-            <li> Send SMPTE HO the <code>20230415-pub.zip</code> (or <code>20230515-pub.zip</code> or <code>20230715-pub.zip</code>) generated in the release to use in the <a>https://github.com/SMPTE/document-library</a>.
-              <ul>
-                <li>Automation for this step is planned for a future date.</li>
-              </ul>
-            </li>
-          </ol>
-        </li>
+        <li>In the repository on GitHub, navigate to the <strong>Releases</strong> page (<code>https://github.com/SMPTE/{repo}/releases</code>).</li>
+        <li>Open the draft release whose name matches the expected <code>YYYYMMDD-pubStage</code> tag for the merged document state.</li>
+        <li>Click <strong>Edit</strong>, review the auto-generated release notes, and confirm that the target commit corresponds to the merge that produced the new state.</li>
+        <li>Click <strong>Publish release</strong>.</li>
       </ol>
-
     </section>
+
+    <section id="sec-release-artifacts">
+      <h3>Release artifacts</h3>
+      <p>Publishing the draft release attaches zip packages to the release details page:</p>
+      <ul>
+        <li><strong>Ballot zip</strong> &mdash; named per <a href="#bib-smpte-ag-02"></a>. Bundles the rendered document together with the published-edition redline (<code>pub-rl.html</code>) and the most-recent-release redline (<code>release-rl.html</code>). See <a href="#sec-redlines"></a> for redline details and reference-base selection.</li>
+        <li><strong>Publish zip</strong> &mdash; named by the tag, used for publishing per <a href="#bib-smpte-ag-33"></a>.</li>
+      </ul>
+      <p class="example">See <a>https://github.com/SMPTE/st428-24-private/releases/tag/20241101-dp</a>, where <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/27c-st-428-24-dp-2024-12-06-pub.zip</a> (ballot zip) and <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/20241101-dp.zip</a> (publish zip) are available.</p>
+    </section>
+
   </section>
 
   <section id="sec-elements">
