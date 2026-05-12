@@ -422,7 +422,7 @@ function insertNormativeReferences(docMetadata) {
   if (sec === null) {
     sec = document.createElement("section");
     sec.id = SMPTE_NORM_REFS_ID;
-    document.body.insertBefore(sec, document.getElementById(SMPTE_CONFORMANCE_ID).nextSibling);
+    document.body.insertBefore(sec, document.getElementById(SMPTE_SCOPE_ID).nextSibling);
   }
 
   const p = document.createElement("p");
@@ -665,7 +665,10 @@ function insertConformance(docMetadata) {
     sec = document.createElement("section");
     sec.id = SMPTE_CONFORMANCE_ID;
 
-    document.body.insertBefore(sec, document.getElementById(SMPTE_SCOPE_ID).nextSibling);
+    const anchor = document.getElementById(SMPTE_TERMS_ID)
+      || document.getElementById(SMPTE_NORM_REFS_ID)
+      || document.getElementById(SMPTE_SCOPE_ID);
+    document.body.insertBefore(sec, anchor.nextSibling);
   }
 
   let implConformance = "";
@@ -1561,9 +1564,9 @@ async function render() {
   insertForeword(docMetadata);
   insertIntroduction(docMetadata);
   insertScope(docMetadata);
-  insertConformance(docMetadata);
   insertNormativeReferences(docMetadata);
   insertTermsAndDefinitions(docMetadata);
+  insertConformance(docMetadata);
 
   insertElementsAnnex(docMetadata);
   insertBibliography(docMetadata);
