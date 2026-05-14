@@ -115,14 +115,27 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        TAG_NAME: ${{ github.event.release.tag_name }}
+        PUB_LINKS: ${{ steps.build.outputs.PUB_LINKS }}
+        LIBRARY_ZIP: ${{ steps.build.outputs.LIBRARY_ZIP }}
+        REVIEW_ZIP: ${{ steps.build.outputs.REVIEW_ZIP }}
       run: |
-        if [[ -n "${{ steps.build.outputs.LIBRARY_ZIP }}" ]]; then
-          gh release upload ${{ github.event.release.tag_name }} ${{ steps.build.outputs.LIBRARY_ZIP }}
+        if [[ -n "$LIBRARY_ZIP" ]]; then
+          gh release upload "$TAG_NAME" "$LIBRARY_ZIP"
         fi
-        if [[ -n "${{ steps.build.outputs.REVIEW_ZIP }}" ]]; then
-          gh release upload ${{ github.event.release.tag_name }} ${{ steps.build.outputs.REVIEW_ZIP }}
+        if [[ -n "$REVIEW_ZIP" ]]; then
+          gh release upload "$TAG_NAME" "$REVIEW_ZIP"
         fi
-        gh release edit ${{ github.event.release.tag_name }} --notes-file ${{ steps.build.outputs.PUB_LINKS }}
+        # Preserve the existing release body (auto-generated changelog and any
+        # editor-added content like PCD review info) and prepend the publication
+        # links above it.
+        EXISTING_BODY=$(gh release view "$TAG_NAME" --json body --jq '.body')
+        {
+          cat "$PUB_LINKS"
+          printf '\n---\n\n'
+          printf '%s\n' "$EXISTING_BODY"
+        } > /tmp/combined-notes.md
+        gh release edit "$TAG_NAME" --notes-file /tmp/combined-notes.md
 
     - name: Notify public repo of PCD
       if: github.event_name == 'release' && inputs.PUBLIC_REPO_PAT != ''
