@@ -1654,6 +1654,11 @@ This is an &lt;code&gt;element&lt;/code&gt; that is rendered with the &lt;code&g
       base for the published-edition redline with the specified Git tag or commit. When absent or <code>null</code>, the base is
       auto-selected as described in <a href="#sec-redlines"></a>.</p>
 
+      <p>If present and not equal to <code>null</code>, the <code>publicRepo</code> property overrides the auto-derived public
+      companion repository used by the PCD notification step (see <a href="#sec-release-pcd-notification"></a>). When absent
+      or <code>null</code>, the public repo is derived by stripping the <code>-private</code> suffix from the current repository
+      name.</p>
+
       <div class="example">
   <pre data-include="../.smpte-build.json"></pre>
       </div>
@@ -2743,6 +2748,36 @@ ERROR: "validate:html" exited with 5.
         <li><strong>Publish zip</strong> &mdash; named by the tag, used for publishing per <a href="#bib-smpte-ag-33"></a>.</li>
       </ul>
       <p class="example">See <a>https://github.com/SMPTE/st428-24-private/releases/tag/20241101-dp</a>, where <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/27c-st-428-24-dp-2024-12-06-pub.zip</a> (ballot zip) and <a>https://github.com/SMPTE/st428-24-private/releases/download/20241101-dp/20241101-dp.zip</a> (publish zip) are available.</p>
+    </section>
+
+    <section id="sec-release-pcd-notification">
+      <h3>Public Committee Draft (PCD) notification of the public repo</h3>
+
+      <p>When the document state on a published release is <code>pubState=pub</code>, <code>pubStage=CD</code>, and <code>pubConfidential=no</code> &mdash; uniquely identifying a Public Committee Draft per <a href="#bib-smpte-ag-33"></a> &mdash; the tooling additionally notifies the public companion repository so that its <code>README.md</code> is updated with a pointer to the rendered document and the public-review comment-period info.</p>
+
+      <p>The public repository is resolved as follows:</p>
+      <ol>
+        <li>If <code>.smpte-build.json</code> sets a non-empty <code>publicRepo</code> property (see <a href="#figure-build-configuration-schema"></a>), that value is used verbatim (e.g., <code>SMPTE/st2098-2</code>).</li>
+        <li>Otherwise, the private repository name is taken from <code>GITHUB_REPOSITORY</code> and its <code>-private</code> suffix is stripped (e.g., <code>SMPTE/st2098-2-private</code> &rarr; <code>SMPTE/st2098-2</code>).</li>
+        <li>If no public repo can be resolved (the private repo name does not end in <code>-private</code> and no override is set), the PCD notification step is skipped.</li>
+      </ol>
+
+      <p>When publishing a PCD draft release, the editor includes the public-review period dates and a marketing message in the release notes body, using the following keywords (each on its own line; the <code>Message:</code> value may span multiple paragraphs to the end of the body):</p>
+
+      <pre>End 1: YYYY-MM-DD
+End 2: YYYY-MM-DD
+
+Message: {free-form text describing the PCD, used as the body of the "Details" section in the public README}</pre>
+
+      <p><code>End 1</code> is the earliest date on which the public review period may end; <code>End 2</code> is the latest. These map directly to the SMPTE phrasing <em>"no earlier than X, and no later than Y"</em> in the public README.</p>
+
+      <p>The tooling fires a <code>repository_dispatch</code> event of type <code>pcd-published</code> on the public repository with a payload containing the tag, release URL, document URL (constructed from <code>CANONICAL_LINK_PREFIX</code> + private repo name + tag), the two end dates, the message, and identifiers for both repositories. The public repository&rsquo;s workflow listens for this event and opens a pull request updating its <code>README.md</code> &mdash; specifically, the block bounded by <code>&lt;!-- PCD-INFO:START --&gt;</code> and <code>&lt;!-- PCD-INFO:END --&gt;</code> markers between the <code>_This repository is public._</code> anchor line and the <code>## Notices</code> heading.</p>
+
+      <p>The PCD notification step is gated by the availability of the <code>PUBLIC_REPO_PAT</code> input on the build action, which carries write access to <code>repository_dispatch</code> on the public repo. When the input is unset, the notification is silently skipped (the rest of the release-published flow runs unchanged).</p>
+
+      <p>The step is idempotent across re-runs: before dispatching, the tooling checks whether the public repository already has a <code>pcd-info/{tag}</code> branch. If present, the notification is skipped &mdash; the pull request has already been opened (or merged) by a prior run.</p>
+
+      <p>Public repositories opt in to receiving PCD notifications by installing a thin workflow file (<code>.github/workflows/pcd-update.yml</code>) that listens for <code>repository_dispatch</code> events of type <code>pcd-published</code> and invokes the reusable workflow <code>SMPTE/html-pub/.github/workflows/pcd-update-reusable.yml</code> at the appropriate tooling tag. See the reusable workflow for the supported inputs.</p>
     </section>
 
   </section>

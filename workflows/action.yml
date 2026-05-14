@@ -11,6 +11,9 @@ inputs:
     required: true
   GITHUB_TOKEN:
     required: true
+  PUBLIC_REPO_PAT:
+    description: "PAT with `repository_dispatch` write access on the public companion repo. When set, enables the PCD-push notification on release-published events. Optional; if unset, the PCD-push step is silently skipped."
+    required: false
 
 runs:
   using: "composite"
@@ -110,3 +113,66 @@ runs:
           gh release upload ${{ github.event.release.tag_name }} ${{ steps.build.outputs.REVIEW_ZIP }}
         fi
         gh release edit ${{ github.event.release.tag_name }} --notes-file ${{ steps.build.outputs.PUB_LINKS }}
+
+    - name: Notify public repo of PCD
+      if: github.event_name == 'release' && inputs.PUBLIC_REPO_PAT != ''
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.PUBLIC_REPO_PAT }}
+        TAG: ${{ github.event.release.tag_name }}
+        RELEASE_BODY: ${{ github.event.release.body }}
+        RELEASE_URL: ${{ github.event.release.html_url }}
+        RELEASE_SHA: ${{ github.event.release.target_commitish }}
+        CANONICAL_LINK_PREFIX: ${{ inputs.CANONICAL_LINK_PREFIX }}
+      run: |
+        set -e
+
+        # Parse doc state at the release commit via derive-release-tag.mjs
+        eval $(node ${GITHUB_ACTION_PATH}/../scripts/derive-release-tag.mjs | sed 's/^/META_/')
+
+        if [[ "$META_pubState" != "pub" || "$META_pubStage" != "CD" || "$META_pubConfidential" != "no" ]]; then
+          echo "Not a PCD release (state=$META_pubState stage=$META_pubStage confidential=$META_pubConfidential); skipping public-repo notification."
+          exit 0
+        fi
+
+        # Resolve public repo
+        eval $(node ${GITHUB_ACTION_PATH}/../scripts/derive-public-repo.mjs | sed 's/^/REPO_/')
+
+        if [[ -z "$REPO_public_repo" ]]; then
+          echo "Could not derive public repo from GITHUB_REPOSITORY=$GITHUB_REPOSITORY (no -private suffix and no publicRepo override); skipping."
+          exit 0
+        fi
+
+        # Dedup: skip if pcd-info/<tag> branch already exists on the public repo
+        if gh api "repos/${REPO_public_repo}/branches/pcd-info/${TAG}" >/dev/null 2>&1; then
+          echo "Branch pcd-info/${TAG} already exists on ${REPO_public_repo}; skipping."
+          exit 0
+        fi
+
+        # Parse End 1, End 2, Message from release body
+        END1=$(printf '%s\n' "$RELEASE_BODY" | grep -iE '^End 1:' | head -1 | sed -E 's/^End 1:\s*//I' | tr -d '\r')
+        END2=$(printf '%s\n' "$RELEASE_BODY" | grep -iE '^End 2:' | head -1 | sed -E 's/^End 2:\s*//I' | tr -d '\r')
+        MESSAGE=$(printf '%s\n' "$RELEASE_BODY" | awk 'BEGIN{p=0} /^Message:/{p=1; sub(/^Message:[[:space:]]*/, ""); print; next} p{print}')
+
+        if [[ -z "$END1" || -z "$END2" ]]; then
+          echo "Release body must contain 'End 1: YYYY-MM-DD' and 'End 2: YYYY-MM-DD' lines for PCD push. Skipping."
+          exit 0
+        fi
+
+        DOC_URL="${CANONICAL_LINK_PREFIX}${REPO_private_repo_name}/${TAG}/"
+
+        echo "Dispatching pcd-published to ${REPO_public_repo} for ${TAG}"
+        gh api "repos/${REPO_public_repo}/dispatches" \
+          --method POST \
+          --field event_type=pcd-published \
+          --field "client_payload[tag]=${TAG}" \
+          --field "client_payload[release_url]=${RELEASE_URL}" \
+          --field "client_payload[doc_url]=${DOC_URL}" \
+          --field "client_payload[private_repo]=${REPO_private_repo}" \
+          --field "client_payload[private_repo_name]=${REPO_private_repo_name}" \
+          --field "client_payload[public_repo]=${REPO_public_repo}" \
+          --field "client_payload[public_repo_name]=${REPO_public_repo_name}" \
+          --field "client_payload[end_1]=${END1}" \
+          --field "client_payload[end_2]=${END2}" \
+          --field "client_payload[message]=${MESSAGE}" \
+          --field "client_payload[sha]=${RELEASE_SHA}"
