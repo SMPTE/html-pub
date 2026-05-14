@@ -90,7 +90,7 @@ runs:
         # so the editor doesn't have to remember the keyword format.
         if [[ "$META_pubStage" == "CD" && "$META_pubConfidential" == "no" ]]; then
           EXISTING_BODY=$(gh release view "$FINAL_TAG" --json body --jq '.body')
-          PCD_TEMPLATE=$'\n\n---\n\n## PCD review period\n\nEnd 1: YYYY-MM-DD\nEnd 2: YYYY-MM-DD\n\nMessage: Describe what changed in this revision. This text becomes the body of the "Details" section in the public repo\'s README.'
+          PCD_TEMPLATE=$'\n\n---\n\n## PCD review period\n\nEnd 1: YYYY-MM-DD\nEnd 2: YYYY-MM-DD\n\nMessage: Enter marketing message. If a revision, also describe what changed in this revision.'
           gh release edit "$FINAL_TAG" --notes "${EXISTING_BODY}${PCD_TEMPLATE}"
           echo "PCD template appended to draft release notes for $FINAL_TAG."
         fi
