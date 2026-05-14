@@ -90,7 +90,7 @@ runs:
         # so the editor doesn't have to remember the keyword format.
         if [[ "$META_pubStage" == "CD" && "$META_pubConfidential" == "no" ]]; then
           EXISTING_BODY=$(gh release view "$FINAL_TAG" --json body --jq '.body')
-          PCD_TEMPLATE=$'\n\n---\n\n## PCD review period (edit before publishing)\n\nEnd 1: YYYY-MM-DD\nEnd 2: YYYY-MM-DD\n\nMessage: Describe what changed in this revision. This text becomes the body of the "Details" section in the public repo\'s README.'
+          PCD_TEMPLATE=$'\n\n---\n\n## PCD review period\n\nEnd 1: YYYY-MM-DD\nEnd 2: YYYY-MM-DD\n\nMessage: Describe what changed in this revision. This text becomes the body of the "Details" section in the public repo\'s README.'
           gh release edit "$FINAL_TAG" --notes "${EXISTING_BODY}${PCD_TEMPLATE}"
           echo "PCD template appended to draft release notes for $FINAL_TAG."
         fi
@@ -192,10 +192,7 @@ runs:
           --field "client_payload[release_url]=${RELEASE_URL}" \
           --field "client_payload[doc_url]=${DOC_URL}" \
           --field "client_payload[private_repo]=${REPO_private_repo}" \
-          --field "client_payload[private_repo_name]=${REPO_private_repo_name}" \
           --field "client_payload[public_repo]=${REPO_public_repo}" \
-          --field "client_payload[public_repo_name]=${REPO_public_repo_name}" \
           --field "client_payload[end_1]=${END1}" \
           --field "client_payload[end_2]=${END2}" \
-          --field "client_payload[message]=${MESSAGE}" \
-          --field "client_payload[sha]=${RELEASE_SHA}"
+          --field "client_payload[message]=${MESSAGE}"
