@@ -1155,11 +1155,6 @@ function validateBody(body, logger) {
     logger.error("Mandatory Scope clause missing", elements[0]);
   }
 
-  /* validate optional conformance */
-
-  if (elements.length > 0 && ConformanceMatcher.match(elements[0], logger))
-    elements.shift();
-
   /* validate optional normative references */
 
   if (elements.length > 0 && NormativeReferencesMatcher.match(elements[0], logger))
@@ -1168,6 +1163,11 @@ function validateBody(body, logger) {
   /* validate optional terms and definitions */
 
   if (elements.length > 0 && DefinitionsMatcher.match(elements[0], logger))
+    elements.shift();
+
+  /* validate optional conformance */
+
+  if (elements.length > 0 && ConformanceMatcher.match(elements[0], logger))
     elements.shift();
 
   /* validate zero or more clauses */
