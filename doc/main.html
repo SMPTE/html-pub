@@ -2806,6 +2806,26 @@ Message: Enter marketing message. If a revision, also describe what changed in t
 
         <p>Public repositories opt in to receiving PCD notifications by installing a thin workflow file (<code>.github/workflows/pcd-update.yml</code>) that listens for <code>repository_dispatch</code> events of type <code>pcd-published</code> and invokes the reusable workflow <code>SMPTE/html-pub/.github/workflows/pcd-update-reusable.yml</code> at the appropriate tooling tag. See the reusable workflow for the supported inputs.</p>
       </section>
+
+      <section id="sec-release-pcd-cleanup">
+        <h4>End-of-period cleanup</h4>
+
+        <p>After the public review period ends, the public repository's <code>README.md</code> should no longer advertise an expired PCD. The cleanup is handled entirely on the public side by a scheduled workflow that runs once per day, parses the <em>"no later than"</em> date from its own README, and opens a pull request to clear the PCD-INFO block when that date has passed.</p>
+
+        <p>Public repositories opt in by installing a second thin workflow file (<code>.github/workflows/pcd-cleanup.yml</code>) alongside the PCD-update wrapper. The cleanup workflow triggers on a daily cron schedule (<code>0 6 * * *</code> &mdash; 06:00 UTC) and on manual <code>workflow_dispatch</code>. The dispatch surfaces an optional <strong>force</strong> input that bypasses the date check &mdash; useful if a PCD is cancelled before its scheduled end, or for testing.</p>
+
+        <p>The cleanup logic:</p>
+        <ol>
+          <li>Read the public repository's <code>README.md</code>.</li>
+          <li>If the file lacks the <code>&lt;!-- PCD-INFO:START --&gt;</code> markers, exit (nothing to clear).</li>
+          <li>Extract the <code>no later than YYYY-MM-DD</code> date from inside the marker block.</li>
+          <li>Compare to today's UTC date. If today is after that date (or the <code>force</code> dispatch input is set), proceed; otherwise exit.</li>
+          <li>Invoke a reusable workflow on the tooling that rewrites the PCD-INFO block, replacing its content with collapsed adjacent markers (<code>&lt;!-- PCD-INFO:START --&gt;&lt;!-- PCD-INFO:END --&gt;</code>).</li>
+          <li>Open a pull request on a stable branch named <code>pcd-info-cleanup</code> with the cleared README.</li>
+        </ol>
+
+        <p>The collapsed markers remain in the README as a permanent insertion point. Any subsequent PCD round refills them via the standard dispatch flow (see <a href="#sec-release-pcd-dispatch"></a>) without re-inserting the markered block. The cleanup is idempotent across daily runs: once the block is cleared, subsequent runs detect the already-collapsed markers and no new pull request is created.</p>
+      </section>
     </section>
 
   </section>
