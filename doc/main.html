@@ -9,12 +9,12 @@
   <meta itemprop="pubType" content="AG">
   <meta itemprop="pubNumber" content="26">
   <!-- <meta itemprop="pubPart" content="XX"> -->
-  <meta itemprop="pubState" content="pub">
+  <meta itemprop="pubState" content="draft">
   <meta itemprop="pubStage" content="PUB">
   <meta itemprop="pubConfidential" content="no">
   <!--< meta itemprop="pubTC" content="XX"> -->
   <meta itemprop="pubSuiteTitle" content="HTML Pub">
-  <meta itemprop="pubDateTime" content="2026-05-05">
+  <meta itemprop="pubDateTime" content="2026-05-12">
   <!-- <meta itemprop="pubRevisionOf" content="SMPTE ST XXXX-Y:ZZZZ"> -->
   <title>Tooling and documentation for HTML documents</title>
 </head>
@@ -417,14 +417,14 @@
               <td><a>Scope</a></td>
               <td>Exactly 1</td>
             <tr>
-              <td><a>Conformance</a></td>
-              <td>0 or 1</td>
-            </tr>
-            <tr>
               <td><a>Normative references</a></td>
               <td>0 or 1</td>
             <tr>
               <td><a>Terms and definitions</a></td>
+              <td>0 or 1</td>
+            </tr>
+            <tr>
+              <td><a>Conformance</a></td>
               <td>0 or 1</td>
             </tr>
             <tr>
@@ -553,30 +553,6 @@
   &lt;p&gt;This is the scope.&lt;/p&gt;
 &lt;/section&gt;</pre>
         </div>
-
-      </section>
-
-      <section id="sec-conformance-section">
-        <h4>Conformance <code>section</code></h4>
-
-        <p>The <dfn>Conformance</dfn> <code>section</code> contains author-supplied, conformance-related prose that is added to the SMPTE
-        boilerplate text that is generated depending on <code>pubType</code>.</p>
-
-        <p>The absence of this <code>section</code> indicates that no author-supplied, conformance-related prose is provided.</p>
-
-        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
-        <code>sec-conformance</code>.</p>
-
-        <p>The heading shall not be present.</p>
-
-        <div class="example">
-<pre>&lt;section id=&quot;sec-conformance&quot;&gt;
-  &lt;p&gt;These are additional conformance requirements and definitions.&lt;/p&gt;
-&lt;/section&gt;
-</pre>
-        </div>
-
-        <p>This <code>section</code> is prohibited unless the document is a Standard or Recommended Practice.</p>
 
       </section>
 
@@ -709,6 +685,34 @@
         </div>
 
         <p class="note">The boilerplate of the clause will be generated automatically.</p>
+
+      </section>
+
+      <section id="sec-conformance-section">
+        <h4>Conformance <code>section</code></h4>
+
+        <p>The <dfn>Conformance</dfn> <code>section</code> contains author-supplied, conformance-related prose that is added to the SMPTE
+        boilerplate text that is generated depending on <code>pubType</code>.</p>
+
+        <p>The <a>Conformance</a> <code>section</code> follows <a>Terms and definitions</a> and is the first SMPTE-defined clause that
+        may carry substantive conformance requirements. It is positioned consistent with ISO/IEC Directives, Part 2, which reserve
+        Clauses 1, 2, and 3 for <a>Scope</a>, <a>Normative references</a>, and <a>Terms and definitions</a> respectively.</p>
+
+        <p>The absence of this <code>section</code> indicates that no author-supplied, conformance-related prose is provided.</p>
+
+        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+        <code>sec-conformance</code>.</p>
+
+        <p>The heading shall not be present.</p>
+
+        <div class="example">
+<pre>&lt;section id=&quot;sec-conformance&quot;&gt;
+  &lt;p&gt;These are additional conformance requirements and definitions.&lt;/p&gt;
+&lt;/section&gt;
+</pre>
+        </div>
+
+        <p>This <code>section</code> is prohibited unless the document is a Standard or Recommended Practice.</p>
 
       </section>
 
