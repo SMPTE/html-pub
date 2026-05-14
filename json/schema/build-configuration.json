@@ -6,6 +6,10 @@
     "latestEditionTag": {
       "description": "Optional override for the redline base. When set, the build uses this git commit or tag when generating redlines against the latest edition. When unset or null, the build auto-derives the redline base from the most recent matching git tag (most recent prior `-pub` tag when the document's pubStage is PUB; otherwise the most recent prior dated tag of any stage).",
       "type": [ "string", "null" ]
+    },
+    "publicRepo": {
+      "description": "Optional override for the public companion repository (e.g., 'SMPTE/st2098-2'). When unset, the tooling derives this by stripping the '-private' suffix from the current repo name. Used by the PCD-push step on release-published events.",
+      "type": [ "string", "null" ]
     }
   }
 }
