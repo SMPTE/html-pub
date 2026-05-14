@@ -56,7 +56,8 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: |
-        TAG=$(node ${GITHUB_ACTION_PATH}/../scripts/derive-release-tag.mjs | grep '^tag=' | head -1 | cut -d= -f2)
+        eval $(node ${GITHUB_ACTION_PATH}/../scripts/derive-release-tag.mjs | sed 's/^/META_/')
+        TAG="$META_tag"
         if [[ -z "$TAG" ]]; then
           echo "pubState != pub or metadata incomplete; skipping draft release."
           exit 0
@@ -84,6 +85,15 @@ runs:
           fi
         fi
         gh release create "$FINAL_TAG" --draft --title "$FINAL_TAG" --target "$GITHUB_SHA" --generate-notes
+
+        # If this draft will be a PCD release (CD/pub/no), append a fill-in template
+        # so the editor doesn't have to remember the keyword format.
+        if [[ "$META_pubStage" == "CD" && "$META_pubConfidential" == "no" ]]; then
+          EXISTING_BODY=$(gh release view "$FINAL_TAG" --json body --jq '.body')
+          PCD_TEMPLATE=$'\n\n---\n\n## PCD review period (edit before publishing)\n\nEnd 1: YYYY-MM-DD\nEnd 2: YYYY-MM-DD\n\nMessage: Describe what changed in this revision. This text becomes the body of the "Details" section in the public repo\'s README.'
+          gh release edit "$FINAL_TAG" --notes "${EXISTING_BODY}${PCD_TEMPLATE}"
+          echo "PCD template appended to draft release notes for $FINAL_TAG."
+        fi
 
     - name: Determine which pull request we are on
       uses: jwalton/gh-find-current-pr@v1
