@@ -1,0 +1,66 @@
+name: PCD README cleanup (reusable)
+
+on:
+  workflow_call:
+
+jobs:
+  clear:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout public repo
+        uses: actions/checkout@v4
+
+      - name: Write cleanup script to /tmp
+        run: |
+          cat > /tmp/clear-pcd-readme.mjs <<'NODE_EOF'
+          import * as fs from "fs";
+
+          const readmePath = "README.md";
+          if (!fs.existsSync(readmePath)) {
+            console.error("README.md not found in public repo root.");
+            process.exit(1);
+          }
+
+          const startMarker = "<!-- PCD-INFO:START -->";
+          const endMarker = "<!-- PCD-INFO:END -->";
+          let readme = fs.readFileSync(readmePath, "utf8");
+
+          if (!readme.includes(startMarker) || !readme.includes(endMarker)) {
+            console.log("No PCD-INFO markers present in README; nothing to clear.");
+            process.exit(0);
+          }
+
+          // Collapse the entire PCD-INFO block to a single line with adjacent markers
+          // and exactly one trailing newline. Idempotent: re-running on already-cleared
+          // README produces the same content.
+          const collapsed = `${startMarker}${endMarker}`;
+          const re = new RegExp(`${startMarker}[\\s\\S]*?${endMarker}\\n?`, "m");
+          const updated = readme.replace(re, `${collapsed}\n`);
+
+          if (updated === readme) {
+            console.log("README content unchanged after collapse; nothing to commit.");
+            process.exit(0);
+          }
+
+          fs.writeFileSync(readmePath, updated);
+          console.log("PCD-INFO block cleared; markers collapsed.");
+          NODE_EOF
+
+      - name: Clear PCD-INFO block in README.md
+        run: node /tmp/clear-pcd-readme.mjs
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: pcd-info-cleanup
+          title: "Clear expired PCD info"
+          commit-message: "Clear expired PCD info"
+          body: |
+            Automated cleanup of the PCD info block in `README.md`. The public
+            review period has ended (or was force-cleared manually), so the
+            PCD-INFO marker block content has been removed and the markers
+            collapsed to a single line as a permanent insertion point for any
+            future PCD round.

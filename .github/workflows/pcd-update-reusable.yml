@@ -1,0 +1,152 @@
+name: PCD README update (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      release_url:
+        required: true
+        type: string
+      doc_url:
+        required: true
+        type: string
+      private_repo:
+        required: true
+        type: string
+      private_repo_name:
+        required: true
+        type: string
+      public_repo:
+        required: true
+        type: string
+      public_repo_name:
+        required: true
+        type: string
+      end_1:
+        required: true
+        type: string
+      end_2:
+        required: true
+        type: string
+      message:
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout public repo
+        uses: actions/checkout@v4
+
+      - name: Write README updater script to /tmp
+        run: |
+          cat > /tmp/update-pcd-readme.mjs <<'NODE_EOF'
+          import * as fs from "fs";
+
+          const readmePath = "README.md";
+          if (!fs.existsSync(readmePath)) {
+            console.error("README.md not found in public repo root.");
+            process.exit(1);
+          }
+
+          const {
+            INPUT_TAG: tag,
+            INPUT_RELEASE_URL: releaseUrl,
+            INPUT_DOC_URL: docUrl,
+            INPUT_PRIVATE_REPO: privateRepo,
+            INPUT_PRIVATE_REPO_NAME: privateRepoName,
+            INPUT_PUBLIC_REPO: publicRepo,
+            INPUT_PUBLIC_REPO_NAME: publicRepoName,
+            INPUT_END_1: end1,
+            INPUT_END_2: end2,
+            INPUT_MESSAGE: message,
+          } = process.env;
+
+          const block = [
+            "## Public Committee Draft (PCD) Notice",
+            "",
+            "This Committee Draft is made available for a public review period ending no",
+            `earlier than ${end1}, and no later than ${end2}.`,
+            "",
+            `To view the document, visit <${docUrl}>.`,
+            "",
+            `- **Release tag:** [${tag}](${releaseUrl})`,
+            `- **Source:** ${privateRepo}`,
+            `- **How to comment:** Open an issue on this repository, https://github.com/${publicRepo}/issues`,
+            "",
+            "This material is work under development and shall not be referred to as a SMPTE",
+            "Standard, Recommended Practice, or Engineering Guideline. It is distributed for",
+            "review and comment; distribution does not constitute publication.",
+            "",
+            "A list of all public CDs can be found on the SMPTE website",
+            "https://www.smpte.org/public-committee-drafts#listing",
+            "",
+            "## Details",
+            "",
+            message && message.trim() ? message.trim() : "*(no message provided)*",
+            "",
+          ].join("\n");
+
+          const startMarker = "<!-- PCD-INFO:START -->";
+          const endMarker = "<!-- PCD-INFO:END -->";
+          const wrapped = `${startMarker}\n${block}${endMarker}\n`;
+
+          let readme = fs.readFileSync(readmePath, "utf8");
+
+          if (readme.includes(startMarker) && readme.includes(endMarker)) {
+            const re = new RegExp(`${startMarker}[\\s\\S]*?${endMarker}\\n?`, "m");
+            readme = readme.replace(re, wrapped);
+          } else {
+            const anchor = "_This repository is public._";
+            const idx = readme.indexOf(anchor);
+            if (idx === -1) {
+              console.error(`README.md is missing the "${anchor}" anchor and the PCD-INFO markers. Cannot determine insertion point.`);
+              process.exit(1);
+            }
+            const afterAnchor = readme.indexOf("\n", idx) + 1;
+            const before = readme.slice(0, afterAnchor);
+            const rest = readme.slice(afterAnchor).replace(/^\s*\n+/, "");
+            readme = `${before}\n${wrapped}\n${rest}`;
+          }
+
+          fs.writeFileSync(readmePath, readme);
+          console.log("README.md updated.");
+          NODE_EOF
+
+      - name: Rewrite PCD-INFO block in README.md
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_RELEASE_URL: ${{ inputs.release_url }}
+          INPUT_DOC_URL: ${{ inputs.doc_url }}
+          INPUT_PRIVATE_REPO: ${{ inputs.private_repo }}
+          INPUT_PRIVATE_REPO_NAME: ${{ inputs.private_repo_name }}
+          INPUT_PUBLIC_REPO: ${{ inputs.public_repo }}
+          INPUT_PUBLIC_REPO_NAME: ${{ inputs.public_repo_name }}
+          INPUT_END_1: ${{ inputs.end_1 }}
+          INPUT_END_2: ${{ inputs.end_2 }}
+          INPUT_MESSAGE: ${{ inputs.message }}
+        run: node /tmp/update-pcd-readme.mjs
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: pcd-info/${{ inputs.tag }}
+          title: "Update PCD info for ${{ inputs.tag }}"
+          commit-message: "Update PCD info for ${{ inputs.tag }}"
+          body: |
+            Automated update of the PCD info block in `README.md`.
+
+            - **Release tag:** [${{ inputs.tag }}](${{ inputs.release_url }})
+            - **Document:** ${{ inputs.doc_url }}
+            - **Source:** ${{ inputs.private_repo }}
+            - **Review ends no earlier than:** ${{ inputs.end_1 }}
+            - **Review ends no later than:** ${{ inputs.end_2 }}
+
+            Review the wording and merge when ready.
