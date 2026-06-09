@@ -482,7 +482,8 @@ div.formula {
 }
 
 div.formula > math {
-  width: 90%;
+  display: table-cell;
+  width: 100%;
   text-align: center;
 }
 
