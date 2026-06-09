@@ -122,7 +122,7 @@ const SMPTE_FRONT_MATTER_BOILERPLATE = `<div id="doc-number-block">
 <div id="long-doc-type">{{longDocType}}</div>
 <h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}} - {{actualPubDateTime}}</div>
-<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>,
+<p><span id="copyright-text">Copyright &#xA9; <span id="doc-copyright-year">{{copyrightYear}}</span>,
 Society of Motion Picture and Television Engineers</span>.
 All rights reserved. No part of this material may be reproduced, by any means whatsoever,
 without the prior written permission of the Society of Motion Picture and Television Engineers.</p>
@@ -135,7 +135,7 @@ const SMPTE_PUB_AG_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscop
 <div id="long-doc-type">{{longDocType}}</div>
 <h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
-<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>,
+<p><span id="copyright-text">Copyright &#xA9; <span id="doc-copyright-year">{{copyrightYear}}</span>,
 Society of Motion Picture and Television Engineers</span>.
 All rights reserved. No part of this material may be reproduced, by any means whatsoever,
 without the prior written permission of the Society of Motion Picture and Television Engineers.</p>
@@ -148,7 +148,7 @@ const SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE = `<div id="doc-designator" itemscop
 <h1>{{fullTitle}}</h1>
 <div id="doc-status">{{publicationState}}: {{actualPubDateTime}}</div>
 <div id="doc-effective">Effective date: {{effectiveDateTime}}</div>
-<p><span id="copyright-text">Copyright © <span id="doc-copyright-year">{{copyrightYear}}</span>,
+<p><span id="copyright-text">Copyright &#xA9; <span id="doc-copyright-year">{{copyrightYear}}</span>,
 Society of Motion Picture and Television Engineers</span>.
 All rights reserved. No part of this material may be reproduced, by any means whatsoever,
 without the prior written permission of the Society of Motion Picture and Television Engineers.</p>
@@ -244,7 +244,7 @@ function insertFrontMatter(docMetadata) {
   let fullTitle;
 
   if (docMetadata.pubSuiteTitle !== null)
-    fullTitle = `${docMetadata.pubSuiteTitle} — ${docMetadata.pubTitle}`;
+    fullTitle = `${docMetadata.pubSuiteTitle} &#x2014; ${docMetadata.pubTitle}`;
   else
     fullTitle = docMetadata.pubTitle;
 
@@ -769,9 +769,9 @@ const SMPTE_GEN_FOREWORD_BOILERPLATE = `<h2>Foreword</h2>
 <p>The Society of Motion Picture and Television Engineers (SMPTE) is an
 internationally-recognized standards developing organization. Headquartered
 and incorporated in the United States of America, SMPTE has members in over
-80 countries on six continents. SMPTE’s Engineering Documents, including
+80 countries on six continents. SMPTE's Engineering Documents, including
 Standards, Recommended Practices, and Engineering Guidelines, are prepared
-by SMPTE’s Technology Committees. Participation in these Committees is open
+by SMPTE's Technology Committees. Participation in these Committees is open
 to all with a bona fide interest in their work. SMPTE cooperates closely
 with other standards-developing organizations, including ISO, IEC and ITU.
 SMPTE Engineering Documents are drafted in accordance with the rules given
@@ -1042,7 +1042,7 @@ function numberTables() {
 
       headingLabel.appendChild(document.createTextNode("Table "));
       headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" — "));
+      headingLabel.appendChild(document.createTextNode(" \u2014 "));
 
 
       caption.insertBefore(headingLabel, caption.firstChild);
@@ -1083,7 +1083,7 @@ function numberFigures() {
 
       headingLabel.appendChild(document.createTextNode("Figure "));
       headingLabel.appendChild(headingNumberElement);
-      headingLabel.appendChild(document.createTextNode(" — "));
+      headingLabel.appendChild(document.createTextNode(" \u2014 "));
 
 
       figcaption.insertBefore(headingLabel, figcaption.firstChild);
@@ -1182,7 +1182,7 @@ function numberSectionNotes(section) {
 
     headingLabel.appendChild(document.createTextNode("NOTE "));
     headingLabel.appendChild(headingNumberElement);
-    headingLabel.appendChild(document.createTextNode(" —⁠ "));
+    headingLabel.appendChild(document.createTextNode(" \u2014⁠ "));
 
     note.insertBefore(headingLabel, note.firstChild);
   }
@@ -1473,7 +1473,7 @@ function resolveLinks(docMetadata) {
 
       } else if (target.classList.contains("footnote")) {
 
-        /* footnote ref — letter already filled by numberTableFootnotes; wrap in <sup> */
+        /* footnote ref - letter already filled by numberTableFootnotes; wrap in <sup> */
         const sup = document.createElement("sup");
         anchor.replaceWith(sup);
         sup.appendChild(anchor);
