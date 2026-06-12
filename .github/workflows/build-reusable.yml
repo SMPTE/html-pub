@@ -6,9 +6,28 @@ name: Build SMPTE document (reusable)
 # repo. The build/validation code itself still comes from the `tooling`
 # submodule (resolved via `uses: ./tooling/workflows` against the caller's
 # checkout), so it stays pinned by each repo's submodule SHA.
+#
+# "Enforce official tooling" replaces the old byte-exact `cmp` guard:
+#   - provenance: the `tooling` submodule must point at the official html-pub
+#     repo (no forks) — checked on every build.
+#   - currency: the recorded submodule commit must match the latest official
+#     `main` — a build only happens when someone is editing the document, and
+#     editors must be on current tooling. OVERRIDE_SUBMODULE_SHA / _REF are the
+#     sanctioned escape hatch for testing or rebuilding an old release.
 
 on:
   workflow_call:
+    inputs:
+      OVERRIDE_SUBMODULE_SHA:
+        description: "Pin enforcement to this tooling SHA instead of latest official main (testing / deliberate rebuild). Mismatch warns instead of failing."
+        required: false
+        type: string
+        default: ""
+      OVERRIDE_SUBMODULE_REF:
+        description: "Pin enforcement to this tooling ref (e.g. a branch) instead of latest official main. Mismatch warns instead of failing."
+        required: false
+        type: string
+        default: ""
 
 env:
   AWS_REGION: us-east-1
@@ -38,6 +57,76 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+
+      - name: Enforce official tooling
+        if: github.repository != 'SMPTE/html-pub'
+        shell: bash
+        env:
+          SUB_PATH: tooling
+          OFFICIAL_URL: https://github.com/SMPTE/html-pub.git
+          OFFICIAL_BRANCH: main
+          OVERRIDE_SHA: ${{ inputs.OVERRIDE_SUBMODULE_SHA }}
+          OVERRIDE_REF: ${{ inputs.OVERRIDE_SUBMODULE_REF }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f ".gitmodules" ]]; then
+            echo "ERROR: .gitmodules not found. This repository must declare the '${SUB_PATH}' submodule."
+            exit 1
+          fi
+
+          # --- Provenance: submodule must point at the official tooling repo (no forks) ---
+          URL_IN_MODULES=$(git config -f .gitmodules --get "submodule.${SUB_PATH}.url" || true)
+          if [[ "$URL_IN_MODULES" != "$OFFICIAL_URL" ]]; then
+            echo "ERROR: ${SUB_PATH} URL in .gitmodules is '$URL_IN_MODULES' but must be '$OFFICIAL_URL'."
+            echo "Forked or relocated tooling is not permitted. Fix .gitmodules to use the official URL."
+            exit 1
+          fi
+
+          RECORDED_SHA=$(git ls-tree HEAD "$SUB_PATH" | awk '{print $3}')
+          if [[ -z "${RECORDED_SHA:-}" ]]; then
+            echo "ERROR: No submodule commit recorded for ${SUB_PATH}. Did you add and commit the submodule?"
+            exit 1
+          fi
+
+          # --- Currency: submodule must be on the latest official tooling ---
+          if [[ -n "${OVERRIDE_SHA:-}" ]]; then
+            TARGET_SHA="$OVERRIDE_SHA"
+          elif [[ -n "${OVERRIDE_REF:-}" ]]; then
+            TARGET_SHA=$(git ls-remote "$OFFICIAL_URL" "$OVERRIDE_REF" | awk '{print $1}')
+            if [[ -z "${TARGET_SHA:-}" ]]; then
+              echo "ERROR: Could not resolve override ref '$OVERRIDE_REF' on '$OFFICIAL_URL'."
+              exit 1
+            fi
+          else
+            TARGET_SHA=$(git ls-remote "$OFFICIAL_URL" "refs/heads/$OFFICIAL_BRANCH" | awk '{print $1}')
+            if [[ -z "${TARGET_SHA:-}" ]]; then
+              echo "ERROR: Could not read '$OFFICIAL_BRANCH' from '$OFFICIAL_URL'."
+              exit 1
+            fi
+          fi
+
+          echo "Recorded(${SUB_PATH}): $RECORDED_SHA"
+          echo "Target  (${SUB_PATH}): $TARGET_SHA"
+
+          if [[ "$RECORDED_SHA" != "$TARGET_SHA" ]]; then
+            if [[ -n "${OVERRIDE_SHA:-}" || -n "${OVERRIDE_REF:-}" ]]; then
+              echo "::warning::Tooling submodule mismatch (override active). Recorded=${RECORDED_SHA} Target=${TARGET_SHA}"
+            else
+              echo "ERROR: Tooling submodule is not on the latest official '${OFFICIAL_BRANCH}'."
+              echo
+              echo "You are editing this document, so the tooling must be current. To update:"
+              echo "  git submodule update --init --remote -- \"${SUB_PATH}\""
+              echo "  git add \"${SUB_PATH}\""
+              echo "  git commit -m \"Bump ${SUB_PATH} to latest ${OFFICIAL_BRANCH}\""
+              echo
+              echo "To intentionally pin (testing, or rebuilding an old release), set"
+              echo "OVERRIDE_SUBMODULE_SHA (or OVERRIDE_SUBMODULE_REF) in the caller stub's 'with:' block."
+              exit 1
+            fi
+          fi
+
+          echo "Official tooling confirmed."
 
       - name: Set repository name
         run: echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
