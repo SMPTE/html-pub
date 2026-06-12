@@ -99,7 +99,7 @@ runs:
         github-token: ${{ inputs.GITHUB_TOKEN }}
 
     - name: Add review links to the pull request
-      uses: marocchino/sticky-pull-request-comment@v2
+      uses: marocchino/sticky-pull-request-comment@v3
       if: github.event_name == 'pull_request' && steps.finder
       with:
         number: ${{ steps.finder.outputs.pr }}
