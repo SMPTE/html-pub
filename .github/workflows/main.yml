@@ -30,7 +30,7 @@ jobs:
     steps:
 
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: true
@@ -42,7 +42,7 @@ jobs:
         run: CUR_BRANCH=$(git rev-parse --abbrev-ref HEAD); for i in `git branch -a | grep remote | grep -v "remotes/pull" | grep -v HEAD | grep -v ${CUR_BRANCH}`; do git branch --track ${i#remotes/origin/} $i; done
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
