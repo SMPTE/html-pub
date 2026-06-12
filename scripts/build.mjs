@@ -169,23 +169,6 @@ async function build(buildPaths, baseRef, lastEdRef, lastReleaseRef, docMetadata
 
   generatedFiles.html = buildPaths.renderedDocName;
 
-  /* create pdf */
-
-  generatedFiles.pdf = `SMPTE-${docMetadata.pubType}-${docMetadata.pubNumber}`;
-  if (docMetadata.pubPart !== null) {
-    generatedFiles.pdf += `-${docMetadata.pubPart}`
-  }
-  if (docMetadata.pubDateTime !== null) {
-    generatedFiles.pdf += `-${docMetadata.pubDateTime}`
-  }
-  if (docMetadata.pubPart !== null) {
-    generatedFiles.pdf += `-${docMetadata.pubSuiteTitle}`
-  }
-  generatedFiles.pdf += `-${docMetadata.pubTitle}.pdf`;
-  generatedFiles.pdf = generatedFiles.pdf.replace(/[\s—–‐‑]+/g, "-");
-
-  await makePDF(buildPaths.renderedDocPath, path.join(buildPaths.pubDirPath, generatedFiles.pdf));
-
   /* generate base redline, if requested */
 
   if (baseRef !== null) {
@@ -253,9 +236,6 @@ async function generatePubLinks(buildPaths, pubLinks) {
     if ("clean" in pubLinks)
       linksDocContents += `[Clean](${pubLinks.clean})\n`;
 
-    if ("pdf" in pubLinks)
-      linksDocContents += `[Clean PDF](${pubLinks.pdf})\n`;
-
     if ("baseRedline" in pubLinks)
       linksDocContents += `[Redline to current draft](${pubLinks.baseRedline})\n`;
 
@@ -303,10 +283,6 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
     pubLinks.clean = `${deployPrefix}${s3PubKeyPrefix}`;
   }
 
-  if ("pdf" in generatedFiles) {
-    pubLinks.pdf = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.pdf)}`;
-  }
-
   if ("baseRedline" in generatedFiles) {
     pubLinks.baseRedline = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.baseRedline)}`;
   }
@@ -349,9 +325,6 @@ async function makeReviewZip(buildPaths, generatedFiles, docMetadata) {
 
   if ("html" in generatedFiles)
     zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.html));
-
-  if ("pdf" in generatedFiles)
-    zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.pdf));
 
   if ("pubRedline" in generatedFiles)
     zip.addLocalFile(path.join(buildPaths.pubDirPath, generatedFiles.pubRedline));
@@ -397,10 +370,6 @@ async function makePubArtifacts(buildPaths, generatedFiles, docMetadata) {
 
   if ("html" in generatedFiles) {
     htmlLinks = `<p><a href="${encodeURIComponent(generatedFiles.html)}">Clean</a></p>\n`;
-  }
-
-  if ("pdf" in generatedFiles) {
-    htmlLinks += `<p><a href="${encodeURIComponent(generatedFiles.pdf)}">Clean PDF</a></p>\n`;
   }
 
   if ("baseRedline" in generatedFiles) {
@@ -459,12 +428,6 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
   if (generatedFiles.media.length > 0)
     manifest.media = generatedFiles.media;
 
-  if ("pdf" in generatedFiles)
-    manifest.main.push({
-      mediaType: "application/pdf",
-      path: generatedFiles.pdf
-    });
-
   if ("html" in generatedFiles)
     manifest.main.push({
       mediaType: "text/html",
@@ -513,77 +476,6 @@ async function makeLibraryZip(buildPaths, generatedFiles, docMetadata) {
   zip.writeZip(zipPath);
 
   return zipFn;
-}
-
-async function makePDF(docPath, pdfPath) {
-  const timeout = 6000000;
-
-  const browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-dev-shm-usage", "--allow-file-access-from-files"]
-  });
-
-
-  const page = await browser.newPage();
-  page.setDefaultTimeout(timeout);
-  await page.emulateMediaType("print");
-  await page.goto("file://" + path.resolve(docPath));
-  await page.content();
-  await page.evaluate(() => {
-    window.PagedConfig = window.PagedConfig || {};
-    window.PagedConfig.auto = false;
-  });
-  await page.addScriptTag({ url: 'https://cdn.jsdelivr.net/npm/pagedjs@0.4.3/dist/paged.polyfill.js' });
-
-  let renderingDone;
-  let rendered = new Promise(function (resolve, reject) {
-    renderingDone = resolve;
-  });
-  await page.exposeFunction("onRendered", (msg) => {
-    console.log(msg);
-    renderingDone();
-  });
-  await page.exposeFunction("onPage", (position) => {
-    if (position % 10 === 0) {
-      console.log("Rendering: Page " + (position + 1));
-    }
-  });
-  await page.evaluate(async () => {
-    document.querySelectorAll('#sec-elements a[href]')
-      .forEach(e => { if (!e.href.startsWith("http")) e.removeAttribute("href"); });
-
-    window.PagedPolyfill.on("page", (page) => {
-      window.onPage(page.position);
-    });
-    window.PagedPolyfill.on("rendered", (flow) => {
-      let msg = "Rendering " + flow.total + " pages took " + flow.performance + " milliseconds.";
-      window.onRendered(msg);
-    })
-    await window.PagedPolyfill.preview();
-  }).catch((error) => {
-    throw error;
-  });
-  await page.waitForNetworkIdle({
-    timeout: timeout
-  });
-  await rendered;
-  await page.waitForSelector(".pagedjs_pages");
-
-  const pdf = await page.pdf({
-    timeout: timeout,
-    printBackground: true,
-    displayHeaderFooter: false,
-    margin: {
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-    }
-  });
-
-  fs.writeFileSync(pdfPath, pdf);
-
-  await browser.close();
-
 }
 
 async function render(docPath) {
