@@ -422,7 +422,7 @@ td.top-cell    { vertical-align: top; }
  table.col-6-xwide tr td:nth-child(6), table.col-6-xwide tr th:nth-child(6),
  table.col-7-xwide tr td:nth-child(7), table.col-7-xwide tr th:nth-child(7),
  table.col-8-xwide tr td:nth-child(8), table.col-8-xwide tr th:nth-child(8) {
-   min-width: 80ch;
+   min-width: 40rem;
  }
 
  /* cell width utilities */
@@ -444,7 +444,7 @@ th.col-wide, td.col-wide {
 }
 
 th.col-xwide, td.col-xwide {
-  min-width: 80ch;
+  min-width: 40rem;
 }
 
 table > caption {
