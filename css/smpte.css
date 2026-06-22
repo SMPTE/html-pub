@@ -444,7 +444,7 @@ th.col-wide, td.col-wide {
 }
 
 th.col-xwide, td.col-xwide {
-  min-width: 40rem;
+  min-width: 80ch;
 }
 
 table > caption {
