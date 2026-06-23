@@ -412,6 +412,19 @@ td.top-cell    { vertical-align: top; }
    width: 20rem;
  }
 
+/* xwide (fits an 80-character listing) */
+
+ table.col-1-xwide tr td:nth-child(1), table.col-1-xwide tr th:nth-child(1),
+ table.col-2-xwide tr td:nth-child(2), table.col-2-xwide tr th:nth-child(2),
+ table.col-3-xwide tr td:nth-child(3), table.col-3-xwide tr th:nth-child(3),
+ table.col-4-xwide tr td:nth-child(4), table.col-4-xwide tr th:nth-child(4),
+ table.col-5-xwide tr td:nth-child(5), table.col-5-xwide tr th:nth-child(5),
+ table.col-6-xwide tr td:nth-child(6), table.col-6-xwide tr th:nth-child(6),
+ table.col-7-xwide tr td:nth-child(7), table.col-7-xwide tr th:nth-child(7),
+ table.col-8-xwide tr td:nth-child(8), table.col-8-xwide tr th:nth-child(8) {
+   min-width: 35rem;
+ }
+
  /* cell width utilities */
 
 th.col-xsmall, td.col-xsmall {
@@ -428,6 +441,10 @@ th.col-medium, td.col-medium {
 
 th.col-wide, td.col-wide {
   width: 20rem;
+}
+
+th.col-xwide, td.col-xwide {
+  min-width: 35rem;
 }
 
 table > caption {
