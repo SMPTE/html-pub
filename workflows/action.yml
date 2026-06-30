@@ -51,6 +51,9 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        # Passed via env (not inline ${{ }}) so backticks, quotes, or newlines in
+        # the commit message cannot break the shell that reads it below.
+        HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
       run: |
         eval $(node ${GITHUB_ACTION_PATH}/../scripts/derive-release-tag.mjs | sed 's/^/META_/')
         TAG="$META_tag"
@@ -59,7 +62,7 @@ runs:
           exit 0
         fi
         FORCE=""
-        if [[ "${{ github.event.head_commit.message }}" == *"[force-release]"* ]]; then
+        if [[ "$HEAD_COMMIT_MESSAGE" == *"[force-release]"* ]]; then
           FORCE="1"
         fi
         FINAL_TAG="$TAG"
