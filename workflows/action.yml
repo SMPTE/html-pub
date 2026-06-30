@@ -80,6 +80,20 @@ runs:
             exit 1
           fi
         fi
+
+        # Prune any stale DRAFT releases for this tag before creating a new one.
+        # Drafts do not create tags, so the tag check above cannot catch them and
+        # they would otherwise accumulate on every push to main. Only drafts are
+        # deleted here; published releases are never touched.
+        for id in $(gh api "repos/${GITHUB_REPOSITORY}/releases" --paginate \
+                      --jq ".[] | select(.tag_name==\"${FINAL_TAG}\" and .draft==true) | .id"); do
+          echo "Deleting stale draft release ${id} for tag ${FINAL_TAG}."
+          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/${id}" >/dev/null
+        done
+
+        # This step runs only after the build step above has succeeded (a failed
+        # build aborts the composite action), so drafts are never auto-created
+        # from a failing build.
         gh release create "$FINAL_TAG" --draft --title "$FINAL_TAG" --target "$GITHUB_SHA" --generate-notes
 
         # If this draft will be a PCD release (CD/pub/no), append a fill-in template

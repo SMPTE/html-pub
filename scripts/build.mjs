@@ -186,25 +186,37 @@ async function build(buildPaths, baseRef, lastEdRef, lastReleaseRef, docMetadata
     child_process.execSync(`git fetch --tags`);
   }
 
-  /* generate redline against most recent published edition, if requested */
+  /* generate redline against most recent published edition, if requested.
+     Non-critical historical artifact: a bad/old reference tag that no longer
+     renders must NOT fail the build — warn and skip instead. */
 
   if (lastEdRef !== null) {
 
     console.log(`Generating a redline against the latest published edition tag: ${lastEdRef}.`);
 
-    await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
-    generatedFiles.pubRedline = buildPaths.pubRedlineName;
+    try {
+      await generateRedline(buildPaths, lastEdRef, buildPaths.pubRedLineRefPath, buildPaths.pubRedlinePath);
+      generatedFiles.pubRedline = buildPaths.pubRedlineName;
+    } catch (e) {
+      console.warn(`::warning::Skipping published-edition redline against ${lastEdRef} (reference failed to render): ${e.message}`);
+    }
 
   }
 
-  /* generate redline against most recent release tag, if requested */
+  /* generate redline against most recent release tag, if requested.
+     Non-critical historical artifact: a bad/old reference tag that no longer
+     renders must NOT fail the build — warn and skip instead. */
 
   if (lastReleaseRef !== null) {
 
     console.log(`Generating a redline against the latest release tag: ${lastReleaseRef}.`);
 
-    await generateRedline(buildPaths, lastReleaseRef, buildPaths.releaseRedLineRefPath, buildPaths.releaseRedlinePath);
-    generatedFiles.releaseRedline = buildPaths.releaseRedlineName;
+    try {
+      await generateRedline(buildPaths, lastReleaseRef, buildPaths.releaseRedLineRefPath, buildPaths.releaseRedlinePath);
+      generatedFiles.releaseRedline = buildPaths.releaseRedlineName;
+    } catch (e) {
+      console.warn(`::warning::Skipping release redline against ${lastReleaseRef} (reference failed to render): ${e.message}`);
+    }
 
   }
 
@@ -491,6 +503,14 @@ async function render(docPath) {
   try {
 
     const page = await browser.newPage();
+
+    /* surface in-page errors in the build log; otherwise they are only visible
+       in the browser console and the build just reports "Page has errors". */
+    page.on("pageerror", err => console.error(`  [page error] ${err.message}`));
+    page.on("console", msg => {
+      if (msg.type() === "error")
+        console.error(`  [page console] ${msg.text()}`);
+    });
 
     const pageURL = "file://" + path.resolve(docPath) + (commitHash ? "?buildHash=" + commitHash : "");
 

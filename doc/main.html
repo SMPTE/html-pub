@@ -14,7 +14,7 @@
   <meta itemprop="pubConfidential" content="no">
   <!--< meta itemprop="pubTC" content="XX"> -->
   <meta itemprop="pubSuiteTitle" content="HTML Pub">
-  <meta itemprop="pubDateTime" content="2026-06-23">
+  <meta itemprop="pubDateTime" content="2026-06-30">
   <!-- <meta itemprop="pubRevisionOf" content="SMPTE ST XXXX-Y:ZZZZ"> -->
   <title>Tooling and documentation for HTML documents</title>
 </head>
@@ -2718,7 +2718,8 @@ ERROR: "validate:html" exited with 5.
 
     <section id="sec-release-trigger">
       <h3>Trigger and auto-draft</h3>
-      <p>Whenever the state of the document changes to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> on the <code>main</code> branch, the tooling automatically creates a <em>draft</em> release in the GitHub repo. A user with appropriate permissions reviews and publishes the draft to finalize the release and trigger production of the associated artifacts.</p>
+      <p>Whenever the state of the document changes to <code>&lt;meta itemprop="pubState" content="pub" /&gt;</code> on the <code>main</code> branch, the tooling automatically creates a <em>draft</em> release in the GitHub repo. The draft is created only after a successful build of the merged state, so releases never originate from a failing build. Any earlier draft for the same tag is replaced so drafts do not accumulate. A user with appropriate permissions reviews and publishes the draft to finalize the release and trigger production of the associated artifacts.</p>
+      <p class="note">Releases shall be published from the auto-created draft. Creating or publishing a release manually on an arbitrary commit is not supported: redline generation and document state are derived from the release tags, so a release made on a commit that does not build cleanly will not produce a usable redline reference (subsequent builds warn and skip that redline).</p>
     </section>
 
     <section id="sec-release-naming">
@@ -2739,6 +2740,7 @@ ERROR: "validate:html" exited with 5.
         <li>In the repository on GitHub, navigate to the <strong>Releases</strong> page (<code>https://github.com/SMPTE/{repo}/releases</code>).</li>
         <li>Open the draft release whose name matches the expected <code>YYYYMMDD-pubStage</code> tag for the merged document state.</li>
         <li>Click <strong>Edit</strong>, review the auto-generated release notes, and confirm that the target commit corresponds to the merge that produced the new state.</li>
+        <li>Tick <strong>Set as the latest release</strong>; do not use the <strong>pre-release</strong> label. Redline generation and document state are driven by the <code>pub</code> and stage tags and depend on the most recent release being marked as the latest release.</li>
         <li>Click <strong>Publish release</strong>.</li>
       </ol>
     </section>
