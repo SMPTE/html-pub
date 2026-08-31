@@ -46,6 +46,10 @@ export const LONG_PUB_TYPE = new Map([
 
 export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE, ER_PUBTYPE, RDD_PUBTYPE]);
 
+/* document types whose Foreword carries the patent rights statement, and hence
+   support pubIPRClaimed */
+export const IPR_CLAIMED_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE]);
+
 export const PUB_STAGE_PUB = "PUB";
 export const PUB_STAGE_DP = "DP";
 export const PUB_STAGE_FCD = "FCD";
@@ -145,6 +149,19 @@ export function validateHead(head, logger) {
     }
   }
 
+  /* pubIPRClaimed (optional) */
+  metadata.pubIPRClaimed = getHeadMetadata(head, "pubIPRClaimed");
+  if (metadata.pubIPRClaimed !== null) {
+    if (metadata.pubIPRClaimed === "no")
+      metadata.pubIPRClaimed = false;
+    else if (metadata.pubIPRClaimed === "yes")
+      metadata.pubIPRClaimed = true;
+    else {
+      metadata.pubIPRClaimed = false;
+      logger.error("pubIPRClaimed invalid");
+    }
+  }
+
   /* pubRevisionOf (optional) */
   metadata.pubRevisionOf = getHeadMetadata(head, "pubRevisionOf");
 
@@ -219,6 +236,13 @@ export function validateHead(head, logger) {
       metadata.pubConfidential = true;
     else if (!metadata.pubConfidential && !(metadata.pubStage === PUB_STAGE_PUB || metadata.pubStage === PUB_STAGE_CD))
       fatal(logger, "Only Committee Drafts and Publications can be non-confidential");
+  }
+
+  /* pubIPRClaimed applies only to the document types whose Foreword carries the
+     patent rights statement */
+  if (metadata.pubIPRClaimed !== null && !IPR_CLAIMED_PUBTYPES.has(metadata.pubType)) {
+    metadata.pubIPRClaimed = null;
+    logger.error("pubIPRClaimed can only be specified for ST, RP and EG documents");
   }
 
   return metadata;

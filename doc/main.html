@@ -14,7 +14,7 @@
   <meta itemprop="pubConfidential" content="no">
   <!--< meta itemprop="pubTC" content="XX"> -->
   <meta itemprop="pubSuiteTitle" content="HTML Pub">
-  <meta itemprop="pubDateTime" content="2026-06-30">
+  <meta itemprop="pubDateTime" content="2026-08-31">
   <!-- <meta itemprop="pubRevisionOf" content="SMPTE ST XXXX-Y:ZZZZ"> -->
   <title>Tooling and documentation for HTML documents</title>
 </head>
@@ -323,6 +323,32 @@
         publication stage is confidential.</p>
       </section>
 
+      <section id="sec-pubIPRClaimed">
+        <h4><code>pubIPRClaimed</code></h4>
+
+        <p>The <code>head</code> element shall contain zero or one
+        <code>meta</code> element with an <code>itemprop</code> attribute equal
+        to <code>pubIPRClaimed</code>.</p>
+
+        <p>If present, the element shall have a <code>content</code> attribute
+        equal to one of the following values:</p>
+
+        <dl>
+          <dt><code>yes</code></dt>
+          <dd>Notice has been received by SMPTE claiming intellectual property
+          rights essential to the implementation of the document.</dd>
+          <dt><code>no</code></dt>
+          <dd>No such notice has been received.</dd>
+        </dl>
+
+        <p>The element shall not be present unless <code>pubType</code> is equal
+        to <code>ST</code>, <code>RP</code> or <code>EG</code>.</p>
+
+        <p>The value selects the intellectual property rights statement inserted
+        in the <a>Foreword</a>. In the absence of the element, the value
+        <code>no</code> is assumed.</p>
+      </section>
+
 
       <section id="sec-pubDateTime">
         <h4><code>pubDateTime</code></h4>
@@ -466,6 +492,9 @@
           that is added to the SMPTE boilerplate text.</p>
 
           <p>The absence of this <code>section</code> indicates that no author-supplied prose was provided.</p>
+
+          <p>The SMPTE boilerplate text includes a statement on intellectual property rights, selected by
+         <code>pubIPRClaimed</code> (see <a href="#sec-pubIPRClaimed"></a>). This statement shall not be supplied by the author.</p>
 
           <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
           <code>sec-foreword</code>.</p>
