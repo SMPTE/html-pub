@@ -811,12 +811,31 @@ const SMPTE_ER_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
 {{authorProse}}
 `
 
-const SMPTE_DOC_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
-
-<p>At the time of publication no notice had been received by SMPTE claiming patent
+const SMPTE_NO_IPR_CLAIMED_BOILERPLATE = `<p>At the time of publication no notice had been received by SMPTE claiming patent
 rights essential to the implementation of this Engineering Document.
 However, attention is drawn to the possibility that some of the elements of this document may be the subject of patent rights.
 SMPTE shall not be held responsible for identifying any or all such patent rights.</p>
+`
+
+const SMPTE_IPR_CLAIMED_BOILERPLATE = `<p>SMPTE draws attention to the fact that it is claimed that compliance with this document may
+involve the use of one or more patents or other intellectual property rights (collectively,
+"IPR"). The Society takes no position concerning the evidence, validity, or scope of this IPR.</p>
+
+<p>Each holder of claimed IPR has assured the Society that it is willing to License all IPR it owns,
+and any third party IPR it has the right to sublicense, that is essential to the implementation of
+this document to those (Members and non-Members alike) desiring to implement this document under
+reasonable terms and conditions, demonstrably free of discrimination. Each holder of claimed IPR
+has filed a statement to such effect with SMPTE. Information may be obtained from the Director,
+Standards &amp; Engineering at SMPTE Headquarters.</p>
+
+<p>Attention is also drawn to the possibility that elements of this document may be subject to IPR
+other than those identified above. The Society shall not be responsible for identifying any or
+all such IPR.</p>
+`
+
+const SMPTE_DOC_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
+
+{{iprStatement}}
 
 {{authorProse}}
 `
@@ -879,7 +898,8 @@ function insertForeword(docMetadata) {
   } else if (docMetadata.pubType == smpte.ER_PUBTYPE) {
     sec.innerHTML = fillTemplate(SMPTE_ER_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});  
   } else {
-    sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse, copyrightYear: (new Date()).getFullYear()});
+    const iprStatement = docMetadata.pubIPRClaimed ? SMPTE_IPR_CLAIMED_BOILERPLATE : SMPTE_NO_IPR_CLAIMED_BOILERPLATE;
+    sec.innerHTML = fillTemplate(SMPTE_DOC_FOREWORD_BOILERPLATE, {authorProse: authorProse, iprStatement: iprStatement, copyrightYear: (new Date()).getFullYear()});
   }
 
 }
