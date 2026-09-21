@@ -749,8 +749,7 @@
           <ul>
             <li>Each entry consists of exactly one <code>dt</code> element followed by exactly one <code>dd</code> element, which
             contains the expansion or meaning of the entry.</li>
-            <li>The <code>dl</code> element shall not contain <code>dfn</code> elements, and the entries are not numbered. An
-            abbreviated term can also appear as a synonym in the <code>terms-int-defs</code> element.</li>
+            <li>The <code>dl</code> element shall not contain <code>dfn</code> elements, and the entries are not numbered.</li>
             <li>Each entry shall be unique within its list.</li>
             <li>The optional <code>data-intro</code> attribute, if present, shall not be empty. It replaces the default introductory
             sentence of the corresponding subclause (see <a href="#sec-terms-rendering"></a>).</li>
@@ -766,6 +765,8 @@
                 <li>The entries shall be listed in alphabetical order, ignoring case.</li>
                 <li>Each abbreviated term shall be used in the text of the document, outside of these lists, either as text or as
                 the contents of an <code>abbr</code> element.</li>
+                <li>An abbreviated term can also be defined as a term in the <code>terms-int-defs</code> element, subject to the
+                constraints of <a href="#sec-abbr-element"></a>.</li>
               </ul>
             </li>
             <li><strong>Symbols</strong> (<code>terms-symbols</code>):
@@ -846,27 +847,7 @@
             specifications:</em></li>
           </ul>
 
-          <p>Each <code>abbr</code> element of the document that has no <code>title</code> attribute is given the expansion of the
-          matching entry of the <code>terms-abbr</code> element as its <code>title</code> attribute. If there is no such entry, the
-          <code>title</code> attribute of another <code>abbr</code> element with the same contents is used, e.g. an abbreviation
-          introduced inline as <code>&lt;dfn&gt;Key Delivery Message&lt;/dfn&gt; (&lt;abbr title="Key Delivery
-          Message"&gt;KDM&lt;/abbr&gt;)</code>.</p>
-
-          <p>An <code>a</code> element without an <code>href</code> attribute, e.g. <code>&lt;a&gt;KDM&lt;/a&gt;</code>, is linked to
-          its definition as described in <a href="#sec-dfn-element"></a>. If no <code>dfn</code> element matches, it is linked to
-          the matching entry of the <code>terms-abbr</code>, <code>terms-symbols</code> or <code>terms-mnemonics</code> element.
-          Matching ignores case, and a trailing <code>s</code> is accepted, e.g. <code>&lt;a&gt;KDMs&lt;/a&gt;</code>. If the
-          contents of the <code>a</code> element are an abbreviated term, the expansion is also shown on hover.</p>
-
-          <div class="example">
-            <p>For an abbreviated term that is also defined as a term, the link resolves in the following order:</p>
-            <ol>
-              <li>a <code>dfn</code> element in the <code>terms-int-defs</code> element, e.g. <code>&lt;dt&gt;&lt;dfn&gt;KDM&lt;/dfn&gt;&lt;/dt&gt;</code>;</li>
-              <li>an inline <code>dfn</code> element listing it in its <code>data-lt</code> attribute, e.g. <code>&lt;dfn
-              data-lt=&quot;KDM&quot;&gt;Key Delivery Message&lt;/dfn&gt;</code>;</li>
-              <li>the entry of the <code>terms-abbr</code> element.</li>
-            </ol>
-          </div>
+          <p>Abbreviations are rendered and linked as specified in <a href="#sec-abbr-element"></a>.</p>
         </section>
 
       </section>
@@ -1145,6 +1126,86 @@
           </ul>
         </div>
 
+      </section>
+
+      <section id="sec-abbr-element">
+        <h4>Abbreviations</h4>
+
+        <section id="sec-abbr-general">
+          <h5>General</h5>
+
+          <p>An abbreviation is marked up by wrapping it in an <code>abbr</code> element. Its expansion is defined in one of the
+          following ways:</p>
+
+          <ul>
+            <li>as an entry of the <code>terms-abbr</code> element (see <a href="#sec-terms-lists"></a>);</li>
+            <li>as a synonym of a term in the <code>terms-int-defs</code> element (see <a href="#sec-terms-int-defs"></a>);</li>
+            <li>inline, using the <code>title</code> attribute of the <code>abbr</code> element.</li>
+          </ul>
+
+          <div class="example">
+<pre>
+&lt;dfn&gt;Key Delivery Message&lt;/dfn&gt; (&lt;abbr title=&quot;Key Delivery Message&quot;&gt;KDM&lt;/abbr&gt;)
+</pre>
+          </div>
+        </section>
+
+        <section id="sec-abbr-both">
+          <h5>Abbreviations that are also terms</h5>
+
+          <p>An abbreviated term can be listed in the <code>terms-abbr</code> element and also be defined as a synonym of a term in
+          the <code>terms-int-defs</code> element. In that case, the expansion of the <code>terms-abbr</code> entry shall be equal to
+          one of the other synonyms of the term, ignoring case.</p>
+
+          <p>When rendered, the expansion of the <code>terms-abbr</code> entry links to the term.</p>
+
+          <div class="example">
+<pre>
+&lt;dl id=&quot;terms-int-defs&quot;&gt;
+  &lt;dt&gt;&lt;dfn&gt;Key Delivery Message&lt;/dfn&gt;&lt;/dt&gt;
+  &lt;dt&gt;&lt;dfn&gt;KDM&lt;/dfn&gt;&lt;/dt&gt;
+  &lt;dd&gt;message that carries content keys&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;dl id=&quot;terms-abbr&quot;&gt;
+  &lt;dt&gt;KDM&lt;/dt&gt;
+  &lt;dd&gt;Key Delivery Message&lt;/dd&gt;
+&lt;/dl&gt;
+</pre>
+          </div>
+        </section>
+
+        <section id="sec-abbr-titles">
+          <h5>Expansions on hover</h5>
+
+          <p>Each <code>abbr</code> element that has no <code>title</code> attribute is given, as its <code>title</code> attribute,
+          the expansion of the matching entry of the <code>terms-abbr</code> element or, if there is no such entry, the
+          <code>title</code> attribute of another <code>abbr</code> element with the same contents.</p>
+
+          <p class="example"><code>&lt;abbr&gt;KDM&lt;/abbr&gt;</code> is rendered as
+          <code>&lt;abbr title=&quot;Key Delivery Message&quot;&gt;KDM&lt;/abbr&gt;</code>.</p>
+        </section>
+
+        <section id="sec-abbr-linking">
+          <h5>Linking to abbreviations</h5>
+
+          <p>An abbreviation is linked to its definition using an <code>a</code> element without an <code>href</code> attribute,
+          e.g. <code>&lt;a&gt;KDM&lt;/a&gt;</code>. The link resolves to the first of the following that matches:</p>
+
+          <ol>
+            <li>a <code>dfn</code> element in the <code>terms-int-defs</code> element, e.g.
+            <code>&lt;dt&gt;&lt;dfn&gt;KDM&lt;/dfn&gt;&lt;/dt&gt;</code>;</li>
+            <li>an inline <code>dfn</code> element that lists the abbreviation in its <code>data-lt</code> attribute (see <a
+            href="#sec-dfn-element"></a>), e.g. <code>&lt;dfn data-lt=&quot;KDM&quot;&gt;Key Delivery Message&lt;/dfn&gt;</code>;</li>
+            <li>the matching entry of the <code>terms-abbr</code> element.</li>
+          </ol>
+
+          <p>Matching ignores case, and a trailing <code>s</code> is accepted, e.g. <code>&lt;a&gt;KDMs&lt;/a&gt;</code>. The
+          expansion of the abbreviation is shown when hovering over the link.</p>
+
+          <p>Entries of the <code>terms-symbols</code> and <code>terms-mnemonics</code> elements are linked in the same way, e.g.
+          <code>&lt;a&gt;uimsbf&lt;/a&gt;</code>. Only symbols without markup, e.g. <code>&lt;a&gt;&#947;&lt;/a&gt;</code>, can be
+          linked, since an <code>a</code> element cannot contain other elements.</p>
+        </section>
       </section>
 
       <section id="sec-dl-element">

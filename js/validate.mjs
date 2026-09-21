@@ -1175,7 +1175,7 @@ class TermsListMatcher {
       if (entries.some(e => e.text === key.text))
         logger.error(`Duplicate entry in the ${this.label} list: ${key.text}`, dt);
 
-      entries.push({ ...key, dt: dt });
+      entries.push({ ...key, dt: dt, dd: dd });
     }
 
     /* check the order */
@@ -1199,7 +1199,44 @@ class TermsListMatcher {
       }
     }
 
+    if (this.options.crossCheck)
+      this.options.crossCheck(element, entries, logger);
+
     return true;
+  }
+}
+
+/* an abbreviated term that is also a term shall have an expansion equal to one of the synonyms of that term */
+function _checkAbbreviationsAgainstTerms(element, entries, logger) {
+  const terms = element.ownerDocument.getElementById("terms-int-defs");
+
+  if (terms === null)
+    return;
+
+  for (const entry of entries) {
+    const abbr = entry.text.toLowerCase();
+
+    const dfn = Array.from(terms.querySelectorAll("dt dfn")).find(d => _normalizeText(d.textContent).toLowerCase() === abbr);
+
+    if (dfn === undefined)
+      continue;
+
+    /* collect the synonyms, i.e. the consecutive dt elements of the term */
+
+    const synonyms = [];
+    const dt = dfn.closest("dt");
+
+    let first = dt;
+    while (first.previousElementSibling !== null && first.previousElementSibling.localName === "dt")
+      first = first.previousElementSibling;
+
+    for (let e = first; e !== null && e.localName === "dt"; e = e.nextElementSibling)
+      synonyms.push(_normalizeText(e.textContent).toLowerCase());
+
+    const expansion = _normalizeText(entry.dd.textContent);
+
+    if (!synonyms.includes(expansion.toLowerCase()))
+      logger.error(`The abbreviated term ${entry.text} is also defined as a term, but its expansion "${expansion}" does not match any of the synonyms of that term`, entry.dd);
   }
 }
 
@@ -1214,7 +1251,8 @@ const AbbreviationsMatcher = new TermsListMatcher("terms-abbr", "abbreviated ter
     return { text: text, sortKey: text };
   },
   compare: alphaCompare,
-  isUsed: _isAbbreviationUsed
+  isUsed: _isAbbreviationUsed,
+  crossCheck: _checkAbbreviationsAgainstTerms
 });
 
 const SymbolsMatcher = new TermsListMatcher("terms-symbols", "symbols", {

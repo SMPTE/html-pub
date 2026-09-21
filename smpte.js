@@ -1529,6 +1529,9 @@ function resolveLinks(docMetadata, abbreviations = new Map()) {
 
   const listPrefixes = { "terms-abbr": "abbr-", "terms-symbols": "symbol-", "terms-mnemonics": "mnemonic-" };
 
+  /* abbreviated terms that are also defined as terms, whose expansion links back to the term */
+  const termBackLinks = [];
+
   for (const [listId, prefix] of Object.entries(listPrefixes)) {
     const list = document.getElementById(listId);
 
@@ -1546,8 +1549,12 @@ function resolveLinks(docMetadata, abbreviations = new Map()) {
       if (baseTerm.slice(-1) !== "s")
         terms.push(baseTerm + "s");
 
-      if (terms.every(t => definitions.has(t)))
+      if (terms.every(t => definitions.has(t))) {
+        const dd = dt.nextElementSibling;
+        if (listId === "terms-abbr" && dd !== null && dd.localName === "dd" && dd.querySelector("a") === null)
+          termBackLinks.push({ dd: dd, target: definitions.get(baseTerm) });
         continue;
+      }
 
       if (dt.id === "") {
         const id = prefix + baseTerm.replace(/\s/g, "-");
@@ -1677,6 +1684,16 @@ function resolveLinks(docMetadata, abbreviations = new Map()) {
       }
 
     }
+  }
+
+  /* link the expansions of abbreviated terms that are also defined as terms */
+
+  for (const { dd, target } of termBackLinks) {
+    const link = document.createElement("a");
+    link.href = "#" + target.id;
+    link.classList.add("dfn-ref");
+    link.append(...dd.childNodes);
+    dd.appendChild(link);
   }
 }
 
