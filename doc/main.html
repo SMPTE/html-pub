@@ -764,7 +764,7 @@
                 <code>abbr</code> element.</li>
                 <li>The entries shall be listed in alphabetical order, ignoring case.</li>
                 <li>Each abbreviated term shall be used in the text of the document, outside of these lists, either as text or as
-                the contents of an <code>abbr</code> element.</li>
+                the contents of an <code>abbr</code> element, in its singular or plural form, e.g. KDM or KDMs.</li>
                 <li>An abbreviated term can also be defined as a term in the <code>terms-int-defs</code> element, subject to the
                 constraints of <a href="#sec-abbr-element"></a>.</li>
               </ul>
@@ -1106,25 +1106,163 @@
       <section id="sec-dfn-element">
         <h4>Inline terms</h4>
 
-        <p>A <dfn data-lt="alternate1|alternate2">term</dfn> can be defined by wrapping it in a <code>dfn</code> element.</p>
+        <section id="sec-dfn-general">
+          <h5>General</h5>
 
-        <p class="example">
-        <code>&lt;dfn data-lt=&quot;alternate1|alternate2&quot;&gt;term&lt;/dfn&gt;</code>
-        </p>
+          <p>A <dfn data-lt="alternate1|alternate2">term</dfn> can be defined by wrapping it in a <code>dfn</code> element, either
+          in the prose or in a <code>dt</code> element of the <code>terms-int-defs</code> element (see <a
+          href="#sec-terms-int-defs"></a>).</p>
 
-        <p>The optional <code>data-lt</code> attribute specify alternate forms of the <a>term</a>, each separated by a
-        <code>|</code>  character.</p>
+          <p class="example">
+          <code>&lt;dfn data-lt=&quot;alternate1|alternate2&quot;&gt;term&lt;/dfn&gt;</code>
+          </p>
 
-        <p>An optional <code>id</code> attribute can be specified; otherwise one will be generated automatically.</p>
+          <p>An optional <code>id</code> attribute can be specified; otherwise one will be generated automatically from the
+          <a>term</a>, e.g. <code>dfn-key-number</code> for the term <em>key number</em>.</p>
 
-        <div class="example">
-          <p>The definition above can be referenced using one of the following forms:</p>
+          <p>A <a>term</a> is referenced using an <code>a</code> element without an <code>href</code> attribute, whose contents
+          are the <a>term</a>, one of its alternate forms (see <a href="#sec-dfn-alternates"></a>) or one of their plural forms
+          (see <a href="#sec-dfn-plurals"></a>). Matching ignores case and extra whitespace.</p>
+
+          <div class="example">
+            <p>The definition above can be referenced using one of the following forms:</p>
+            <ul>
+              <li><code>&lt;a&gt;term&lt;/a&gt;</code>, which is rendered as <a>term</a></li>
+              <li><code>&lt;a&gt;alternate1&lt;/a&gt;</code>, which is rendered as <a>alternate1</a></li>
+              <li><code>&lt;a&gt;alternate2&lt;/a&gt;</code>, which is rendered as <a>alternate2</a></li>
+              <li><code>&lt;a&gt;terms&lt;/a&gt;</code>, which is rendered as <a>terms</a></li>
+            </ul>
+          </div>
+
+          <p>Each <a>term</a> and alternate form shall be defined only once in the document; otherwise a <em>Duplicate
+          definition</em> error is reported.</p>
+        </section>
+
+        <section id="sec-dfn-alternates">
+          <h5>Alternate forms</h5>
+
+          <p>The optional <code>data-lt</code> attribute specifies alternate forms of the <a>term</a>, each separated by a
+          <code>|</code> character. An alternate form can be, for example:</p>
+
           <ul>
-            <li><code>&lt;a&gt;term&lt;/a&gt;</code>, which is rendered as <a>term</a></li>
-            <li><code>&lt;a&gt;alternate1&lt;/a&gt;</code>, which is rendered as <a>alternate1</a></li>
-            <li><code>&lt;a&gt;alternate2&lt;/a&gt;</code>, which is rendered as <a>alternate2</a></li>
+            <li>a synonym or a spelling variant, e.g. <code>&lt;dfn data-lt=&quot;colour space&quot;&gt;color space&lt;/dfn&gt;</code>;</li>
+            <li>an abbreviation, e.g. <code>&lt;dfn data-lt=&quot;KDM&quot;&gt;Key Delivery Message&lt;/dfn&gt;</code> (see <a
+            href="#sec-abbr-element"></a>);</li>
+            <li>a plural form that is not generated automatically, e.g. <code>&lt;dfn
+            data-lt=&quot;children&quot;&gt;child&lt;/dfn&gt;</code> (see <a href="#sec-dfn-plurals-lt"></a>).</li>
           </ul>
-        </div>
+
+          <p>Plural forms are also generated for each alternate form, e.g. <code>&lt;a&gt;KDMs&lt;/a&gt;</code> references the
+          <em>Key Delivery Message</em> definition above.</p>
+        </section>
+
+        <section id="sec-dfn-plurals">
+          <h5>Plural forms</h5>
+
+          <p>A reference also matches the following plural forms of the last word of the <a>term</a> and of each alternate
+          form:</p>
+
+          <table id="tab-dfn-plurals">
+            <caption>Generated plural forms</caption>
+            <thead>
+              <tr>
+                <th>Singular ending</th>
+                <th>Plural form</th>
+                <th>Examples</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>any, except <code>s</code></td>
+                <td>add <code>s</code></td>
+                <td>frame, frames; key, keys</td>
+              </tr>
+              <tr>
+                <td><code>s</code>, <code>x</code>, <code>z</code>, <code>ch</code>, <code>sh</code></td>
+                <td>add <code>es</code></td>
+                <td>bus, buses; box, boxes; patch, patches</td>
+              </tr>
+              <tr>
+                <td>consonant followed by <code>y</code></td>
+                <td>replace <code>y</code> with <code>ies</code></td>
+                <td>entity, entities</td>
+              </tr>
+              <tr>
+                <td><code>ex</code>, <code>ix</code></td>
+                <td>replace with <code>ices</code></td>
+                <td>index, indices; matrix, matrices; vertex, vertices</td>
+              </tr>
+              <tr>
+                <td><code>is</code></td>
+                <td>replace with <code>es</code></td>
+                <td>axis, axes; analysis, analyses</td>
+              </tr>
+              <tr>
+                <td><code>um</code>, <code>on</code></td>
+                <td>replace with <code>a</code></td>
+                <td>datum, data; medium, media; criterion, criteria</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>More than one plural form can apply to the same word, in which case all of them are matched, e.g. both
+          <code>&lt;a&gt;AXF Object indices&lt;/a&gt;</code> and <code>&lt;a&gt;AXF Object indexes&lt;/a&gt;</code> reference
+          <code>&lt;dfn&gt;AXF Object index&lt;/dfn&gt;</code>.</p>
+
+          <p>Generated plural forms never result in a <em>Duplicate definition</em> error. A generated plural form that is equal
+          to another <a>term</a> or alternate form is ignored, i.e. the other <a>term</a> takes precedence.</p>
+
+          <div class="example">
+            <p>If both <code>&lt;dfn&gt;datum&lt;/dfn&gt;</code> and <code>&lt;dfn&gt;data&lt;/dfn&gt;</code> are defined,
+            <code>&lt;a&gt;data&lt;/a&gt;</code> references the <a>term</a> <em>data</em>, not the plural form of
+            <em>datum</em>.</p>
+          </div>
+        </section>
+
+        <section id="sec-dfn-plurals-lt">
+          <h5>Plural forms using <code>data-lt</code></h5>
+
+          <p>A plural form that is not generated automatically shall be listed in the <code>data-lt</code> attribute. This
+          includes:</p>
+
+          <table id="tab-dfn-plurals-lt">
+            <caption>Plural forms specified using <code>data-lt</code></caption>
+            <thead>
+              <tr>
+                <th>Case</th>
+                <th>Markup</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>irregular plural</td>
+                <td><code>&lt;dfn data-lt=&quot;children&quot;&gt;child&lt;/dfn&gt;</code></td>
+              </tr>
+              <tr>
+                <td>plural of a word other than the last</td>
+                <td><code>&lt;dfn data-lt=&quot;frames of reference&quot;&gt;frame of reference&lt;/dfn&gt;</code></td>
+              </tr>
+              <tr>
+                <td>final <code>f</code> or <code>fe</code> replaced with <code>ves</code></td>
+                <td><code>&lt;dfn data-lt=&quot;leaves&quot;&gt;leaf&lt;/dfn&gt;</code></td>
+              </tr>
+              <tr>
+                <td>final <code>o</code> followed by <code>es</code></td>
+                <td><code>&lt;dfn data-lt=&quot;echoes&quot;&gt;echo&lt;/dfn&gt;</code></td>
+              </tr>
+              <tr>
+                <td>other Latin or Greek plural</td>
+                <td><code>&lt;dfn data-lt=&quot;schemata&quot;&gt;schema&lt;/dfn&gt;</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>A plural form that is identical to the singular form, e.g. <em>series</em>, needs no <code>data-lt</code>
+          attribute.</p>
+
+          <p class="note">A generated plural form that is not an English word, e.g. <em>leafs</em>, is harmless since it is only
+          matched if used in a reference.</p>
+        </section>
 
       </section>
 
@@ -1199,7 +1337,8 @@
             <li>the matching entry of the <code>terms-abbr</code> element.</li>
           </ol>
 
-          <p>Matching ignores case, and a trailing <code>s</code> is accepted, e.g. <code>&lt;a&gt;KDMs&lt;/a&gt;</code>. The
+          <p>Matching ignores case and accepts the plural forms specified in <a href="#sec-dfn-element"></a>, e.g.
+          <code>&lt;a&gt;KDMs&lt;/a&gt;</code>. The
           expansion of the abbreviation is shown when hovering over the link.</p>
 
           <p>Entries of the <code>terms-symbols</code> and <code>terms-mnemonics</code> elements are linked in the same way, e.g.

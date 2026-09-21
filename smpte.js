@@ -1469,12 +1469,59 @@ function _getSectionReference(target) {
   return targetNumber;
 }
 
+/* likely plural forms of the last word of a normalized term; irregular plurals are specified using data-lt */
+function _pluralForms(term) {
+  const i = term.lastIndexOf(" ");
+  const head = term.slice(0, i + 1);
+  const word = term.slice(i + 1);
+
+  const forms = new Set();
+
+  if (!word.endsWith("s"))
+    forms.add(word + "s");                        /* frame -> frames */
+  if (/(s|x|z|ch|sh)$/.test(word))
+    forms.add(word + "es");                       /* bus -> buses, box -> boxes */
+  if (/[^aeiou]y$/.test(word))
+    forms.add(word.slice(0, -1) + "ies");         /* entity -> entities */
+  if (/(ex|ix)$/.test(word))
+    forms.add(word.slice(0, -2) + "ices");        /* index -> indices, matrix -> matrices */
+  if (/is$/.test(word))
+    forms.add(word.slice(0, -2) + "es");          /* axis -> axes */
+  if (/(um|on)$/.test(word))
+    forms.add(word.slice(0, -2) + "a");           /* datum -> data, criterion -> criteria */
+
+  return Array.from(forms, f => head + f);
+}
+
 function resolveLinks(docMetadata, abbreviations = new Map()) {
   /* collect definitions */
 
   const dfns = document.getElementsByTagName("dfn");
 
   const definitions = new Map();
+
+  /* generated plural forms, which yield to explicit forms and never cause duplicate definitions */
+  const generated = new Set();
+
+  function _addDefinition(terms, target) {
+    for (const term of terms) {
+      definitions.set(term, target);
+      generated.delete(term);
+    }
+
+    for (const term of terms) {
+      for (const plural of _pluralForms(term)) {
+        if (!definitions.has(plural)) {
+          definitions.set(plural, target);
+          generated.add(plural);
+        }
+      }
+    }
+  }
+
+  function _isDefined(term) {
+    return definitions.has(term) && !generated.has(term);
+  }
 
   for (const dfn of dfns) {
 
@@ -1489,19 +1536,11 @@ function resolveLinks(docMetadata, abbreviations = new Map()) {
 
     terms.add(baseTerm);
 
-    if (baseTerm.slice(-1) !== "s")
-      terms.add(baseTerm + "s");
-
     if (dfn.hasAttribute("data-lt")) {
       dfn.getAttribute("data-lt").split("|").forEach(t => terms.add(_normalizeTerm(t)));
     }
 
-    const termExists = function() {
-      for(const term of terms.values())
-        if (definitions.has(term))
-          return true;
-      return false;
-    }();
+    const termExists = Array.from(terms).some(_isDefined);
 
     if (termExists) {
       logger_.error("Duplicate definition", dfn);
@@ -1519,9 +1558,7 @@ function resolveLinks(docMetadata, abbreviations = new Map()) {
       dfn.id = "dfn-" + id;
     }
 
-    for(let term of terms) {
-      definitions.set(term, dfn);
-    }
+    _addDefinition(terms, dfn);
 
   }
 
@@ -1544,12 +1581,7 @@ function resolveLinks(docMetadata, abbreviations = new Map()) {
       if (baseTerm.length === 0)
         continue;
 
-      const terms = [baseTerm];
-
-      if (baseTerm.slice(-1) !== "s")
-        terms.push(baseTerm + "s");
-
-      if (terms.every(t => definitions.has(t))) {
+      if (_isDefined(baseTerm)) {
         const dd = dt.nextElementSibling;
         if (listId === "terms-abbr" && dd !== null && dd.localName === "dd" && dd.querySelector("a") === null)
           termBackLinks.push({ dd: dd, target: definitions.get(baseTerm) });
@@ -1564,10 +1596,7 @@ function resolveLinks(docMetadata, abbreviations = new Map()) {
         dt.id = uniqueId;
       }
 
-      for (const term of terms) {
-        if (!definitions.has(term))
-          definitions.set(term, dt);
-      }
+      _addDefinition([baseTerm], dt);
     }
   }
 

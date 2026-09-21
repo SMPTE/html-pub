@@ -1068,17 +1068,19 @@ function _usageText(body) {
   return clone;
 }
 
-function _containsToken(text, token) {
+function _containsToken(text, token, suffix = "") {
   const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "u").test(text);
+  return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}${suffix}(?![\\p{L}\\p{N}])`, "u").test(text);
 }
 
+/* an abbreviated term is also used when it appears in its plural form, e.g. KDMs */
 function _isAbbreviationUsed(root, abbr) {
+  const plural = new RegExp(`^${abbr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(e?s)?$`, "u");
   for (const e of root.querySelectorAll("abbr")) {
-    if (_normalizeText(e.textContent) === abbr)
+    if (plural.test(_normalizeText(e.textContent)))
       return true;
   }
-  return _containsToken(root.textContent, abbr);
+  return _containsToken(root.textContent, abbr, "(e?s)?");
 }
 
 function _isSymbolUsed(root, parts) {
