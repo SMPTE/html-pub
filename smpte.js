@@ -1448,6 +1448,8 @@ function resolveAbbreviations() {
     if (expansion !== undefined)
       abbr.title = expansion;
   }
+
+  return expansions;
 }
 
 function _normalizeTerm(term) {
@@ -1467,7 +1469,7 @@ function _getSectionReference(target) {
   return targetNumber;
 }
 
-function resolveLinks(docMetadata) {
+function resolveLinks(docMetadata, abbreviations = new Map()) {
   /* collect definitions */
 
   const dfns = document.getElementsByTagName("dfn");
@@ -1523,6 +1525,45 @@ function resolveLinks(docMetadata) {
 
   }
 
+  /* entries of the abbreviated terms, symbols and mnemonics lists, unless already defined by a dfn */
+
+  const listPrefixes = { "terms-abbr": "abbr-", "terms-symbols": "symbol-", "terms-mnemonics": "mnemonic-" };
+
+  for (const [listId, prefix] of Object.entries(listPrefixes)) {
+    const list = document.getElementById(listId);
+
+    if (list === null)
+      continue;
+
+    for (const dt of list.querySelectorAll(":scope > dt")) {
+      const baseTerm = _normalizeTerm(dt.textContent);
+
+      if (baseTerm.length === 0)
+        continue;
+
+      const terms = [baseTerm];
+
+      if (baseTerm.slice(-1) !== "s")
+        terms.push(baseTerm + "s");
+
+      if (terms.every(t => definitions.has(t)))
+        continue;
+
+      if (dt.id === "") {
+        const id = prefix + baseTerm.replace(/\s/g, "-");
+        let uniqueId = id;
+        for (let i = 2; document.getElementById(uniqueId) !== null; i++)
+          uniqueId = `${id}-${i}`;
+        dt.id = uniqueId;
+      }
+
+      for (const term of terms) {
+        if (!definitions.has(term))
+          definitions.set(term, dt);
+      }
+    }
+  }
+
   const anchors = document.getElementsByTagName("a");
 
   for (const anchor of anchors) {
@@ -1554,6 +1595,12 @@ function resolveLinks(docMetadata) {
         } else {
           anchor.href = "#" + definitions.get(term).id;
           anchor.classList.add("dfn-ref");
+
+          /* show the expansion of an abbreviated term on hover */
+          const text = anchor.textContent.trim();
+          const expansion = abbreviations.get(text) ?? (text.endsWith("s") ? abbreviations.get(text.slice(0, -1)) : undefined);
+          if (expansion !== undefined && !anchor.hasAttribute("title"))
+            anchor.title = expansion;
         }
 
       }
@@ -1719,8 +1766,8 @@ async function render() {
   numberTableFootnotes();
   markDeprecated();
   numberTerms();
-  resolveAbbreviations();
-  resolveLinks(docMetadata);
+  const abbreviations = resolveAbbreviations();
+  resolveLinks(docMetadata, abbreviations);
   insertTOC(docMetadata);
   addHeadingLinks(docMetadata);
 

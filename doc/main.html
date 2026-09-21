@@ -643,152 +643,231 @@
       <section id="sec-terms-definitions-clause">
         <h4>Terms and definitions <code>section</code></h4>
 
-        <p>The <dfn>Terms and definitions</dfn> <code>section</code> collects terms, abbreviations and symbols that are not defined inline the
-        clauses of the document, as described in <a href="#sec-dfn-element"></a>.</p>
+        <section id="sec-terms-general">
+          <h5>General</h5>
 
-        <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
-        <code>sec-terms-and-definitions</code>.</p>
+          <p>The <dfn>Terms and definitions</dfn> <code>section</code> collects terms, abbreviated terms, symbols and mnemonics that
+          are not defined inline the clauses of the document, as described in <a href="#sec-dfn-element"></a>.</p>
 
-        <p>The heading shall not be present. It is generated automatically, either as <em>Terms and definitions</em> or as a
-        composite title, as specified below.</p>
+          <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
+          <code>sec-terms-and-definitions</code>.</p>
 
-        <p>The absence of this <code>section</code> indicates that all terms and abbreviations are defined inline the clauses of the
-        document.</p>
+          <p>The heading shall not be present. The heading and the boilerplate of the clause are generated automatically, as
+          specified in <a href="#sec-terms-rendering"></a>.</p>
 
-        <p>If present, the <code>section</code> contains one or more of the following elements, in the order listed:</p>
+          <p>The absence of this <code>section</code> indicates that all terms and abbreviations are defined inline the clauses of
+          the document.</p>
 
-        <ul>
-          <li>a <code>ul</code> element that cites external definitions, subject to the following constraints:
-            <ul>
-              <li>The <code>id</code> attribute of the <code>ul</code> element shall be equal to <code>terms-ext-defs</code>.</li>
-              <li>Each <code>li</code> element contains a citation link to a normative reference (see <a
-              href="#sec-norm-refs-section"></a>), whose definitions are included by reference.</li>
-            </ul>
-          </li>
-          <li>a <code>dl</code> element that contains individual definitions and abbreviations, subject to the following
-          constraints:
-            <ul>
-              <li>The <code>id</code> attribute of the <code>dl</code> element shall be equal to <code>terms-int-defs</code>.</li>
-              <li>Each <code>dt</code> element contains a single term, abbreviation or symbol. Zero or more additional <code>dt</code> elements
-              can follow the first <code>dt</code> element, in which case all the terms, abbreviations and symbols in the immediately
-              preceding <code>dt</code> elements are synonyms.</li>
-              <li>The <code>dd</code> elements following the <code>dt</code> element(s) shall appear in the following
-              order - each group is optional (except the definition), but if present, it shall appear in this sequence:
-                <ol>
-                  <li><strong>Deprecated:</strong> the first <code>dd</code> element, if present, shall have a <code>class</code>
-                  attribute containing <code>deprecated</code>, indicating the term is deprecated. At most one such element is permitted.</li>
-                  <li><strong>Definition:</strong> the next <code>dd</code> element shall be the definition of the term. This element is required.
-                  References to other defined terms and <code>dfn</code> elements are permitted using <code>&lt;a&gt;</code> elements without an
-                  <code>href</code> attribute. Citations to clauses or external references (i.e. <code>&lt;a href="#bib-HTML-5"&gt;</code>) are not permitted.</li>
-                  <li><strong>Examples:</strong> the next <code>dd</code> element(s), if present, shall each have a <code>class</code>
-                  attribute containing <code>example</code>.</li>
-                  <li><strong>Notes:</strong> the next <code>dd</code> element(s), if present, shall each have a <code>class</code>
-                  attribute containing <code>note</code>. References to defined terms, clauses, and external references are all permitted.</li>
-                  <li><strong>Source:</strong> the last <code>dd</code> element, if present, shall have a <code>class</code>
-                  attribute containing <code>source</code> and serves as the source of the definition. At most one such element
-                  is permitted. It shall contain a reference to a bibliographic entry and may contain additional text. If any
-                  changes are made to the original terminological entry, this shall be indicated, along with a description of
-                  what has been modified.</li>
-                </ol>
-              </li>
-            </ul>
-          </li>
-          <li>a <code>dl</code> element that lists abbreviated terms, whose <code>id</code> attribute shall be equal to
-          <code>terms-abbr</code>. Each <code>dt</code> element contains the abbreviated term, either as plain text or as a
-          single <code>abbr</code> element.</li>
-          <li>a <code>dl</code> element that lists symbols, whose <code>id</code> attribute shall be equal to
-          <code>terms-symbols</code>.</li>
-          <li>a <code>dl</code> element that lists mnemonics, whose <code>id</code> attribute shall be equal to
-          <code>terms-mnemonics</code>.</li>
-        </ul>
+          <p>If present, the <code>section</code> contains one or more of the following elements, each optional, in the order
+          listed:</p>
 
-        <p>The abbreviated terms, symbols and mnemonics <code>dl</code> elements are subject to the following constraints:</p>
+          <ol>
+            <li><code>ul</code> element with <code>id</code> equal to <code>terms-ext-defs</code>: external definitions (see <a
+            href="#sec-terms-ext-defs"></a>)</li>
+            <li><code>dl</code> element with <code>id</code> equal to <code>terms-int-defs</code>: terms and definitions (see <a
+            href="#sec-terms-int-defs"></a>)</li>
+            <li><code>dl</code> element with <code>id</code> equal to <code>terms-abbr</code>: abbreviated terms (see <a
+            href="#sec-terms-lists"></a>)</li>
+            <li><code>dl</code> element with <code>id</code> equal to <code>terms-symbols</code>: symbols (see <a
+            href="#sec-terms-lists"></a>)</li>
+            <li><code>dl</code> element with <code>id</code> equal to <code>terms-mnemonics</code>: mnemonics (see <a
+            href="#sec-terms-lists"></a>)</li>
+          </ol>
+        </section>
 
-        <ul>
-          <li>Each entry consists of exactly one <code>dt</code> element followed by exactly one <code>dd</code> element, which
-          contains the expansion or meaning of the entry.</li>
-          <li>The <code>dl</code> element shall not contain <code>dfn</code> elements and the entries are not numbered. An
-          abbreviated term can also appear as a synonym in the <code>terms-int-defs</code> element.</li>
-          <li>Each entry shall be unique within its list.</li>
-          <li>The entries of the <code>terms-abbr</code> and <code>terms-mnemonics</code> elements shall be listed in
-          alphabetical order, ignoring case.</li>
-          <li>The entries of the <code>terms-symbols</code> element shall be listed in the order specified in <a
-          href="#bib-iso-directives-part2"></a>, 17.5: an uppercase Latin letter followed by the same lowercase Latin letter (A, a, B, b, &#8230;); letters
-          without indices preceding letters with indices, and letter indices preceding numerical ones (B, b, C, C<sub>m</sub>,
-          C<sub>2</sub>, c, d, d<sub>ext</sub>, d<sub>int</sub>, d<sub>1</sub>, &#8230;); Latin letters followed by Greek letters;
-          and any other special symbols last. Indices are marked up using <code>sub</code> elements. If the symbols need to be
-          listed in a specific order to reflect technical criteria, the <code>data-order</code> attribute of the
-          <code>terms-symbols</code> element shall be equal to <code>technical</code>, in which case the order is not checked.</li>
-          <li>Each abbreviated term and symbol shall be used in the text of the document, outside of these lists. An abbreviated term
-          is used if it appears as text or as the contents of an <code>abbr</code> element. A symbol is used if it appears as a
-          <code>var</code> element, optionally followed by <code>sub</code> or <code>sup</code> elements, as a MathML
-          <code>mi</code> element, or, for a symbol without indices, as text.</li>
-          <li>The optional <code>data-intro</code> attribute, if present, shall not be empty and replaces the default introductory
-          sentence of the corresponding subclause.</li>
-        </ul>
+        <section id="sec-terms-ext-defs">
+          <h5>External definitions</h5>
 
-        <p>If any of the <code>terms-abbr</code>, <code>terms-symbols</code> or <code>terms-mnemonics</code> elements is present,
-        the clause is divided into subclauses: a <em>Terms and definitions</em> subclause containing the <code>terms-ext-defs</code>
-        and <code>terms-int-defs</code> elements, followed by an <em>Abbreviated terms</em>, <em>Symbols</em> and <em>Mnemonics</em>
-        subclause for each element that is present, in that order. The terms of the <code>terms-int-defs</code> element are then
-        numbered within the first subclause, e.g. 3.1.1.</p>
+          <p>The <code>terms-ext-defs</code> <code>ul</code> element cites documents whose definitions are included by reference.
+          Each <code>li</code> element contains a citation link to a normative reference (see <a
+          href="#sec-norm-refs-section"></a>).</p>
 
-        <p>The title of the clause is generated from the subclauses present, as a composite title consistent with <a
-        href="#bib-iso-directives-part2"></a>:</p>
-
-        <ul>
-          <li>none of the <code>terms-abbr</code>, <code>terms-symbols</code> or <code>terms-mnemonics</code> elements:
-          <em>Terms and definitions</em></li>
-          <li><code>terms-abbr</code> only: <em>Terms, definitions and abbreviated terms</em></li>
-          <li><code>terms-symbols</code> only: <em>Terms, definitions and symbols</em></li>
-          <li><code>terms-mnemonics</code> only: <em>Terms, definitions and mnemonics</em></li>
-          <li>more than one: the titles of the subclauses present, in order, e.g. <em>Terms, definitions, abbreviated terms,
-          symbols and mnemonics</em></li>
-        </ul>
-
-        <p>The introductory sentence of the <em>Mnemonics</em> subclause defaults to <em>The following data types are used for data
-        specifications:</em>.</p>
-
-        <p>Each <code>abbr</code> element of the document that has no <code>title</code> attribute is given the expansion of the
-        matching entry of the <code>terms-abbr</code> element as its <code>title</code> attribute. If there is no such entry, the
-        <code>title</code> attribute of another <code>abbr</code> element with the same contents is used, e.g. an abbreviation
-        introduced inline as <code>&lt;dfn&gt;Key Delivery Message&lt;/dfn&gt; (&lt;abbr title="Key Delivery
-        Message"&gt;KDM&lt;/abbr&gt;)</code>.</p>
-
-        <div class="example">
+          <div class="example">
 <pre>
-&lt;section id=&quot;sec-terms-and-definitions&quot;&gt;
-  &lt;ul id=&quot;terms-ext-defs&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;#bib-HTML-5&quot;&gt;&lt;/a&gt;&lt;/li&gt;
-  &lt;/ul&gt;
-  &lt;dl id=&quot;terms-int-defs&quot;&gt;
-    &lt;dt&gt;&lt;dfn&gt;key number&lt;/dfn&gt;&lt;/dt&gt;
-    &lt;dd class="deprecated"&gt;deprecated term&lt;/dd&gt;
-    &lt;dd&gt;number that is printed with ink or exposed onto the film at the time of
-    manufacture at regular intervals, typically one foot&lt;/dd&gt;
-    &lt;dd class="example"&gt;An example of a key number is 12345.&lt;/dd&gt;
-    &lt;dd class="note"&gt;Key number shall not be confused with key frame.&lt;/dd&gt;
-    &lt;dd class="source"&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;, modified - definition has been updated.&lt;/dd&gt;
-  &lt;/dl&gt;
-  &lt;dl id=&quot;terms-abbr&quot;&gt;
-    &lt;dt&gt;&lt;abbr&gt;KDM&lt;/abbr&gt;&lt;/dt&gt;
-    &lt;dd&gt;Key Delivery Message&lt;/dd&gt;
-  &lt;/dl&gt;
-  &lt;dl id=&quot;terms-symbols&quot;&gt;
-    &lt;dt&gt;&lt;var&gt;E&lt;/var&gt;&lt;sub&gt;B&lt;/sub&gt;&lt;/dt&gt;
-    &lt;dd&gt;blue colour signal, normalized&lt;/dd&gt;
-    &lt;dt&gt;&lt;var&gt;f&lt;/var&gt;&lt;sub&gt;s&lt;/sub&gt;&lt;/dt&gt;
-    &lt;dd&gt;sampling frequency, in hertz&lt;/dd&gt;
-  &lt;/dl&gt;
-  &lt;dl id=&quot;terms-mnemonics&quot;&gt;
-    &lt;dt&gt;&lt;code&gt;uimsbf&lt;/code&gt;&lt;/dt&gt;
-    &lt;dd&gt;unsigned integer, most significant bit first&lt;/dd&gt;
-  &lt;/dl&gt;
-&lt;/section&gt;
+&lt;ul id=&quot;terms-ext-defs&quot;&gt;
+  &lt;li&gt;&lt;a href=&quot;#bib-HTML-5&quot;&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 </pre>
-        </div>
+          </div>
+        </section>
 
-        <p class="note">The boilerplate of the clause will be generated automatically.</p>
+        <section id="sec-terms-int-defs">
+          <h5>Terms and definitions</h5>
+
+          <p>The <code>terms-int-defs</code> <code>dl</code> element contains individual terms and their definitions, subject to
+          the following constraints:</p>
+
+          <ul>
+            <li>Each <code>dt</code> element contains a single term, abbreviation or symbol. Zero or more additional <code>dt</code>
+            elements can follow the first <code>dt</code> element, in which case all the terms, abbreviations and symbols in the
+            immediately preceding <code>dt</code> elements are synonyms.</li>
+            <li>The <code>dd</code> elements following the <code>dt</code> element(s) shall appear in the following order - each
+            group is optional (except the definition), but if present, it shall appear in this sequence:
+              <ol>
+                <li><strong>Deprecated:</strong> the first <code>dd</code> element, if present, shall have a <code>class</code>
+                attribute containing <code>deprecated</code>, indicating the term is deprecated. At most one such element is
+                permitted.</li>
+                <li><strong>Definition:</strong> the next <code>dd</code> element shall be the definition of the term. This element
+                is required. References to other defined terms and <code>dfn</code> elements are permitted using
+                <code>&lt;a&gt;</code> elements without an <code>href</code> attribute. Citations to clauses or external references
+                (i.e. <code>&lt;a href="#bib-HTML-5"&gt;</code>) are not permitted.</li>
+                <li><strong>Examples:</strong> the next <code>dd</code> element(s), if present, shall each have a
+                <code>class</code> attribute containing <code>example</code>.</li>
+                <li><strong>Notes:</strong> the next <code>dd</code> element(s), if present, shall each have a <code>class</code>
+                attribute containing <code>note</code>. References to defined terms, clauses, and external references are all
+                permitted.</li>
+                <li><strong>Source:</strong> the last <code>dd</code> element, if present, shall have a <code>class</code>
+                attribute containing <code>source</code> and serves as the source of the definition. At most one such element is
+                permitted. It shall contain a reference to a bibliographic entry and may contain additional text. If any changes
+                are made to the original terminological entry, this shall be indicated, along with a description of what has been
+                modified.</li>
+              </ol>
+            </li>
+          </ul>
+
+          <div class="example">
+<pre>
+&lt;dl id=&quot;terms-int-defs&quot;&gt;
+  &lt;dt&gt;&lt;dfn&gt;key number&lt;/dfn&gt;&lt;/dt&gt;
+  &lt;dd class="deprecated"&gt;deprecated term&lt;/dd&gt;
+  &lt;dd&gt;number that is printed with ink or exposed onto the film at the time of
+  manufacture at regular intervals, typically one foot&lt;/dd&gt;
+  &lt;dd class="example"&gt;An example of a key number is 12345.&lt;/dd&gt;
+  &lt;dd class="note"&gt;Key number shall not be confused with key frame.&lt;/dd&gt;
+  &lt;dd class="source"&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;, modified - definition has been updated.&lt;/dd&gt;
+&lt;/dl&gt;
+</pre>
+          </div>
+        </section>
+
+        <section id="sec-terms-lists">
+          <h5>Abbreviated terms, symbols and mnemonics</h5>
+
+          <p>The <code>terms-abbr</code>, <code>terms-symbols</code> and <code>terms-mnemonics</code> <code>dl</code> elements list
+          abbreviated terms, symbols and mnemonics respectively, subject to the following constraints:</p>
+
+          <ul>
+            <li>Each entry consists of exactly one <code>dt</code> element followed by exactly one <code>dd</code> element, which
+            contains the expansion or meaning of the entry.</li>
+            <li>The <code>dl</code> element shall not contain <code>dfn</code> elements, and the entries are not numbered. An
+            abbreviated term can also appear as a synonym in the <code>terms-int-defs</code> element.</li>
+            <li>Each entry shall be unique within its list.</li>
+            <li>The optional <code>data-intro</code> attribute, if present, shall not be empty. It replaces the default introductory
+            sentence of the corresponding subclause (see <a href="#sec-terms-rendering"></a>).</li>
+          </ul>
+
+          <p>In addition, the following constraints apply to each list:</p>
+
+          <ul>
+            <li><strong>Abbreviated terms</strong> (<code>terms-abbr</code>):
+              <ul>
+                <li>Each <code>dt</code> element contains the abbreviated term, either as plain text or as a single
+                <code>abbr</code> element.</li>
+                <li>The entries shall be listed in alphabetical order, ignoring case.</li>
+                <li>Each abbreviated term shall be used in the text of the document, outside of these lists, either as text or as
+                the contents of an <code>abbr</code> element.</li>
+              </ul>
+            </li>
+            <li><strong>Symbols</strong> (<code>terms-symbols</code>):
+              <ul>
+                <li>Indices are marked up using <code>sub</code> elements.</li>
+                <li>The entries shall be listed in the order specified in <a href="#bib-iso-directives-part2"></a>, 17.5:
+                  <ul>
+                    <li>an uppercase Latin letter followed by the same lowercase Latin letter (A, a, B, b, &#8230;);</li>
+                    <li>letters without indices preceding letters with indices, and letter indices preceding numerical ones (B, b,
+                    C, C<sub>m</sub>, C<sub>2</sub>, c, d, d<sub>ext</sub>, d<sub>int</sub>, d<sub>1</sub>, &#8230;);</li>
+                    <li>Latin letters followed by Greek letters (a, b, &#8230; &#945;, &#946;, &#8230;);</li>
+                    <li>any other special symbols last.</li>
+                  </ul>
+                </li>
+                <li>If the symbols need to be listed in a specific order to reflect technical criteria, the
+                <code>data-order</code> attribute of the <code>terms-symbols</code> element shall be equal to
+                <code>technical</code>, in which case the order is not checked. The <code>data-order</code> attribute is not
+                permitted on the other lists.</li>
+                <li>Each symbol shall be used in the text of the document, outside of these lists, either as a <code>var</code>
+                element, optionally followed by <code>sub</code> or <code>sup</code> elements, as a MathML <code>mi</code> element,
+                or, for a symbol without indices, as text.</li>
+              </ul>
+            </li>
+            <li><strong>Mnemonics</strong> (<code>terms-mnemonics</code>):
+              <ul>
+                <li>The entries shall be listed in alphabetical order, ignoring case.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <div class="example">
+<pre>
+&lt;dl id=&quot;terms-abbr&quot;&gt;
+  &lt;dt&gt;&lt;abbr&gt;KDM&lt;/abbr&gt;&lt;/dt&gt;
+  &lt;dd&gt;Key Delivery Message&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;dl id=&quot;terms-symbols&quot;&gt;
+  &lt;dt&gt;&lt;var&gt;E&lt;/var&gt;&lt;sub&gt;B&lt;/sub&gt;&lt;/dt&gt;
+  &lt;dd&gt;blue colour signal, normalized&lt;/dd&gt;
+  &lt;dt&gt;&lt;var&gt;f&lt;/var&gt;&lt;sub&gt;s&lt;/sub&gt;&lt;/dt&gt;
+  &lt;dd&gt;sampling frequency, in hertz&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;dl id=&quot;terms-mnemonics&quot;&gt;
+  &lt;dt&gt;&lt;code&gt;uimsbf&lt;/code&gt;&lt;/dt&gt;
+  &lt;dd&gt;unsigned integer, most significant bit first&lt;/dd&gt;
+&lt;/dl&gt;
+</pre>
+          </div>
+        </section>
+
+        <section id="sec-terms-rendering">
+          <h5>Rendering</h5>
+
+          <p>The heading and the boilerplate of the clause are generated automatically.</p>
+
+          <p>If none of the <code>terms-abbr</code>, <code>terms-symbols</code> or <code>terms-mnemonics</code> elements is present,
+          the clause is titled <em>Terms and definitions</em> and its terms are numbered within the clause, e.g. 3.1.</p>
+
+          <p>Otherwise:</p>
+
+          <ul>
+            <li>The clause is divided into subclauses: a <em>Terms and definitions</em> subclause containing the
+            <code>terms-ext-defs</code> and <code>terms-int-defs</code> elements, followed by an <em>Abbreviated terms</em>,
+            <em>Symbols</em> and <em>Mnemonics</em> subclause for each element that is present, in that order.</li>
+            <li>The terms of the <code>terms-int-defs</code> element are numbered within the first subclause, e.g. 3.1.1.</li>
+            <li>The clause is given a composite title that lists the subclauses present, consistent with <a
+            href="#bib-iso-directives-part2"></a>:
+              <ul>
+                <li><code>terms-abbr</code> only: <em>Terms, definitions and abbreviated terms</em></li>
+                <li><code>terms-symbols</code> only: <em>Terms, definitions and symbols</em></li>
+                <li><code>terms-mnemonics</code> only: <em>Terms, definitions and mnemonics</em></li>
+                <li>more than one: the subclauses present, in order, e.g. <em>Terms, definitions, abbreviated terms, symbols and
+                mnemonics</em></li>
+              </ul>
+            </li>
+            <li>Each subclause starts with an introductory sentence, which the <code>data-intro</code> attribute of the list can
+            replace. The default for the <em>Mnemonics</em> subclause is <em>The following data types are used for data
+            specifications:</em></li>
+          </ul>
+
+          <p>Each <code>abbr</code> element of the document that has no <code>title</code> attribute is given the expansion of the
+          matching entry of the <code>terms-abbr</code> element as its <code>title</code> attribute. If there is no such entry, the
+          <code>title</code> attribute of another <code>abbr</code> element with the same contents is used, e.g. an abbreviation
+          introduced inline as <code>&lt;dfn&gt;Key Delivery Message&lt;/dfn&gt; (&lt;abbr title="Key Delivery
+          Message"&gt;KDM&lt;/abbr&gt;)</code>.</p>
+
+          <p>An <code>a</code> element without an <code>href</code> attribute, e.g. <code>&lt;a&gt;KDM&lt;/a&gt;</code>, is linked to
+          its definition as described in <a href="#sec-dfn-element"></a>. If no <code>dfn</code> element matches, it is linked to
+          the matching entry of the <code>terms-abbr</code>, <code>terms-symbols</code> or <code>terms-mnemonics</code> element.
+          Matching ignores case, and a trailing <code>s</code> is accepted, e.g. <code>&lt;a&gt;KDMs&lt;/a&gt;</code>. If the
+          contents of the <code>a</code> element are an abbreviated term, the expansion is also shown on hover.</p>
+
+          <div class="example">
+            <p>For an abbreviated term that is also defined as a term, the link resolves in the following order:</p>
+            <ol>
+              <li>a <code>dfn</code> element in the <code>terms-int-defs</code> element, e.g. <code>&lt;dt&gt;&lt;dfn&gt;KDM&lt;/dfn&gt;&lt;/dt&gt;</code>;</li>
+              <li>an inline <code>dfn</code> element listing it in its <code>data-lt</code> attribute, e.g. <code>&lt;dfn
+              data-lt=&quot;KDM&quot;&gt;Key Delivery Message&lt;/dfn&gt;</code>;</li>
+              <li>the entry of the <code>terms-abbr</code> element.</li>
+            </ol>
+          </div>
+        </section>
 
       </section>
 
