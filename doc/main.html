@@ -649,7 +649,8 @@
         <p>The <code>id</code> attribute shall be present on the <code>section</code> element and equal to
         <code>sec-terms-and-definitions</code>.</p>
 
-        <p>The heading shall not be present.</p>
+        <p>The heading shall not be present. It is generated automatically, either as <em>Terms and definitions</em> or as a
+        composite title, as specified below.</p>
 
         <p>The absence of this <code>section</code> indicates that all terms and abbreviations are defined inline the clauses of the
         document.</p>
@@ -730,9 +731,20 @@
         the clause is divided into subclauses: a <em>Terms and definitions</em> subclause containing the <code>terms-ext-defs</code>
         and <code>terms-int-defs</code> elements, followed by an <em>Abbreviated terms</em>, <em>Symbols</em> and <em>Mnemonics</em>
         subclause for each element that is present, in that order. The terms of the <code>terms-int-defs</code> element are then
-        numbered within the first subclause, e.g. 3.1.1. The clause is given a composite title that lists the subclauses present,
-        e.g. <em>Terms, definitions and abbreviated terms</em> or <em>Terms, definitions, abbreviated terms, symbols and
-        mnemonics</em>.</p>
+        numbered within the first subclause, e.g. 3.1.1.</p>
+
+        <p>The title of the clause is generated from the subclauses present, as a composite title consistent with <a
+        href="#bib-iso-directives-part2"></a>:</p>
+
+        <ul>
+          <li>none of the <code>terms-abbr</code>, <code>terms-symbols</code> or <code>terms-mnemonics</code> elements:
+          <em>Terms and definitions</em></li>
+          <li><code>terms-abbr</code> only: <em>Terms, definitions and abbreviated terms</em></li>
+          <li><code>terms-symbols</code> only: <em>Terms, definitions and symbols</em></li>
+          <li><code>terms-mnemonics</code> only: <em>Terms, definitions and mnemonics</em></li>
+          <li>more than one: the titles of the subclauses present, in order, e.g. <em>Terms, definitions, abbreviated terms,
+          symbols and mnemonics</em></li>
+        </ul>
 
         <p>The introductory sentence of the <em>Mnemonics</em> subclause defaults to <em>The following data types are used for data
         specifications:</em>.</p>
@@ -788,9 +800,7 @@
 
         <p>The <a>Conformance</a> <code>section</code> follows <a>Terms and definitions</a> and is the first SMPTE-defined clause that
         may carry substantive conformance requirements. It is positioned consistent with <a href="#bib-iso-directives-part2"></a>, which reserve
-        Clauses 1, 2, and 3 for <a>Scope</a>, <a>Normative references</a>, and <a>Terms and definitions</a> respectively. Clause 3
-        takes a composite title, e.g. <em>Terms, definitions and abbreviated terms</em>, when abbreviated terms, symbols or mnemonics
-        are listed.</p>
+        Clauses 1, 2, and 3 for <a>Scope</a>, <a>Normative references</a>, and <a>Terms and definitions</a> respectively.</p>
 
         <p>The absence of this <code>section</code> indicates that no author-supplied, conformance-related prose is provided.</p>
 
