@@ -115,6 +115,27 @@ function validateFootnoteReferences(root, logger) {
   }
 }
 
+/* a broken end tag, e.g. "Identifier/dd>" instead of "Identifier</dd>", is parsed as text since most end tags are
+   optional, and is therefore not reported by an HTML validator */
+const STRAY_END_TAG_RE = /(?:^|[^<])(\/(?:a|abbr|b|bdi|bdo|blockquote|caption|cite|code|dd|del|dfn|div|dl|dt|em|figcaption|figure|h[1-6]|i|kbd|li|ol|p|pre|q|s|samp|section|span|strong|sub|sup|table|tbody|td|tfoot|th|thead|tr|u|ul|var)>)/i;
+
+function validateStrayEndTags(root, logger) {
+  const walker = root.ownerDocument.createTreeWalker(root, 4 /* NodeFilter.SHOW_TEXT */);
+
+  for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+    const parent = node.parentElement;
+
+    /* markup examples are expected in code */
+    if (parent === null || parent.closest("pre, code, samp, kbd, script, style") !== null)
+      continue;
+
+    const m = STRAY_END_TAG_RE.exec(node.textContent);
+
+    if (m !== null)
+      logger.error(`Text contains a malformed end tag: ${m[1]}`, parent);
+  }
+}
+
 export function validateDataIncludes(doc, logger, readFile = null) {
   if (readFile === null) return;
   for (const el of doc.querySelectorAll("pre[data-include]")) {
@@ -295,6 +316,7 @@ export function smpteValidate(doc, logger, readFile = null, source = null) {
   validateFootnoteLocation(doc.documentElement, logger);
   validateTfootNoteOrder(doc.documentElement, logger);
   validateFootnoteReferences(doc.documentElement, logger);
+  validateStrayEndTags(doc.body, logger);
   validateBody(doc.body, logger);
   if (readFile !== null)
     validateDataIncludes(doc, logger, readFile);
