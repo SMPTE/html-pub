@@ -478,6 +478,52 @@ function insertNormativeReferences(docMetadata) {
 
 const SMPTE_TERMS_ID = "sec-terms-and-definitions";
 
+/* optional lists that turn the Terms and definitions clause into subclauses */
+const SMPTE_TERMS_LISTS = [
+  {
+    id: "terms-abbr",
+    sectionId: "sec-abbreviated-terms",
+    heading: "Abbreviated terms",
+    titlePart: "abbreviated terms",
+    intro: "For the purposes of this document, the following abbreviated terms apply:"
+  },
+  {
+    id: "terms-symbols",
+    sectionId: "sec-symbols",
+    heading: "Symbols",
+    titlePart: "symbols",
+    intro: "For the purposes of this document, the following symbols apply:"
+  },
+  {
+    id: "terms-mnemonics",
+    sectionId: "sec-mnemonics",
+    heading: "Mnemonics",
+    titlePart: "mnemonics",
+    intro: "The following data types are used for data specifications:"
+  }
+];
+
+/* composite title per ISO Directives Part 2, e.g. "Terms, definitions and abbreviated terms" */
+function _termsClauseTitle(lists) {
+  if (lists.length === 0)
+    return "Terms and definitions";
+
+  const parts = ["Terms", "definitions", ...lists.map(l => l.titlePart)];
+
+  return parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1];
+}
+
+function _createTermsSubclause(id, heading) {
+  const sub = document.createElement("section");
+  sub.id = id;
+
+  const h3 = document.createElement("h3");
+  h3.innerText = heading;
+  sub.appendChild(h3);
+
+  return sub;
+}
+
 function insertTermsAndDefinitions(docMetadata) {
   let sec = document.getElementById(SMPTE_TERMS_ID);
 
@@ -495,21 +541,17 @@ function insertTermsAndDefinitions(docMetadata) {
 
   const p = document.createElement("p");
 
-  if (sec.childElementCount !== 0) {
+  const defList = document.getElementById("terms-int-defs");
+  const extList = document.getElementById("terms-ext-defs");
 
-    let defList = document.getElementById("terms-int-defs");
-    let extList = document.getElementById("terms-ext-defs");
-
-    if (extList === null && defList !== null) {
-      p.innerHTML = `For the purposes of this document, the following terms and definitions apply:`;
-    } else if (extList !== null && defList === null) {
-      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents apply:`;
-    } else if (extList !== null && defList !== null) {
-      p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents and the additional terms and definitions apply:`;
-    }
-
+  if (extList === null && defList !== null) {
+    p.innerHTML = `For the purposes of this document, the following terms and definitions apply:`;
+  } else if (extList !== null && defList === null) {
+    p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents apply:`;
+  } else if (extList !== null && defList !== null) {
+    p.innerHTML = `For the purposes of this document, the terms and definitions given in the following documents and the additional terms and definitions apply:`;
   } else {
-    p.innerHTML = `No terms and definitions are listed in this document.` 
+    p.innerHTML = `No terms and definitions are listed in this document.`
   }
 
   sec.insertBefore(p, sec.firstChild);
@@ -528,7 +570,36 @@ function insertTermsAndDefinitions(docMetadata) {
     return;
   }
 
-  h2.innerText = "Terms and definitions";
+  const lists = SMPTE_TERMS_LISTS.filter(l => document.getElementById(l.id) !== null);
+
+  h2.innerText = _termsClauseTitle(lists);
+
+  if (lists.length === 0)
+    return;
+
+  /* split the clause into subclauses */
+
+  const termsSub = _createTermsSubclause("sec-terms-defs", "Terms and definitions");
+  termsSub.appendChild(p);
+  if (extList !== null)
+    termsSub.appendChild(extList);
+  if (defList !== null)
+    termsSub.appendChild(defList);
+  sec.appendChild(termsSub);
+
+  for (const l of lists) {
+    const list = document.getElementById(l.id);
+    const sub = _createTermsSubclause(l.sectionId, l.heading);
+
+    const intro = document.createElement("p");
+    intro.innerText = list.getAttribute("data-intro") || l.intro;
+    list.removeAttribute("data-intro");
+    list.removeAttribute("data-order");
+
+    sub.appendChild(intro);
+    sub.appendChild(list);
+    sec.appendChild(sub);
+  }
 }
 
 function insertBibliography(docMetadata) {
@@ -1304,12 +1375,12 @@ function markDeprecated() {
 }
 
 function numberTerms() {
-  const termsSection = document.getElementById("sec-terms-and-definitions");
   const terms = document.getElementById("terms-int-defs");
+  const termsSection = terms ? terms.closest("section") : null;
   if (!termsSection || !terms) return;
 
-  // Clause number for the Terms and definitions section (e.g. "4")
-  const sectionNumberEl = termsSection.querySelector(":scope > h2 .heading-number");
+  // Number of the (sub)clause holding the terms (e.g. "3" or "3.1")
+  const sectionNumberEl = termsSection.querySelector(":scope > :is(h2, h3) .heading-number");
   const sectionNumber = sectionNumberEl ? sectionNumberEl.innerText.trim() : "";
 
   let counter = 1;
@@ -1330,6 +1401,52 @@ function numberTerms() {
     // Number on its own line above the term
     child.insertBefore(document.createElement("br"), child.firstChild);
     child.insertBefore(numLine, child.firstChild);
+  }
+}
+
+function resolveAbbreviations() {
+  /* collect expansions from the abbreviated terms list, then from inline abbr elements with a title */
+
+  const expansions = new Map();
+
+  const list = document.getElementById("terms-abbr");
+
+  if (list !== null) {
+    for (const dt of list.querySelectorAll(":scope > dt")) {
+      const dd = dt.nextElementSibling;
+      if (dd === null || dd.localName !== "dd")
+        continue;
+
+      let abbr = dt.querySelector("abbr");
+
+      if (abbr === null) {
+        abbr = document.createElement("abbr");
+        abbr.append(...dt.childNodes);
+        dt.appendChild(abbr);
+      }
+
+      expansions.set(abbr.textContent.trim(), dd.textContent.trim().replace(/\s+/g, " "));
+    }
+  }
+
+  const abbrs = Array.from(document.body.getElementsByTagName("abbr"));
+
+  for (const abbr of abbrs) {
+    const text = abbr.textContent.trim();
+    if (abbr.hasAttribute("title") && !expansions.has(text))
+      expansions.set(text, abbr.getAttribute("title"));
+  }
+
+  /* fill in missing titles */
+
+  for (const abbr of abbrs) {
+    if (abbr.hasAttribute("title"))
+      continue;
+
+    const expansion = expansions.get(abbr.textContent.trim());
+
+    if (expansion !== undefined)
+      abbr.title = expansion;
   }
 }
 
@@ -1602,6 +1719,7 @@ async function render() {
   numberTableFootnotes();
   markDeprecated();
   numberTerms();
+  resolveAbbreviations();
   resolveLinks(docMetadata);
   insertTOC(docMetadata);
   addHeadingLinks(docMetadata);

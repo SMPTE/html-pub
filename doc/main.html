@@ -651,7 +651,7 @@
         <p>The absence of this <code>section</code> indicates that all terms and abbreviations are defined inline the clauses of the
         document.</p>
 
-        <p>If present, the <code>section</code> contains one or both of the following elements:</p>
+        <p>If present, the <code>section</code> contains one or more of the following elements, in the order listed:</p>
 
         <ul>
           <li>a <code>ul</code> element that cites external definitions, subject to the following constraints:
@@ -689,7 +689,56 @@
               </li>
             </ul>
           </li>
+          <li>a <code>dl</code> element that lists abbreviated terms, whose <code>id</code> attribute shall be equal to
+          <code>terms-abbr</code>. Each <code>dt</code> element contains the abbreviated term, either as plain text or as a
+          single <code>abbr</code> element.</li>
+          <li>a <code>dl</code> element that lists symbols, whose <code>id</code> attribute shall be equal to
+          <code>terms-symbols</code>.</li>
+          <li>a <code>dl</code> element that lists mnemonics, whose <code>id</code> attribute shall be equal to
+          <code>terms-mnemonics</code>.</li>
         </ul>
+
+        <p>The abbreviated terms, symbols and mnemonics <code>dl</code> elements are subject to the following constraints:</p>
+
+        <ul>
+          <li>Each entry consists of exactly one <code>dt</code> element followed by exactly one <code>dd</code> element, which
+          contains the expansion or meaning of the entry.</li>
+          <li>The <code>dl</code> element shall not contain <code>dfn</code> elements and the entries are not numbered. An
+          abbreviated term can also appear as a synonym in the <code>terms-int-defs</code> element.</li>
+          <li>Each entry shall be unique within its list.</li>
+          <li>The entries of the <code>terms-abbr</code> and <code>terms-mnemonics</code> elements shall be listed in
+          alphabetical order, ignoring case.</li>
+          <li>The entries of the <code>terms-symbols</code> element shall be listed in the order specified in ISO/IEC Directives,
+          Part 2, Clause 17.5: an uppercase Latin letter followed by the same lowercase Latin letter (A, a, B, b, &#8230;); letters
+          without indices preceding letters with indices, and letter indices preceding numerical ones (B, b, C, C<sub>m</sub>,
+          C<sub>2</sub>, c, d, d<sub>ext</sub>, d<sub>int</sub>, d<sub>1</sub>, &#8230;); Latin letters followed by Greek letters;
+          and any other special symbols last. Indices are marked up using <code>sub</code> elements. If the symbols need to be
+          listed in a specific order to reflect technical criteria, the <code>data-order</code> attribute of the
+          <code>terms-symbols</code> element shall be equal to <code>technical</code>, in which case the order is not checked.</li>
+          <li>Each abbreviated term and symbol shall be used in the text of the document, outside of these lists. An abbreviated term
+          is used if it appears as text or as the contents of an <code>abbr</code> element. A symbol is used if it appears as a
+          <code>var</code> element, optionally followed by <code>sub</code> or <code>sup</code> elements, as a MathML
+          <code>mi</code> element, or, for a symbol without indices, as text.</li>
+          <li>The optional <code>data-intro</code> attribute, if present, shall not be empty and replaces the default introductory
+          sentence of the corresponding subclause.</li>
+        </ul>
+
+        <p>If any of the <code>terms-abbr</code>, <code>terms-symbols</code> or <code>terms-mnemonics</code> elements is present,
+        the clause is divided into subclauses: a <em>Terms and definitions</em> subclause containing the <code>terms-ext-defs</code>
+        and <code>terms-int-defs</code> elements, followed by an <em>Abbreviated terms</em>, <em>Symbols</em> and <em>Mnemonics</em>
+        subclause for each element that is present, in that order. The terms of the <code>terms-int-defs</code> element are then
+        numbered within the first subclause, e.g. 3.1.1. The clause is given a composite title that lists the subclauses present,
+        e.g. <em>Terms, definitions and abbreviated terms</em> or <em>Terms, definitions, abbreviated terms, symbols and
+        mnemonics</em>.</p>
+
+        <p>The introductory sentence of the <em>Mnemonics</em> subclause defaults to <em>The following data types are used for data
+        specifications:</em>.</p>
+
+        <p>Each <code>abbr</code> element of the document that has no <code>title</code> attribute is given the expansion of the
+        matching entry of the <code>terms-abbr</code> element as its <code>title</code> attribute. If there is no such entry, the
+        <code>title</code> attribute of another <code>abbr</code> element with the same contents is used, e.g. an abbreviation
+        introduced inline as <code>&lt;dfn&gt;Key Delivery Message&lt;/dfn&gt; (&lt;abbr title="Key Delivery
+        Message"&gt;KDM&lt;/abbr&gt;)</code>.</p>
 
         <div class="example">
 <pre>
@@ -705,6 +754,20 @@
     &lt;dd class="example"&gt;An example of a key number is 12345.&lt;/dd&gt;
     &lt;dd class="note"&gt;Key number shall not be confused with key frame.&lt;/dd&gt;
     &lt;dd class="source"&gt;&lt;a href=&quot;#bib-key-number-spec&quot;&gt;&lt;/a&gt;, modified - definition has been updated.&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl id=&quot;terms-abbr&quot;&gt;
+    &lt;dt&gt;&lt;abbr&gt;KDM&lt;/abbr&gt;&lt;/dt&gt;
+    &lt;dd&gt;Key Delivery Message&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl id=&quot;terms-symbols&quot;&gt;
+    &lt;dt&gt;&lt;var&gt;E&lt;/var&gt;&lt;sub&gt;B&lt;/sub&gt;&lt;/dt&gt;
+    &lt;dd&gt;blue colour signal, normalized&lt;/dd&gt;
+    &lt;dt&gt;&lt;var&gt;f&lt;/var&gt;&lt;sub&gt;s&lt;/sub&gt;&lt;/dt&gt;
+    &lt;dd&gt;sampling frequency, in hertz&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;dl id=&quot;terms-mnemonics&quot;&gt;
+    &lt;dt&gt;&lt;code&gt;uimsbf&lt;/code&gt;&lt;/dt&gt;
+    &lt;dd&gt;unsigned integer, most significant bit first&lt;/dd&gt;
   &lt;/dl&gt;
 &lt;/section&gt;
 </pre>
@@ -722,7 +785,9 @@
 
         <p>The <a>Conformance</a> <code>section</code> follows <a>Terms and definitions</a> and is the first SMPTE-defined clause that
         may carry substantive conformance requirements. It is positioned consistent with ISO/IEC Directives, Part 2, which reserve
-        Clauses 1, 2, and 3 for <a>Scope</a>, <a>Normative references</a>, and <a>Terms and definitions</a> respectively.</p>
+        Clauses 1, 2, and 3 for <a>Scope</a>, <a>Normative references</a>, and <a>Terms and definitions</a> respectively. Clause 3
+        takes a composite title, e.g. <em>Terms, definitions and abbreviated terms</em>, when abbreviated terms, symbols or mnemonics
+        are listed.</p>
 
         <p>The absence of this <code>section</code> indicates that no author-supplied, conformance-related prose is provided.</p>
 

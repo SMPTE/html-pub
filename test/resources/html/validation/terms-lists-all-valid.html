@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head itemscope="itemscope" itemtype="http://smpte.org/standards/documents">
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="module" src="../../../../smpte.js"></script>
+    <meta itemprop="test" content="valid" />
+    <meta itemprop="pubType" content="AG" />
+    <meta itemprop="pubNumber" content="99" />
+    <meta itemprop="pubState" content="draft" />
+    <title>Title of the document</title>
+  </head>
+  <body>
+    <section id="sec-scope">
+      <p>This is the scope of the document.</p>
+    </section>
+
+    <section id="sec-normative-references">
+      <ul>
+        <li>
+          <cite id="bib-smpte-standards-operations-manual">SMPTE OM</cite></li>
+      </ul>
+    </section>
+
+    <section id="sec-terms-and-definitions">
+      <ul id="terms-ext-defs">
+        <li><a href="#bib-smpte-standards-operations-manual"></a></li>
+      </ul>
+      <dl id="terms-int-defs">
+        <dt><dfn>Key Delivery Message</dfn></dt>
+        <dt><dfn>KDM</dfn></dt>
+        <dd>message that carries content keys</dd>
+      </dl>
+      <dl id="terms-abbr">
+        <dt><abbr>JSON</abbr></dt>
+        <dd>JavaScript Object Notation</dd>
+        <dt>KDM</dt>
+        <dd>Key Delivery Message</dd>
+      </dl>
+      <dl id="terms-symbols">
+        <dt><var>E</var><sub>B</sub></dt>
+        <dd>blue colour signal, normalized</dd>
+        <dt><var>f</var><sub>s</sub></dt>
+        <dd>sampling frequency, in hertz</dd>
+        <dt><var>γ</var></dt>
+        <dd>gamma</dd>
+      </dl>
+      <dl id="terms-mnemonics">
+        <dt><code>bslbf</code></dt>
+        <dd>bit string, left bit first</dd>
+        <dt><code>uimsbf</code></dt>
+        <dd>unsigned integer, most significant bit first</dd>
+      </dl>
+    </section>
+
+    <section id="sec-usage">
+      <h2>Usage</h2>
+      <p>A <abbr>KDM</abbr> is encoded as <abbr>JSON</abbr>. The signal <var>E</var><sub>B</sub> is sampled at
+      <var>f</var><sub>s</sub> and <var>γ</var> is applied.</p>
+    </section>
+  </body>
+</html>
