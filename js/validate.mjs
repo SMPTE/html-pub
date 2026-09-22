@@ -115,6 +115,27 @@ function validateFootnoteReferences(root, logger) {
   }
 }
 
+/* a broken end tag, e.g. "Identifier/dd>" instead of "Identifier</dd>", is parsed as text since most end tags are
+   optional, and is therefore not reported by an HTML validator */
+const STRAY_END_TAG_RE = /(?:^|[^<])(\/(?:a|abbr|b|bdi|bdo|blockquote|caption|cite|code|dd|del|dfn|div|dl|dt|em|figcaption|figure|h[1-6]|i|kbd|li|ol|p|pre|q|s|samp|section|span|strong|sub|sup|table|tbody|td|tfoot|th|thead|tr|u|ul|var)>)/i;
+
+function validateStrayEndTags(root, logger) {
+  const walker = root.ownerDocument.createTreeWalker(root, 4 /* NodeFilter.SHOW_TEXT */);
+
+  for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+    const parent = node.parentElement;
+
+    /* markup examples are expected in code */
+    if (parent === null || parent.closest("pre, code, samp, kbd, script, style") !== null)
+      continue;
+
+    const m = STRAY_END_TAG_RE.exec(node.textContent);
+
+    if (m !== null)
+      logger.error(`Text contains a malformed end tag: ${m[1]}`, parent);
+  }
+}
+
 export function validateDataIncludes(doc, logger, readFile = null) {
   if (readFile === null) return;
   for (const el of doc.querySelectorAll("pre[data-include]")) {
@@ -295,6 +316,7 @@ export function smpteValidate(doc, logger, readFile = null, source = null) {
   validateFootnoteLocation(doc.documentElement, logger);
   validateTfootNoteOrder(doc.documentElement, logger);
   validateFootnoteReferences(doc.documentElement, logger);
+  validateStrayEndTags(doc.body, logger);
   validateBody(doc.body, logger);
   if (readFile !== null)
     validateDataIncludes(doc, logger, readFile);
@@ -965,6 +987,316 @@ class InternalDefinitionsMatcher {
 }
 
 
+/* abbreviated terms, symbols and mnemonics lists */
+
+function _normalizeText(text) {
+  return text.trim().replace(/\s+/g, " ");
+}
+
+/* splits a symbol dt into its base, subscript (index) and superscript text */
+function _symbolParts(dt) {
+  let base = "";
+  let sub = "";
+  let sup = "";
+
+  function _collect(node) {
+    for (const child of node.childNodes) {
+      if (child.nodeType === 3 /* TEXT_NODE */) {
+        base += child.textContent;
+      } else if (child.localName === "sub") {
+        sub += child.textContent;
+      } else if (child.localName === "sup") {
+        sup += child.textContent;
+      } else {
+        _collect(child);
+      }
+    }
+  }
+
+  _collect(dt);
+
+  return { base: base.replace(/\s+/g, ""), sub: sub.trim(), sup: sup.trim() };
+}
+
+function _symbolText(parts) {
+  return parts.base + (parts.sub ? "_" + parts.sub : "") + (parts.sup ? "^" + parts.sup : "");
+}
+
+function _scriptClass(ch) {
+  if (/\p{Script=Latin}/u.test(ch)) return 0;
+  if (/\p{Script=Greek}/u.test(ch)) return 1;
+  return 2;
+}
+
+function _indexKind(index) {
+  if (index.length === 0) return 0;
+  if (/^\p{L}/u.test(index)) return 1;
+  if (/^\p{N}/u.test(index)) return 2;
+  return 3;
+}
+
+function _compareIndex(a, b) {
+  const kind = _indexKind(a) - _indexKind(b);
+  if (kind !== 0) return kind;
+  if (_indexKind(a) === 2) {
+    const num = parseFloat(a) - parseFloat(b);
+    if (num !== 0 && !isNaN(num)) return num;
+  }
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/* ISO Directives Part 2, 17.5: A, a, B, b, ...; letters without indices, then
+   letter indices, then numerical indices; Latin, then Greek, then other symbols */
+function isoSymbolCompare(a, b) {
+  const aChars = Array.from(a.base);
+  const bChars = Array.from(b.base);
+  const len = Math.min(aChars.length, bChars.length);
+
+  for (let i = 0; i < len; i++) {
+    const cls = _scriptClass(aChars[i]) - _scriptClass(bChars[i]);
+    if (cls !== 0) return cls;
+    const aLower = aChars[i].toLowerCase().codePointAt(0);
+    const bLower = bChars[i].toLowerCase().codePointAt(0);
+    if (aLower !== bLower) return aLower - bLower;
+  }
+
+  if (aChars.length !== bChars.length)
+    return aChars.length - bChars.length;
+
+  for (let i = 0; i < len; i++) {
+    const aUpper = aChars[i] !== aChars[i].toLowerCase() ? 0 : 1;
+    const bUpper = bChars[i] !== bChars[i].toLowerCase() ? 0 : 1;
+    if (aUpper !== bUpper) return aUpper - bUpper;
+  }
+
+  const index = _compareIndex(a.sub, b.sub);
+  if (index !== 0) return index;
+
+  return _compareIndex(a.sup, b.sup);
+}
+
+function alphaCompare(a, b) {
+  return a.localeCompare(b, "en", { sensitivity: "base" });
+}
+
+/* text of the document excluding the abbreviated terms, symbols and mnemonics lists */
+function _usageText(body) {
+  const clone = body.cloneNode(true);
+  for (const id of ["terms-abbr", "terms-symbols", "terms-mnemonics"]) {
+    const list = clone.querySelector(`#${id}`);
+    if (list !== null)
+      list.remove();
+  }
+  return clone;
+}
+
+function _containsToken(text, token, suffix = "") {
+  const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}${suffix}(?![\\p{L}\\p{N}])`, "u").test(text);
+}
+
+/* an abbreviated term is also used when it appears in its plural form, e.g. KDMs */
+function _isAbbreviationUsed(root, abbr) {
+  const plural = new RegExp(`^${abbr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(e?s)?$`, "u");
+  for (const e of root.querySelectorAll("abbr")) {
+    if (plural.test(_normalizeText(e.textContent)))
+      return true;
+  }
+  return _containsToken(root.textContent, abbr, "(e?s)?");
+}
+
+function _isSymbolUsed(root, parts) {
+  const target = _symbolText(parts);
+
+  /* var elements, optionally followed by sub/sup elements */
+  for (const v of root.querySelectorAll("var")) {
+    const occurrence = { base: _normalizeText(v.textContent).replace(/\s+/g, ""), sub: "", sup: "" };
+    let next = v.nextSibling;
+    while (next !== null && (next.localName === "sub" || next.localName === "sup")) {
+      occurrence[next.localName] = next.textContent.trim();
+      next = next.nextSibling;
+    }
+    if (_symbolText(occurrence) === target)
+      return true;
+  }
+
+  /* MathML identifiers */
+  for (const mi of root.querySelectorAll("mi")) {
+    const occurrence = { base: mi.textContent.trim(), sub: "", sup: "" };
+    const parent = mi.parentElement;
+    if (parent !== null && parent.firstElementChild === mi) {
+      const scripts = Array.from(parent.children).slice(1);
+      if (parent.localName === "msub" || parent.localName === "msubsup")
+        occurrence.sub = scripts[0] ? scripts[0].textContent.trim() : "";
+      if (parent.localName === "msup")
+        occurrence.sup = scripts[0] ? scripts[0].textContent.trim() : "";
+      if (parent.localName === "msubsup")
+        occurrence.sup = scripts[1] ? scripts[1].textContent.trim() : "";
+    }
+    if (_symbolText(occurrence) === target)
+      return true;
+  }
+
+  /* plain text, for symbols without indices */
+  if (parts.sub === "" && parts.sup === "")
+    return _containsToken(root.textContent, parts.base);
+
+  return false;
+}
+
+class TermsListMatcher {
+  constructor(id, label, options) {
+    this.id = id;
+    this.label = label;
+    this.options = options;
+  }
+
+  match(element, logger) {
+    if (element.localName !== "dl" || element.id !== this.id)
+      return false;
+
+    if (element.hasAttribute("data-intro") && _normalizeText(element.getAttribute("data-intro")).length === 0)
+      logger.error(`The data-intro attribute of the ${this.label} list must not be empty`, element);
+
+    const isTechnicalOrder = element.getAttribute("data-order") === "technical";
+
+    if (element.hasAttribute("data-order")) {
+      if (!this.options.allowTechnicalOrder)
+        logger.error(`The data-order attribute is only permitted on the symbols list`, element);
+      else if (!isTechnicalOrder)
+        logger.error(`The data-order attribute of the symbols list must be equal to "technical"`, element);
+    }
+
+    if (element.querySelector("dfn") !== null)
+      logger.error(`The ${this.label} list must not contain dfn elements`, element);
+
+    const children = Array.from(element.children);
+
+    if (children.length === 0)
+      logger.error(`The ${this.label} list must contain at least one entry`, element);
+
+    const entries = [];
+
+    for (let i = 0; i < children.length; i += 2) {
+      const dt = children[i];
+      const dd = children[i + 1];
+
+      if (!DtMatcher.match(dt, logger) || dd === undefined || !DdMatcher.match(dd, logger)) {
+        logger.error(`Each entry of the ${this.label} list must be exactly one dt element followed by one dd element`, dt);
+        return true;
+      }
+
+      const key = this.options.key(dt, logger);
+
+      if (key === null)
+        continue;
+
+      if (key.text.length === 0) {
+        logger.error(`Empty entry in the ${this.label} list`, dt);
+        continue;
+      }
+
+      if (entries.some(e => e.text === key.text))
+        logger.error(`Duplicate entry in the ${this.label} list: ${key.text}`, dt);
+
+      entries.push({ ...key, dt: dt, dd: dd });
+    }
+
+    /* check the order */
+
+    if (!isTechnicalOrder) {
+      for (let i = 1; i < entries.length; i++) {
+        if (this.options.compare(entries[i - 1].sortKey, entries[i].sortKey) > 0) {
+          logger.error(`The ${this.label} list is out of order: ${entries[i].text} must precede ${entries[i - 1].text}`, entries[i].dt);
+          break;
+        }
+      }
+    }
+
+    /* check that each entry is used in the text */
+
+    if (this.options.isUsed) {
+      const root = _usageText(element.ownerDocument.body);
+      for (const entry of entries) {
+        if (!this.options.isUsed(root, entry.sortKey))
+          logger.error(`The ${this.label} list contains an entry that is not used in the text: ${entry.text}`, entry.dt);
+      }
+    }
+
+    if (this.options.crossCheck)
+      this.options.crossCheck(element, entries, logger);
+
+    return true;
+  }
+}
+
+/* an abbreviated term that is also a term shall have an expansion equal to one of the synonyms of that term */
+function _checkAbbreviationsAgainstTerms(element, entries, logger) {
+  const terms = element.ownerDocument.getElementById("terms-int-defs");
+
+  if (terms === null)
+    return;
+
+  for (const entry of entries) {
+    const abbr = entry.text.toLowerCase();
+
+    const dfn = Array.from(terms.querySelectorAll("dt dfn")).find(d => _normalizeText(d.textContent).toLowerCase() === abbr);
+
+    if (dfn === undefined)
+      continue;
+
+    /* collect the synonyms, i.e. the consecutive dt elements of the term */
+
+    const synonyms = [];
+    const dt = dfn.closest("dt");
+
+    let first = dt;
+    while (first.previousElementSibling !== null && first.previousElementSibling.localName === "dt")
+      first = first.previousElementSibling;
+
+    for (let e = first; e !== null && e.localName === "dt"; e = e.nextElementSibling)
+      synonyms.push(_normalizeText(e.textContent).toLowerCase());
+
+    const expansion = _normalizeText(entry.dd.textContent);
+
+    if (!synonyms.includes(expansion.toLowerCase()))
+      logger.error(`The abbreviated term ${entry.text} is also defined as a term, but its expansion "${expansion}" does not match any of the synonyms of that term`, entry.dd);
+  }
+}
+
+const AbbreviationsMatcher = new TermsListMatcher("terms-abbr", "abbreviated terms", {
+  key: (dt, logger) => {
+    const text = _normalizeText(dt.textContent);
+    if (dt.childElementCount > 1 ||
+        (dt.childElementCount === 1 && (dt.firstElementChild.localName !== "abbr" || _normalizeText(dt.firstElementChild.textContent) !== text))) {
+      logger.error(`An abbreviated term must be plain text or a single abbr element`, dt);
+      return null;
+    }
+    return { text: text, sortKey: text };
+  },
+  compare: alphaCompare,
+  isUsed: _isAbbreviationUsed,
+  crossCheck: _checkAbbreviationsAgainstTerms
+});
+
+const SymbolsMatcher = new TermsListMatcher("terms-symbols", "symbols", {
+  key: (dt, logger) => {
+    const parts = _symbolParts(dt);
+    return { text: parts.base.length === 0 ? "" : _symbolText(parts), sortKey: parts };
+  },
+  compare: isoSymbolCompare,
+  isUsed: _isSymbolUsed,
+  allowTechnicalOrder: true
+});
+
+const MnemonicsMatcher = new TermsListMatcher("terms-mnemonics", "mnemonics", {
+  key: (dt, logger) => {
+    const text = _normalizeText(dt.textContent);
+    return { text: text, sortKey: text };
+  },
+  compare: alphaCompare
+});
+
 class DefinitionsMatcher {
   static match(element, logger) {
     if (element.localName !== "section" || element.id !== "sec-terms-and-definitions")
@@ -972,15 +1304,22 @@ class DefinitionsMatcher {
 
     const children = Array.from(element.children);
 
-    /* validate optional additional elements */
+    /* validate optional external definitions */
 
     if (children.length > 0 && ExternalDefinitionsMatcher.match(children[0], logger))
       children.shift();
 
-    /* validate optional bibliography */
+    /* validate optional internal definitions */
 
     if (children.length > 0 && InternalDefinitionsMatcher.match(children[0], logger))
       children.shift();
+
+    /* validate optional abbreviated terms, symbols and mnemonics, in that order */
+
+    for (const matcher of [AbbreviationsMatcher, SymbolsMatcher, MnemonicsMatcher]) {
+      if (children.length > 0 && matcher.match(children[0], logger))
+        children.shift();
+    }
 
     /* are there unknown children */
 

@@ -197,6 +197,23 @@ dd.term-source {
   font-size: 0.8rem;
 }
 
+/* abbreviated terms, symbols and mnemonics */
+
+#terms-abbr, #terms-symbols, #terms-mnemonics {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 2em;
+  row-gap: 0.25em;
+}
+
+#terms-abbr > *, #terms-symbols > *, #terms-mnemonics > * {
+  margin: 0;
+}
+
+#terms-abbr > dt, #terms-symbols > dt, #terms-mnemonics > dt {
+  font-weight: normal;
+}
+
 /* quotes */
 
 q {
