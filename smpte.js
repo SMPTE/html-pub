@@ -375,9 +375,17 @@ function insertIntroduction(docMetadata) {
 
   h2.innerText = "Introduction";
 
-  if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
+  /* RDDs are not Engineering Documents, even though RDD is in ENGDOC_PUBTYPES */
+  let docNoun = null;
+  if (docMetadata.pubType === smpte.RDD_PUBTYPE) {
+    docNoun = "Registered Disclosure Document";
+  } else if (smpte.ENGDOC_PUBTYPES.has(docMetadata.pubType)) {
+    docNoun = "Engineering Document";
+  }
+
+  if (docNoun !== null) {
     let b = document.createElement("p");
-    b.innerHTML = "<em>This clause is entirely informative and does not form an integral part of this Engineering Document.</em>";
+    b.innerHTML = `<em>This clause is entirely informative and does not form an integral part of this ${docNoun}.</em>`;
     sec.insertBefore(b, h2.nextSibling)
   }
 }
