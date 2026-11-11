@@ -14,7 +14,7 @@
   <meta itemprop="pubConfidential" content="no">
   <!--< meta itemprop="pubTC" content="XX"> -->
   <meta itemprop="pubSuiteTitle" content="HTML Pub">
-  <meta itemprop="pubDateTime" content="2026-09-29">
+  <meta itemprop="pubDateTime" content="2026-11-11">
   <!-- <meta itemprop="pubRevisionOf" content="SMPTE ST XXXX-Y:ZZZZ"> -->
   <title>Tooling and documentation for HTML documents</title>
 </head>
@@ -3208,6 +3208,8 @@ Message: Enter marketing message. If a revision, also describe what changed in t
         <p>After the public review period ends, the public repository's <code>README.md</code> should no longer advertise an expired PCD. The cleanup is handled entirely on the public side by a scheduled workflow that runs once per day, parses the <em>"no later than"</em> date from its own README, and opens a pull request to clear the PCD-INFO block when that date has passed.</p>
 
         <p>Public repositories opt in by installing a second thin workflow file (<code>.github/workflows/pcd-cleanup.yml</code>) alongside the PCD-update wrapper. The cleanup workflow triggers on a daily cron schedule (<code>0 6 * * *</code> &mdash; 06:00 UTC) and on manual <code>workflow_dispatch</code>. The dispatch surfaces an optional <strong>force</strong> input that bypasses the date check &mdash; useful if a PCD is cancelled before its scheduled end, or for testing.</p>
+
+        <p>GitHub automatically disables scheduled workflows in a public repository after 60 days without repository activity, and scheduled runs do not count as activity. Because a review period often ends more than 60 days after the README was last updated, every run of the cleanup workflow first re-enables itself through the GitHub Actions API (<code>PUT /repos/{owner}/{repo}/actions/workflows/pcd-cleanup.yml/enable</code>), which resets that timer. The wrapper's check job therefore requires the <code>actions: write</code> permission. A workflow that GitHub has already disabled stays disabled until it is re-enabled once, by hand or by repository administration tooling.</p>
 
         <p>The cleanup logic:</p>
         <ol>
