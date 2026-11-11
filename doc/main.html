@@ -3209,6 +3209,8 @@ Message: Enter marketing message. If a revision, also describe what changed in t
 
         <p>Public repositories opt in by installing a second thin workflow file (<code>.github/workflows/pcd-cleanup.yml</code>) alongside the PCD-update wrapper. The cleanup workflow triggers on a daily cron schedule (<code>0 6 * * *</code> &mdash; 06:00 UTC) and on manual <code>workflow_dispatch</code>. The dispatch surfaces an optional <strong>force</strong> input that bypasses the date check &mdash; useful if a PCD is cancelled before its scheduled end, or for testing.</p>
 
+        <p>GitHub automatically disables scheduled workflows in a public repository after 60 days without repository activity, and scheduled runs do not count as activity. Because a review period often ends more than 60 days after the README was last updated, every run of the cleanup workflow first re-enables itself through the GitHub Actions API (<code>PUT /repos/{owner}/{repo}/actions/workflows/pcd-cleanup.yml/enable</code>), which resets that timer. The wrapper's check job therefore requires the <code>actions: write</code> permission. A workflow that GitHub has already disabled stays disabled until it is re-enabled once, by hand or by repository administration tooling.</p>
+
         <p>The cleanup logic:</p>
         <ol>
           <li>Read the public repository's <code>README.md</code>.</li>
