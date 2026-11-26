@@ -138,14 +138,14 @@ function mirrorDirExcludeTooling(srcDir, targetDir, relParentPath) {
 
     if (srcStat.isDirectory()) {
 
-      s3SyncDir(srcPath, s3Client, bucket, dstKey + "/");
+      await s3SyncDir(srcPath, s3Client, bucket, dstKey + "/");
 
     } else if (srcStat.isFile()) {
 
       const contentType = guessContentTypeFromExtension(srcPath);
 
       const cmd = new PutObjectCommand({
-        Body: fs.createReadStream(srcPath),
+        Body: fs.readFileSync(srcPath),
         Bucket: bucket,
         Key: dstKey,
         ContentType: contentType
@@ -315,7 +315,7 @@ async function s3Upload(buildPaths, versionKey, generatedFiles) {
     pubLinks.libraryZip = `${deployPrefix}${s3PubKeyPrefix}${encodeURIComponent(generatedFiles.libraryZip)}`;
   }
 
-  s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
+  await s3SyncDir(buildPaths.pubDirPath, s3Client, s3Bucket, s3PubKeyPrefix);
 
   return pubLinks;
 }
