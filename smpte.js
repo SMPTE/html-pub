@@ -714,7 +714,12 @@ function insertElementsAnnex(docMetadata) {
     if (isAbsoluteLink) {
       e.innerText = href;
     } else {
-      e.innerText = href.split('\\').pop().split('/').pop();
+      const fileName = href.split('\\').pop().split('/').pop();
+      try {
+        e.innerText = decodeURIComponent(fileName);
+      } catch {
+        e.innerText = fileName;
+      }
     }
 
     e.parentElement.insertBefore(
