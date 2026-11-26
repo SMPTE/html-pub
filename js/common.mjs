@@ -35,8 +35,8 @@ export const RDD_PUBTYPE = "RDD";
 
 export const PUB_TYPES = new Set([AG_PUBTYPE, OM_PUBTYPE, ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE, ER_PUBTYPE, RDD_PUBTYPE]);
 export const LONG_PUB_TYPE = new Map([
-  [AG_PUBTYPE, "Administrative Guideline"],
-  [OM_PUBTYPE, "Operations Manual"],
+  [AG_PUBTYPE, "SMPTE Administrative Guideline"],
+  [OM_PUBTYPE, "SMPTE Operations Manual"],
   [ST_PUBTYPE, "SMPTE Standard"],
   [RP_PUBTYPE, "SMPTE Recommended Practice"],
   [EG_PUBTYPE, "SMPTE Engineering Guideline"],
@@ -44,7 +44,7 @@ export const LONG_PUB_TYPE = new Map([
   [RDD_PUBTYPE, "SMPTE Registered Disclosure Document"]
 ])
 
-export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE, ER_PUBTYPE, RDD_PUBTYPE]);
+export const ENGDOC_PUBTYPES = new Set([ST_PUBTYPE, RP_PUBTYPE, EG_PUBTYPE, RDD_PUBTYPE]);
 
 /* document types whose Foreword carries the patent rights statement, and hence
    support pubIPRClaimed */

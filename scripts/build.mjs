@@ -739,7 +739,7 @@ async function main() {
       generatedFiles.elements.push({
         title: element.title.replace(/\s+/g, " "),
         file: {
-          path: href,
+          path: decodeURIComponent(href),
           mediaType: guessContentTypeFromExtension(href)
         }
       });
