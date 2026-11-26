@@ -190,12 +190,12 @@ function insertFrontMatter(docMetadata) {
 
     switch (docMetadata.pubType) {
       case smpte.AG_PUBTYPE:
+      case smpte.ER_PUBTYPE:
       case smpte.OM_PUBTYPE:
         break;
       case smpte.ST_PUBTYPE:
       case smpte.RP_PUBTYPE:
       case smpte.EG_PUBTYPE:
-      case smpte.ER_PUBTYPE:
       case smpte.RDD_PUBTYPE:
         if (docMetadata.pubPart !== null)
           actualPubNumber += `-<span itemprop="doc-part" id="doc-part">${docMetadata.pubPart}</span>`;
@@ -230,13 +230,13 @@ function insertFrontMatter(docMetadata) {
       break;
   }
 
-  const draftWarning = docMetadata.pubStage === smpte.PUB_STAGE_PUB ? "" : SMPTE_DRAFT_WARNING;
+  const draftWarning = docMetadata.pubStage === smpte.PUB_STAGE_PUB ? "" : smpteDraftWarning(longDocType);
 
   let boilerplate;
 
   if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.OM_PUBTYPE)
     boilerplate = SMPTE_PUB_OM_FRONT_MATTER_BOILERPLATE;
-  else if (docMetadata.pubState === smpte.PUB_STATE_PUB && docMetadata.pubType === smpte.AG_PUBTYPE)
+  else if (docMetadata.pubState === smpte.PUB_STATE_PUB && (docMetadata.pubType === smpte.AG_PUBTYPE || docMetadata.pubType === smpte.ER_PUBTYPE))
     boilerplate = SMPTE_PUB_AG_FRONT_MATTER_BOILERPLATE;
   else
     boilerplate = SMPTE_FRONT_MATTER_BOILERPLATE;
@@ -714,7 +714,12 @@ function insertElementsAnnex(docMetadata) {
     if (isAbsoluteLink) {
       e.innerText = href;
     } else {
-      e.innerText = href.split('\\').pop().split('/').pop();
+      const fileName = href.split('\\').pop().split('/').pop();
+      try {
+        e.innerText = decodeURIComponent(fileName);
+      } catch {
+        e.innerText = fileName;
+      }
     }
 
     e.parentElement.insertBefore(
@@ -919,15 +924,16 @@ const SMPTE_DOC_FOREWORD_BOILERPLATE = `${SMPTE_GEN_FOREWORD_BOILERPLATE}
 {{authorProse}}
 `
 
-const SMPTE_DRAFT_WARNING = `
+function smpteDraftWarning(longDocType) {
+  return `
 <div id="sec-draft-warning">
 <strong>Warning:</strong> This document is an unpublished work under development and shall not be referred
-to as a SMPTE Standard,
-Recommended Practice, or Engineering Guideline. It is distributed for review and comment; distribution does not constitute
+to as a ${longDocType}. It is distributed for review and comment; distribution does not constitute
 publication. Recipients of this document are strongly encouraged to submit, with their comments, notification of any relevant
 patent rights of which they are aware and to provide supporting documentation.
 </div>
-`
+`;
+}
 
 function insertForeword(docMetadata) {
   let sec = document.getElementById(SMPTE_FOREWORD_ID);
